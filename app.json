@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "DharmaDaily",
+    "name": "ధర్మ Daily — Telugu Panchangam",
     "slug": "DharmaDaily",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,20 +10,24 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0F0F1A"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dharmadaily.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0F0F1A"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.dharmadaily.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "Daily Telugu Panchangam with Tithi, Nakshatram, Yogam, Karanam, Rahu Kalam, Sunrise/Sunset, Festival Calendar, and sacred Slokas. Based on Drik Ganita astronomical calculations.",
+    "primaryColor": "#E8751A"
   }
 }
