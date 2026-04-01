@@ -760,15 +760,15 @@ function AppContent() {
         {/* Legal links footer */}
         <View style={styles.legalFooter}>
           <TouchableOpacity onPress={() => {
-            if (Platform.OS === 'web') window.open('https://jayanth0107.github.io/DharmaDaily/privacy-policy.html', '_blank');
-            else Linking.openURL('https://jayanth0107.github.io/DharmaDaily/privacy-policy.html');
+            if (Platform.OS === 'web') window.open('https://jayanth0107.github.io/dharma-daily-legal/privacy-policy.html', '_blank');
+            else Linking.openURL('https://jayanth0107.github.io/dharma-daily-legal/privacy-policy.html');
           }}>
             <Text style={styles.legalLink}>గోప్యతా విధానం</Text>
           </TouchableOpacity>
           <Text style={styles.legalDot}>•</Text>
           <TouchableOpacity onPress={() => {
-            if (Platform.OS === 'web') window.open('https://jayanth0107.github.io/DharmaDaily/terms-and-conditions.html', '_blank');
-            else Linking.openURL('https://jayanth0107.github.io/DharmaDaily/terms-and-conditions.html');
+            if (Platform.OS === 'web') window.open('https://jayanth0107.github.io/dharma-daily-legal/terms-and-conditions.html', '_blank');
+            else Linking.openURL('https://jayanth0107.github.io/dharma-daily-legal/terms-and-conditions.html');
           }}>
             <Text style={styles.legalLink}>నిబంధనలు</Text>
           </TouchableOpacity>
