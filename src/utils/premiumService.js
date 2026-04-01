@@ -1,0 +1,301 @@
+// Dharma Daily — Premium Subscription Service
+// Manages free/premium tiers, feature gating, and trial periods
+// Uses AsyncStorage for persistence with backup + integrity checks
+//
+// SECURITY:
+//   - Dual storage (primary + backup) for resilience
+//   - Simple integrity hash to detect tampering
+//   - Graceful fallback if storage is corrupted
+//   - In-memory cache for fast access
+//
+// TIER STRUCTURE:
+//   Free    — Core panchangam, festivals, ekadashi, gold prices, kids section
+//   Premium — Ad-free, Gita slokas library, Muhurtam Finder, dark mode,
+//             multi-year data, unlimited locations, priority features
+
+import { Platform } from 'react-native';
+
+// --- Storage abstraction ---
+let storage = null;
+
+async function getStorage() {
+  if (storage) return storage;
+  try {
+    if (Platform.OS === 'web') {
+      storage = {
+        getItem: async (key) => localStorage.getItem(key),
+        setItem: async (key, value) => localStorage.setItem(key, value),
+        removeItem: async (key) => localStorage.removeItem(key),
+      };
+    } else {
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      storage = AsyncStorage;
+    }
+  } catch {
+    const mem = {};
+    storage = {
+      getItem: async (key) => mem[key] || null,
+      setItem: async (key, value) => { mem[key] = value; },
+      removeItem: async (key) => { delete mem[key]; },
+    };
+  }
+  return storage;
+}
+
+// --- Constants ---
+const STORAGE_KEY = '@dharma_premium';
+const BACKUP_KEY = '@dharma_premium_bk';
+const INTEGRITY_SALT = 'dharma2026';
+const TRIAL_DAYS = 7;
+
+export const TIERS = {
+  FREE: 'free',
+  PREMIUM: 'premium',
+};
+
+export const PREMIUM_FEATURES = {
+  AD_FREE: 'ad_free',
+  GITA_LIBRARY: 'gita_library',
+  MUHURTAM_FINDER: 'muhurtam_finder',
+  DARK_MODE: 'dark_mode',
+  MULTI_YEAR: 'multi_year',
+  UNLIMITED_LOCATIONS: 'unlimited_locations',
+  EXPORT_PDF: 'export_pdf',
+  WIDGET: 'widget',
+};
+
+const TIER_ACCESS = {
+  [TIERS.FREE]: [],
+  [TIERS.PREMIUM]: Object.values(PREMIUM_FEATURES),
+};
+
+// --- Integrity check (simple hash to detect casual tampering) ---
+function computeHash(state) {
+  const data = `${INTEGRITY_SALT}|${state.tier}|${state.activatedAt || 0}|${state.expiresAt || 0}|${state.trialUsed}|${state.unlockSource || ''}`;
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    const ch = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash |= 0;
+  }
+  return hash.toString(36);
+}
+
+function validateIntegrity(stored) {
+  if (!stored || !stored.tier) return false;
+  if (!stored._h) return true; // Old data without hash — accept but re-save with hash
+  return stored._h === computeHash(stored);
+}
+
+// --- State ---
+let _premiumState = null;
+
+const DEFAULT_STATE = () => ({
+  tier: TIERS.FREE,
+  activatedAt: null,
+  expiresAt: null,
+  trialUsed: false,
+  trialStartedAt: null,
+  unlockSource: null,
+});
+
+async function loadState() {
+  if (_premiumState) return _premiumState;
+
+  const store = await getStorage();
+
+  // Try primary storage
+  try {
+    const raw = await store.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (validateIntegrity(parsed)) {
+        _premiumState = parsed;
+        return _premiumState;
+      }
+      console.warn('Premium: primary storage integrity check failed, trying backup');
+    }
+  } catch {
+    console.warn('Premium: primary storage read failed');
+  }
+
+  // Fallback to backup storage
+  try {
+    const rawBk = await store.getItem(BACKUP_KEY);
+    if (rawBk) {
+      const parsed = JSON.parse(rawBk);
+      if (validateIntegrity(parsed)) {
+        _premiumState = parsed;
+        // Restore primary from backup
+        await store.setItem(STORAGE_KEY, rawBk);
+        if (__DEV__) console.log('Premium: restored from backup');
+        return _premiumState;
+      }
+    }
+  } catch {
+    console.warn('Premium: backup storage read failed');
+  }
+
+  // Nothing valid — start fresh
+  _premiumState = DEFAULT_STATE();
+  return _premiumState;
+}
+
+async function saveState() {
+  // Add integrity hash
+  _premiumState._h = computeHash(_premiumState);
+  const data = JSON.stringify(_premiumState);
+
+  try {
+    const store = await getStorage();
+    // Save to both primary and backup
+    await store.setItem(STORAGE_KEY, data);
+    await store.setItem(BACKUP_KEY, data);
+  } catch {
+    console.warn('Premium: save failed');
+  }
+}
+
+// --- Public API ---
+
+/**
+ * Initialize premium service. Call once on app start.
+ */
+export async function initPremium() {
+  const state = await loadState();
+
+  // Check if premium has expired
+  if (state.tier === TIERS.PREMIUM && state.expiresAt) {
+    const now = Date.now();
+    if (now > state.expiresAt) {
+      state.tier = TIERS.FREE;
+      state.expiresAt = null;
+      state.unlockSource = null;
+      await saveState();
+    }
+  }
+
+  return state;
+}
+
+/**
+ * Check if user has premium access
+ */
+export async function isPremium() {
+  const state = await loadState();
+  if (state.tier !== TIERS.PREMIUM) return false;
+
+  if (state.expiresAt) {
+    const now = Date.now();
+    if (now > state.expiresAt) {
+      state.tier = TIERS.FREE;
+      state.expiresAt = null;
+      await saveState();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Check if a specific feature is available
+ */
+export async function hasFeature(featureId) {
+  const premium = await isPremium();
+  if (premium) return true;
+  return TIER_ACCESS[TIERS.FREE].includes(featureId);
+}
+
+/**
+ * Get current tier info
+ */
+export async function getTierInfo() {
+  const state = await loadState();
+  const premium = await isPremium();
+
+  return {
+    tier: premium ? TIERS.PREMIUM : TIERS.FREE,
+    isPremium: premium,
+    expiresAt: state.expiresAt ? new Date(state.expiresAt) : null,
+    daysRemaining: state.expiresAt
+      ? Math.max(0, Math.ceil((state.expiresAt - Date.now()) / (1000 * 60 * 60 * 24)))
+      : null,
+    trialAvailable: !state.trialUsed,
+    unlockSource: state.unlockSource,
+  };
+}
+
+/**
+ * Start a free trial (7 days of premium)
+ */
+export async function startTrial() {
+  const state = await loadState();
+  if (state.trialUsed) {
+    return { success: false, reason: 'Trial already used' };
+  }
+
+  const now = Date.now();
+  state.tier = TIERS.PREMIUM;
+  state.trialUsed = true;
+  state.trialStartedAt = now;
+  state.activatedAt = now;
+  state.expiresAt = now + TRIAL_DAYS * 24 * 60 * 60 * 1000;
+  state.unlockSource = 'trial';
+  await saveState();
+
+  return {
+    success: true,
+    expiresAt: new Date(state.expiresAt),
+    daysRemaining: TRIAL_DAYS,
+  };
+}
+
+/**
+ * Activate premium (called after purchase/donation confirmation)
+ * @param {string} source - 'purchase', 'donation', 'promo', 'dev'
+ * @param {number} durationDays - 0 for lifetime, or number of days
+ */
+export async function activatePremium(source = 'purchase', durationDays = 365) {
+  const state = await loadState();
+  const now = Date.now();
+
+  state.tier = TIERS.PREMIUM;
+  state.activatedAt = now;
+  state.unlockSource = source;
+  state.expiresAt = durationDays > 0
+    ? now + durationDays * 24 * 60 * 60 * 1000
+    : null; // null = lifetime
+
+  await saveState();
+
+  return {
+    success: true,
+    tier: TIERS.PREMIUM,
+    expiresAt: state.expiresAt ? new Date(state.expiresAt) : null,
+  };
+}
+
+/**
+ * Deactivate premium (for testing or cancellation)
+ */
+export async function deactivatePremium() {
+  const state = await loadState();
+  state.tier = TIERS.FREE;
+  state.expiresAt = null;
+  state.unlockSource = null;
+  await saveState();
+  return { success: true };
+}
+
+/**
+ * Get premium pricing info (for display)
+ */
+export function getPricingInfo() {
+  return {
+    monthly: { price: '₹49', priceUsd: '$0.99', period: 'నెల / month' },
+    yearly: { price: '₹299', priceUsd: '$4.99', period: 'సంవత్సరం / year', savings: '49%' },
+    lifetime: { price: '₹999', priceUsd: '$14.99', period: 'జీవితకాలం / lifetime' },
+    trialDays: TRIAL_DAYS,
+  };
+}

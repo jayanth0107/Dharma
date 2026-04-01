@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>DharmaDaily Feature Graphic</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1024px; height: 500px; overflow: hidden; }
+  .banner {
+    width: 1024px; height: 500px; position: relative;
+    background: linear-gradient(135deg, #0D0500 0%, #1A0A00 25%, #2C1810 50%, #4A1A0A 75%, #6B1C23 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  /* Decorative border */
+  .border-top, .border-bottom {
+    position: absolute; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, transparent, #FFD700, #E8751A, #FFD700, transparent);
+  }
+  .border-top { top: 0; }
+  .border-bottom { bottom: 0; }
+  /* Content */
+  .content { text-align: center; z-index: 2; }
+  .om { font-size: 48px; color: #FFD700; margin-bottom: 8px; }
+  .title {
+    font-size: 72px; font-weight: 900; color: #FFD700;
+    letter-spacing: 3px; text-shadow: 0 2px 20px rgba(255,215,0,0.3);
+  }
+  .subtitle {
+    font-size: 28px; color: rgba(255,248,240,0.7); font-weight: 600;
+    letter-spacing: 2px; margin-top: 4px;
+  }
+  .divider {
+    width: 200px; height: 2px; margin: 16px auto;
+    background: linear-gradient(90deg, transparent, #FFD700, transparent);
+  }
+  .features {
+    display: flex; gap: 24px; justify-content: center; margin-top: 12px;
+  }
+  .feature {
+    color: rgba(255,248,240,0.85); font-size: 16px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .feature .dot { width: 6px; height: 6px; border-radius: 3px; background: #E8751A; }
+  .tagline {
+    color: #E8751A; font-size: 20px; font-weight: 700; margin-top: 20px;
+    letter-spacing: 1px;
+  }
+  /* Decorative corners */
+  .corner { position: absolute; width: 40px; height: 40px; border-color: #FFD700; opacity: 0.3; }
+  .corner-tl { top: 16px; left: 16px; border-top: 2px solid; border-left: 2px solid; }
+  .corner-tr { top: 16px; right: 16px; border-top: 2px solid; border-right: 2px solid; }
+  .corner-bl { bottom: 16px; left: 16px; border-bottom: 2px solid; border-left: 2px solid; }
+  .corner-br { bottom: 16px; right: 16px; border-bottom: 2px solid; border-right: 2px solid; }
+  /* Background pattern */
+  .pattern {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(circle at 20% 50%, rgba(232,117,26,0.06) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 50%, rgba(196,30,58,0.04) 0%, transparent 50%);
+  }
+</style>
+</head>
+<body>
+<div class="banner">
+  <div class="pattern"></div>
+  <div class="border-top"></div>
+  <div class="border-bottom"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <div class="content">
+    <div class="om">🙏</div>
+    <div class="title">ధర్మ Daily</div>
+    <div class="subtitle">తెలుగు పంచాంగం</div>
+    <div class="divider"></div>
+    <div class="features">
+      <span class="feature"><span class="dot"></span>తిథి • నక్షత్రం</span>
+      <span class="feature"><span class="dot"></span>ముహూర్తాలు</span>
+      <span class="feature"><span class="dot"></span>పండుగలు</span>
+      <span class="feature"><span class="dot"></span>బంగారం ధరలు</span>
+      <span class="feature"><span class="dot"></span>భగవద్గీత</span>
+    </div>
+    <div class="tagline">ప్రతిరోజూ మీ ఆధ్యాత్మిక సహచరుడు</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DharmaDaily — Play Store Publishing & Monetization Guide</title>
+<style>
+  @media print { body { font-size: 11pt; } .page-break { page-break-before: always; } }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #2C1810; max-width: 900px; margin: 0 auto; padding: 40px 30px; }
+  h1 { font-size: 28px; color: #E8751A; border-bottom: 3px solid #D4A017; padding-bottom: 10px; margin-bottom: 20px; }
+  h2 { font-size: 20px; color: #6B1C23; margin-top: 30px; margin-bottom: 12px; border-left: 4px solid #E8751A; padding-left: 12px; }
+  h3 { font-size: 16px; color: #C55A11; margin-top: 18px; margin-bottom: 8px; }
+  p, li { font-size: 14px; margin-bottom: 8px; }
+  ul, ol { padding-left: 24px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { background: #E8751A; color: white; padding: 10px; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid #ddd; }
+  tr:nth-child(even) { background: #FFF8F0; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+  .critical { background: #C41E3A; color: white; }
+  .high { background: #E8751A; color: white; }
+  .medium { background: #D4A017; color: white; }
+  .done { background: #2E7D32; color: white; }
+  code { background: #F5E6D3; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  pre { background: #1A1A2E; color: #F5D77A; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 10px 0; font-size: 12px; }
+  .box { border: 1px solid #D4A017; border-radius: 12px; padding: 16px; margin: 12px 0; background: #FFFDF5; }
+  .box-title { font-weight: 700; color: #E8751A; margin-bottom: 6px; }
+  .schedule-table td:first-child { font-weight: 700; white-space: nowrap; width: 120px; }
+  .check { color: #2E7D32; font-weight: bold; }
+  .warn { color: #C41E3A; font-weight: bold; }
+  hr { border: none; border-top: 1px solid #D4A017; margin: 24px 0; }
+  .header-meta { color: #8A7A6A; font-size: 13px; margin-bottom: 20px; }
+  .revenue-box { background: linear-gradient(135deg, #FFF8F0, #FAF0E6); border: 2px solid #D4A017; border-radius: 12px; padding: 20px; margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<h1>DharmaDaily — Play Store Publishing & Revenue Guide</h1>
+<p class="header-meta">Prepared: March 30, 2026 | Version: 1.0 | App: com.dharmadaily.app</p>
+
+<hr>
+
+<!-- ========== SECTION 1: SCHEDULE ========== -->
+<h2>1. Implementation Schedule (14-Day Sprint)</h2>
+
+<table class="schedule-table">
+<tr><th>Day</th><th>Tasks</th><th>Status</th></tr>
+<tr><td>Day 1 (Mar 30)</td><td>
+  <strong>Code Production Hardening</strong><br>
+  - Add Error Boundary to App.js<br>
+  - Fix gold price fetch error handling<br>
+  - Fix ReminderModal persistent storage (AsyncStorage)<br>
+  - Add defensive null checks in panchangamCalculator<br>
+  - Fix silent catch blocks in goldPriceService<br>
+  - Fix share error handling in DailyDarshan<br>
+  - Add accessibility labels to all touchable elements
+</td><td><span class="badge done">DONE</span></td></tr>
+<tr><td>Day 2 (Mar 31)</td><td>
+  <strong>Play Store Account & Assets</strong><br>
+  - Create Google Play Developer account ($25)<br>
+  - Design app icon (512x512)<br>
+  - Design feature graphic (1024x500)<br>
+  - Take 8 screenshots (phone + 7" tablet)<br>
+  - Write store description (Telugu + English)
+</td><td><span class="badge high">TODO</span></td></tr>
+<tr><td>Day 3 (Apr 1)</td><td>
+  <strong>Privacy & Legal</strong><br>
+  - Write Privacy Policy (host on GitHub Pages)<br>
+  - Write Terms of Service<br>
+  - Add privacy policy URL to app.json<br>
+  - Complete Data Safety form checklist<br>
+  - Verify image licenses (Wikimedia Commons)
+</td><td><span class="badge high">TODO</span></td></tr>
+<tr><td>Day 4 (Apr 2)</td><td>
+  <strong>Build Configuration</strong><br>
+  - Install & configure EAS CLI<br>
+  - Create eas.json with production profile<br>
+  - Set up app signing (keystore)<br>
+  - Build first AAB (Android App Bundle)<br>
+  - Test AAB on emulator
+</td><td><span class="badge high">TODO</span></td></tr>
+<tr><td>Day 5-6 (Apr 3-4)</td><td>
+  <strong>Testing on Real Devices</strong><br>
+  - Test on Samsung Galaxy (mid-range)<br>
+  - Test on Pixel device<br>
+  - Test on 7" tablet<br>
+  - Test with slow 3G network<br>
+  - Test offline mode (airplane mode)<br>
+  - Test all modals, navigation, date changes<br>
+  - Fix any crashes or visual bugs
+</td><td><span class="badge high">TODO</span></td></tr>
+<tr><td>Day 7 (Apr 5)</td><td>
+  <strong>Upload to Internal Testing</strong><br>
+  - Create app in Google Play Console<br>
+  - Upload AAB to Internal Testing track<br>
+  - Add 5 internal testers (yourself + friends)<br>
+  - Fill content rating questionnaire<br>
+  - Fill Data Safety form<br>
+  - Set pricing & distribution
+</td><td><span class="badge high">TODO</span></td></tr>
+<tr><td>Day 8-9 (Apr 6-7)</td><td>
+  <strong>AdMob Integration</strong><br>
+  - Create AdMob account (ads.google.com)<br>
+  - Create ad units: 1 banner + 1 interstitial<br>
+  - Install react-native-google-mobile-ads<br>
+  - Add banner ad below QuickAccessBar<br>
+  - Add interstitial on festival detail modal close<br>
+  - Test with test ad IDs first
+</td><td><span class="badge medium">TODO</span></td></tr>
+<tr><td>Day 10 (Apr 8)</td><td>
+  <strong>Move to Closed Testing</strong><br>
+  - Promote build to Closed Testing track<br>
+  - Recruit 20 testers (friends, family, WhatsApp groups)<br>
+  - Create feedback form (Google Forms)<br>
+  - Start 14-day closed testing countdown
+</td><td><span class="badge medium">TODO</span></td></tr>
+<tr><td>Day 11-12 (Apr 9-10)</td><td>
+  <strong>Add Premium Features (Optional)</strong><br>
+  - Add "Share as Image" for panchangam<br>
+  - Add home screen widget concept<br>
+  - Add donation/UPI support button<br>
+  - Implement notification reminders
+</td><td><span class="badge medium">TODO</span></td></tr>
+<tr><td>Day 13 (Apr 11)</td><td>
+  <strong>Fix Tester Feedback</strong><br>
+  - Collect all tester feedback<br>
+  - Fix critical bugs<br>
+  - Rebuild and re-upload
+</td><td><span class="badge medium">TODO</span></td></tr>
+<tr><td>Day 14+ (Apr 22)</td><td>
+  <strong>Production Release</strong><br>
+  - 14-day closed testing period complete<br>
+  - Promote to Production<br>
+  - Monitor crash reports (Play Console + Firebase Crashlytics)<br>
+  - Respond to first reviews<br>
+  - Share on social media & WhatsApp
+</td><td><span class="badge critical">LAUNCH</span></td></tr>
+</table>
+
+<hr>
+
+<!-- ========== SECTION 2: PRODUCTION FIXES ========== -->
+<div class="page-break"></div>
+<h2>2. Production Code Fixes (Completed Day 1)</h2>
+
+<table>
+<tr><th>Issue</th><th>File</th><th>Severity</th><th>Fix</th></tr>
+<tr><td>No Error Boundary</td><td>App.js</td><td><span class="badge critical">CRITICAL</span></td><td>Added ErrorBoundary wrapper with fallback UI</td></tr>
+<tr><td>Gold price fetch no .catch()</td><td>App.js</td><td><span class="badge critical">CRITICAL</span></td><td>Added .catch() with error logging</td></tr>
+<tr><td>Reminders lost on reload</td><td>ReminderModal.js</td><td><span class="badge critical">CRITICAL</span></td><td>Migrated to AsyncStorage persistence</td></tr>
+<tr><td>Silent catch blocks</td><td>goldPriceService.js</td><td><span class="badge high">HIGH</span></td><td>Added console.warn in all catch blocks</td></tr>
+<tr><td>NaN crash on time parsing</td><td>panchangamCalculator.js</td><td><span class="badge high">HIGH</span></td><td>Added safeParseTime() with validation</td></tr>
+<tr><td>Share error swallowed</td><td>DailyDarshan.js</td><td><span class="badge medium">MEDIUM</span></td><td>Added error handling (ignore cancel)</td></tr>
+<tr><td>No date validation</td><td>ReminderModal.js</td><td><span class="badge medium">MEDIUM</span></td><td>Added date format validation</td></tr>
+<tr><td>Missing accessibility</td><td>All components</td><td><span class="badge medium">MEDIUM</span></td><td>Added accessibilityLabel / accessibilityRole</td></tr>
+<tr><td>Reminder delete hack</td><td>ReminderModal.js</td><td><span class="badge medium">MEDIUM</span></td><td>Proper React state management</td></tr>
+<tr><td>No app permissions</td><td>app.json</td><td><span class="badge high">HIGH</span></td><td>Added INTERNET permission</td></tr>
+</table>
+
+<hr>
+
+<!-- ========== SECTION 3: MONETIZATION ========== -->
+<div class="page-break"></div>
+<h2>3. Monetization Strategy</h2>
+
+<div class="revenue-box">
+<h3>Revenue Projection (Conservative)</h3>
+<table>
+<tr><th>Month</th><th>Daily Users</th><th>Ad Revenue/mo</th><th>Premium/mo</th><th>Total/mo</th></tr>
+<tr><td>Month 1-2</td><td>500</td><td>Rs.1,500</td><td>Rs.0</td><td>Rs.1,500</td></tr>
+<tr><td>Month 3-4</td><td>2,000</td><td>Rs.6,000</td><td>Rs.2,000</td><td>Rs.8,000</td></tr>
+<tr><td>Month 6</td><td>5,000</td><td>Rs.15,000</td><td>Rs.8,000</td><td>Rs.23,000</td></tr>
+<tr><td>Month 12</td><td>15,000</td><td>Rs.45,000</td><td>Rs.25,000</td><td>Rs.70,000</td></tr>
+<tr><td>Year 2 (5 apps)</td><td>50,000+</td><td>Rs.1,50,000</td><td>Rs.50,000</td><td>Rs.2,00,000</td></tr>
+</table>
+<p style="font-size:12px; color:#8A7A6A; margin-top:8px;">* Based on Indian market CPM of Rs.30-50/1000 impressions, 5% premium conversion</p>
+</div>
+
+<h3>Strategy A: Google AdMob (Start Day 8)</h3>
+<ul>
+  <li><strong>Banner Ad</strong> — Below QuickAccessBar (always visible, low annoyance)</li>
+  <li><strong>Interstitial Ad</strong> — On festival detail modal close (between content)</li>
+  <li><strong>NEVER place ads</strong> on panchangam cards, slokas, or prayer content</li>
+  <li>Use test ad IDs during development, switch to real IDs before production</li>
+</ul>
+
+<h3>Strategy B: Freemium (Start Month 2)</h3>
+<table>
+<tr><th>Free Features</th><th>Premium (Rs.99-299/year)</th></tr>
+<tr><td>Daily panchangam</td><td>Ad-free experience</td></tr>
+<tr><td>Basic timings</td><td>Detailed muhurtam for events</td></tr>
+<tr><td>3 upcoming festivals</td><td>Full year festival calendar</td></tr>
+<tr><td>Today's story</td><td>Complete story library</td></tr>
+<tr><td>Gold prices</td><td>Price alerts & history chart</td></tr>
+</table>
+
+<h3>Strategy C: Donations (Start Day 1)</h3>
+<ul>
+  <li>Add "Support Dharma Daily" button in menu</li>
+  <li>UPI deep link (Google Pay / PhonePe) — 0% commission</li>
+  <li>Works very well with religious/spiritual audience</li>
+</ul>
+
+<h3>Strategy D: Partnerships (Start Month 3)</h3>
+<ul>
+  <li>Temple event listings (sponsored)</li>
+  <li>Purohit/Priest directory (paid listings)</li>
+  <li>Puja items affiliate links (Amazon/Flipkart)</li>
+  <li>Gold jeweler sponsored card near gold prices</li>
+</ul>
+
+<hr>
+
+<!-- ========== SECTION 4: PLAY STORE CHECKLIST ========== -->
+<div class="page-break"></div>
+<h2>4. Play Store Submission Checklist</h2>
+
+<div class="box">
+<div class="box-title">Pre-Submission Requirements</div>
+<ul>
+  <li>[ ] Google Play Developer account created & verified ($25)</li>
+  <li>[ ] App icon: 512x512 PNG, no transparency, no rounded corners</li>
+  <li>[ ] Feature graphic: 1024x500 PNG</li>
+  <li>[ ] Phone screenshots: Min 2, recommended 8 (1080x1920 or 1440x2560)</li>
+  <li>[ ] 7-inch tablet screenshots: Min 2 recommended</li>
+  <li>[ ] Short description: Max 80 characters</li>
+  <li>[ ] Full description: Max 4000 chars (Telugu + English keywords)</li>
+  <li>[ ] Privacy Policy URL (hosted, publicly accessible)</li>
+  <li>[ ] App signed with upload key (EAS handles this)</li>
+  <li>[ ] AAB (Android App Bundle) built successfully</li>
+</ul>
+</div>
+
+<div class="box">
+<div class="box-title">Play Console Setup</div>
+<ul>
+  <li>[ ] App category: <strong>Lifestyle</strong> or <strong>Books & Reference</strong></li>
+  <li>[ ] Content rating: Complete IARC questionnaire (expect "Everyone")</li>
+  <li>[ ] Target audience: General (NOT children-directed to avoid COPPA)</li>
+  <li>[ ] Data Safety form completed</li>
+  <li>[ ] Pricing: Free (with in-app purchases later)</li>
+  <li>[ ] Countries: India (primary), USA, UK, UAE, Singapore, Australia</li>
+</ul>
+</div>
+
+<div class="box">
+<div class="box-title">Data Safety Declaration</div>
+<table>
+<tr><th>Data Type</th><th>Collected?</th><th>Purpose</th></tr>
+<tr><td>Location (approximate)</td><td>Yes</td><td>Panchangam calculations (sunrise/sunset)</td></tr>
+<tr><td>Device storage</td><td>Yes</td><td>Reminder persistence, price cache</td></tr>
+<tr><td>Network access</td><td>Yes</td><td>Gold/Silver price APIs</td></tr>
+<tr><td>Personal info</td><td>No</td><td>—</td></tr>
+<tr><td>Financial info</td><td>No</td><td>—</td></tr>
+</table>
+</div>
+
+<div class="box">
+<div class="box-title">Mandatory 20-Tester Closed Testing (14 days)</div>
+<p>Google requires <strong>20 unique testers</strong> who have opted in to your closed testing track for at least <strong>14 consecutive days</strong> before you can publish to production.</p>
+<ul>
+  <li>Recruit from: Family, friends, Telugu community WhatsApp groups</li>
+  <li>Create a Google Group or email list for testers</li>
+  <li>Share the opt-in link from Play Console</li>
+  <li>Ask testers to install and use the app daily</li>
+  <li>Collect feedback via Google Forms</li>
+</ul>
+</div>
+
+<hr>
+
+<!-- ========== SECTION 5: MARKETING ========== -->
+<div class="page-break"></div>
+<h2>5. Growth & Marketing (Zero Cost)</h2>
+
+<h3>App Store Optimization (ASO)</h3>
+<div class="box">
+<div class="box-title">Optimized Store Title</div>
+<code>ధర్మ Daily - Telugu Panchangam, Tithi, Festivals 2026</code>
+<p style="margin-top:8px;"><strong>Keywords to include in description:</strong> తెలుగు పంచాంగం, tithi, nakshatram, rahu kalam, today panchangam, telugu calendar 2026, gold price today, ekadashi, festival calendar, sunrise sunset, muhurtham</p>
+</div>
+
+<h3>Viral Growth Tactics</h3>
+<ol>
+  <li><strong>WhatsApp Share Card</strong> — "Share today's panchangam" generates a beautiful image card. Telugu WhatsApp groups will spread this virally.</li>
+  <li><strong>YouTube Shorts</strong> — 30-second feature demo videos in Telugu. Zero cost, massive reach.</li>
+  <li><strong>Temple QR Codes</strong> — Print QR code posters, place at local temples.</li>
+  <li><strong>Facebook Telugu Groups</strong> — Post daily panchangam from your app.</li>
+  <li><strong>Ask for Reviews</strong> — Prompt after 7 days of use (not before).</li>
+</ol>
+
+<hr>
+
+<!-- ========== SECTION 6: FUTURE APPS ========== -->
+<h2>6. App Portfolio Roadmap (Benefit Mankind)</h2>
+
+<table>
+<tr><th>#</th><th>App</th><th>Audience</th><th>Revenue</th><th>Timeline</th></tr>
+<tr><td>1</td><td><strong>DharmaDaily</strong> (this app)</td><td>Telugu Hindu community</td><td>Ads + Premium</td><td>Apr 2026</td></tr>
+<tr><td>2</td><td><strong>Stotram</strong> — All Hindu stotras with audio</td><td>100M+ Hindus</td><td>Ads + Premium</td><td>Jun 2026</td></tr>
+<tr><td>3</td><td><strong>Subham</strong> — Telugu muhurtam finder</td><td>Wedding planners</td><td>Freemium Rs.199/yr</td><td>Aug 2026</td></tr>
+<tr><td>4</td><td><strong>Annadanam</strong> — Free food at temples</td><td>Everyone</td><td>Donations + Sponsorship</td><td>Oct 2026</td></tr>
+<tr><td>5</td><td><strong>Gita Daily</strong> — One verse per day</td><td>Spiritual seekers</td><td>Ads + Donations</td><td>Dec 2026</td></tr>
+<tr><td>6</td><td><strong>Farmer's Panchang</strong> — Planting calendar</td><td>Indian farmers</td><td>Govt partnerships</td><td>Feb 2027</td></tr>
+</table>
+
+<p><strong>Key advantage:</strong> Each app reuses 60%+ of your existing code — panchangam calculator, sacred theme, gold price service, component library.</p>
+
+<hr>
+
+<!-- ========== SECTION 7: LEGAL & TAX ========== -->
+<h2>7. Legal & Tax Compliance</h2>
+
+<ul>
+  <li><strong>GST Registration</strong> — Required if annual revenue exceeds Rs.20 lakhs</li>
+  <li><strong>TDS</strong> — Google deducts TDS on Indian developer earnings</li>
+  <li><strong>PAN</strong> — Required for Google Play Developer verification</li>
+  <li><strong>Bank Account</strong> — Add to Payments Center for payouts (minimum Rs.100)</li>
+  <li><strong>Image Licensing</strong> — All Wikimedia images must have attribution; verify each is CC BY-SA or Public Domain</li>
+  <li><strong>No Copyrighted Content</strong> — Ensure stories and descriptions are original or public domain</li>
+  <li><strong>AdMob Policy</strong> — Never click own ads, never encourage ad clicks, never place ads that mimic content</li>
+</ul>
+
+<hr>
+
+<h2>8. Key Commands Reference</h2>
+
+<pre>
+# Install dependencies
+npm install
+
+# Install EAS CLI
+npm install -g eas-cli
+
+# Login to Expo
+eas login
+
+# Configure EAS build
+eas build:configure
+
+# Build Android App Bundle (production)
+eas build --platform android --profile production
+
+# Build for testing (APK)
+eas build --platform android --profile preview
+
+# Submit to Play Store
+eas submit --platform android
+
+# Start local dev server
+npx expo start
+</pre>
+
+<hr>
+
+<div class="box" style="text-align: center; border-color: #2E7D32;">
+<h3 style="color: #2E7D32;">Ready to Launch!</h3>
+<p>Follow the 14-day schedule above. The code is now production-hardened.<br>
+Your first step: Create your Google Play Developer account today.</p>
+<p style="font-style: italic; color: #8A7A6A; margin-top: 12px;">సర్వే జనాః సుఖినో భవంతు — May all beings be happy</p>
+</div>
+
+</body>
+</html>

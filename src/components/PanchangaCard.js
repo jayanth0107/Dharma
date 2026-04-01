@@ -1,7 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
+
+// Icon mapping for panchangam elements
+const PANCHANGA_ICONS = {
+  'తిథి': { name: 'moon-waxing-crescent', family: 'MaterialCommunityIcons' },
+  'నక్షత్రం': { name: 'star-four-points', family: 'MaterialCommunityIcons' },
+  'యోగం': { name: 'infinity', family: 'MaterialCommunityIcons' },
+  'కరణం': { name: 'flower-tulip', family: 'MaterialCommunityIcons' },
+};
+
+function PanchangaIcon({ label, size = 18, color }) {
+  const iconInfo = PANCHANGA_ICONS[label];
+  if (!iconInfo) return null;
+  return <MaterialCommunityIcons name={iconInfo.name} size={size} color={color} />;
+}
 
 export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel, accentColor }) {
   return (
@@ -11,9 +26,9 @@ export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel
         style={styles.cardGradient}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.cardIcon}>{icon}</Text>
+          <PanchangaIcon label={label} size={18} color={accentColor || Colors.textSecondary} />
           <Text style={[styles.cardLabel, { color: accentColor || Colors.textSecondary }]}>
-            {label}
+            {' '}{label}
           </Text>
         </View>
         <Text style={styles.teluguValue}>{teluguValue}</Text>
@@ -28,18 +43,90 @@ export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel
   );
 }
 
-export function TimingCard({ icon, label, startTime, endTime, isActive, accentColor }) {
+const TIMING_DESCRIPTIONS = {
+  'రాహు కాలం': { english: 'Rahu Kalam', desc: 'శుభ కార్యాలు, ప్రయాణం, కొత్త పనులు ప్రారంభించవద్దు' },
+  'యమగండ కాలం': { english: 'Yamaganda Kalam', desc: 'ఆరోగ్య సంబంధ నిర్ణయాలు, ఔషధ సేవనం నివారించండి' },
+  'గుళిక కాలం': { english: 'Gulika Kalam', desc: 'ముఖ్యమైన ఒప్పందాలు, పెట్టుబడులు నివారించండి' },
+};
+
+export function TimingCard({ icon, label, startTime, endTime, isActive, accentColor, iconName, isAuspicious }) {
+  const color = accentColor || Colors.kumkum;
+  const info = TIMING_DESCRIPTIONS[label] || {};
+
   return (
-    <View style={[styles.timingCard, isActive && styles.timingCardActive]}>
-      <View style={styles.timingHeader}>
-        <Text style={styles.timingIcon}>{icon}</Text>
-        <Text style={[styles.timingLabel, { color: accentColor || Colors.kumkum }]}>
-          {label}
-        </Text>
-      </View>
-      <Text style={styles.timingValue}>
-        {startTime} — {endTime}
-      </Text>
+    <View style={[
+      styles.timingCard,
+      { borderColor: color + '25', borderLeftColor: color },
+      isActive && styles.timingCardActive,
+    ]}>
+      <LinearGradient
+        colors={[color + '08', color + '04']}
+        style={styles.timingGradient}
+      >
+        {/* Top row: icon + name + badge */}
+        <View style={styles.timingTopRow}>
+          {iconName ? (
+            <MaterialCommunityIcons name={iconName} size={20} color={color} style={{ marginRight: 10 }} />
+          ) : (
+            <Text style={{ fontSize: 18, marginRight: 10 }}>{icon}</Text>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.timingLabel, { color }]}>{label}</Text>
+            {info.english ? <Text style={styles.timingEnglish}>{info.english}</Text> : null}
+          </View>
+          {isActive && (
+            <View style={[styles.activeBadge, { backgroundColor: color }]}>
+              <Text style={styles.activeBadgeText}>ప్రస్తుతం</Text>
+            </View>
+          )}
+        </View>
+        {/* Time row */}
+        <View style={styles.timingTimeRow}>
+          <MaterialCommunityIcons name="clock-alert-outline" size={15} color={color} style={{ marginRight: 6, opacity: 0.6 }} />
+          <Text style={[styles.timingValue, { color }]}>
+            {startTime}  —  {endTime}
+          </Text>
+        </View>
+        {/* Description */}
+        {info.desc ? <Text style={styles.timingDesc}>{info.desc}</Text> : null}
+      </LinearGradient>
+    </View>
+  );
+}
+
+export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
+  const bgColors = isAuspicious
+    ? ['rgba(46,125,50,0.08)', 'rgba(76,175,80,0.04)']
+    : ['rgba(196,30,58,0.06)', 'rgba(232,117,26,0.04)'];
+  const borderColor = isAuspicious ? 'rgba(46,125,50,0.2)' : 'rgba(196,30,58,0.15)';
+  const iconColor = isAuspicious ? Colors.tulasiGreen : Colors.kumkum;
+  const iconName = isAuspicious ? 'check-decagram' : 'close-octagon-outline';
+
+  return (
+    <View style={[styles.muhurthamCard, { borderColor }, isActive && styles.muhurthamCardActive]}>
+      <LinearGradient colors={bgColors} style={styles.muhurthamGradient}>
+        {/* Top row: icon + name + active badge */}
+        <View style={styles.muhurthamTopRow}>
+          <MaterialCommunityIcons name={iconName} size={20} color={iconColor} style={{ marginRight: 10 }} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.muhurthamName, { color: iconColor }]}>{muhurtham.telugu}</Text>
+            <Text style={styles.muhurthamEnglish}>{muhurtham.english}</Text>
+          </View>
+          {isActive && (
+            <View style={[styles.activeBadge, { backgroundColor: iconColor }]}>
+              <Text style={styles.activeBadgeText}>ప్రస్తుతం</Text>
+            </View>
+          )}
+        </View>
+        {/* Bottom row: time — full width, larger font */}
+        <View style={styles.muhurthamTimeRow}>
+          <MaterialCommunityIcons name="clock-outline" size={15} color={iconColor} style={{ marginRight: 6, opacity: 0.6 }} />
+          <Text style={[styles.muhurthamTime, { color: iconColor }]}>
+            {muhurtham.startFormatted}  —  {muhurtham.endFormatted}
+          </Text>
+        </View>
+      </LinearGradient>
+      {muhurtham.description ? <Text style={styles.muhurthamDesc}>{muhurtham.description}</Text> : null}
     </View>
   );
 }
@@ -55,14 +142,14 @@ export function SlokaCard({ sloka }) {
         style={styles.slokaGradient}
       >
         <View style={styles.slokaDecoTop}>
-          <Text style={styles.slokaDecoration}>~ ~ ~</Text>
+          <MaterialCommunityIcons name="fleur-de-lis" size={20} color={Colors.goldShimmer} />
         </View>
         <Text style={styles.slokaDeity}>{sloka.deity}</Text>
         <Text style={styles.slokaText}>{sloka.sanskrit}</Text>
         <View style={styles.slokaDivider} />
         <Text style={styles.slokaMeaning}>{sloka.meaning}</Text>
         <View style={styles.slokaDecoBottom}>
-          <Text style={styles.slokaDecoration}>~ ~ ~</Text>
+          <MaterialCommunityIcons name="fleur-de-lis" size={20} color={Colors.goldShimmer} />
         </View>
       </LinearGradient>
     </View>
@@ -99,62 +186,147 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   cardLabel: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   teluguValue: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     color: Colors.darkBrown,
     marginBottom: 2,
   },
   englishValue: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    fontSize: 15,
+    color: '#3A2A1A',
     fontWeight: '500',
   },
   sublabel: {
-    fontSize: 11,
-    color: Colors.textMuted,
+    fontSize: 13,
+    color: '#4A3A2A',
     marginTop: 4,
     fontStyle: 'italic',
   },
 
-  // Timing Card
+  // Timing Card — matches MuhurthamCard layout
   timingCard: {
-    backgroundColor: Colors.ivory,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 10,
     borderWidth: 1,
-    borderColor: 'rgba(212, 160, 23, 0.15)',
+    borderLeftWidth: 3,
+  },
+  timingGradient: {
+    padding: 14,
+  },
+  timingTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  timingEnglish: {
+    fontSize: 13,
+    color: '#6B5B4B',
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  timingTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+    marginLeft: 30,
+  },
+  timingDesc: {
+    fontSize: 12,
+    color: '#6B5B4B',
+    fontStyle: 'italic',
+    marginTop: 6,
+    marginLeft: 30,
+    lineHeight: 18,
   },
   timingCardActive: {
-    borderColor: Colors.kumkum,
-    borderWidth: 1.5,
-    backgroundColor: 'rgba(196, 30, 58, 0.05)',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  timingHeader: {
+  timingLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  timingValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+
+  // Muhurtham Card
+  muhurthamCard: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 10,
+    borderWidth: 1,
+  },
+  muhurthamCardActive: {
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  muhurthamGradient: {
+    padding: 14,
+  },
+  muhurthamTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  timingIcon: {
+  muhurthamTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+    marginLeft: 30,
+  },
+  muhurthamName: {
     fontSize: 16,
-    marginRight: 8,
-  },
-  timingLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  timingValue: {
-    fontSize: 14,
     fontWeight: '700',
-    color: Colors.darkBrown,
+  },
+  muhurthamEnglish: {
+    fontSize: 13,
+    color: '#6B5B4B',
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  muhurthamTime: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  muhurthamDesc: {
+    fontSize: 14,
+    color: '#4A3A2A',
+    fontStyle: 'italic',
+    paddingHorizontal: 14,
+    paddingBottom: 10,
+    lineHeight: 20,
+  },
+  activeBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  activeBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: Colors.white,
   },
 
   // Sloka Card
@@ -177,11 +349,6 @@ const styles = StyleSheet.create({
   },
   slokaDecoBottom: {
     marginTop: 8,
-  },
-  slokaDecoration: {
-    color: Colors.goldShimmer,
-    fontSize: 18,
-    letterSpacing: 8,
   },
   slokaDeity: {
     color: Colors.goldShimmer,

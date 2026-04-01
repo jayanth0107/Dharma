@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx expo:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(eas whoami:*)",
+      "Bash(npx eas-cli:*)",
+      "Bash(curl -s http://localhost:8082)",
+      "Bash(curl:*)",
+      "WebFetch(domain:commons.wikimedia.org)",
+      "WebSearch",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:upload.wikimedia.org)",
+      "Bash(python -m json.tool)",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(r[''''title'''']\\) for r in data[''''query''''][''''search'''']]\")",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(r[''''title'''']\\) for r in data[''''query''''][''''search'''']]\")",
+      "Bash(python -c \":*)",
+      "mcp__claude_ai_Canva__generate-design",
+      "Bash(ls:*)",
+      "Bash(npm uninstall:*)",
+      "mcp__claude_ai_Canva__create-design-from-candidate",
+      "mcp__claude_ai_Canva__export-design",
+      "Bash(xargs wc:*)",
+      "Bash(taskkill //F //IM \"node.exe\")",
+      "Bash(npx -y acorn --ecma2020 --module App.js)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(grep -r \"localStorage\\\\|AsyncStorage\" /c/Users/bujji/Desktop/DharmaDaily/src --include=*.js -l)",
+      "Bash(grep -E '\\\\.\\(png|jpg|webp\\)$')",
+      "Bash(grep -r console.log /c/Users/bujji/Desktop/DharmaDaily/src --include=*.js)",
+      "Bash(grep:*)",
+      "Bash(mv \"google-pay-icon.png\" \"googlepay.png\")",
+      "Bash(mv \"phonepe-icon.png\" \"phonepe.png\")",
+      "Bash(mv \"bhim logo.png\" \"bhim.png\")"
+    ]
+  }
+}

@@ -2,11 +2,12 @@
   "expo": {
     "name": "ధర్మ Daily — Telugu Panchangam",
     "slug": "DharmaDaily",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "dharmadaily",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -14,7 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dharmadaily.app"
+      "bundleIdentifier": "com.dharmadaily.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "పంచాంగం గణనల కోసం మీ స్థానం అవసరం — సూర్యోదయం/సూర్యాస్తమయం సమయాలు",
+        "CFBundleLocalizations": ["te", "en"],
+        "CFBundleDevelopmentRegion": "en"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,12 +28,42 @@
         "backgroundColor": "#0F0F1A"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.dharmadaily.app"
+      "package": "com.dharmadaily.app",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "versionCode": 2,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Dharma Daily - Telugu Panchangam",
+      "shortName": "Dharma Daily",
+      "lang": "te",
+      "description": "Free Telugu Panchangam app with daily Tithi, Nakshatram, Yogam, Karanam, Muhurtam timings, festival calendar, Ekadashi dates, gold prices, and Bhagavad Gita slokas.",
+      "themeColor": "#E8751A",
+      "backgroundColor": "#FFFDF5"
     },
-    "description": "Daily Telugu Panchangam with Tithi, Nakshatram, Yogam, Karanam, Rahu Kalam, Sunrise/Sunset, Festival Calendar, and sacred Slokas. Based on Drik Ganita astronomical calculations.",
-    "primaryColor": "#E8751A"
+    "description": "Daily Telugu Panchangam (తెలుగు పంచాంగం) with astronomically accurate Tithi, Nakshatram, Yogam, Karanam, Rahu Kalam, Sunrise/Sunset times. Includes 2026 festival calendar, Ekadashi tracker, Muhurtam finder, gold & silver prices, Bhagavad Gita slokas, kids stories, and daily deity darshan. Based on Drik Ganita astronomical calculations with Lahiri Ayanamsa.",
+    "primaryColor": "#E8751A",
+    "owner": "jayanth0107",
+    "privacy": "public",
+    "platforms": ["ios", "android", "web"],
+    "githubUrl": "https://github.com/jayanth0107/DharmaDaily",
+    "extra": {
+      "eas": {
+        "projectId": "8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d"
+      }
+    },
+    "plugins": [
+      "expo-location",
+      "expo-notifications"
+    ],
+    "locales": {
+      "te": "./locales/te.json"
+    }
   }
 }
