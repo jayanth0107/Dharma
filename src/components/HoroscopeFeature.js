@@ -217,9 +217,12 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
     setHoroVerifying(true);
     setTimeout(async () => {
       const { activatePremium } = require('../utils/premiumService');
-      await activatePremium('horoscope_' + selectedPlan.id, selectedPlan.days, {
+      await activatePremium('horoscope_upi', selectedPlan.days, {
         amount: selectedPlan.price,
         planId: selectedPlan.id,
+        planName: selectedPlan.telugu,
+        screen: 'HoroscopeFeature',
+        platform: Platform.OS,
       });
       setHoroVerifying(false);
       trackEvent('horoscope_purchase', { plan: selectedPlan.id });

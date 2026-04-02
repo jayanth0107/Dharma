@@ -196,9 +196,12 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     // Show verification animation, then activate
     setVerifying(true);
     setTimeout(async () => {
-      await activatePremium('purchase', selectedPlan.days, {
+      await activatePremium('premium_upi', selectedPlan.days, {
         amount: selectedPlan.price,
         planId: selectedPlan.id,
+        planName: selectedPlan.telugu,
+        screen: 'PremiumBanner',
+        platform: Platform.OS,
       });
       setVerifying(false);
       trackEvent('premium_activated', { plan: selectedPlan.id });

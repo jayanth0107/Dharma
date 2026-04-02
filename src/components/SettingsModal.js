@@ -199,23 +199,40 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                     {paymentRecords.length === 0 ? (
                       <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 12 }}>చెల్లింపులు లేవు</Text>
                     ) : (
-                      paymentRecords.map((r, i) => (
-                        <View key={i} style={{ paddingVertical: 8, borderBottomWidth: i < paymentRecords.length - 1 ? 1 : 0, borderBottomColor: 'rgba(0,0,0,0.06)' }}>
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 13, fontWeight: '700', color: Colors.darkBrown }}>
-                              {r.source === 'trial' ? '🆓 Trial' : `💳 ₹${r.amount || '—'}`}
-                            </Text>
-                            <Text style={{ fontSize: 11, color: Colors.textMuted }}>{r.days}d</Text>
+                      paymentRecords.slice().reverse().map((r, i) => {
+                        const sourceLabel = r.source === 'trial' ? '🆓 Free Trial'
+                          : r.source === 'premium_upi' ? '💳 Premium (UPI)'
+                          : r.source === 'horoscope_upi' ? '🔮 Horoscope (UPI)'
+                          : r.source === 'dev' ? '🔧 Dev Activate'
+                          : r.source === 'promo' ? '🎁 Promo Code'
+                          : `📦 ${r.source}`;
+                        return (
+                          <View key={i} style={{ paddingVertical: 8, borderBottomWidth: i < paymentRecords.length - 1 ? 1 : 0, borderBottomColor: 'rgba(0,0,0,0.06)' }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Text style={{ fontSize: 13, fontWeight: '700', color: Colors.darkBrown }}>{sourceLabel}</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '700', color: r.amount ? Colors.tulasiGreen : Colors.textMuted }}>
+                                {r.amount ? `₹${r.amount}` : 'Free'}
+                              </Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
+                              <Text style={{ fontSize: 11, color: Colors.textMuted }}>
+                                {r.planName || r.planId || '—'} • {r.days}d
+                              </Text>
+                              <Text style={{ fontSize: 10, color: '#aaa' }}>
+                                {r.date ? new Date(r.date).toLocaleString('te-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
+                              </Text>
+                            </View>
+                            {r.screen ? (
+                              <Text style={{ fontSize: 10, color: '#bbb', marginTop: 1 }}>
+                                via {r.screen} • {r.platform || 'web'}
+                              </Text>
+                            ) : null}
                           </View>
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
-                            <Text style={{ fontSize: 11, color: Colors.textMuted }}>{r.planId || r.source}</Text>
-                            <Text style={{ fontSize: 10, color: '#aaa' }}>{r.date ? new Date(r.date).toLocaleDateString('te-IN') : '—'}</Text>
-                          </View>
-                        </View>
-                      ))
+                        );
+                      })
                     )}
                     <Text style={{ fontSize: 10, color: '#bbb', textAlign: 'center', marginTop: 8 }}>
-                      {paymentRecords.length} record(s) — Admin only
+                      {paymentRecords.length} record(s) — Device-local only • Admin only
                     </Text>
                   </View>
                 )}
