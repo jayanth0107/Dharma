@@ -96,6 +96,7 @@ async function fetchFromMetalsAPI() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
+    // WARNING: Demo key — get free-tier key from metalpriceapi.com for production
     const response = await fetch(
       'https://api.metalpriceapi.com/v1/latest?api_key=demo&base=INR&currencies=XAU,XAG',
       { headers: { 'Accept': 'application/json' }, signal: controller.signal }

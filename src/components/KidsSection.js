@@ -123,6 +123,7 @@ function SlokaCard({ sloka }) {
 
 export function KidsSection({ dayOfWeek }) {
   const [activeStory, setActiveStory] = useState(null);
+  const [modalImgFailed, setModalImgFailed] = useState(false);
 
   // Show 4 stories starting from today's day
   const storyStart = dayOfWeek % KIDS_STORIES.length;
@@ -145,14 +146,14 @@ export function KidsSection({ dayOfWeek }) {
         // Web: 2x2 tile grid
         <View style={st.webGrid}>
           {visibleStories.map((story) => (
-            <StoryTile key={story.id} story={story} onPress={() => setActiveStory(story)} wide={true} />
+            <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); }} wide={true} />
           ))}
         </View>
       ) : (
         // Mobile: Horizontal scrollable carousel
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.carousel}>
           {visibleStories.map((story) => (
-            <StoryTile key={story.id} story={story} onPress={() => setActiveStory(story)} wide={false} />
+            <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); }} wide={false} />
           ))}
         </ScrollView>
       )}
@@ -175,7 +176,13 @@ export function KidsSection({ dayOfWeek }) {
                 <Ionicons name="close" size={22} color="#FFF" />
               </TouchableOpacity>
               <ScrollView showsVerticalScrollIndicator={false}>
-                <Image source={{ uri: activeStory.image }} style={st.modalImage} resizeMode="cover" />
+                {!modalImgFailed ? (
+                  <Image source={{ uri: activeStory.image }} style={st.modalImage} resizeMode="cover" onError={() => setModalImgFailed(true)} />
+                ) : (
+                  <View style={[st.modalImageFallback, { backgroundColor: activeStory.color + '15' }]}>
+                    <MaterialCommunityIcons name={activeStory.icon} size={64} color={activeStory.color} />
+                  </View>
+                )}
                 <View style={st.modalBody}>
                   <Text style={[st.modalTitle, { color: activeStory.color }]}>{activeStory.title}</Text>
                   <Text style={st.modalEnglish}>{activeStory.english}</Text>
@@ -256,6 +263,7 @@ const st = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   modalImage: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  modalImageFallback: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24, alignItems: 'center', justifyContent: 'center' },
   modalBody: { padding: 20 },
   modalTitle: { fontSize: 24, fontWeight: '800' },
   modalEnglish: { fontSize: 14, color: '#6B5B4B', marginTop: 2 },

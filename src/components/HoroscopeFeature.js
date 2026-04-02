@@ -96,6 +96,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
   const [horoscope, setHoroscope] = useState(null);
   const [usageInfo, setUsageInfo] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [qrFailed, setQrFailed] = useState(false);
   const searchTimer = useRef(null);
 
   // Reset step and load usage info on open
@@ -483,7 +484,14 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     {/* QR Code */}
                     <View style={{ alignItems: 'center', marginTop: 14, padding: 12, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(74,26,107,0.1)' }}>
                       <Text style={{ fontSize: 12, fontWeight: '600', color: Colors.textMuted, marginBottom: 8 }}>QR కోడ్ స్కాన్ చేయండి</Text>
-                      <Image source={{ uri: getHoroscopeQrUrl(selectedPlan.price) }} style={{ width: 160, height: 160 }} resizeMode="contain" />
+                      {!qrFailed ? (
+                        <Image source={{ uri: getHoroscopeQrUrl(selectedPlan.price) }} style={{ width: 160, height: 160 }} resizeMode="contain" onError={() => setQrFailed(true)} />
+                      ) : (
+                        <View style={{ alignItems: 'center', justifyContent: 'center', width: 160, height: 160 }}>
+                          <MaterialCommunityIcons name="qrcode" size={48} color={Colors.textMuted} />
+                          <Text style={{ fontSize: 12, color: Colors.textMuted, marginTop: 8 }}>QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.</Text>
+                        </View>
+                      )}
                       <Text style={{ fontSize: 13, fontWeight: '700', color: '#4A1A6B', marginTop: 8 }}>₹{selectedPlan.price}</Text>
                     </View>
 

@@ -5,6 +5,17 @@
 
 import { Platform } from 'react-native';
 
+// Nominatim rate limit: max 1 request/second
+let lastNominatimCall = 0;
+async function nominatimThrottle() {
+  const now = Date.now();
+  const elapsed = now - lastNominatimCall;
+  if (elapsed < 1100) {
+    await new Promise(r => setTimeout(r, 1100 - elapsed));
+  }
+  lastNominatimCall = Date.now();
+}
+
 // --- GPS Location ---
 export async function getCurrentPosition() {
   try {
@@ -50,6 +61,8 @@ export async function getCurrentPosition() {
 // Returns city, state, country from lat/lng
 export async function reverseGeocode(latitude, longitude) {
   try {
+    await nominatimThrottle();
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
@@ -65,7 +78,7 @@ export async function reverseGeocode(latitude, longitude) {
     );
     clearTimeout(timeout);
 
-    if (!response.ok) throw new Error('Geocoding HTTP error');
+    if (!response.ok) throw new Error(`Reverse geocoding failed with HTTP ${response.status}`);
     const data = await response.json();
 
     const address = data.address || {};
@@ -85,7 +98,10 @@ export async function reverseGeocode(latitude, longitude) {
       displayName: area && city ? `${area}, ${city}` : city || state || data.display_name?.split(',')[0] || '',
     };
   } catch (e) {
-    console.warn('Reverse geocoding failed:', e?.message || e);
+    const msg = e?.name === 'AbortError'
+      ? 'Reverse geocoding timed out after 8s'
+      : `Reverse geocoding failed: ${e?.message || e}`;
+    console.warn(msg);
     return null;
   }
 }
@@ -98,6 +114,8 @@ export async function searchLocation(query) {
   const sanitized = query.trim().slice(0, 100).replace(/[\x00-\x1f]/g, '');
 
   try {
+    await nominatimThrottle();
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
@@ -113,7 +131,7 @@ export async function searchLocation(query) {
     );
     clearTimeout(timeout);
 
-    if (!response.ok) throw new Error('Search HTTP error');
+    if (!response.ok) throw new Error(`Location search failed with HTTP ${response.status}`);
     const results = await response.json();
 
     return results.map((r) => {
@@ -134,7 +152,10 @@ export async function searchLocation(query) {
       };
     }).filter(r => r.latitude && r.longitude);
   } catch (e) {
-    console.warn('Location search failed:', e?.message || e);
+    const msg = e?.name === 'AbortError'
+      ? 'Location search timed out after 8s'
+      : `Location search failed: ${e?.message || e}`;
+    console.warn(msg);
     return [];
   }
 }
