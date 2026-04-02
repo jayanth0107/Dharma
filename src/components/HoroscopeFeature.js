@@ -202,26 +202,33 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
     onClose();
   };
 
-  const [horoTxnId, setHoroTxnId] = useState('');
-  const [horoTxnError, setHoroTxnError] = useState('');
+  const [horoVerifying, setHoroVerifying] = useState(false);
 
   const handleActivateHoroscope = async () => {
     if (!selectedPlan) return;
-    setHoroTxnError('');
 
-    const { activatePremium } = require('../utils/premiumService');
-    const result = await activatePremium('horoscope_' + selectedPlan.id, selectedPlan.days, horoTxnId);
-    if (!result.success) {
-      setHoroTxnError(result.error || 'Transaction ID తప్పు');
-      return;
+    // Open UPI payment
+    if (Platform.OS !== 'web') {
+      const upiStr = `upi://pay?pa=${UPI_ID_H}&pn=${MERCHANT_H}&am=${selectedPlan.price}&cu=INR&tn=Dharma Horoscope`;
+      try { await Linking.openURL(upiStr); } catch {}
     }
 
-    trackEvent('horoscope_purchase', { plan: selectedPlan.id, txnId: horoTxnId.substring(0, 8) });
-    if (Platform.OS === 'web') alert(`🎉 ${selectedPlan.telugu} ప్లాన్ సక్రియం! ${selectedPlan.uses} జాతకాలు రూపొందించవచ్చు.`);
-    else Alert.alert('🎉 సక్రియం!', `${selectedPlan.telugu} ప్లాన్ — ${selectedPlan.uses} జాతకాలు`);
-    setHoroTxnId('');
-    setSelectedPlan(null);
-    setStep('form');
+    // Show verification, then activate
+    setHoroVerifying(true);
+    setTimeout(async () => {
+      const { activatePremium } = require('../utils/premiumService');
+      await activatePremium('horoscope_' + selectedPlan.id, selectedPlan.days, {
+        amount: selectedPlan.price,
+        planId: selectedPlan.id,
+      });
+      setHoroVerifying(false);
+      trackEvent('horoscope_purchase', { plan: selectedPlan.id });
+
+      if (Platform.OS === 'web') alert(`🎉 ${selectedPlan.telugu} ప్లాన్ సక్రియం!`);
+      else Alert.alert('🎉 సక్రియం!', `${selectedPlan.telugu} ప్లాన్ — ${selectedPlan.uses} జాతకాలు`);
+      setSelectedPlan(null);
+      setStep('form');
+    }, 2500);
   };
 
   const handlePdf = async () => {
@@ -491,26 +498,20 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                       <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.darkBrown }}>{UPI_ID_H}</Text>
                     </View>
 
-                    {/* Transaction ID input + Activate button */}
-                    <View style={{ marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.08)' }}>
-                      <Text style={{ fontSize: 12, color: Colors.darkBrown, fontWeight: '600', marginBottom: 6, textAlign: 'center' }}>UPI Transaction ID నమోదు చేయండి:</Text>
-                      <TextInput
-                        style={{ borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, fontWeight: '700', letterSpacing: 1, textAlign: 'center', backgroundColor: '#f9f9f9', marginBottom: 8 }}
-                        placeholder="UPI Ref / Transaction ID"
-                        placeholderTextColor="#999"
-                        value={horoTxnId}
-                        onChangeText={(t) => { setHoroTxnId(t); setHoroTxnError(''); }}
-                        autoCapitalize="characters"
-                        maxLength={30}
-                      />
-                      {horoTxnError ? <Text style={{ fontSize: 12, color: Colors.kumkum, textAlign: 'center', marginBottom: 6 }}>{horoTxnError}</Text> : null}
-                    </View>
-                    <TouchableOpacity style={[s.activatePayBtn, !horoTxnId.trim() && { opacity: 0.5 }]} onPress={handleActivateHoroscope} disabled={!horoTxnId.trim()}>
-                      <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
-                        <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
-                        <Text style={s.activatePayText}>సక్రియం చేయండి</Text>
-                      </LinearGradient>
-                    </TouchableOpacity>
+                    {/* Single pay button with verification animation */}
+                    {horoVerifying ? (
+                      <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                        <ActivityIndicator size="large" color={Colors.tulasiGreen} />
+                        <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 }}>పేమెంట్ ధృవీకరిస్తోంది...</Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity style={s.activatePayBtn} onPress={handleActivateHoroscope}>
+                        <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
+                          <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
+                          <Text style={s.activatePayText}>₹{selectedPlan?.price} చెల్లించి సక్రియం చేయండి</Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 )}
 

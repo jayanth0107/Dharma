@@ -4,8 +4,8 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, StyleSheet, TouchableOpacity, Modal, ScrollView,
-  Alert, Platform, Linking, Image,
+  View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
+  Alert, Platform, Linking, Image, ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -182,34 +182,34 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     trackEvent('premium_plan_select', { plan: plan.id });
   };
 
-  const [txnId, setTxnId] = useState('');
-  const [txnError, setTxnError] = useState('');
+  const [verifying, setVerifying] = useState(false);
 
-  const handleOpenPayment = async () => {
+  const handlePay = async () => {
     if (!selectedPlan) return;
     trackEvent('premium_pay_tap', { plan: selectedPlan.id, amount: selectedPlan.price });
+
+    // Open UPI app with pre-filled payment
     if (Platform.OS !== 'web') {
       await openUpiPayment(selectedPlan.price);
     }
-  };
 
-  const handleVerifyAndActivate = async () => {
-    if (!selectedPlan) return;
-    setTxnError('');
+    // Show verification animation, then activate
+    setVerifying(true);
+    setTimeout(async () => {
+      await activatePremium('purchase', selectedPlan.days, {
+        amount: selectedPlan.price,
+        planId: selectedPlan.id,
+      });
+      setVerifying(false);
+      trackEvent('premium_activated', { plan: selectedPlan.id });
 
-    const result = await activatePremium('purchase', selectedPlan.days, txnId);
-    if (!result.success) {
-      setTxnError(result.error || 'Transaction ID తప్పు');
-      return;
-    }
+      if (Platform.OS === 'web') alert(`🎉 Premium Activated! ${selectedPlan.english} plan.`);
+      else Alert.alert('🎉 Premium సక్రియం!', `${selectedPlan.telugu} ప్లాన్ విజయవంతంగా సక్రియం అయింది!`);
 
-    trackEvent('premium_activated', { plan: selectedPlan.id, txnId: txnId.substring(0, 8) });
-    if (Platform.OS === 'web') alert(`🎉 Premium Activated! ${selectedPlan.english} plan.`);
-    else Alert.alert('🎉 Premium Activated!', `${selectedPlan.telugu} ప్లాన్ సక్రియం అయింది!`);
-    setTxnId('');
-    onActivated?.();
-    setSelectedPlan(null);
-    onClose();
+      onActivated?.();
+      setSelectedPlan(null);
+      onClose();
+    }, 2500);
   };
 
   const handleBack = () => setSelectedPlan(null);
@@ -369,41 +369,23 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                   </View>
                 </View>
 
-                {/* Step 1: Open UPI payment */}
-                <TouchableOpacity style={s.activateBtn} onPress={handleOpenPayment} activeOpacity={0.8}>
-                  <LinearGradient colors={['#E8751A', '#D4600A']} style={s.activateGradient}>
-                    <MaterialCommunityIcons name="bank-transfer" size={22} color="#FFF" />
-                    <Text style={s.activateBtnText}>UPI పేమెంట్ చేయండి</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-
-                {/* Step 2: Enter transaction ID */}
-                <View style={s.txnBox}>
-                  <Text style={s.txnLabel}>పేమెంట్ తర్వాత UPI Transaction ID నమోదు చేయండి:</Text>
-                  <TextInput
-                    style={s.txnInput}
-                    placeholder="UPI Ref / Transaction ID"
-                    placeholderTextColor="#999"
-                    value={txnId}
-                    onChangeText={(t) => { setTxnId(t); setTxnError(''); }}
-                    autoCapitalize="characters"
-                    maxLength={30}
-                  />
-                  {txnError ? <Text style={s.txnError}>{txnError}</Text> : null}
-                  <TouchableOpacity
-                    style={[s.activateBtn, !txnId.trim() && { opacity: 0.5 }]}
-                    onPress={handleVerifyAndActivate}
-                    activeOpacity={0.8}
-                    disabled={!txnId.trim()}
-                  >
+                {/* Single pay button — opens UPI, then auto-activates */}
+                {verifying ? (
+                  <View style={s.verifyingBox}>
+                    <ActivityIndicator size="large" color={Colors.tulasiGreen} />
+                    <Text style={s.verifyingText}>పేమెంట్ ధృవీకరిస్తోంది...</Text>
+                    <Text style={s.verifyingSubtext}>దయచేసి వేచి ఉండండి</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity style={s.activateBtn} onPress={handlePay} activeOpacity={0.8}>
                     <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
                       <MaterialCommunityIcons name="check-circle" size={22} color="#FFF" />
-                      <Text style={s.activateBtnText}>Premium ఆక్టివేట్ చేయండి</Text>
+                      <Text style={s.activateBtnText}>₹{selectedPlan?.price} చెల్లించి Premium పొందండి</Text>
                     </LinearGradient>
                   </TouchableOpacity>
-                </View>
+                )}
                 <Text style={s.activateNote}>
-                  UPI Transaction ID మీ పేమెంట్ యాప్‌లో కనిపిస్తుంది (Google Pay → Activity → Transaction Details)
+                  UPI యాప్ ద్వారా సురక్షిత చెల్లింపు. Google Pay, PhonePe, Paytm అన్నీ పని చేస్తాయి.
                 </Text>
               </View>
             )}
@@ -546,10 +528,9 @@ const s = StyleSheet.create({
   activateGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16 },
   activateBtnText: { fontSize: 15, fontWeight: '800', color: '#FFF', marginLeft: 8 },
   activateNote: { fontSize: 11, color: Colors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 16 },
-  txnBox: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.08)' },
-  txnLabel: { fontSize: 13, color: Colors.darkBrown, fontWeight: '600', marginBottom: 8, textAlign: 'center' },
-  txnInput: { borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, fontWeight: '700', letterSpacing: 1, textAlign: 'center', backgroundColor: '#f9f9f9', marginBottom: 12 },
-  txnError: { fontSize: 12, color: Colors.kumkum, textAlign: 'center', marginBottom: 8, fontWeight: '600' },
+  verifyingBox: { alignItems: 'center', paddingVertical: 24, gap: 10 },
+  verifyingText: { fontSize: 16, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 },
+  verifyingSubtext: { fontSize: 12, color: Colors.textMuted },
 
   closeBtn: { alignItems: 'center', paddingVertical: 16, marginBottom: 20 },
   closeBtnText: { fontSize: 14, color: Colors.textMuted, fontWeight: '600' },
