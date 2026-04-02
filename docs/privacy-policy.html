@@ -48,7 +48,8 @@
 <p>If you use the Horoscope (Rashi Phalam) feature, you may enter birth details such as date, time, and place of birth. This data is stored <strong>only on your device</strong> using AsyncStorage/localStorage and is <strong>never sent to our servers</strong>. When generating a Vedic birth chart, API calls are made to third-party astrology services (VedAstro.org / FreeAstrologyAPI). These API calls transmit only geographic coordinates and time data — <strong>no personal names or identifying information</strong> is sent.</p>
 
 <h3>1.6 Payment Data</h3>
-<p>Premium subscriptions are purchased via UPI (Unified Payments Interface). UPI payments are processed entirely by third-party payment apps such as Google Pay, PhonePe, Paytm, or BHIM. We do <strong>not</strong> store, collect, or have access to your payment details, bank account numbers, UPI IDs, or transaction records. Only the premium activation status (active/inactive and expiry date) is stored locally on your device.</p>
+<p>Premium subscriptions are purchased via UPI (Unified Payments Interface). UPI payments are processed entirely by third-party payment apps such as Google Pay, PhonePe, Paytm, or BHIM. We do <strong>not</strong> store, collect, or have access to your payment details, bank account numbers, or UPI IDs.</p>
+<p>When you activate a premium plan or free trial, a <strong>non-personal transaction record</strong> is stored in our secure cloud database (Google Firebase Firestore). This record contains: plan type, amount, duration, device platform (Android/iOS/web), an anonymous device identifier (randomly generated, not linked to your identity), and timestamp. <strong>No personal information</strong> (name, phone number, UPI ID, email) is included in this record. This data is used solely for internal business analytics and is not shared with any third party.</p>
 
 <h3>1.7 Notification Data</h3>
 <p>If you enable notifications (festival reminders, Ekadashi alerts, etc.), your notification preferences are stored <strong>locally on your device</strong> using AsyncStorage/localStorage. We do not transmit notification preferences to any server. Push notification tokens, if generated, are used only for delivering notifications through Expo's notification service and are not linked to any personal information.</p>
@@ -57,7 +58,7 @@
 <ul>
   <li>We do <strong>not</strong> collect your name, email, phone number, or any personal identifiers</li>
   <li>Location coordinates are processed locally on your device for panchangam calculations (sunrise/sunset). City name is detected via OpenStreetMap's Nominatim service. We do not store or transmit your GPS data to our servers.</li>
-  <li>We do <strong>not</strong> collect financial information or payment data</li>
+  <li>We do <strong>not</strong> collect financial information such as bank details, UPI IDs, or card numbers. Only anonymous transaction records (amount, plan, timestamp) are stored for business analytics</li>
   <li>We do <strong>not</strong> use cookies or web tracking technologies</li>
   <li>We do <strong>not</strong> sell, share, or transmit any data to third parties</li>
   <li>We do <strong>not</strong> create user profiles or track users across apps</li>
