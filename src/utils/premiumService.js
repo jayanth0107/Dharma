@@ -252,11 +252,21 @@ export async function startTrial() {
 }
 
 /**
- * Activate premium (called after purchase/donation confirmation)
- * @param {string} source - 'purchase', 'donation', 'promo', 'dev'
+ * Activate premium after payment verification.
+ * Requires a UPI transaction reference ID for audit trail.
+ * Dev/promo activations bypass transaction ID check.
+ *
+ * @param {string} source - 'purchase', 'horoscope', 'promo', 'dev'
  * @param {number} durationDays - 0 for lifetime, or number of days
+ * @param {string} transactionId - UPI transaction reference (required for purchase/horoscope)
  */
-export async function activatePremium(source = 'purchase', durationDays = 365) {
+export async function activatePremium(source = 'purchase', durationDays = 365, transactionId = '') {
+  // Require transaction ID for real purchases (not dev/promo)
+  const requiresTxn = !['dev', 'promo', 'trial'].includes(source);
+  if (requiresTxn && (!transactionId || transactionId.trim().length < 6)) {
+    return { success: false, error: 'UPI Transaction ID అవసరం (కనీసం 6 అక్షరాలు)' };
+  }
+
   const state = await loadState();
   const now = Date.now();
 
@@ -266,6 +276,17 @@ export async function activatePremium(source = 'purchase', durationDays = 365) {
   state.expiresAt = durationDays > 0
     ? now + durationDays * 24 * 60 * 60 * 1000
     : null; // null = lifetime
+
+  // Store payment record for audit trail
+  if (!state.payments) state.payments = [];
+  state.payments.push({
+    source,
+    transactionId: transactionId.trim(),
+    amount: source === 'trial' ? 0 : null,
+    days: durationDays,
+    timestamp: now,
+    date: new Date(now).toISOString(),
+  });
 
   await saveState();
 
