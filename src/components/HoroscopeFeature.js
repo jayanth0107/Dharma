@@ -602,10 +602,16 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     text += `━━━━━━━━━━━━━━━━\n\n`;
 
                     // Birth details
+                    const dateStr = h.birthDate instanceof Date
+                      ? `${h.birthDate.getDate()}-${h.birthDate.getMonth() + 1}-${h.birthDate.getFullYear()}`
+                      : (h.birthDate || '');
+                    const placeStr = typeof h.birthPlace === 'object'
+                      ? (h.birthPlace?.name || h.birthPlace?.area || '')
+                      : (h.birthPlace || '');
                     text += `📅 జన్మ వివరాలు\n`;
-                    text += `తేదీ: ${h.birthDate || ''}\n`;
+                    text += `తేదీ: ${dateStr}\n`;
                     text += `సమయం: ${h.birthTime || ''}\n`;
-                    text += `స్థలం: ${h.birthPlace || ''}\n\n`;
+                    text += `స్థలం: ${placeStr}\n\n`;
 
                     // Core astro data
                     text += `🌙 రాశి: ${h.rashi?.telugu || ''} (${h.rashi?.english || ''})\n`;
