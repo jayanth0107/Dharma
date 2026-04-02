@@ -52,7 +52,6 @@
     "description": "Daily Telugu Panchangam (తెలుగు పంచాంగం) with astronomically accurate Tithi, Nakshatram, Yogam, Karanam, Rahu Kalam, Sunrise/Sunset times. Includes 2026 festival calendar, Ekadashi tracker, Muhurtam finder, gold & silver prices, Bhagavad Gita slokas, kids stories, and daily deity darshan. Based on Drik Ganita astronomical calculations with Lahiri Ayanamsa.",
     "primaryColor": "#E8751A",
     "owner": "jayanth0107",
-    "privacy": "public",
     "platforms": [
       "ios",
       "android",
