@@ -90,33 +90,37 @@ async function fetchFromGoldAPICom() {
   }
 }
 
-// --- API 2: MetalpriceAPI (demo key — limited but works) ---
-async function fetchFromMetalsAPI() {
+// --- API 2: Gold-API.com alternate endpoint (gold price in USD, convert to INR) ---
+async function fetchFromGoldAPIAlternate() {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
-    // WARNING: Demo key — get free-tier key from metalpriceapi.com for production
-    const response = await fetch(
-      'https://api.metalpriceapi.com/v1/latest?api_key=demo&base=INR&currencies=XAU,XAG',
-      { headers: { 'Accept': 'application/json' }, signal: controller.signal }
-    );
+    // Fetch gold in USD and USD/INR rate separately, then calculate
+    const [goldRes, rateRes] = await Promise.all([
+      fetch('https://api.gold-api.com/price/XAU/USD', { signal: controller.signal }),
+      fetch('https://api.frankfurter.app/latest?from=USD&to=INR', { signal: controller.signal }),
+    ]);
     clearTimeout(timeout);
 
-    if (!response.ok) throw new Error('HTTP error');
-    const data = await response.json();
-    if (!data.success || !data.rates) throw new Error('Invalid response');
+    if (!goldRes.ok || !rateRes.ok) throw new Error('HTTP error');
+    const goldData = await goldRes.json();
+    const rateData = await rateRes.json();
 
-    const goldPerOzINR = 1 / data.rates.INRXAU;
-    const silverPerOzINR = 1 / data.rates.INRXAG;
+    if (!goldData.price || !rateData.rates?.INR) throw new Error('Missing data');
+
+    const goldPerOzINR = goldData.price * rateData.rates.INR;
     const gold = convertToIndianDomestic(goldPerOzINR);
+
+    // Estimate silver from gold/silver ratio (~80:1)
+    const silverPerOzINR = goldPerOzINR / 80;
     const silverIndian = Math.round((silverPerOzINR / TROY_OZ_TO_GRAM) * INDIA_PREMIUM);
 
     if (!isReasonablePrice(gold.perGram24k)) throw new Error('Sanity check failed');
 
-    return buildPriceResult(gold.perGram24k, gold.perGram22k, silverIndian, 'MetalpriceAPI');
+    return buildPriceResult(gold.perGram24k, gold.perGram22k, silverIndian, 'Gold-API (USD→INR)');
   } catch (error) {
-    console.warn('MetalpriceAPI fetch failed:', error?.message || error);
+    if (__DEV__) console.warn('Gold-API alternate fetch failed:', error?.message || error);
     return null;
   }
 }
@@ -181,7 +185,7 @@ export async function fetchGoldSilverPrices() {
 
   // Try APIs in order
   let prices = await fetchFromGoldAPICom();
-  if (!prices) prices = await fetchFromMetalsAPI();
+  if (!prices) prices = await fetchFromGoldAPIAlternate();
   if (!prices) prices = await fetchFromFrankfurter();
 
   // If all APIs failed, try persistent cache
