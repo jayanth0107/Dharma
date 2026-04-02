@@ -180,37 +180,46 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     trackEvent('premium_plan_select', { plan: plan.id });
   };
 
-  const [verifying, setVerifying] = useState(false);
+  const [paymentStep, setPaymentStep] = useState('idle'); // idle | paying | confirm
 
   const handlePay = async () => {
     if (!selectedPlan) return;
     trackEvent('premium_pay_tap', { plan: selectedPlan.id, amount: selectedPlan.price });
 
-    // Open UPI app with pre-filled payment
-    if (Platform.OS !== 'web') {
-      await openUpiPayment(selectedPlan.price);
+    if (Platform.OS === 'web') {
+      // Web: no UPI app — show QR/UPI ID, then ask for confirmation
+      setPaymentStep('confirm');
+      return;
     }
 
-    // Show verification animation, then activate
-    setVerifying(true);
-    setTimeout(async () => {
-      await activatePremium('premium_upi', selectedPlan.days, {
-        amount: selectedPlan.price,
-        planId: selectedPlan.id,
-        planName: selectedPlan.telugu,
-        screen: 'PremiumBanner',
-        platform: Platform.OS,
-      });
-      setVerifying(false);
-      trackEvent('premium_activated', { plan: selectedPlan.id });
+    // Mobile: open UPI app, then show confirm step when user returns
+    setPaymentStep('paying');
+    await openUpiPayment(selectedPlan.price);
+    // User returns from UPI app — show confirm button
+    setPaymentStep('confirm');
+  };
 
-      if (Platform.OS === 'web') alert(`🎉 Premium Activated! ${selectedPlan.english} plan.`);
-      else Alert.alert('🎉 Premium సక్రియం!', `${selectedPlan.telugu} ప్లాన్ విజయవంతంగా సక్రియం అయింది!`);
+  const handleConfirmPayment = async () => {
+    if (!selectedPlan) return;
+    setPaymentStep('paying');
 
-      onActivated?.();
-      setSelectedPlan(null);
-      onClose();
-    }, 2500);
+    await activatePremium('premium_upi', selectedPlan.days, {
+      amount: selectedPlan.price,
+      planId: selectedPlan.id,
+      planName: selectedPlan.telugu,
+      screen: 'PremiumBanner',
+      platform: Platform.OS,
+    });
+
+    trackEvent('premium_activated', { plan: selectedPlan.id });
+    setPaymentStep('idle');
+
+    if (Platform.OS === 'web') alert(`🎉 Premium Activated! ${selectedPlan.english} plan.`);
+    else Alert.alert('🎉 Premium సక్రియం!', `${selectedPlan.telugu} ప్లాన్ విజయవంతంగా సక్రియం అయింది!`);
+
+    onActivated?.();
+    setSelectedPlan(null);
+    onClose();
   };
 
   const handleBack = () => setSelectedPlan(null);
@@ -370,24 +379,50 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                   </View>
                 </View>
 
-                {/* Single pay button — opens UPI, then auto-activates */}
-                {verifying ? (
+                {/* Step 1: Pay button — opens UPI app (mobile) or shows QR (web) */}
+                {paymentStep === 'idle' && (
+                  <>
+                    <TouchableOpacity style={s.activateBtn} onPress={handlePay} activeOpacity={0.8}>
+                      <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
+                        <MaterialCommunityIcons name="bank-transfer" size={22} color="#FFF" />
+                        <Text style={s.activateBtnText}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                    <Text style={s.activateNote}>
+                      UPI యాప్ ద్వారా సురక్షిత చెల్లింపు. Google Pay, PhonePe, Paytm అన్నీ పని చేస్తాయి.
+                    </Text>
+                  </>
+                )}
+
+                {/* Loading state */}
+                {paymentStep === 'paying' && (
                   <View style={s.verifyingBox}>
                     <ActivityIndicator size="large" color={Colors.tulasiGreen} />
-                    <Text style={s.verifyingText}>పేమెంట్ ధృవీకరిస్తోంది...</Text>
-                    <Text style={s.verifyingSubtext}>దయచేసి వేచి ఉండండి</Text>
+                    <Text style={s.verifyingText}>ప్రాసెస్ అవుతోంది...</Text>
                   </View>
-                ) : (
-                  <TouchableOpacity style={s.activateBtn} onPress={handlePay} activeOpacity={0.8}>
-                    <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
-                      <MaterialCommunityIcons name="check-circle" size={22} color="#FFF" />
-                      <Text style={s.activateBtnText}>₹{selectedPlan?.price} చెల్లించి Premium పొందండి</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
                 )}
-                <Text style={s.activateNote}>
-                  UPI యాప్ ద్వారా సురక్షిత చెల్లింపు. Google Pay, PhonePe, Paytm అన్నీ పని చేస్తాయి.
-                </Text>
+
+                {/* Step 2: Confirm payment was made */}
+                {paymentStep === 'confirm' && (
+                  <>
+                    <View style={s.confirmBox}>
+                      <MaterialCommunityIcons name="check-circle-outline" size={32} color={Colors.tulasiGreen} />
+                      <Text style={s.confirmTitle}>పేమెంట్ పూర్తయిందా?</Text>
+                      <Text style={s.confirmSubtext}>
+                        UPI యాప్‌లో ₹{selectedPlan?.price} పంపిన తర్వాత క్రింది బటన్ నొక్కండి
+                      </Text>
+                    </View>
+                    <TouchableOpacity style={s.activateBtn} onPress={handleConfirmPayment} activeOpacity={0.8}>
+                      <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
+                        <MaterialCommunityIcons name="check-circle" size={22} color="#FFF" />
+                        <Text style={s.activateBtnText}>అవును, పేమెంట్ చేశాను ✓</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setPaymentStep('idle')} style={{ marginTop: 10, alignItems: 'center' }}>
+                      <Text style={{ fontSize: 13, color: Colors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
             )}
 
@@ -531,7 +566,9 @@ const s = StyleSheet.create({
   activateNote: { fontSize: 11, color: Colors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 16 },
   verifyingBox: { alignItems: 'center', paddingVertical: 24, gap: 10 },
   verifyingText: { fontSize: 16, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 },
-  verifyingSubtext: { fontSize: 12, color: Colors.textMuted },
+  confirmBox: { alignItems: 'center', paddingVertical: 16, gap: 6, marginBottom: 12, backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 14, padding: 16 },
+  confirmTitle: { fontSize: 18, fontWeight: '800', color: Colors.tulasiGreen },
+  confirmSubtext: { fontSize: 13, color: Colors.textMuted, textAlign: 'center', lineHeight: 18 },
 
   closeBtn: { alignItems: 'center', paddingVertical: 16, marginBottom: 20 },
   closeBtnText: { fontSize: 14, color: Colors.textMuted, fontWeight: '600' },
