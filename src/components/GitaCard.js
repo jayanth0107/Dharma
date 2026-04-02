@@ -4,14 +4,15 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Modal, FlatList,
+  View, Text, StyleSheet, TouchableOpacity, Modal, FlatList, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { getTodayGitaSloka, GITA_SLOKAS } from '../data/bhagavadGita';
 import { trackEvent } from '../utils/analytics';
-import { universalShare, buildGitaShareText } from '../utils/shareService';
+import { buildGitaShareText } from '../utils/shareService';
+import { SectionShareRow } from './SectionShareRow';
 
 /**
  * GitaDailyCard — Shows today's Gita sloka
@@ -23,13 +24,6 @@ export function GitaDailyCard({ date, isPremium = false }) {
   const sloka = getTodayGitaSloka(date);
 
   if (!sloka) return null;
-
-  const handleShare = async () => {
-    try {
-      await universalShare(buildGitaShareText(sloka), 'భగవద్గీత');
-      trackEvent('gita_share', { chapter: sloka.chapter, verse: sloka.verse });
-    } catch { /* cancelled */ }
-  };
 
   return (
     <View style={s.container}>
@@ -88,31 +82,41 @@ export function GitaDailyCard({ date, isPremium = false }) {
         </View>
       )}
 
-      {/* Actions */}
+      {/* Library button — always visible */}
       <View style={s.actions}>
-        <TouchableOpacity style={s.shareBtn} onPress={handleShare}>
-          <Ionicons name="share-social-outline" size={16} color={Colors.saffron} />
-          <Text style={s.shareBtnText}>పంచుకోండి</Text>
-        </TouchableOpacity>
-
-        {isPremium ? (
-          <TouchableOpacity
-            style={s.libraryBtn}
-            onPress={() => {
+        <TouchableOpacity
+          style={s.libraryBtn}
+          onPress={() => {
+            if (isPremium) {
               setShowLibrary(true);
               trackEvent('gita_library_open');
-            }}
-          >
-            <MaterialCommunityIcons name="bookshelf" size={16} color="#4A1A6B" />
-            <Text style={s.libraryBtnText}>శ్లోక గ్రంథాలయం</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={s.premiumHint}>
-            <MaterialCommunityIcons name="crown" size={14} color={Colors.gold} />
-            <Text style={s.premiumHintText}>30 శ్లోకాలు — Premium</Text>
-          </View>
-        )}
+            } else {
+              alert('👑 30 శ్లోకాలు చూడాలంటే Premium అవసరం.\n\nసెట్టింగ్స్ → Premium ఆన్ చేయండి.');
+            }
+          }}
+        >
+          <MaterialCommunityIcons name="bookshelf" size={18} color="#4A1A6B" />
+          <Text style={s.libraryBtnText}>30 శ్లోకాలు చూడండి</Text>
+          {!isPremium && <MaterialCommunityIcons name="crown" size={14} color={Colors.gold} style={{ marginLeft: 4 }} />}
+        </TouchableOpacity>
       </View>
+
+      {/* Share */}
+      <SectionShareRow section="gita" buildText={() => {
+        if (isPremium) {
+          // Premium: share all 30 slokas
+          return `🙏 భగవద్గీత — 30 శ్లోకాలు\n\n` +
+            GITA_SLOKAS.map((sl, i) =>
+              `${i + 1}. అధ్యాయం ${sl.chapter}, శ్లోకం ${sl.verse}\n` +
+              `${sl.sanskrit}\n` +
+              `తెలుగు: ${sl.telugu}\n` +
+              `English: ${sl.english}\n`
+            ).join('\n━━━━━━━━━━━━\n\n') +
+            `\n━━━━━━━━━━━━━━━━\nధర్మ దినచర్య App — Premium\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+        }
+        // Free: share today's sloka only
+        return buildGitaShareText(sloka);
+      }} />
 
       {/* Library Modal (Premium) */}
       {showLibrary && (
@@ -197,6 +201,41 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
             contentContainerStyle={{ paddingBottom: 20 }}
           />
 
+          {/* PDF button */}
+          <View style={s.modalActions}>
+            <TouchableOpacity style={s.modalPdfBtn} onPress={() => {
+              const html = buildAll30Html();
+              if (Platform.OS === 'web') {
+                const win = window.open('', '_blank');
+                if (win) { win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500); }
+              } else {
+                try {
+                  const { shareAsPdf } = require('../utils/shareService');
+                  shareAsPdf(html, 'భగవద్గీత 30 శ్లోకాలు');
+                } catch {}
+              }
+            }}>
+              <MaterialCommunityIcons name="file-pdf-box" size={18} color="#C41E3A" />
+              <Text style={s.modalPdfText}>30 శ్లోకాలు PDF</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Share all 30 slokas with preview */}
+          <SectionShareRow
+            section="gita_library"
+            insideModal
+            buildText={() => {
+              return `🙏 భగవద్గీత — 30 శ్లోకాలు\n\n` +
+                GITA_SLOKAS.map((sl, i) =>
+                  `${i + 1}. అధ్యాయం ${sl.chapter}, శ్లోకం ${sl.verse}\n` +
+                  `${sl.sanskrit}\n` +
+                  `తెలుగు: ${sl.telugu}\n` +
+                  `English: ${sl.english}\n`
+                ).join('\n━━━━━━━━━━━━━━━━\n\n') +
+                `\n━━━━━━━━━━━━━━━━\nధర్మ దినచర్య App — Premium Feature\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+            }}
+          />
+
           <TouchableOpacity style={s.modalCloseBtn} onPress={onClose}>
             <Text style={s.modalCloseBtnText}>మూసివేయండి</Text>
           </TouchableOpacity>
@@ -204,6 +243,36 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
       </View>
     </Modal>
   );
+}
+
+function buildAll30Html() {
+  const rows = GITA_SLOKAS.map((sl, i) => `
+    <div style="margin:16px 0;padding:16px;background:#FAFAF5;border-radius:10px;border-left:3px solid #4A1A6B;page-break-inside:avoid">
+      <div style="font-size:12px;color:#4A1A6B;font-weight:700;margin-bottom:6px">
+        ${i + 1}. అధ్యాయం ${sl.chapter}, శ్లోకం ${sl.verse} — ${sl.theme}
+      </div>
+      <div style="font-size:14px;color:#2C1810;line-height:1.8;white-space:pre-wrap">${sl.sanskrit}</div>
+      <div style="font-size:13px;color:#4A3A2A;margin-top:8px;line-height:1.6"><strong>తెలుగు:</strong> ${sl.telugu}</div>
+      <div style="font-size:12px;color:#6B5B4B;margin-top:4px;line-height:1.5"><strong>English:</strong> ${sl.english}</div>
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+    <style>
+      @page { margin: 20mm; }
+      body { font-family: sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #2C1810; }
+      h1 { color: #4A1A6B; text-align: center; font-size: 24px; border-bottom: 2px solid #4A1A6B; padding-bottom: 10px; }
+      .sub { text-align: center; color: #6B5B4B; font-size: 14px; margin-bottom: 20px; }
+      .footer { text-align: center; color: #aaa; font-size: 11px; margin-top: 30px; border-top: 1px solid #eee; padding-top: 12px; }
+      .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg); font-size: 50px; color: rgba(74,26,107,0.03); font-weight: 900; pointer-events: none; z-index: -1; }
+    </style>
+  </head><body>
+    <div class="watermark">ధర్మ దినచర్య</div>
+    <h1>🙏 భగవద్గీత — 30 శ్లోకాలు</h1>
+    <p class="sub">Bhagavad Gita — 30 Selected Verses with Telugu & English</p>
+    ${rows}
+    <div class="footer">Generated by ధర్మ దినచర్య (Dharma Daily) App — Premium Feature<br>🙏 సర్వే జనాః సుఖినో భవంతు</div>
+  </body></html>`;
 }
 
 const s = StyleSheet.create({
@@ -268,24 +337,13 @@ const s = StyleSheet.create({
 
   actions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.05)',
   },
-  shareBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.saffron + '30',
-  },
-  shareBtnText: { fontSize: 12, color: Colors.saffron, fontWeight: '600', marginLeft: 4 },
-
   libraryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -365,4 +423,20 @@ const s = StyleSheet.create({
     backgroundColor: '#4A1A6B', borderRadius: 12,
   },
   modalCloseBtnText: { fontSize: 15, fontWeight: '700', color: '#F5D77A' },
+  modalActions: {
+    flexDirection: 'row', justifyContent: 'center', gap: 12,
+    paddingHorizontal: 20, paddingTop: 10,
+  },
+  modalPdfBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingVertical: 10, paddingHorizontal: 18, borderRadius: 14,
+    backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#C41E3A30',
+  },
+  modalPdfText: { fontSize: 13, fontWeight: '700', color: '#C41E3A' },
+  modalShareBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingVertical: 10, paddingHorizontal: 18, borderRadius: 14,
+    backgroundColor: Colors.saffron,
+  },
+  modalShareText: { fontSize: 13, fontWeight: '700', color: '#fff' },
 });

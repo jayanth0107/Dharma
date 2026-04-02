@@ -1,7 +1,7 @@
 // Settings modal — notification preferences, app info
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Switch, Platform,
+  View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Switch, Platform, TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -9,14 +9,58 @@ import { Colors } from '../theme/colors';
 import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '../utils/notificationService';
 import { setAdConfig } from './AdBanner';
 
+// Admin verification (obfuscated)
+const _k = 42;
+const _c = [67, 102, 120, 79, 79, 94, 66, 75, 70, 106, 27, 30, 25];
+function verifyAdmin(input) {
+  if (!input || input.length !== _c.length) return false;
+  for (let i = 0; i < _c.length; i++) {
+    if ((input.charCodeAt(i) ^ _k) !== _c[i]) return false;
+  }
+  return true;
+}
+
 export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) {
   const [settings, setSettings] = useState(null);
+  const [tapCount, setTapCount] = useState(0);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminUnlocked, setAdminUnlocked] = useState(__DEV__ ? true : false);
+  const [adminInput, setAdminInput] = useState('');
+  const [adminError, setAdminError] = useState(false);
 
   useEffect(() => {
     if (visible) {
       loadNotifSettings().then(setSettings);
+    } else {
+      // Reset admin state on close
+      setTapCount(0);
+      setShowAdminLogin(false);
+      setAdminUnlocked(false);
+      setAdminInput('');
+      setAdminError(false);
     }
   }, [visible]);
+
+  const handleVersionTap = () => {
+    const next = tapCount + 1;
+    setTapCount(next);
+    if (next >= 7) {
+      setShowAdminLogin(true);
+      setTapCount(0);
+    }
+  };
+
+  const handleAdminLogin = () => {
+    if (verifyAdmin(adminInput)) {
+      setAdminUnlocked(true);
+      setShowAdminLogin(false);
+      setAdminError(false);
+      setAdminInput('');
+    } else {
+      setAdminError(true);
+      setAdminInput('');
+    }
+  };
 
   const updateSetting = async (key, value) => {
     const updated = { ...settings, [key]: value };
@@ -94,41 +138,64 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
               </>
             )}
 
-            {/* App Info */}
-            {/* Ad Control */}
-            <Text style={[s.sectionTitle, { marginTop: 20 }]}>📢 ప్రకటనలు (Ads)</Text>
-            <SettingRow
-              icon="advertisements" label="ప్రకటనలు చూపించు"
-              sublabel={isPremium ? 'Premium — ప్రకటనలు ఆఫ్' : 'ఉచిత వినియోగదారులకు ప్రకటనలు చూపబడతాయి'}
-              value={!isPremium && (settings?.adsEnabled !== false)}
-              onChange={(v) => {
-                updateSetting('adsEnabled', v);
-                setAdConfig({ enabled: v });
-              }}
-            />
+            {/* Admin-only controls — hidden behind version tap + passcode */}
+            {adminUnlocked && (
+              <>
+                <Text style={[s.sectionTitle, { marginTop: 20 }]}>🔐 Admin Controls</Text>
+                <SettingRow
+                  icon="advertisements" label="ప్రకటనలు చూపించు"
+                  sublabel={isPremium ? 'Premium — ప్రకటనలు ఆఫ్' : 'ఉచిత వినియోగదారులకు ప్రకటనలు చూపబడతాయి'}
+                  value={!isPremium && (settings?.adsEnabled !== false)}
+                  onChange={(v) => {
+                    updateSetting('adsEnabled', v);
+                    setAdConfig({ enabled: v });
+                  }}
+                />
+                <View style={s.settingRow}>
+                  <MaterialCommunityIcons name="crown" size={22} color="#FFD700" style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.settingLabel}>Premium {isPremium ? 'సక్రియం ✅' : 'నిష్క్రియం'}</Text>
+                    <Text style={s.settingSublabel}>{isPremium ? 'అన్ని ఫీచర్లు అన్‌లాక్ + ప్రకటనలు లేవు' : 'ముహూర్తం ఫైండర్, జాతకం, గీత లైబ్రరీ లాక్'}</Text>
+                  </View>
+                  <Switch
+                    value={isPremium}
+                    onValueChange={onTogglePremium}
+                    trackColor={{ false: '#ddd', true: '#FFD70060' }}
+                    thumbColor={isPremium ? '#FFD700' : '#ccc'}
+                  />
+                </View>
+              </>
+            )}
 
-            {/* Dev Premium Toggle */}
-            <Text style={[s.sectionTitle, { marginTop: 20 }]}>👑 Premium</Text>
-            <View style={s.settingRow}>
-              <MaterialCommunityIcons name="crown" size={22} color="#FFD700" style={{ marginRight: 12 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={s.settingLabel}>Premium {isPremium ? 'సక్రియం ✅' : 'నిష్క్రియం'}</Text>
-                <Text style={s.settingSublabel}>{isPremium ? 'అన్ని ఫీచర్లు అన్‌లాక్ + ప్రకటనలు లేవు' : 'ముహూర్తం ఫైండర్, జాతకం, గీత లైబ్రరీ లాక్'}</Text>
+            {/* Admin login prompt */}
+            {showAdminLogin && !adminUnlocked && (
+              <View style={s.adminLogin}>
+                <Text style={s.adminTitle}>🔐 Admin Login</Text>
+                <TextInput
+                  style={s.adminInput}
+                  placeholder="Passcode"
+                  placeholderTextColor="#999"
+                  secureTextEntry
+                  value={adminInput}
+                  onChangeText={(t) => { setAdminInput(t); setAdminError(false); }}
+                  onSubmitEditing={handleAdminLogin}
+                  autoFocus
+                />
+                {adminError && <Text style={s.adminError}>Incorrect passcode</Text>}
+                <TouchableOpacity style={s.adminBtn} onPress={handleAdminLogin}>
+                  <Text style={s.adminBtnText}>Login</Text>
+                </TouchableOpacity>
               </View>
-              <Switch
-                value={isPremium}
-                onValueChange={onTogglePremium}
-                trackColor={{ false: '#ddd', true: '#FFD70060' }}
-                thumbColor={isPremium ? '#FFD700' : '#ccc'}
-              />
-            </View>
+            )}
 
             <Text style={[s.sectionTitle, { marginTop: 20 }]}>📱 యాప్ సమాచారం</Text>
 
-            <View style={s.infoRow}>
-              <Text style={s.infoLabel}>వెర్షన్</Text>
-              <Text style={s.infoValue}>1.1.0</Text>
-            </View>
+            <TouchableOpacity onPress={handleVersionTap} activeOpacity={1}>
+              <View style={s.infoRow}>
+                <Text style={s.infoLabel}>వెర్షన్</Text>
+                <Text style={s.infoValue}>1.1.0</Text>
+              </View>
+            </TouchableOpacity>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>డెవలపర్</Text>
               <Text style={s.infoValue}>DharmaDaily Team</Text>
@@ -240,6 +307,26 @@ const s = StyleSheet.create({
     fontSize: 12, color: Colors.textMuted, fontStyle: 'italic',
     textAlign: 'center', marginTop: 16, marginBottom: 8, lineHeight: 18,
   },
+
+  adminLogin: {
+    marginTop: 16, padding: 16, backgroundColor: '#fff',
+    borderRadius: 14, borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  adminTitle: {
+    fontSize: 15, fontWeight: '800', color: Colors.darkBrown, marginBottom: 12,
+  },
+  adminInput: {
+    backgroundColor: '#F5F0E8', borderRadius: 10, padding: 12,
+    fontSize: 15, color: Colors.darkBrown, borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)',
+  },
+  adminError: {
+    fontSize: 12, color: '#C41E3A', fontWeight: '600', marginTop: 6,
+  },
+  adminBtn: {
+    backgroundColor: Colors.saffron, borderRadius: 10, paddingVertical: 10,
+    alignItems: 'center', marginTop: 10,
+  },
+  adminBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   closeBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20,

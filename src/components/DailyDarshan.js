@@ -117,7 +117,7 @@ export function DailyDarshanCard({ dayOfWeek }) {
               <Image
                 source={typeof deityImageUri === 'string' ? { uri: deityImageUri } : deityImageUri}
                 style={styles.deityImage}
-                resizeMode="contain"
+                resizeMode="cover"
                 onError={() => setImageFailed(true)}
               />
               <LinearGradient
@@ -160,10 +160,8 @@ export function DailyDarshanCard({ dayOfWeek }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginTop: 6,
+    marginTop: 0,
     marginBottom: 14,
-    borderRadius: 20,
     overflow: 'hidden',
     elevation: 2,
     shadowColor: '#B8860B',
@@ -173,10 +171,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#FFFDF5',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: 8,
     alignItems: 'center',
-    borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: 'rgba(212,160,23,0.25)',
   },
   greetingRow: {
@@ -184,7 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 12,
+    marginBottom: 4,
   },
   greeting: {
     fontSize: 18,
@@ -199,15 +198,15 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    minHeight: 280,
-    borderRadius: 16,
+    minHeight: 320,
+    borderRadius: 0,
     overflow: 'hidden',
     marginBottom: 12,
     backgroundColor: '#FFF8E7',
   },
   deityImage: {
     width: '100%',
-    height: 300,
+    height: 360,
   },
   imageOverlay: {
     position: 'absolute',

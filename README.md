@@ -95,7 +95,7 @@ The app is a single scrollable page with these sections (top to bottom):
 - **Daily Sloka** — Subhashitam/wisdom verse
 - **Bhagavad Gita** — Daily sloka (1 per day, rotates by date)
 - **Analytics Dashboard** — Track your app usage (Menu → Analytics)
-- **Zoom Controls** — Floating font size adjuster (90%-140%)
+- **Zoom Controls** — Font size adjuster below settings icon in bottom bar (90%-140%)
 - **Error Recovery** — Telugu/English crash recovery screen
 - **WhatsApp Share** — Share today's panchangam via WhatsApp with one tap
 - **Share** — Share deity images, Gita slokas, panchangam data via any app
@@ -203,6 +203,7 @@ Find auspicious days for 6 event types:
 - **Horoscope limits:** Enforced per plan (5/20/200 generations). Counter stored locally
 - **Trust-based activation:** Premium status is stored locally. Abuse detection may be added in future versions
 - **No account required:** The app does not require login or account creation
+- **Admin controls:** Premium toggle and ad configuration are protected behind a hidden passcode-authenticated admin panel accessible only to the developer. Regular users cannot see or access these controls
 
 ### WhatsApp & Share Features (`src/utils/shareService.js`)
 
@@ -252,21 +253,20 @@ DharmaDaily/
 ├── package.json                        # Dependencies & scripts
 ├── app.json                            # Expo config (name, icons, splash)
 ├── eas.json                            # EAS Build profiles
-├── google-services.json                # Firebase Android config
+├── google-services.json                # Firebase Android config (gitignored)
 │
 ├── src/
 │   ├── components/                     # All UI components (functional, hooks)
 │   │   ├── HeaderSection.js            # Animated header: year, month, sunrise/sunset, location
-│   │   ├── DateInfoCard.js             # Compact date display card
+│   │   ├── StickyNavTabs.js            # Horizontal scrolling section navigation bar
 │   │   ├── PanchangaCard.js            # Tithi/Nakshatra/Yoga/Karana cards + Timing + Muhurtham + Sloka
-│   │   ├── QuickAccessBar.js           # 6 horizontal shortcut buttons
 │   │   ├── FestivalCard.js             # Today's festival banner + upcoming list
 │   │   ├── EkadashiCard.js             # Ekadashi banners, list, and yearly modal
 │   │   ├── GoldPriceCard.js            # Live gold/silver prices with sparkle animation
 │   │   ├── MiniCalendar.js             # Monthly calendar with festival/ekadashi dots
 │   │   ├── FilterPills.js              # Observance type filter (Ekadashi, Sankashti, etc.)
-│   │   ├── BottomTabBar.js             # Fixed bottom navigation (6 tabs + floating +)
-│   │   ├── DailyDarshan.js             # Deity of the day with image, mantra, share
+│   │   ├── BottomTabBar.js             # Fixed bottom nav (4 tabs + settings + zoom)
+│   │   ├── DailyDarshan.js             # Deity of the day with full-width image, mantra
 │   │   ├── DeityBanner.js              # Cultural divider/separator component
 │   │   ├── KidsSection.js              # Stories carousel + slokas for children
 │   │   ├── ReminderModal.js            # Create/manage/delete reminders
@@ -274,9 +274,14 @@ DharmaDaily/
 │   │   ├── AnalyticsDashboard.js       # Local analytics viewer
 │   │   ├── AdBanner.js                 # AdMob banner + interstitial (native)
 │   │   ├── AdBanner.web.js             # Web stub (no ads on web)
-│   │   ├── GitaCard.js          ★ NEW  # Bhagavad Gita daily sloka + library modal
-│   │   ├── MuhurtamFinder.js    ★ NEW  # Auspicious day finder + PDF + WhatsApp share
-│   │   └── PremiumBanner.js     ★ NEW  # Premium upsell banner + subscription modal
+│   │   ├── FadeInSection.js            # Animated fade-in wrapper for sections
+│   │   ├── FestivalConfetti.js         # Confetti animation on festival days
+│   │   ├── SectionShareRow.js          # WhatsApp + native share buttons per section
+│   │   ├── GitaCard.js                 # Bhagavad Gita daily sloka + library modal
+│   │   ├── MuhurtamFinder.js           # Auspicious day finder + PDF + WhatsApp share
+│   │   ├── HoroscopeFeature.js         # Vedic birth chart generator (premium)
+│   │   ├── PremiumBanner.js            # Premium upsell banner + subscription modal
+│   │   └── SettingsModal.js            # Settings + hidden admin panel (passcode-protected)
 │   │
 │   ├── data/                           # Static data files (2026 scope)
 │   │   ├── panchangam.js               # Tithi, Vaaram, Nakshatra, Yoga, Karana constants
@@ -284,36 +289,40 @@ DharmaDaily/
 │   │   ├── ekadashi.js                 # 24 Ekadashi dates with deity/significance
 │   │   ├── holidays.js                 # 27 public holidays (India + Telangana/AP)
 │   │   ├── observances.js              # Sankashti, Pournami, Amavasya, Pradosham dates
-│   │   └── bhagavadGita.js      ★ NEW  # 30 Gita slokas (Sanskrit/Telugu/English)
+│   │   └── bhagavadGita.js             # 30 Gita slokas (Sanskrit/Telugu/English)
 │   │
 │   ├── utils/                          # Business logic & services
 │   │   ├── panchangamCalculator.js     # Astronomical math (Lahiri Ayanamsa, positions)
 │   │   ├── goldPriceService.js         # 3-API gold/silver price fetcher with caching
 │   │   ├── analytics.js                # Local event tracking + Firebase ready
 │   │   ├── geolocation.js              # GPS + reverse geocoding + location search
-│   │   ├── ratePrompt.js               # App rating prompt logic
-│   │   ├── shareService.js      ★ NEW  # WhatsApp, PDF, native share utilities
-│   │   └── premiumService.js    ★ NEW  # Premium subscription management
+│   │   ├── shareService.js             # WhatsApp, PDF, native share utilities
+│   │   ├── premiumService.js           # Premium subscription management
+│   │   ├── horoscopeCalculator.js      # Vedic astrology calculations
+│   │   ├── horoscopeUsageTracker.js    # Horoscope generation limits per plan
+│   │   ├── notificationService.js      # Push notification scheduling
+│   │   ├── deviceCapability.js         # Animation/performance feature detection
+│   │   └── ratePrompt.js              # App rating prompt logic
 │   │
 │   ├── config/
-│   │   └── firebase.js                 # Firebase config (placeholder keys)
+│   │   └── firebase.js                 # Firebase config + Analytics
 │   │
 │   └── theme/
 │       └── colors.js                   # Sacred color palette & gradient definitions
 │
 ├── assets/
-│   ├── deities/                        # Local deity images
+│   ├── deities/                        # Local deity images (Venkateswara, Krishna)
+│   ├── upi/                            # UPI payment logos (GPay, PhonePe, Paytm, BHIM)
 │   ├── icon-512.png                    # App icon
-│   ├── feature-graphic.jpg             # Play Store feature graphic
-│   └── IMAGE-GUIDE.md                  # Image asset documentation
+│   └── feature-graphic.jpg             # Play Store feature graphic
 │
 ├── docs/
 │   ├── DharmaDaily-PlayStore-Guide.html  # Monetization & publishing schedule
 │   ├── play-store-listing.md             # Store title, description, keywords
-│   ├── privacy-policy.html              # Privacy policy for store
-│   └── terms-and-conditions.html        # Terms & conditions for store
+│   └── github-pages/                     # Privacy policy & terms (hosted)
 │
 ├── CLAUDE.md                           # AI assistant project instructions
+├── ADMIN.md                            # Admin guide (gitignored — developer only)
 └── README.md                           # This file
 ```
 

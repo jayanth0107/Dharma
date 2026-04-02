@@ -29,32 +29,40 @@ DharmaDaily (ధర్మ Daily) is a React Native (Expo) Telugu Panchangam mobi
   - `geolocation.js` — GPS detection, reverse geocoding, location search
   - `shareService.js` — centralized WhatsApp, native share, and PDF sharing utilities
   - `analytics.js` — local event tracking with Firebase Analytics support
+  - `horoscopeCalculator.js` — Vedic astrology calculations (rashi, nakshatra, navagraha)
+  - `horoscopeUsageTracker.js` — per-plan horoscope generation limits
+  - `notificationService.js` — push notification scheduling and settings
+  - `deviceCapability.js` — animation/performance feature detection
   - `ratePrompt.js` — app rating prompt logic
 
-## Component inventory (19 components)
+## Component inventory (22 active components)
 
-| Component | Lines | Purpose |
-|-----------|-------|---------|
-| `HeaderSection.js` | ~340 | Animated gradient header with Telugu year, month, sunrise/sunset, location |
-| `PanchangaCard.js` | ~340 | Tithi/Nakshatra/Yoga/Karana cards + TimingCard + MuhurthamCard + SlokaCard |
-| `FestivalCard.js` | ~140 | Today's festival banner + upcoming festival list items |
-| `EkadashiCard.js` | ~380 | Ekadashi banners, upcoming list, and full-year modal |
-| `GoldPriceCard.js` | ~320 | Live gold/silver prices with sparkle animation |
-| `DailyDarshan.js` | ~260 | Deity of the day with HD image, mantra, share |
-| `KidsSection.js` | ~270 | Stories carousel + slokas for children |
-| `MiniCalendar.js` | ~260 | Monthly calendar with festival/ekadashi dot indicators |
-| `ReminderModal.js` | ~500 | Full reminder CRUD modal |
-| `DonateSection.js` | ~470 | UPI donation card + modal with QR codes |
-| `BottomTabBar.js` | ~300 | Fixed bottom tab navigation |
-| `DeityBanner.js` | ~250 | Cultural divider/separator |
-| `AnalyticsDashboard.js` | ~170 | Local analytics viewer |
-| `QuickAccessBar.js` | ~120 | 6 horizontal shortcut buttons |
-| `DateInfoCard.js` | ~150 | Compact date display |
-| `FilterPills.js` | ~85 | Observance type filter pills |
-| `AdBanner.js` | ~95 | AdMob banner + interstitial (native only) |
-| `GitaCard.js` | ~250 | **NEW** — Bhagavad Gita daily sloka + library modal |
-| `MuhurtamFinder.js` | ~700 | **NEW** — Auspicious day finder + PDF generation + WhatsApp/share |
-| `PremiumBanner.js` | ~250 | **NEW** — Premium upsell banner + subscription modal |
+| Component | Purpose |
+|-----------|---------|
+| `HeaderSection.js` | Animated gradient header with Telugu year, month, sunrise/sunset, location, pulsing crown |
+| `StickyNavTabs.js` | Horizontal scrolling section navigation with auto-highlight on scroll |
+| `PanchangaCard.js` | Tithi/Nakshatra/Yoga/Karana cards + TimingCard + MuhurthamCard + SlokaCard |
+| `FestivalCard.js` | Today's festival banner + upcoming festival list items |
+| `EkadashiCard.js` | Ekadashi banners, upcoming list, and full-year modal |
+| `GoldPriceCard.js` | Live gold/silver prices with sparkle animation |
+| `DailyDarshan.js` | Full-width deity of the day with cover image, mantra, share |
+| `KidsSection.js` | Stories carousel + slokas for children |
+| `MiniCalendar.js` | Monthly calendar with festival/ekadashi dot indicators |
+| `ReminderModal.js` | Full reminder CRUD modal |
+| `DonateSection.js` | UPI donation card + modal with QR codes |
+| `BottomTabBar.js` | Fixed bottom nav (4 tabs + raised settings + zoom controls) |
+| `DeityBanner.js` | Cultural divider/separator (CulturalDivider) |
+| `AnalyticsDashboard.js` | Local analytics viewer |
+| `FilterPills.js` | Observance type filter pills |
+| `AdBanner.js` | AdMob banner + interstitial (native only), web stub in AdBanner.web.js |
+| `FadeInSection.js` | Animated fade-in wrapper for sections |
+| `FestivalConfetti.js` | Confetti animation on festival days |
+| `SectionShareRow.js` | WhatsApp + native share buttons per section |
+| `GitaCard.js` | Bhagavad Gita daily sloka + library modal |
+| `MuhurtamFinder.js` | Auspicious day finder + PDF generation + WhatsApp/share |
+| `HoroscopeFeature.js` | Vedic birth chart generator (premium) |
+| `PremiumBanner.js` | Premium upsell banner + subscription modal |
+| `SettingsModal.js` | Notifications, app info + hidden admin panel (passcode-protected) |
 
 ## Key conventions
 
@@ -99,6 +107,21 @@ All festival, ekadashi, holiday, and observance data in `src/data/` is hardcoded
 - **Geolocation** auto-detects on first launch via GPS → reverse geocode (Nominatim) → fallback to Hyderabad
 - **Location search** uses Nominatim API with debounced search, returns global results
 - **Ads** use Google AdMob test IDs. AdBanner.web.js is a no-op stub for web builds
+
+## Admin System (Developer-Only Controls)
+
+The app has a hidden admin panel for developer-only access to premium toggle and ad controls. **Regular users cannot see or access these controls.**
+
+- **Production:** Settings → tap version "1.1.0" 7 times → enter passcode → admin controls appear
+- **Development (`__DEV__`):** Admin controls are auto-unlocked (no tap/passcode needed)
+- **Admin mode resets** every time the Settings modal is closed
+- **Passcode** is XOR-obfuscated in `src/components/SettingsModal.js` (never stored in plaintext)
+- **`ADMIN.md`** contains full admin documentation — this file is gitignored and never committed
+- **Never commit admin passcode** in code comments, commit messages, or PRs
+
+### Admin controls available:
+- Ad toggle (show/hide ads globally)
+- Premium toggle (activate/deactivate premium features)
 
 ## Premium feature implementation
 

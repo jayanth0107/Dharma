@@ -20,3 +20,7 @@ android/app/build/
 ios/build/
 .DS_Store
 Thumbs.db
+
+# Admin / Developer secrets
+ADMIN.md
+.claude/

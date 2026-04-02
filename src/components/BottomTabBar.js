@@ -15,24 +15,25 @@ const RIGHT_TABS = [
   { id: 'menu', icon: 'dots-horizontal-circle-outline', iconActive: 'dots-horizontal-circle', label: 'మెనూ', color: '#4A1A6B' },
 ];
 
+// Same order as quick access menu — premium first
 const MENU_ITEMS = [
+  { id: 'muhurtamFinder', icon: 'calendar-star', label: 'ముహూర్తం ఫైండర్', sublabel: 'శుభ దినాలు కనుగొనండి', color: '#2E7D32', premium: true },
+  { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం — జాతకం', sublabel: 'వేద జాతకం రూపొందించండి', color: '#4A1A6B', premium: true },
+  { id: 'gita', icon: 'book-open-page-variant', label: 'భగవద్గీత', sublabel: '30 శ్లోకాలు — గ్రంథాలయం', color: '#4A1A6B', premium: true },
+  { id: 'darshan', icon: 'hands-pray', label: 'దైనిక దర్శనం', sublabel: 'నేటి దేవత & మంత్రం', color: '#E8751A' },
   { id: 'panchang', icon: 'pot-mix', label: 'పంచాంగం', sublabel: 'తిథి, నక్షత్రం, యోగం, కరణం', color: '#E8751A' },
   { id: 'muhurtham', icon: 'clock-check', label: 'సమయాలు', sublabel: 'శుభ & అశుభ సమయాలు', color: '#C41E3A' },
   { id: 'festivals', icon: 'party-popper', label: 'పండుగలు & వ్రతాలు', sublabel: 'ఏకాదశి, చతుర్థి, పౌర్ణమి...', color: '#2E7D32' },
   { id: 'holidays', icon: 'airplane-takeoff', label: 'సెలవులు', sublabel: 'ప్రభుత్వ సెలవులు', color: '#4A90D9' },
   { id: 'gold', icon: 'gold', label: 'బంగారం ధరలు', sublabel: 'బంగారం & వెండి ధరలు', color: '#B8860B' },
   { id: 'kids', icon: 'baby-face-outline', label: 'పిల్లల కథలు', sublabel: 'కథలు & శ్లోకాలు', color: '#7B1FA2' },
-  { id: 'gita', icon: 'book-open-page-variant', label: 'భగవద్గీత', sublabel: 'నేటి శ్లోకం & గ్రంథాలయం', color: '#4A1A6B' },
-  { id: 'muhurtamFinder', icon: 'calendar-star', label: 'ముహూర్తం ఫైండర్', sublabel: 'శుభ దినాలు కనుగొనండి', color: '#2E7D32' },
-  { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం — జాతకం', sublabel: 'వేద జాతకం రూపొందించండి', color: '#4A1A6B' },
   { id: 'sloka', icon: 'format-quote-open', label: 'సుభాషితం', sublabel: 'నేటి శ్లోకం', color: '#D4A017' },
-  { id: 'darshan', icon: 'hands-pray', label: 'దైనిక దర్శనం', sublabel: 'నేటి దేవత & మంత్రం', color: '#E8751A' },
   { id: 'reminder', icon: 'bell-plus', label: 'రిమైండర్లు', sublabel: 'పండుగలు, వ్రతాలకు రిమైండర్', color: '#E8751A' },
   { id: 'donate', icon: 'hand-heart', label: 'దానం', sublabel: 'ధర్మ Daily కి సహాయం', color: '#2E7D32' },
   { id: 'analytics', icon: 'chart-line', label: 'విశ్లేషణ', sublabel: 'యాప్ వాడకం', color: '#607D8B' },
 ];
 
-export function BottomTabBar({ activeTab, onTabPress }) {
+export function BottomTabBar({ activeTab, onTabPress, fontScale = 1.0, onZoomIn, onZoomOut }) {
   const [showMenu, setShowMenu] = useState(false);
 
   const renderTab = (tab) => {
@@ -83,6 +84,25 @@ export function BottomTabBar({ activeTab, onTabPress }) {
             <MaterialCommunityIcons name="cog" size={26} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.centerLabel}>సెట్టింగ్స్</Text>
+          <View style={styles.zoomRow}>
+            <TouchableOpacity
+              onPress={onZoomOut}
+              style={[styles.zoomBtn, fontScale <= 0.9 && styles.zoomBtnDisabled]}
+              disabled={fontScale <= 0.9}
+              activeOpacity={0.6}
+            >
+              <Text style={[styles.zoomText, fontScale <= 0.9 && styles.zoomTextDisabled]}>అ−</Text>
+            </TouchableOpacity>
+            <Text style={styles.zoomPercent}>{Math.round(fontScale * 100)}%</Text>
+            <TouchableOpacity
+              onPress={onZoomIn}
+              style={[styles.zoomBtn, fontScale >= 1.4 && styles.zoomBtnDisabled]}
+              disabled={fontScale >= 1.4}
+              activeOpacity={0.6}
+            >
+              <Text style={[styles.zoomText, fontScale >= 1.4 && styles.zoomTextDisabled]}>అ+</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Tab row */}
@@ -115,14 +135,25 @@ export function BottomTabBar({ activeTab, onTabPress }) {
                   style={styles.menuItem}
                   onPress={() => { setShowMenu(false); onTabPress(item.id); }}
                 >
-                  <View style={[styles.menuIcon, { backgroundColor: item.color + '12', borderColor: item.color + '25' }]}>
-                    <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
+                  <View style={{ position: 'relative' }}>
+                    <View style={[styles.menuIcon, { backgroundColor: item.color + '12', borderColor: item.color + '25' }]}>
+                      <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
+                    </View>
+                    {item.premium && (
+                      <View style={styles.menuCrown}>
+                        <MaterialCommunityIcons name="crown" size={10} color="#FFD700" />
+                      </View>
+                    )}
                   </View>
                   <View style={styles.menuInfo}>
                     <Text style={styles.menuLabel}>{item.label}</Text>
                     <Text style={styles.menuSublabel}>{item.sublabel}</Text>
                   </View>
-                  <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.textMuted} />
+                  {item.premium ? (
+                    <MaterialCommunityIcons name="crown" size={16} color="#FFD700" />
+                  ) : (
+                    <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.textMuted} />
+                  )}
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -152,7 +183,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingTop: 8,
-    paddingBottom: 6,
+    paddingBottom: 28,
   },
   tab: {
     flex: 1,
@@ -171,10 +202,10 @@ const styles = StyleSheet.create({
   labelActive: { fontWeight: '800' },
 
   // Center reminder button
-  centerSpacer: { width: 64 },
+  centerSpacer: { width: 100 },
   centerFloating: {
-    position: 'absolute', top: -24, left: '50%', marginLeft: -28,
-    zIndex: 10, alignItems: 'center',
+    position: 'absolute', top: -24, left: '50%', marginLeft: -50,
+    width: 100, zIndex: 10, alignItems: 'center',
   },
   centerButton: {
     width: 56, height: 56, borderRadius: 28,
@@ -187,6 +218,35 @@ const styles = StyleSheet.create({
   },
   centerLabel: {
     fontSize: 9, fontWeight: '700', color: Colors.saffron, marginTop: 2,
+  },
+  zoomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 4,
+  },
+  zoomBtn: {
+    width: 30, height: 24, borderRadius: 8,
+    backgroundColor: Colors.saffron,
+    alignItems: 'center', justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+  },
+  zoomBtnDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.5,
+  },
+  zoomText: {
+    fontSize: 13, fontWeight: '900', color: '#fff',
+  },
+  zoomTextDisabled: {
+    color: '#999',
+  },
+  zoomPercent: {
+    fontSize: 10, fontWeight: '800', color: Colors.darkBrown,
   },
 
   // Menu modal
@@ -215,6 +275,12 @@ const styles = StyleSheet.create({
     width: 46, height: 46, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center', marginRight: 14,
     borderWidth: 1,
+  },
+  menuCrown: {
+    position: 'absolute', top: -4, right: -4,
+    width: 16, height: 16, borderRadius: 8,
+    backgroundColor: '#4A1A6B', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: '#FFFDF5',
   },
   menuInfo: { flex: 1 },
   menuLabel: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown },

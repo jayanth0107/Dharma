@@ -54,14 +54,14 @@ export function StickyNavTabs({ activeSection, onTabPress }) {
     }
   }, [activeSection]);
 
+  const scrollXRef = useRef(0);
+
   const handleScroll = (e) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     scrollXRef.current = contentOffset.x;
     setShowLeft(contentOffset.x > 10);
     setShowRight(contentOffset.x < contentSize.width - layoutMeasurement.width - 10);
   };
-
-  const scrollXRef = useRef(0);
   const scrollBy = (dir) => {
     const step = TAB_WIDTH * 3; // scroll 3 tabs at a time
     const newX = Math.max(0, scrollXRef.current + (dir * step));

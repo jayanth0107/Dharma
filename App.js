@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, Component } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Component } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, TouchableOpacity,
   Dimensions, Modal, FlatList, Platform, TextInput, ActivityIndicator, Linking,
@@ -53,7 +53,6 @@ import { ReminderModal } from './src/components/ReminderModal';
 import { CulturalDivider } from './src/components/DeityBanner';
 import { BottomTabBar } from './src/components/BottomTabBar';
 import { StickyNavTabs } from './src/components/StickyNavTabs';
-import { FadeInSection } from './src/components/FadeInSection';
 import { DailyDarshanCard } from './src/components/DailyDarshan';
 import { KidsSection } from './src/components/KidsSection';
 import { AnalyticsDashboard } from './src/components/AnalyticsDashboard';
@@ -68,7 +67,7 @@ import { initPremium, isPremium as checkIsPremium, getTierInfo } from './src/uti
 import { loadNotifSettings, setupDailyNotifications } from './src/utils/notificationService';
 import { SectionShareRow } from './src/components/SectionShareRow';
 import {
-  universalShare, buildPanchangamShareText,
+  buildPanchangamShareText,
   buildTimingsShareText, buildFestivalsShareText, buildHolidaysShareText,
   buildEkadashiShareText, buildGoldShareText, buildGitaShareText,
   buildSlokaShareText,
@@ -81,7 +80,7 @@ import { getUpcomingObservances } from './src/data/observances';
 import { EKADASHI_2026 } from './src/data/ekadashi';
 import { getTodayGitaSloka } from './src/data/bhagavadGita';
 import { fetchGoldSilverPrices } from './src/utils/goldPriceService';
-import { initAnalytics, trackEvent, trackSectionView, trackScreenView, trackFeatureUse, trackShare } from './src/utils/analytics';
+import { initAnalytics, trackEvent, trackScreenView } from './src/utils/analytics';
 import { autoDetectLocation, searchLocation } from './src/utils/geolocation';
 import { checkRatePrompt } from './src/utils/ratePrompt';
 import { Colors } from './src/theme/colors';
@@ -122,6 +121,29 @@ function AppContent() {
   const scrollViewRef = useRef(null);
   const sectionPositions = useRef({});
   const [visibleSection, setVisibleSection] = useState('muhurtamFinder');
+  const visibleSectionRef = useRef('muhurtamFinder');
+  const scrollLockRef = useRef(false);
+
+  const sectionOrder = useMemo(() => ['muhurtamFinder', 'darshan', 'panchang', 'muhurtham', 'festivals', 'holidays', 'gold', 'kids', 'sloka', 'donate'], []);
+
+  const lockScrollTracker = useCallback(() => {
+    scrollLockRef.current = true;
+    setTimeout(() => { scrollLockRef.current = false; }, 800);
+  }, []);
+
+  const handleScroll = useCallback((e) => {
+    if (scrollLockRef.current) return;
+    const y = e.nativeEvent.contentOffset.y + 200;
+    const positions = sectionPositions.current;
+    let current = sectionOrder[0];
+    for (const key of sectionOrder) {
+      if (positions[key] && y >= positions[key]) current = key;
+    }
+    if (current !== visibleSectionRef.current) {
+      visibleSectionRef.current = current;
+      setVisibleSection(current);
+    }
+  }, [sectionOrder]);
 
   // Sync ad config when premium changes
   useEffect(() => {
@@ -153,8 +175,9 @@ function AppContent() {
     }
   }, [fontScale]);
 
-  // Auto-detect user location on first mount
+  // All async init — single mount effect, all run in parallel
   useEffect(() => {
+    // Location detection
     setLocationDetecting(true);
     autoDetectLocation()
       .then((detected) => {
@@ -165,23 +188,20 @@ function AppContent() {
       })
       .catch(() => { /* keep default Hyderabad */ })
       .finally(() => setLocationDetecting(false));
-  }, []);
 
-  // Initialize analytics, rate prompt, and premium on first mount
-  useEffect(() => {
+    // Analytics, rate prompt, ads, notifications
     initAnalytics().catch(e => console.warn('Analytics init failed:', e));
     checkRatePrompt().catch(e => console.warn('Rate prompt check failed:', e));
     loadInterstitialAd();
-    // Setup daily notifications
     loadNotifSettings().then(s => setupDailyNotifications(s)).catch(() => {});
-    // Load premium status
+
+    // Premium status
     initPremium().then(() => {
       checkIsPremium().then(p => setPremiumActive(p));
       getTierInfo().then(info => setTrialAvailable(info.trialAvailable));
     }).catch(e => console.warn('Premium init failed:', e));
-  }, []);
 
-  useEffect(() => {
+    // Gold prices
     setPricesLoading(true);
     fetchGoldSilverPrices()
       .then((prices) => {
@@ -205,7 +225,7 @@ function AppContent() {
     trackEvent('date_navigate', { direction: days > 0 ? 'forward' : 'back' });
   }, []);
 
-  function isTimeInRange(start, end) {
+  const isTimeInRange = useCallback((start, end) => {
     if (!start || !end || !start.includes(':') || !end.includes(':')) return false;
     const now = new Date();
     const [startH, startM] = start.split(':').map(Number);
@@ -213,19 +233,18 @@ function AppContent() {
     if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) return false;
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     return currentMinutes >= startH * 60 + startM && currentMinutes <= endH * 60 + endM;
-  }
+  }, []);
 
-  const scrollToSection = (key) => {
-    // Small delay to allow layout to complete if section just appeared
+  const scrollToSection = useCallback((key) => {
     setTimeout(() => {
       const yPos = sectionPositions.current[key];
       if (yPos && scrollViewRef.current) {
         scrollViewRef.current.scrollTo({ y: yPos - 10, animated: true });
       }
     }, 100);
-  };
+  }, []);
 
-  const handleTabPress = (tabId) => {
+  const handleTabPress = useCallback((tabId) => {
     setActiveTab(tabId);
     trackScreenView(tabId);
 
@@ -240,7 +259,7 @@ function AppContent() {
         setShowAnalytics(true);
         break;
       case 'donate':
-        setShowDonate(true);
+        scrollToSection('donate');
         break;
       case 'calendar':
         // Open calendar, wait for render, then scroll
@@ -278,12 +297,18 @@ function AppContent() {
         scrollToSection('sloka');
         break;
       case 'gita':
-        scrollToSection('gita');
+        lockScrollTracker();
+        visibleSectionRef.current = 'gita';
+        setVisibleSection('gita');
+        scrollToSection('muhurtamFinder');
         break;
       case 'darshan':
         scrollToSection('darshan');
         break;
       case 'muhurtamFinder':
+        lockScrollTracker();
+        visibleSectionRef.current = 'muhurtamFinder';
+        setVisibleSection('muhurtamFinder');
         setShowMuhurtamFinder(true);
         break;
       case 'premium':
@@ -296,13 +321,16 @@ function AppContent() {
         setShowSettings(true);
         break;
       case 'horoscope':
+        lockScrollTracker();
+        visibleSectionRef.current = 'horoscope';
+        setVisibleSection('horoscope');
         setShowHoroscope(true);
         break;
       default:
         scrollToSection(tabId);
         break;
     }
-  };
+  }, [scrollToSection]);
 
   // Location search with debounce
   const searchTimeoutRef = useRef(null);
@@ -364,18 +392,8 @@ function AppContent() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        onScroll={(e) => {
-          const y = e.nativeEvent.contentOffset.y + 200;
-          const positions = sectionPositions.current;
-          // Must match actual page order AND TABS order
-          const sectionOrder = ['muhurtamFinder', 'horoscope', 'gita', 'darshan', 'panchang', 'muhurtham', 'festivals', 'holidays', 'gold', 'kids', 'sloka', 'donate'];
-          let current = 'muhurtamFinder';
-          for (const key of sectionOrder) {
-            if (positions[key] && y >= positions[key]) current = key;
-          }
-          if (current !== visibleSection) setVisibleSection(current);
-        }}
-        scrollEventThrottle={100}
+        onScroll={handleScroll}
+        scrollEventThrottle={150}
       >
         {/* Header — includes location */}
         <View style={{ position: 'relative' }}>
@@ -426,11 +444,16 @@ function AppContent() {
         </View>
 
         {/* Daily Darshan — Deity of the day */}
-        <FadeInSection delay={100}>
-          <View onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
-            <DailyDarshanCard dayOfWeek={selectedDate.getDay()} />
+        <View style={styles.section} onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
+            <MaterialCommunityIcons name="hands-pray" size={16} color="#E8751A" style={{ marginRight: 6 }} />
+            <Text style={[styles.sectionTitle, { color: '#E8751A' }]}>దైనిక దర్శనం</Text>
+            <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
           </View>
-        </FadeInSection>
+          <Text style={styles.sectionSubtitle}>నేటి దేవత & మంత్రం</Text>
+          <DailyDarshanCard dayOfWeek={selectedDate.getDay()} />
+        </View>
 
         {/* Pancha Angam — includes calendar + date nav */}
         <View style={styles.section} onLayout={(e) => { sectionPositions.current.panchang = e.nativeEvent.layout.y; sectionPositions.current.calendar = e.nativeEvent.layout.y; }}>
@@ -715,10 +738,9 @@ function AppContent() {
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
             <MaterialCommunityIcons name="baby-face-outline" size={16} color="#E8751A" style={{ marginRight: 6 }} />
-            <Text style={[styles.sectionTitle, { color: '#E8751A' }]}>పిల్లల విభాగం</Text>
+            <Text style={[styles.sectionTitle, { color: '#E8751A' }]}>పిల్లల కథలు</Text>
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
           </View>
-          <Text style={styles.sectionSubtitle}>పిల్లలకు కథలు & శ్లోకాలు</Text>
           <KidsSection dayOfWeek={selectedDate.getDay()} />
           <SectionShareRow section="kids" buildText={() => `📖 ధర్మ Daily — పిల్లల విభాగం\n\nపిల్లలకు కథలు & శ్లోకాలు\n\nధర్మ Daily App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`} />
         </View>
@@ -777,33 +799,19 @@ function AppContent() {
             <Text style={styles.legalLink}>సహాయం</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Extra space so last sections can scroll high enough to be detected */}
+        <View style={{ height: 300 }} />
       </ScrollView>
 
-      {/* Zoom Controls — top-right, below sticky nav */}
-      <View style={styles.floatingZoom}>
-        <TouchableOpacity
-          style={[styles.floatingZoomBtn, fontScale <= 0.9 && styles.floatingZoomBtnDisabled]}
-          onPress={() => setFontScale(s => Math.max(0.9, +(s - 0.1).toFixed(1)))}
-          disabled={fontScale <= 0.9}
-          accessibilityLabel="అక్షరాలు చిన్నవి చేయండి"
-        >
-          <Text style={styles.floatingZoomText}>అ−</Text>
-        </TouchableOpacity>
-        <View style={styles.floatingZoomBadge}>
-          <Text style={styles.floatingZoomPercent}>{Math.round(fontScale * 100)}%</Text>
-        </View>
-        <TouchableOpacity
-          style={[styles.floatingZoomBtn, fontScale >= 1.4 && styles.floatingZoomBtnDisabled]}
-          onPress={() => setFontScale(s => Math.min(1.4, +(s + 0.1).toFixed(1)))}
-          disabled={fontScale >= 1.4}
-          accessibilityLabel="అక్షరాలు పెద్దవి చేయండి"
-        >
-          <Text style={styles.floatingZoomText}>అ+</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Fixed Bottom Tab Bar */}
-      <BottomTabBar activeTab={activeTab} onTabPress={handleTabPress} />
+      <BottomTabBar
+        activeTab={activeTab}
+        onTabPress={handleTabPress}
+        fontScale={fontScale}
+        onZoomIn={() => setFontScale(s => Math.min(1.4, +(s + 0.1).toFixed(1)))}
+        onZoomOut={() => setFontScale(s => Math.max(0.9, +(s - 0.1).toFixed(1)))}
+      />
 
       {/* Reminder Modal */}
       <ReminderModal
@@ -1140,36 +1148,6 @@ const styles = StyleSheet.create({
   },
   legalLink: { fontSize: 12, color: '#4A90D9', fontWeight: '600', textDecorationLine: 'underline' },
   legalDot: { fontSize: 10, color: Colors.textMuted },
-
-  // Zoom controls — vertical, right side, level with hero card moon
-  floatingZoom: {
-    position: 'absolute',
-    right: 4,
-    top: 300,
-    zIndex: 50,
-    backgroundColor: 'rgba(44,24,16,0.85)',
-    borderRadius: 20,
-    paddingVertical: 4,
-    paddingHorizontal: 3,
-    alignItems: 'center',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
-  floatingZoomBtn: {
-    width: 30, height: 30, borderRadius: 15,
-    backgroundColor: Colors.saffron,
-    alignItems: 'center', justifyContent: 'center',
-    marginVertical: 2,
-  },
-  floatingZoomBtnDisabled: { backgroundColor: '#666', opacity: 0.4 },
-  floatingZoomText: { fontSize: 12, fontWeight: '800', color: Colors.white },
-  floatingZoomBadge: {
-    paddingHorizontal: 2, paddingVertical: 1, marginVertical: 1,
-  },
-  floatingZoomPercent: { fontSize: 8, fontWeight: '700', color: '#FFF8F0' },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
