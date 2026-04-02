@@ -250,7 +250,22 @@ export async function startTrial() {
   state.activatedAt = now;
   state.expiresAt = now + TRIAL_DAYS * 24 * 60 * 60 * 1000;
   state.unlockSource = 'trial';
+
+  // Log trial in payments
+  if (!state.payments) state.payments = [];
+  state.payments.push({
+    source: 'trial', amount: 0, planId: 'trial',
+    planName: `${TRIAL_DAYS}-day Trial`, screen: 'PremiumBanner',
+    days: TRIAL_DAYS, timestamp: now, date: new Date(now).toISOString(),
+  });
+
   await saveState();
+
+  // Sync trial to Firestore
+  try {
+    const { syncPaymentToCloud } = require('./paymentSync');
+    syncPaymentToCloud(state.payments[state.payments.length - 1]).catch(() => {});
+  } catch {}
 
   return {
     success: true,
@@ -293,6 +308,13 @@ export async function activatePremium(source = 'purchase', durationDays = 365, p
   });
 
   await saveState();
+
+  // Sync to Firebase Firestore (non-blocking, fire-and-forget)
+  const record = state.payments[state.payments.length - 1];
+  try {
+    const { syncPaymentToCloud } = require('./paymentSync');
+    syncPaymentToCloud(record).catch(() => {});
+  } catch {}
 
   return {
     success: true,

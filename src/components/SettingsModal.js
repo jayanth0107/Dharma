@@ -8,6 +8,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '../utils/notificationService';
 import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
+import { getPaymentStats } from '../utils/paymentSync';
 import { setAdConfig } from './AdBanner';
 
 // Admin verification (obfuscated)
@@ -30,6 +31,9 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
   const [adminError, setAdminError] = useState(false);
   const [paymentRecords, setPaymentRecords] = useState([]);
   const [showPayments, setShowPayments] = useState(false);
+  const [cloudStats, setCloudStats] = useState(null);
+  const [showCloud, setShowCloud] = useState(false);
+  const [cloudLoading, setCloudLoading] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -234,6 +238,80 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                     <Text style={{ fontSize: 10, color: '#bbb', textAlign: 'center', marginTop: 8 }}>
                       {paymentRecords.length} record(s) — Device-local only • Admin only
                     </Text>
+                  </View>
+                )}
+                {/* Cloud Payments (All Users) */}
+                <TouchableOpacity
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: 'rgba(74,26,107,0.06)', borderRadius: 12, padding: 12 }]}
+                  onPress={async () => {
+                    if (!showCloud) {
+                      setCloudLoading(true);
+                      const stats = await getPaymentStats();
+                      setCloudStats(stats);
+                      setCloudLoading(false);
+                    }
+                    setShowCloud(!showCloud);
+                  }}
+                >
+                  <MaterialCommunityIcons name="cloud-download" size={22} color="#4A1A6B" style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.settingLabel}>Cloud Payments (All Users)</Text>
+                    <Text style={s.settingSublabel}>Firebase — అన్ని పరికరాల చెల్లింపులు</Text>
+                  </View>
+                  <MaterialCommunityIcons name={showCloud ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.textMuted} />
+                </TouchableOpacity>
+
+                {showCloud && (
+                  <View style={{ marginTop: 8, backgroundColor: '#f5f0fa', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(74,26,107,0.1)' }}>
+                    {cloudLoading ? (
+                      <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 16 }}>Firebase లోడ్ అవుతోంది...</Text>
+                    ) : !cloudStats ? (
+                      <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 12 }}>డేటా లేదు</Text>
+                    ) : (
+                      <>
+                        {/* Stats summary */}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.06)', marginBottom: 10 }}>
+                          <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
+                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Total Revenue</Text>
+                          </View>
+                          <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: '#4A1A6B' }}>{cloudStats.uniqueDevices}</Text>
+                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Devices</Text>
+                          </View>
+                          <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.saffron }}>{cloudStats.purchases}</Text>
+                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Purchases</Text>
+                          </View>
+                          <View style={{ alignItems: 'center' }}>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.gold }}>{cloudStats.trials}</Text>
+                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Trials</Text>
+                          </View>
+                        </View>
+
+                        {/* Recent records */}
+                        {cloudStats.records.slice(0, 20).map((r, i) => {
+                          const srcLabel = r.source === 'trial' ? '🆓' : r.source?.includes('horoscope') ? '🔮' : '💳';
+                          return (
+                            <View key={r.id || i} style={{ paddingVertical: 6, borderBottomWidth: i < 19 ? 1 : 0, borderBottomColor: 'rgba(0,0,0,0.04)' }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.darkBrown }}>
+                                  {srcLabel} {r.amount ? `₹${r.amount}` : 'Free'} — {r.planName || r.planId || r.source}
+                                </Text>
+                                <Text style={{ fontSize: 10, color: '#aaa' }}>{r.days}d</Text>
+                              </View>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 1 }}>
+                                <Text style={{ fontSize: 10, color: '#bbb' }}>{r.deviceId?.substring(0, 12) || '—'} • {r.platform || '?'}</Text>
+                                <Text style={{ fontSize: 10, color: '#bbb' }}>{r.date ? new Date(r.date).toLocaleDateString() : '—'}</Text>
+                              </View>
+                            </View>
+                          );
+                        })}
+                        <Text style={{ fontSize: 10, color: '#bbb', textAlign: 'center', marginTop: 8 }}>
+                          {cloudStats.totalRecords} total records from Firebase
+                        </Text>
+                      </>
+                    )}
                   </View>
                 )}
               </>
