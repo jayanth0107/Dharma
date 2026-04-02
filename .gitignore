@@ -9,7 +9,7 @@ dist/
 *.orig.*
 web-build/
 google-play-service-account.json
-google-services.json
+# google-services.json — tracked in git (Firebase web keys are public by design, security via Firestore rules)
 .env
 .env.local
 .env.production
