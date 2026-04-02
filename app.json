@@ -30,7 +30,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F0F1A"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.dharmadaily.app",
       "permissions": [
         "INTERNET",
@@ -67,7 +66,13 @@
     },
     "plugins": [
       "expo-location",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon-512.png",
+          "color": "#E8751A"
+        }
+      ],
       "expo-font"
     ],
     "locales": {
