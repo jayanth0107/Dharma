@@ -203,36 +203,39 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
     onClose();
   };
 
-  const [horoVerifying, setHoroVerifying] = useState(false);
+  const [horoPayStep, setHoroPayStep] = useState('idle'); // idle | confirm | processing
 
-  const handleActivateHoroscope = async () => {
+  const handleOpenHoroPayment = async () => {
     if (!selectedPlan) return;
+    trackEvent('horoscope_pay_tap', { plan: selectedPlan.id, amount: selectedPlan.price });
 
-    // Open UPI payment
     if (Platform.OS !== 'web') {
       const upiStr = `upi://pay?pa=${UPI_ID_H}&pn=${MERCHANT_H}&am=${selectedPlan.price}&cu=INR&tn=Dharma Horoscope`;
       try { await Linking.openURL(upiStr); } catch {}
     }
+    setHoroPayStep('confirm');
+  };
 
-    // Show verification, then activate
-    setHoroVerifying(true);
-    setTimeout(async () => {
-      const { activatePremium } = require('../utils/premiumService');
-      await activatePremium('horoscope_upi', selectedPlan.days, {
-        amount: selectedPlan.price,
-        planId: selectedPlan.id,
-        planName: selectedPlan.telugu,
-        screen: 'HoroscopeFeature',
-        platform: Platform.OS,
-      });
-      setHoroVerifying(false);
-      trackEvent('horoscope_purchase', { plan: selectedPlan.id });
+  const handleConfirmHoroPayment = async () => {
+    if (!selectedPlan) return;
+    setHoroPayStep('processing');
 
-      if (Platform.OS === 'web') alert(`🎉 ${selectedPlan.telugu} ప్లాన్ సక్రియం!`);
-      else Alert.alert('🎉 సక్రియం!', `${selectedPlan.telugu} ప్లాన్ — ${selectedPlan.uses} జాతకాలు`);
-      setSelectedPlan(null);
-      setStep('form');
-    }, 2500);
+    const { activatePremium } = require('../utils/premiumService');
+    await activatePremium('horoscope_upi', selectedPlan.days, {
+      amount: selectedPlan.price,
+      planId: selectedPlan.id,
+      planName: selectedPlan.telugu,
+      screen: 'HoroscopeFeature',
+      platform: Platform.OS,
+    });
+
+    trackEvent('horoscope_purchase', { plan: selectedPlan.id });
+    setHoroPayStep('idle');
+
+    if (Platform.OS === 'web') alert(`🎉 ${selectedPlan.telugu} ప్లాన్ సక్రియం!`);
+    else Alert.alert('🎉 సక్రియం!', `${selectedPlan.telugu} ప్లాన్ — ${selectedPlan.uses} జాతకాలు`);
+    setSelectedPlan(null);
+    setStep('form');
   };
 
   // PDF + Share handled by SectionShareRow component
@@ -491,18 +494,40 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     </View>
 
                     {/* Single pay button with verification animation */}
-                    {horoVerifying ? (
-                      <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                        <ActivityIndicator size="large" color={Colors.tulasiGreen} />
-                        <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 }}>పేమెంట్ ధృవీకరిస్తోంది...</Text>
-                      </View>
-                    ) : (
-                      <TouchableOpacity style={s.activatePayBtn} onPress={handleActivateHoroscope}>
+                    {/* Step 1: Pay */}
+                    {horoPayStep === 'idle' && (
+                      <TouchableOpacity style={s.activatePayBtn} onPress={handleOpenHoroPayment}>
                         <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
-                          <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
-                          <Text style={s.activatePayText}>₹{selectedPlan?.price} చెల్లించి సక్రియం చేయండి</Text>
+                          <MaterialCommunityIcons name="bank-transfer" size={20} color="#FFF" />
+                          <Text style={s.activatePayText}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
                         </LinearGradient>
                       </TouchableOpacity>
+                    )}
+                    {/* Processing */}
+                    {horoPayStep === 'processing' && (
+                      <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                        <ActivityIndicator size="large" color={Colors.tulasiGreen} />
+                        <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 }}>ప్రాసెస్ అవుతోంది...</Text>
+                      </View>
+                    )}
+                    {/* Step 2: Confirm */}
+                    {horoPayStep === 'confirm' && (
+                      <>
+                        <View style={{ alignItems: 'center', paddingVertical: 12, gap: 4, marginBottom: 10, backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 12, padding: 14 }}>
+                          <MaterialCommunityIcons name="check-circle-outline" size={28} color={Colors.tulasiGreen} />
+                          <Text style={{ fontSize: 15, fontWeight: '800', color: Colors.tulasiGreen }}>పేమెంట్ పూర్తయిందా?</Text>
+                          <Text style={{ fontSize: 12, color: Colors.textMuted, textAlign: 'center' }}>₹{selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి</Text>
+                        </View>
+                        <TouchableOpacity style={s.activatePayBtn} onPress={handleConfirmHoroPayment}>
+                          <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
+                            <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
+                            <Text style={s.activatePayText}>అవును, పేమెంట్ చేశాను ✓</Text>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setHoroPayStep('idle')} style={{ marginTop: 8, alignItems: 'center' }}>
+                          <Text style={{ fontSize: 12, color: Colors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
+                        </TouchableOpacity>
+                      </>
                     )}
                   </View>
                 )}

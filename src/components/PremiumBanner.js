@@ -80,7 +80,10 @@ async function openUpiApp(scheme, amount) {
 }
 
 async function openUpiPayment(amount) {
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web') {
+    alert(`UPI ID: ${UPI_ID}\n\nదయచేసి మీ UPI యాప్‌లో ₹${amount} పంపండి.\nలేదా QR కోడ్ స్కాన్ చేయండి.`);
+    return;
+  }
 
   // Try generic upi:// first (lets user pick their preferred app)
   const generic = buildUpiDeepLink(amount);
