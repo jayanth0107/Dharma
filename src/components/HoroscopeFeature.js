@@ -83,8 +83,8 @@ function getHoroscopeQrUrl(amount) {
 }
 
 // ── Horoscope Modal (form + payment + results) ──
-export function HoroscopeModal({ visible, onClose, isPremium }) {
-  const [step, setStep] = useState('form'); // 'form' | 'payment' | 'loading' | 'result'
+export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
+  const [step, setStep] = useState(isPremium ? 'form' : 'locked'); // 'locked' | 'form' | 'payment' | 'loading' | 'result'
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
@@ -97,15 +97,16 @@ export function HoroscopeModal({ visible, onClose, isPremium }) {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const searchTimer = useRef(null);
 
-  // Load usage info on open
+  // Reset step and load usage info on open
   React.useEffect(() => {
     if (visible) {
+      setStep(isPremium ? 'form' : 'locked');
       const { loadUsageData, canGenerate } = require('../utils/horoscopeUsageTracker');
       loadUsageData().then(data => {
-        canGenerate(true).then(setUsageInfo); // isPremium check can be passed from props later
+        canGenerate(true).then(setUsageInfo);
       });
     }
-  }, [visible]);
+  }, [visible, isPremium]);
 
   const handlePlaceSearch = (text) => {
     setPlaceQuery(text);
@@ -247,6 +248,31 @@ export function HoroscopeModal({ visible, onClose, isPremium }) {
           </LinearGradient>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            {step === 'locked' && (
+              <View style={s.lockedWrap}>
+                <MaterialCommunityIcons name="lock" size={48} color="#4A1A6B" />
+                <Text style={s.lockedTitle}>Premium ఫీచర్</Text>
+                <Text style={s.lockedDesc}>
+                  రాశి ఫలం — వేద జాతకం Premium వినియోగదారులకు మాత్రమే అందుబాటులో ఉంటుంది.
+                </Text>
+                <Text style={s.lockedDescEn}>
+                  Vedic Horoscope is a Premium feature. Upgrade to generate your birth chart.
+                </Text>
+                <TouchableOpacity
+                  style={s.lockedBtn}
+                  onPress={() => { onClose(); setTimeout(() => onOpenPremium?.(), 300); }}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient colors={['#4A1A6B', '#2D1B4E']} style={s.lockedBtnGradient}>
+                    <MaterialCommunityIcons name="crown" size={20} color="#FFD700" />
+                    <Text style={s.lockedBtnText}>Premium అప్‌గ్రేడ్ చేయండి</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onClose} style={{ marginTop: 16 }}>
+                  <Text style={s.lockedCancel}>తర్వాత చూస్తాను</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             {step === 'form' && (
               <View style={s.form}>
                 <Text style={s.formTitle}>జన్మ వివరాలు నమోదు చేయండి</Text>
@@ -665,6 +691,33 @@ const s = StyleSheet.create({
   backX: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 22, fontWeight: '800', color: '#FFD700', marginTop: 8 },
   subtitle: { fontSize: 12, color: 'rgba(255,248,240,0.5)', marginTop: 2 },
+
+  // Locked / Premium gate
+  lockedWrap: {
+    alignItems: 'center', padding: 40, paddingTop: 50,
+  },
+  lockedTitle: {
+    fontSize: 22, fontWeight: '800', color: '#4A1A6B', marginTop: 16,
+  },
+  lockedDesc: {
+    fontSize: 14, color: '#6B5B4B', textAlign: 'center', marginTop: 12, lineHeight: 22,
+  },
+  lockedDescEn: {
+    fontSize: 12, color: '#8A7A6A', textAlign: 'center', marginTop: 6, lineHeight: 18,
+  },
+  lockedBtn: {
+    marginTop: 24, borderRadius: 14, overflow: 'hidden', width: '100%',
+  },
+  lockedBtnGradient: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 14, gap: 8,
+  },
+  lockedBtnText: {
+    fontSize: 16, fontWeight: '800', color: '#FFD700',
+  },
+  lockedCancel: {
+    fontSize: 13, color: '#8A7A6A', fontWeight: '600',
+  },
 
   // Form
   form: { padding: 20 },

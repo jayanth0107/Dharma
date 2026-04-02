@@ -1,19 +1,34 @@
 // Web ad — shows sample placeholder ads for testing
 // On web, real AdMob doesn't work, so we show visual placeholders
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
+// Shared state with listener pattern so all AdBannerWidgets re-render
 let _adsEnabled = true;
 let _isPremium = false;
+const _listeners = new Set();
+
+function notifyListeners() {
+  _listeners.forEach(fn => fn());
+}
 
 export function setAdConfig({ enabled, isPremium }) {
   if (enabled !== undefined) _adsEnabled = enabled;
   if (isPremium !== undefined) _isPremium = isPremium;
+  notifyListeners();
 }
 
 export function AdBannerWidget({ style, variant = 'default' }) {
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const listener = () => forceUpdate(n => n + 1);
+    _listeners.add(listener);
+    return () => _listeners.delete(listener);
+  }, []);
+
   if (_isPremium || !_adsEnabled) return null;
 
   const ads = {

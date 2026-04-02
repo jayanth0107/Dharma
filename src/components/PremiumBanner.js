@@ -25,18 +25,19 @@ const UPI_LOGOS = {
 };
 
 const PREMIUM_PLANS = [
-  { id: 'monthly', telugu: 'నెలవారీ', english: 'Monthly', price: 49, label: '₹49', days: 30, emoji: '📅' },
-  { id: 'yearly', telugu: 'వార్షిక', english: 'Yearly', price: 299, label: '₹299', days: 365, emoji: '⭐', best: true, savings: '49%' },
-  { id: 'lifetime', telugu: 'జీవితకాలం', english: 'Lifetime', price: 999, label: '₹999', days: 0, emoji: '👑' },
+  { id: 'weekly', telugu: 'వారం', english: 'Weekly', price: 9, label: '₹9', days: 7, emoji: '🔓' },
+  { id: 'monthly', telugu: 'నెలవారీ', english: 'Monthly', price: 29, label: '₹29', days: 30, emoji: '📅', savings: '54%' },
+  { id: 'yearly', telugu: 'వార్షిక', english: 'Yearly', price: 199, label: '₹199', days: 365, emoji: '⭐', best: true, savings: '86%' },
+  { id: 'lifetime', telugu: 'జీవితకాలం', english: 'Lifetime', price: 499, label: '₹499', days: 0, emoji: '👑' },
 ];
 
 const PREMIUM_PERKS = [
-  { icon: 'book-open-page-variant', text: 'భగవద్గీత 30 శ్లోకాలు', textEn: 'Full Gita Library (30 slokas)' },
-  { icon: 'calendar-star', text: 'ముహూర్తం ఫైండర్', textEn: 'Muhurtam Finder — auspicious days' },
-  { icon: 'advertisements-off', text: 'ప్రకటనలు లేవు', textEn: 'Ad-free experience' },
-  { icon: 'weather-night', text: 'డార్క్ మోడ్', textEn: 'Dark Mode (coming soon)' },
-  { icon: 'map-marker-multiple', text: 'అపరిమిత స్థానాలు', textEn: 'Unlimited locations' },
-  { icon: 'calendar-range', text: 'బహు సంవత్సర డేటా', textEn: 'Multi-year festival data' },
+  { icon: 'calendar-star', text: 'ముహూర్తం ఫైండర్', textEn: 'Find auspicious days for weddings, travel & more', detail: '90 రోజులు స్కాన్ • 6 ఈవెంట్ రకాలు • PDF రిపోర్ట్ • WhatsApp షేర్' },
+  { icon: 'zodiac-leo', text: 'రాశి ఫలం — జాతకం', textEn: 'Vedic horoscope & birth chart', detail: 'రాశి, లగ్నం, నక్షత్రం • నవగ్రహ స్థానాలు • వ్యక్తిత్వ విశ్లేషణ' },
+  { icon: 'book-open-page-variant', text: 'భగవద్గీత లైబ్రరీ', textEn: 'Browse all 30 slokas with themes', detail: 'సంస్కృతం + తెలుగు + ఆంగ్లం • థీమ్ / అధ్యాయం వెతుకు • షేర్' },
+  { icon: 'advertisements-off', text: 'ప్రకటనలు లేవు', textEn: 'Completely ad-free experience', detail: 'బ్యానర్ & ఇంటర్‌స్టీషియల్ ప్రకటనలు పూర్తిగా తొలగించబడతాయి' },
+  { icon: 'weather-night', text: 'డార్క్ మోడ్', textEn: 'Dark Mode (coming soon)', detail: 'రాత్రి చదవడానికి కంటి ఒత్తిడి తగ్గించే థీమ్' },
+  { icon: 'calendar-range', text: 'బహు సంవత్సర డేటా', textEn: 'Multi-year data (coming soon)', detail: '2024-2030 పండుగలు, ఏకాదశి, సెలవులు' },
 ];
 
 // ---- UPI Payment helpers ----
@@ -49,25 +50,51 @@ function getQrCodeUrl(amount) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
 }
 
-async function openUpiPayment(amount) {
-  if (Platform.OS === 'web') return; // Web uses QR code
+// Build app-specific UPI intent URLs that work reliably on Android
+function buildAppUpiUrl(scheme, amount) {
+  const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('DharmaDaily Premium')}&mc=5411`;
+  switch (scheme) {
+    case 'gpay':
+      return `gpay://upi/pay?${params}`;
+    case 'phonepe':
+      return `phonepe://pay?${params}`;
+    case 'paytmmp':
+      return `paytmmp://pay?${params}`;
+    case 'upi':
+    default:
+      return `upi://pay?${params}`;
+  }
+}
 
-  const deepLink = buildUpiDeepLink(amount);
+async function openUpiApp(scheme, amount) {
+  const url = buildAppUpiUrl(scheme, amount);
   try {
-    const supported = await Linking.canOpenURL(deepLink);
-    if (supported) { await Linking.openURL(deepLink); return; }
-  } catch { /* try app-specific */ }
+    const canOpen = await Linking.canOpenURL(url);
+    if (canOpen) { await Linking.openURL(url); return true; }
+  } catch {}
+  // Fallback to generic upi:// intent
+  try {
+    const generic = buildUpiDeepLink(amount);
+    const canOpen = await Linking.canOpenURL(generic);
+    if (canOpen) { await Linking.openURL(generic); return true; }
+  } catch {}
+  return false;
+}
 
-  const apps = [
-    { url: `tez://upi/pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('DharmaDaily Premium')}`, name: 'Google Pay' },
-    { url: `phonepe://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('DharmaDaily Premium')}`, name: 'PhonePe' },
-    { url: `paytmmp://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('DharmaDaily Premium')}`, name: 'Paytm' },
-  ];
-  for (const app of apps) {
-    try {
-      const canOpen = await Linking.canOpenURL(app.url);
-      if (canOpen) { await Linking.openURL(app.url); return; }
-    } catch { /* next */ }
+async function openUpiPayment(amount) {
+  if (Platform.OS === 'web') return;
+
+  // Try generic upi:// first (lets user pick their preferred app)
+  const generic = buildUpiDeepLink(amount);
+  try {
+    const supported = await Linking.canOpenURL(generic);
+    if (supported) { await Linking.openURL(generic); return; }
+  } catch {}
+
+  // Try app-specific schemes
+  for (const scheme of ['gpay', 'phonepe', 'paytmmp']) {
+    const opened = await openUpiApp(scheme, amount);
+    if (opened) return;
   }
 
   Alert.alert('UPI యాప్ కనుగొనబడలేదు', `దయచేసి ₹${amount} ఈ UPI ID కి పంపండి:\n\n${UPI_ID}`);
@@ -117,7 +144,7 @@ export function PremiumBanner({ onUpgrade, trialAvailable }) {
         <View style={b.textWrap}>
           <Text style={b.title}>ధర్మ Daily Premium</Text>
           <Text style={b.subtitle}>
-            {trialAvailable ? '7 రోజులు ఉచితం — ముహూర్తం, గీత, డార్క్ మోడ్...' : 'ముహూర్తం ఫైండర్, గీత గ్రంథాలయం, ప్రకటనలు లేవు'}
+            {trialAvailable ? '3 రోజులు ఉచితం — ముహూర్తం, రాశి ఫలం, గీత...' : 'ముహూర్తం ఫైండర్, రాశి ఫలం, గీత, ప్రకటనలు లేవు'}
           </Text>
         </View>
         <View style={b.badge}>
@@ -140,8 +167,8 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     const result = await startTrial();
     setActivating(false);
     if (result.success) {
-      if (Platform.OS === 'web') alert('🎉 7 రోజులు Premium ఉచితం!');
-      else Alert.alert('🎉 Trial Activated!', '7 రోజులు Premium ఉచితం!\nGita Library, Muhurtam Finder, Ad-free and more!');
+      if (Platform.OS === 'web') alert('🎉 3 రోజులు Premium ఉచితం!');
+      else Alert.alert('🎉 Trial Activated!', '3 రోజులు Premium ఉచితం!\nMuhurtam Finder, Horoscope, Gita Library, Ad-free!');
       onActivated?.();
       onClose();
     } else {
@@ -181,29 +208,29 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={s.overlay}>
         <View style={s.modal}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Header */}
-            <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={s.header}>
-              <TouchableOpacity style={s.closeX} onPress={handleClose}>
-                <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
+          {/* Sticky Header — stays visible while scrolling */}
+          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={s.header}>
+            <TouchableOpacity style={s.closeX} onPress={handleClose}>
+              <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
+            </TouchableOpacity>
+            {selectedPlan && (
+              <TouchableOpacity style={s.backX} onPress={handleBack}>
+                <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
-              {selectedPlan && (
-                <TouchableOpacity style={s.backX} onPress={handleBack}>
-                  <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.7)" />
-                </TouchableOpacity>
-              )}
-              <MaterialCommunityIcons name="crown" size={48} color="#FFD700" />
-              <Text style={s.title}>ధర్మ Daily Premium</Text>
-              {!selectedPlan ? (
-                <>
-                  <Text style={s.subtitle}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>
-                  <Text style={s.subtitleEn}>Enhance your spiritual journey</Text>
-                </>
-              ) : (
-                <Text style={s.subtitle}>{selectedPlan.telugu} — {selectedPlan.label}</Text>
-              )}
-            </LinearGradient>
+            )}
+            <MaterialCommunityIcons name="crown" size={48} color="#FFD700" />
+            <Text style={s.title}>ధర్మ Daily Premium</Text>
+            {!selectedPlan ? (
+              <>
+                <Text style={s.subtitle}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>
+                <Text style={s.subtitleEn}>Enhance your spiritual journey</Text>
+              </>
+            ) : (
+              <Text style={s.subtitle}>{selectedPlan.telugu} — {selectedPlan.label}</Text>
+            )}
+          </LinearGradient>
 
+          <ScrollView showsVerticalScrollIndicator={false}>
             {!selectedPlan ? (
               <>
                 {/* Perks */}
@@ -217,6 +244,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                       <View style={s.perkText}>
                         <Text style={s.perkTelugu}>{perk.text}</Text>
                         <Text style={s.perkEnglish}>{perk.textEn}</Text>
+                        {perk.detail && <Text style={s.perkDetail}>{perk.detail}</Text>}
                       </View>
                       <Ionicons name="checkmark-circle" size={20} color={Colors.tulasiGreen} />
                     </View>
@@ -229,7 +257,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                     <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.trialGradient}>
                       <MaterialCommunityIcons name="gift" size={22} color="#FFF" />
                       <Text style={s.trialBtnText}>
-                        {activating ? 'ఆక్టివేట్ చేస్తోంది...' : '7 రోజులు ఉచితంగా ప్రయత్నించండి'}
+                        {activating ? 'ఆక్టివేట్ చేస్తోంది...' : '3 రోజులు ఉచితంగా ప్రయత్నించండి'}
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -278,32 +306,30 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                   <Text style={s.appBtnsTitle}>UPI యాప్ ఎంచుకోండి</Text>
                   <View style={s.appBtnsRow}>
                     {[
-                      { name: 'Google Pay', letter: 'G', bg: '#4285F4', scheme: 'tez' },
-                      { name: 'PhonePe', letter: 'Pe', bg: '#5F259F', scheme: 'phonepe' },
-                      { name: 'Paytm', letter: '₹', bg: '#00B9F1', scheme: 'paytmmp' },
-                      { name: 'BHIM', letter: 'B', bg: '#00796B', scheme: 'upi' },
+                      { name: 'Google Pay', letter: 'G', bg: '#4285F4', scheme: 'gpay', logo: 'tez' },
+                      { name: 'PhonePe', letter: 'Pe', bg: '#5F259F', scheme: 'phonepe', logo: 'phonepe' },
+                      { name: 'Paytm', letter: '₹', bg: '#00B9F1', scheme: 'paytmmp', logo: 'paytmmp' },
+                      { name: 'BHIM', letter: 'B', bg: '#00796B', scheme: 'upi', logo: 'upi' },
                     ].map((app) => (
                       <TouchableOpacity
                         key={app.scheme}
                         style={[s.appBtn, { borderColor: app.bg + '35' }]}
                         onPress={async () => {
+                          trackEvent('premium_upi_tap', { app: app.name, amount: selectedPlan.price });
                           if (Platform.OS === 'web') {
                             await copyUpiId();
                             alert(`UPI ID కాపీ అయింది!\n\n${UPI_ID}\n\nమీ ఫోన్‌లో ${app.name} తెరిచి ₹${selectedPlan.price} పంపండి.\nలేదా QR కోడ్ స్కాన్ చేయండి.`);
                             return;
                           }
-                          const url = `${app.scheme}://upi/pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${selectedPlan.price}&cu=INR&tn=${encodeURIComponent('DharmaDaily Premium')}`;
-                          try {
-                            const canOpen = await Linking.canOpenURL(url);
-                            if (canOpen) { await Linking.openURL(url); return; }
-                          } catch {}
-                          try { await Linking.openURL(buildUpiDeepLink(selectedPlan.price)); } catch {}
-                          Alert.alert(`${app.name} కనుగొనబడలేదు`, `QR కోడ్ స్కాన్ చేయండి లేదా UPI ID కి ₹${selectedPlan.price} పంపండి:\n\n${UPI_ID}`);
+                          const opened = await openUpiApp(app.scheme, selectedPlan.price);
+                          if (!opened) {
+                            Alert.alert(`${app.name} కనుగొనబడలేదు`, `QR కోడ్ స్కాన్ చేయండి లేదా UPI ID కి ₹${selectedPlan.price} పంపండి:\n\n${UPI_ID}`);
+                          }
                         }}
                         activeOpacity={0.7}
                       >
-                        {UPI_LOGOS[app.scheme] ? (
-                          <Image source={UPI_LOGOS[app.scheme]} style={s.appLogoImg} resizeMode="contain" />
+                        {UPI_LOGOS[app.logo] ? (
+                          <Image source={UPI_LOGOS[app.logo]} style={s.appLogoImg} resizeMode="contain" />
                         ) : (
                           <View style={[s.appLogo, { backgroundColor: app.bg }]}>
                             <Text style={s.appLogoText}>{app.letter}</Text>
@@ -396,6 +422,7 @@ const s = StyleSheet.create({
   perkText: { flex: 1, marginLeft: 12 },
   perkTelugu: { fontSize: 14, fontWeight: '600', color: Colors.darkBrown },
   perkEnglish: { fontSize: 11, color: Colors.textMuted, marginTop: 1 },
+  perkDetail: { fontSize: 10, color: '#8A7A6A', marginTop: 4, lineHeight: 14, fontStyle: 'italic' },
 
   trialSection: { paddingHorizontal: 20, paddingTop: 24 },
   trialBtn: { borderRadius: 16, overflow: 'hidden' },

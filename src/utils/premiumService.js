@@ -46,7 +46,7 @@ async function getStorage() {
 const STORAGE_KEY = '@dharma_premium';
 const BACKUP_KEY = '@dharma_premium_bk';
 const INTEGRITY_SALT = 'dharma2026';
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 3;
 
 export const TIERS = {
   FREE: 'free',
@@ -293,9 +293,10 @@ export async function deactivatePremium() {
  */
 export function getPricingInfo() {
   return {
-    monthly: { price: '₹49', priceUsd: '$0.99', period: 'నెల / month' },
-    yearly: { price: '₹299', priceUsd: '$4.99', period: 'సంవత్సరం / year', savings: '49%' },
-    lifetime: { price: '₹999', priceUsd: '$14.99', period: 'జీవితకాలం / lifetime' },
+    weekly: { price: '₹9', priceUsd: '$0.29', period: 'వారం / week' },
+    monthly: { price: '₹29', priceUsd: '$0.49', period: 'నెల / month', savings: '54%' },
+    yearly: { price: '₹199', priceUsd: '$2.99', period: 'సంవత్సరం / year', savings: '86%' },
+    lifetime: { price: '₹499', priceUsd: '$6.99', period: 'జీవితకాలం / lifetime' },
     trialDays: TRIAL_DAYS,
   };
 }

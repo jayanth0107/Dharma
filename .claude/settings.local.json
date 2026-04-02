@@ -31,7 +31,18 @@
       "Bash(grep:*)",
       "Bash(mv \"google-pay-icon.png\" \"googlepay.png\")",
       "Bash(mv \"phonepe-icon.png\" \"phonepe.png\")",
-      "Bash(mv \"bhim logo.png\" \"bhim.png\")"
+      "Bash(mv \"bhim logo.png\" \"bhim.png\")",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(code --add \"C:/Users/bujji/Desktop/DharmaDaily\")",
+      "Bash(echo $PROFILE)",
+      "Bash(powershell.exe -Command \"echo $PROFILE\")",
+      "Bash(powershell.exe -Command \"Start-Process intl.cpl -Verb RunAs\")",
+      "Bash(find C:UsersbujjiDesktopDharmaDailysrccomponents -name *Sticky* -o -name *Tab*)",
+      "Bash(eas build:*)",
+      "WebFetch(domain:expo.dev)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''logUrl'''',''''no logUrl''''\\)\\)\")",
+      "WebFetch(domain:api.expo.dev)"
     ]
   }
 }

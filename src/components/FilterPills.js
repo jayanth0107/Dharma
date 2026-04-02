@@ -25,12 +25,12 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const FILTERS = [
-  { id: 'all', label: 'అన్నీ', icon: 'calendar-star' },
-  { id: 'ekadashi', label: 'ఏకాదశి', icon: 'hands-pray' },
-  { id: 'chaturthi', label: 'సంకష్టహర చతుర్థి', icon: 'elephant' },
-  { id: 'pournami', label: 'పౌర్ణమి', icon: 'moon-full' },
-  { id: 'amavasya', label: 'అమావాస్య', icon: 'moon-new' },
-  { id: 'pradosham', label: 'ప్రదోషం', icon: 'weather-night' },
+  { id: 'all', label: 'అన్నీ', icon: 'calendar-star', color: '#E8751A' },
+  { id: 'ekadashi', label: 'ఏకాదశి', icon: 'hands-pray', color: '#2E7D32' },
+  { id: 'chaturthi', label: 'సంకష్టహర చతుర్థి', icon: 'elephant', color: '#C41E3A' },
+  { id: 'pournami', label: 'పౌర్ణమి', icon: 'moon-full', color: '#B8860B' },
+  { id: 'amavasya', label: 'అమావాస్య', icon: 'moon-new', color: '#4A1A6B' },
+  { id: 'pradosham', label: 'ప్రదోషం', icon: 'weather-night', color: '#4A90D9' },
 ];
 
 export function FilterPills({ activeFilter, onFilterChange }) {
@@ -77,16 +77,20 @@ export function FilterPills({ activeFilter, onFilterChange }) {
           return (
             <TouchableOpacity
               key={filter.id}
-              style={[styles.pill, isActive && styles.pillActive]}
+              style={[
+                styles.pill,
+                { borderColor: filter.color + '30', backgroundColor: filter.color + '08' },
+                isActive && { backgroundColor: filter.color, borderColor: filter.color },
+              ]}
               onPress={() => handlePress(filter.id)}
             >
               <MaterialCommunityIcons
                 name={filter.icon}
-                size={14}
-                color={isActive ? Colors.white : '#5A4A3A'}
-                style={{ marginRight: 4 }}
+                size={16}
+                color={isActive ? Colors.white : filter.color}
+                style={{ marginRight: 5 }}
               />
-              <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
+              <Text style={[styles.pillText, { color: filter.color }, isActive && styles.pillTextActive]}>
                 {filter.label}
               </Text>
             </TouchableOpacity>

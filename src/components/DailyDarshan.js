@@ -1,11 +1,92 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, Animated, Easing } from 'react-native';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { View, Text, StyleSheet, Image, Animated, Easing, Dimensions } from 'react-native';
 import { SectionShareRow } from './SectionShareRow';
 import { buildDarshanShareText } from '../utils/shareService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { ANIMATIONS_ENABLED } from '../utils/deviceCapability';
+
+const FLOWERS = ['🌸', '🌺', '🌼', '🪷', '💐'];
+const PETAL_COUNT = 8;
+
+function FallingFlowers() {
+  const screenW = Dimensions.get('window').width;
+  const petals = useMemo(() =>
+    Array.from({ length: PETAL_COUNT }, (_, i) => ({
+      id: i,
+      flower: FLOWERS[i % FLOWERS.length],
+      left: Math.random() * (screenW - 40),
+      delay: i * 600,
+      duration: 3500 + Math.random() * 2000,
+      size: 14 + Math.random() * 8,
+    })), []);
+
+  return (
+    <View style={flowerStyles.container} pointerEvents="none">
+      {petals.map(p => <FallingPetal key={p.id} {...p} />)}
+    </View>
+  );
+}
+
+function FallingPetal({ flower, left, delay, duration, size }) {
+  const translateY = useRef(new Animated.Value(-30)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!ANIMATIONS_ENABLED) return;
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(translateY, { toValue: 380, duration, useNativeDriver: true }),
+          Animated.timing(translateX, { toValue: (Math.random() - 0.5) * 60, duration, useNativeDriver: true }),
+          Animated.timing(rotate, { toValue: 1, duration, useNativeDriver: true }),
+          Animated.sequence([
+            Animated.timing(opacity, { toValue: 0.8, duration: 400, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 0.8, duration: duration - 800, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+          ]),
+        ]),
+        Animated.parallel([
+          Animated.timing(translateY, { toValue: -30, duration: 0, useNativeDriver: true }),
+          Animated.timing(translateX, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(rotate, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0, duration: 0, useNativeDriver: true }),
+        ]),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, []);
+
+  const spin = rotate.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
+
+  return (
+    <Animated.Text
+      style={[
+        flowerStyles.petal,
+        { left, fontSize: size, opacity, transform: [{ translateY }, { translateX }, { rotate: spin }] },
+      ]}
+    >
+      {flower}
+    </Animated.Text>
+  );
+}
+
+const flowerStyles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+    zIndex: 5,
+  },
+  petal: {
+    position: 'absolute',
+    top: 0,
+  },
+});
 
 // Deity images from Wikimedia Commons (CC BY-SA / Public Domain)
 // Using remote URLs — images are cached after first load
@@ -110,8 +191,9 @@ export function DailyDarshanCard({ dayOfWeek }) {
           <Text style={styles.dayGreetingInline}>{deity.greeting}</Text>
         </View>
 
-        {/* Deity image with icon fallback */}
+        {/* Deity image with icon fallback + falling flowers */}
         <View style={styles.imageContainer}>
+          {ANIMATIONS_ENABLED && <FallingFlowers />}
           {!imageFailed ? (
             <>
               <Image

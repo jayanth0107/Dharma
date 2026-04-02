@@ -1,0 +1,11 @@
+{
+  "terminal.integrated.fontFamily": "'Cascadia Code', 'Nirmala UI', Consolas, monospace",
+  "editor.fontFamily": "'Cascadia Code', 'Nirmala UI', Consolas, 'Courier New', monospace",
+  "terminal.integrated.fontSize": 14,
+  "editor.fontSize": 16,
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

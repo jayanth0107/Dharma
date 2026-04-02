@@ -24,7 +24,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
   const [settings, setSettings] = useState(null);
   const [tapCount, setTapCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminUnlocked, setAdminUnlocked] = useState(__DEV__ ? true : false);
+  const [adminUnlocked, setAdminUnlocked] = useState(typeof __DEV__ !== 'undefined' ? __DEV__ : true);
   const [adminInput, setAdminInput] = useState('');
   const [adminError, setAdminError] = useState(false);
 
@@ -32,10 +32,11 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
     if (visible) {
       loadNotifSettings().then(setSettings);
     } else {
-      // Reset admin state on close
+      // Reset admin state on close (preserve dev auto-unlock)
+      const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : true;
       setTapCount(0);
       setShowAdminLogin(false);
-      setAdminUnlocked(false);
+      setAdminUnlocked(isDev);
       setAdminInput('');
       setAdminError(false);
     }
@@ -51,7 +52,8 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
   };
 
   const handleAdminLogin = () => {
-    if (verifyAdmin(adminInput)) {
+    const trimmed = adminInput.trim();
+    if (verifyAdmin(trimmed)) {
       setAdminUnlocked(true);
       setShowAdminLogin(false);
       setAdminError(false);
@@ -159,7 +161,12 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                   </View>
                   <Switch
                     value={isPremium}
-                    onValueChange={onTogglePremium}
+                    onValueChange={(v) => {
+                      onTogglePremium(v);
+                      // Premium ON = ads OFF automatically
+                      if (v) setAdConfig({ isPremium: true, enabled: false });
+                      else setAdConfig({ isPremium: false });
+                    }}
                     trackColor={{ false: '#ddd', true: '#FFD70060' }}
                     thumbColor={isPremium ? '#FFD700' : '#ccc'}
                   />
@@ -176,6 +183,10 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                   placeholder="Passcode"
                   placeholderTextColor="#999"
                   secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="off"
+                  spellCheck={false}
                   value={adminInput}
                   onChangeText={(t) => { setAdminInput(t); setAdminError(false); }}
                   onSubmitEditing={handleAdminLogin}

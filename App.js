@@ -120,34 +120,46 @@ function AppContent() {
   const [showShareApp, setShowShareApp] = useState(false);
   const scrollViewRef = useRef(null);
   const sectionPositions = useRef({});
-  const [visibleSection, setVisibleSection] = useState('muhurtamFinder');
-  const visibleSectionRef = useRef('muhurtamFinder');
+  const [visibleSection, setVisibleSection] = useState('darshan');
+  const visibleSectionRef = useRef('darshan');
   const scrollLockRef = useRef(false);
 
-  const sectionOrder = useMemo(() => ['muhurtamFinder', 'darshan', 'panchang', 'muhurtham', 'festivals', 'holidays', 'gold', 'kids', 'sloka', 'donate'], []);
+  const sectionOrder = useMemo(() => ['darshan', 'panchang', 'muhurtham', 'festivals', 'gold', 'kids', 'holidays', 'sloka', 'muhurtamFinder', 'donate'], []);
 
   const lockScrollTracker = useCallback(() => {
     scrollLockRef.current = true;
-    setTimeout(() => { scrollLockRef.current = false; }, 800);
+    setTimeout(() => { scrollLockRef.current = false; }, 500);
   }, []);
+
+  const premiumIds = useMemo(() => ['muhurtamFinder', 'horoscope', 'gita'], []);
 
   const handleScroll = useCallback((e) => {
     if (scrollLockRef.current) return;
-    const y = e.nativeEvent.contentOffset.y + 200;
+    const y = e.nativeEvent.contentOffset.y + 120;
     const positions = sectionPositions.current;
     let current = sectionOrder[0];
     for (const key of sectionOrder) {
       if (positions[key] && y >= positions[key]) current = key;
     }
+    // If scrolled to premium section and a premium tab was manually selected, keep it
+    if (current === 'muhurtamFinder' && premiumIds.includes(visibleSectionRef.current)) {
+      return;
+    }
     if (current !== visibleSectionRef.current) {
       visibleSectionRef.current = current;
       setVisibleSection(current);
     }
-  }, [sectionOrder]);
+  }, [sectionOrder, premiumIds]);
 
-  // Sync ad config when premium changes
+  // Sync ad config when premium changes + load saved ad setting
   useEffect(() => {
     setAdConfig({ isPremium: premiumActive });
+    // Load persisted ad setting from notification settings (shares same storage)
+    loadNotifSettings().then(s => {
+      if (s && s.adsEnabled === false) {
+        setAdConfig({ enabled: false });
+      }
+    }).catch(() => {});
   }, [premiumActive]);
 
   useEffect(() => {
@@ -235,13 +247,21 @@ function AppContent() {
     return currentMinutes >= startH * 60 + startM && currentMinutes <= endH * 60 + endM;
   }, []);
 
+  // Offset to account for sticky nav + header space so section title is visible
+  const SCROLL_OFFSET = 140;
+
   const scrollToSection = useCallback((key) => {
-    setTimeout(() => {
-      const yPos = sectionPositions.current[key];
-      if (yPos && scrollViewRef.current) {
-        scrollViewRef.current.scrollTo({ y: yPos - 10, animated: true });
-      }
-    }, 100);
+    const yPos = sectionPositions.current[key];
+    if (yPos && scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: Math.max(0, yPos - SCROLL_OFFSET), animated: true });
+    } else {
+      setTimeout(() => {
+        const yRetry = sectionPositions.current[key];
+        if (yRetry && scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({ y: Math.max(0, yRetry - SCROLL_OFFSET), animated: true });
+        }
+      }, 150);
+    }
   }, []);
 
   const handleTabPress = useCallback((tabId) => {
@@ -393,7 +413,7 @@ function AppContent() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
-        scrollEventThrottle={150}
+        scrollEventThrottle={50}
       >
         {/* Header — includes location */}
         <View style={{ position: 'relative' }}>
@@ -427,21 +447,32 @@ function AppContent() {
         {/* Ad Banner */}
         <AdBannerWidget />
 
-        {/* Premium విభాగాలు — shown prominently at top */}
-        <View style={styles.section} onLayout={(e) => { sectionPositions.current.muhurtamFinder = e.nativeEvent.layout.y; sectionPositions.current.horoscope = e.nativeEvent.layout.y; sectionPositions.current.gita = e.nativeEvent.layout.y; }}>
-          <View style={styles.sectionHeader}>
-            <View style={[styles.sectionLine, { backgroundColor: '#4A1A6B' }]} />
-            <MaterialCommunityIcons name="crown" size={16} color="#FFD700" style={{ marginRight: 6 }} />
-            <Text style={[styles.sectionTitle, { color: '#4A1A6B' }]}>Premium విభాగాలు</Text>
-            <View style={[styles.sectionLine, { backgroundColor: '#4A1A6B' }]} />
+        {/* Premium feature nudges — compact teasers for free users */}
+        {!premiumActive && (
+          <View style={styles.premiumNudgeRow}>
+            <TouchableOpacity style={styles.premiumNudgeItem} onPress={() => setShowMuhurtamFinder(true)} activeOpacity={0.7}>
+              <MaterialCommunityIcons name="calendar-star" size={20} color="#2E7D32" />
+              <Text style={styles.premiumNudgeText}>ముహూర్తం{'\n'}ఫైండర్</Text>
+              <View style={styles.premiumNudgeCrown}>
+                <MaterialCommunityIcons name="crown" size={10} color="#fff" />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.premiumNudgeItem} onPress={() => setShowHoroscope(true)} activeOpacity={0.7}>
+              <MaterialCommunityIcons name="zodiac-leo" size={20} color="#4A1A6B" />
+              <Text style={styles.premiumNudgeText}>రాశి{'\n'}ఫలం</Text>
+              <View style={styles.premiumNudgeCrown}>
+                <MaterialCommunityIcons name="crown" size={10} color="#fff" />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.premiumNudgeItem} onPress={() => handleTabPress('gita')} activeOpacity={0.7}>
+              <MaterialCommunityIcons name="book-open-page-variant" size={20} color="#4A1A6B" />
+              <Text style={styles.premiumNudgeText}>గీత{'\n'}లైబ్రరీ</Text>
+              <View style={styles.premiumNudgeCrown}>
+                <MaterialCommunityIcons name="crown" size={10} color="#fff" />
+              </View>
+            </TouchableOpacity>
           </View>
-          <MuhurtamFinderCard isPremium={premiumActive} onOpen={() => setShowMuhurtamFinder(true)} />
-          <HoroscopeCard isPremium={premiumActive} onOpen={() => setShowHoroscope(true)} />
-          <GitaDailyCard date={selectedDate} isPremium={premiumActive} />
-          {!premiumActive && (
-            <PremiumBanner onUpgrade={() => setShowPremium(true)} trialAvailable={trialAvailable} />
-          )}
-        </View>
+        )}
 
         {/* Daily Darshan — Deity of the day */}
         <View style={styles.section} onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
@@ -537,7 +568,7 @@ function AppContent() {
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.tulasiGreen }]} />
             <MaterialCommunityIcons name="clock-check" size={16} color={Colors.tulasiGreen} style={{ marginRight: 6 }} />
-            <Text style={[styles.sectionTitle, { color: Colors.tulasiGreen }]}>శుభ & అశుభ సమయాలు</Text>
+            <Text style={[styles.sectionTitle, { color: Colors.tulasiGreen }]}>శుభ & <Text style={{ color: Colors.kumkum }}>అశుభ</Text> సమయాలు</Text>
             <View style={[styles.sectionLine, { backgroundColor: Colors.tulasiGreen }]} />
           </View>
           <Text style={styles.sectionSubtitle}>నేటి ముహూర్తాలు మరియు నిషేధ సమయాలు</Text>
@@ -558,11 +589,6 @@ function AppContent() {
             isActive={isTimeInRange(panchangam.amritKalam.start, panchangam.amritKalam.end)}
             isAuspicious={true}
           />
-          <MuhurthamCard
-            muhurtham={panchangam.durmuhurtam}
-            isActive={isTimeInRange(panchangam.durmuhurtam.start, panchangam.durmuhurtam.end)}
-            isAuspicious={false}
-          />
 
           {/* Inauspicious — sub-header within same section */}
           <View style={[styles.sectionHeader, { marginTop: 14 }]}>
@@ -571,6 +597,12 @@ function AppContent() {
             <Text style={{ fontSize: 15, fontWeight: '700', color: Colors.kumkum, marginHorizontal: 6 }}>అశుభ సమయాలు</Text>
             <View style={[styles.sectionLine, { backgroundColor: Colors.kumkum }]} />
           </View>
+
+          <MuhurthamCard
+            muhurtham={panchangam.durmuhurtam}
+            isActive={isTimeInRange(panchangam.durmuhurtam.start, panchangam.durmuhurtam.end)}
+            isAuspicious={false}
+          />
 
           <TimingCard
             iconName="cancel"
@@ -639,27 +671,39 @@ function AppContent() {
           ) : (
             /* Other filters — chaturthi, pournami, amavasya, pradosham */
             (() => {
+              const filterColors = { chaturthi: '#C41E3A', pournami: '#B8860B', amavasya: '#4A1A6B', pradosham: '#4A90D9' };
+              const accent = filterColors[festivalFilter] || Colors.saffron;
               const items = getUpcomingObservances(festivalFilter, selectedDate, 5);
               if (items.length === 0) return <Text style={styles.sectionSubtitle}>రాబోయే తేదీలు లేవు</Text>;
               return items.map((item, idx) => {
                 const d = new Date(item.date);
-                const dateStr = d.toLocaleDateString('te-IN', { month: 'long', day: 'numeric', weekday: 'short' });
+                const dayNum = d.getDate();
+                const monthEn = d.toLocaleDateString('en-IN', { month: 'short' });
+                const weekdayTe = d.toLocaleDateString('te-IN', { weekday: 'long' });
+                const monthTe = d.toLocaleDateString('te-IN', { month: 'long' });
                 return (
                   <View key={item.date + idx} style={{
                     flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff',
-                    borderRadius: 12, padding: 12, marginBottom: 8,
-                    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+                    borderRadius: 16, padding: 14, marginBottom: 10,
+                    borderWidth: 1.5, borderColor: accent + '18', borderLeftWidth: 4, borderLeftColor: accent,
                   }}>
                     <View style={{
-                      width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.saffron + '15',
-                      alignItems: 'center', justifyContent: 'center', marginRight: 12,
+                      width: 56, height: 56, borderRadius: 14, backgroundColor: accent + '12',
+                      alignItems: 'center', justifyContent: 'center', marginRight: 14,
                     }}>
-                      <Text style={{ fontSize: 14, fontWeight: '800', color: Colors.saffron }}>{item.daysLeft}</Text>
-                      <Text style={{ fontSize: 7, color: Colors.saffron, fontWeight: '600' }}>రోజులు</Text>
+                      <Text style={{ fontSize: 22, fontWeight: '900', color: accent, lineHeight: 26 }}>{dayNum}</Text>
+                      <Text style={{ fontSize: 10, color: accent, fontWeight: '700' }}>{monthEn}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.darkBrown }}>{item.name}</Text>
-                      <Text style={{ fontSize: 11, color: Colors.textMuted, marginTop: 2 }}>{dateStr}</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '800', color: Colors.darkBrown }}>{item.name}</Text>
+                      <Text style={{ fontSize: 13, color: '#6B5B4B', marginTop: 3 }}>{weekdayTe}, {monthTe} {dayNum}</Text>
+                    </View>
+                    <View style={{
+                      alignItems: 'center', backgroundColor: accent + '10',
+                      borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6,
+                    }}>
+                      <Text style={{ fontSize: 18, fontWeight: '900', color: accent }}>{item.daysLeft}</Text>
+                      <Text style={{ fontSize: 9, color: accent, fontWeight: '700' }}>{item.daysLeft === 0 ? 'నేడు' : 'రోజులు'}</Text>
                     </View>
                   </View>
                 );
@@ -684,6 +728,27 @@ function AppContent() {
               return `🙏 ధర్మ Daily — ${filterNames[festivalFilter] || festivalFilter}\n\n${lines}\n\n━━━━━━━━━━━━━━━━\nధర్మ Daily App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
             }}
           />
+        </View>
+
+        {/* Gold & Silver Prices */}
+        <View style={styles.section} onLayout={(e) => sectionPositions.current.gold = e.nativeEvent.layout.y}>
+          <GoldSilverPriceCard prices={goldSilverPrices} loading={pricesLoading} />
+          <SectionShareRow section="gold" buildText={() => buildGoldShareText(goldSilverPrices)} />
+        </View>
+
+        {/* Ad between gold and kids */}
+        <AdBannerWidget variant="gold" />
+
+        {/* పిల్లల కథలు / Kids Section */}
+        <View style={styles.section} onLayout={(e) => sectionPositions.current.kids = e.nativeEvent.layout.y}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
+            <MaterialCommunityIcons name="baby-face-outline" size={16} color="#E8751A" style={{ marginRight: 6 }} />
+            <Text style={[styles.sectionTitle, { color: '#E8751A' }]}>పిల్లల కథలు</Text>
+            <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
+          </View>
+          <KidsSection dayOfWeek={selectedDate.getDay()} />
+          <SectionShareRow section="kids" buildText={() => `📖 ధర్మ Daily — పిల్లల కథలు\n\nపిల్లలకు కథలు & శ్లోకాలు\n\nధర్మ Daily App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`} />
         </View>
 
         {/* Public Holidays / సెలవులు */}
@@ -724,33 +789,10 @@ function AppContent() {
           </View>
         )}
 
-        {/* Gold & Silver Prices — with jewellery header */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.gold = e.nativeEvent.layout.y}>
-          <GoldSilverPriceCard prices={goldSilverPrices} loading={pricesLoading} />
-          <SectionShareRow section="gold" buildText={() => buildGoldShareText(goldSilverPrices)} />
-        </View>
-
-        {/* Ad between gold and kids */}
-        <AdBannerWidget variant="gold" />
-
-        {/* పిల్లల విభాగం / Kids Section */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.kids = e.nativeEvent.layout.y}>
-          <View style={styles.sectionHeader}>
-            <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
-            <MaterialCommunityIcons name="baby-face-outline" size={16} color="#E8751A" style={{ marginRight: 6 }} />
-            <Text style={[styles.sectionTitle, { color: '#E8751A' }]}>పిల్లల కథలు</Text>
-            <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
-          </View>
-          <KidsSection dayOfWeek={selectedDate.getDay()} />
-          <SectionShareRow section="kids" buildText={() => `📖 ధర్మ Daily — పిల్లల విభాగం\n\nపిల్లలకు కథలు & శ్లోకాలు\n\nధర్మ Daily App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`} />
-        </View>
-
-
-
         {/* Cultural divider */}
         <CulturalDivider type="harvest" />
 
-        {/* సుభాషితం / Daily Sloka (competitor-style quote card) */}
+        {/* సుభాషితం / Daily Sloka */}
         <View style={styles.section} onLayout={(e) => sectionPositions.current.sloka = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.gold }]} />
@@ -762,8 +804,24 @@ function AppContent() {
           <SectionShareRow section="sloka" buildText={() => buildSlokaShareText(panchangam.dailySloka)} />
         </View>
 
-        {/* Ad before donate */}
+        {/* Ad before premium */}
         <AdBannerWidget variant="spiritual" />
+
+        {/* Premium విభాగాలు — after free value, user sees what they get */}
+        <View style={styles.section} onLayout={(e) => { sectionPositions.current.muhurtamFinder = e.nativeEvent.layout.y; sectionPositions.current.horoscope = e.nativeEvent.layout.y; sectionPositions.current.gita = e.nativeEvent.layout.y; }}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionLine, { backgroundColor: '#4A1A6B' }]} />
+            <MaterialCommunityIcons name="crown" size={16} color="#FFD700" style={{ marginRight: 6 }} />
+            <Text style={[styles.sectionTitle, { color: '#4A1A6B' }]}>Premium విభాగాలు</Text>
+            <View style={[styles.sectionLine, { backgroundColor: '#4A1A6B' }]} />
+          </View>
+          <MuhurtamFinderCard isPremium={premiumActive} onOpen={() => setShowMuhurtamFinder(true)} />
+          <HoroscopeCard isPremium={premiumActive} onOpen={() => setShowHoroscope(true)} />
+          <GitaDailyCard date={selectedDate} isPremium={premiumActive} />
+          {!premiumActive && (
+            <PremiumBanner onUpgrade={() => setShowPremium(true)} trialAvailable={trialAvailable} />
+          )}
+        </View>
 
         {/* Donate Section */}
         <View style={styles.section} onLayout={(e) => sectionPositions.current.donate = e.nativeEvent.layout.y}>
@@ -859,7 +917,7 @@ function AppContent() {
       />
 
       {/* Horoscope Modal (Premium) */}
-      <HoroscopeModal visible={showHoroscope} onClose={() => setShowHoroscope(false)} isPremium={premiumActive} />
+      <HoroscopeModal visible={showHoroscope} onClose={() => setShowHoroscope(false)} isPremium={premiumActive} onOpenPremium={() => setShowPremium(true)} />
 
       {/* Share App Modal */}
       {showShareApp && (
@@ -1091,6 +1149,27 @@ const styles = StyleSheet.create({
   sectionLine: { flex: 1, height: 1.5, backgroundColor: Colors.sandalwood, opacity: 0.3, borderRadius: 1 },
   sectionTitle: { fontSize: 20, fontWeight: '800', color: Colors.darkBrown, marginHorizontal: 8, letterSpacing: 1 },
   sectionSubtitle: { fontSize: 14, color: '#6B5B4B', textAlign: 'center', marginBottom: 12, letterSpacing: 0.3 },
+
+  // Premium nudge row
+  premiumNudgeRow: {
+    flexDirection: 'row', justifyContent: 'center', gap: 8,
+    marginHorizontal: 14, marginBottom: 10, marginTop: 4,
+  },
+  premiumNudgeItem: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: '#4A1A6B10', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 8,
+    borderWidth: 1.5, borderColor: '#4A1A6B20', position: 'relative',
+  },
+  premiumNudgeText: {
+    fontSize: 11, fontWeight: '700', color: '#4A1A6B', flexShrink: 1, lineHeight: 14,
+  },
+  premiumNudgeCrown: {
+    position: 'absolute', top: -6, right: -4,
+    width: 18, height: 18, borderRadius: 9,
+    backgroundColor: '#B8860B', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1.5, borderColor: '#FFFDF5',
+    elevation: 2,
+  },
 
   // Card Grid
   cardGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },

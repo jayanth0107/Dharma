@@ -38,10 +38,13 @@ function buildUpiDeepLink(amount) {
 function getAppIntentUrls(amount) {
   const note = encodeURIComponent(`${APP_NAME} Donation`);
   const pa = encodeURIComponent(UPI_ID);
+  const pn = encodeURIComponent(MERCHANT_NAME);
+  const params = `pa=${pa}&pn=${pn}&am=${amount}&cu=INR&tn=${note}&mc=5411`;
   return [
-    { url: `tez://upi/pay?pa=${pa}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${note}`, name: 'Google Pay' },
-    { url: `phonepe://pay?pa=${pa}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${note}`, name: 'PhonePe' },
-    { url: `paytmmp://pay?pa=${pa}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${note}`, name: 'Paytm' },
+    { url: `gpay://upi/pay?${params}`, name: 'Google Pay' },
+    { url: `phonepe://pay?${params}`, name: 'PhonePe' },
+    { url: `paytmmp://pay?${params}`, name: 'Paytm' },
+    { url: `upi://pay?${params}`, name: 'BHIM UPI' },
   ];
 }
 

@@ -15,19 +15,19 @@ const RIGHT_TABS = [
   { id: 'menu', icon: 'dots-horizontal-circle-outline', iconActive: 'dots-horizontal-circle', label: 'మెనూ', color: '#4A1A6B' },
 ];
 
-// Same order as quick access menu — premium first
+// Free value first, premium later — matches sticky nav and ScrollView order
 const MENU_ITEMS = [
-  { id: 'muhurtamFinder', icon: 'calendar-star', label: 'ముహూర్తం ఫైండర్', sublabel: 'శుభ దినాలు కనుగొనండి', color: '#2E7D32', premium: true },
-  { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం — జాతకం', sublabel: 'వేద జాతకం రూపొందించండి', color: '#4A1A6B', premium: true },
-  { id: 'gita', icon: 'book-open-page-variant', label: 'భగవద్గీత', sublabel: '30 శ్లోకాలు — గ్రంథాలయం', color: '#4A1A6B', premium: true },
   { id: 'darshan', icon: 'hands-pray', label: 'దైనిక దర్శనం', sublabel: 'నేటి దేవత & మంత్రం', color: '#E8751A' },
   { id: 'panchang', icon: 'pot-mix', label: 'పంచాంగం', sublabel: 'తిథి, నక్షత్రం, యోగం, కరణం', color: '#E8751A' },
   { id: 'muhurtham', icon: 'clock-check', label: 'సమయాలు', sublabel: 'శుభ & అశుభ సమయాలు', color: '#C41E3A' },
   { id: 'festivals', icon: 'party-popper', label: 'పండుగలు & వ్రతాలు', sublabel: 'ఏకాదశి, చతుర్థి, పౌర్ణమి...', color: '#2E7D32' },
-  { id: 'holidays', icon: 'airplane-takeoff', label: 'సెలవులు', sublabel: 'ప్రభుత్వ సెలవులు', color: '#4A90D9' },
   { id: 'gold', icon: 'gold', label: 'బంగారం ధరలు', sublabel: 'బంగారం & వెండి ధరలు', color: '#B8860B' },
   { id: 'kids', icon: 'baby-face-outline', label: 'పిల్లల కథలు', sublabel: 'కథలు & శ్లోకాలు', color: '#7B1FA2' },
+  { id: 'holidays', icon: 'airplane-takeoff', label: 'సెలవులు', sublabel: 'ప్రభుత్వ సెలవులు', color: '#4A90D9' },
   { id: 'sloka', icon: 'format-quote-open', label: 'సుభాషితం', sublabel: 'నేటి శ్లోకం', color: '#D4A017' },
+  { id: 'muhurtamFinder', icon: 'calendar-star', label: 'ముహూర్తం ఫైండర్', sublabel: 'శుభ దినాలు కనుగొనండి', color: '#2E7D32', premium: true },
+  { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం — జాతకం', sublabel: 'వేద జాతకం రూపొందించండి', color: '#4A1A6B', premium: true },
+  { id: 'gita', icon: 'book-open-page-variant', label: 'భగవద్గీత', sublabel: '30 శ్లోకాలు — గ్రంథాలయం', color: '#4A1A6B', premium: true },
   { id: 'reminder', icon: 'bell-plus', label: 'రిమైండర్లు', sublabel: 'పండుగలు, వ్రతాలకు రిమైండర్', color: '#E8751A' },
   { id: 'donate', icon: 'hand-heart', label: 'దానం', sublabel: 'ధర్మ Daily కి సహాయం', color: '#2E7D32' },
   { id: 'analytics', icon: 'chart-line', label: 'విశ్లేషణ', sublabel: 'యాప్ వాడకం', color: '#607D8B' },

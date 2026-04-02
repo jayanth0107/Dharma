@@ -22,19 +22,19 @@ function PulsingArrow({ direction }) {
   );
 }
 
-// Premium first, then free sections in page order
+// Free value first, premium later — matches ScrollView and menu order
 const TABS = [
-  { id: 'muhurtamFinder', icon: 'calendar-star', label: 'ముహూర్తం', color: '#2E7D32', premium: true },
-  { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం', color: '#4A1A6B', premium: true },
-  { id: 'gita', icon: 'book-open-page-variant', label: 'గీత', color: '#4A1A6B', premium: true },
   { id: 'darshan', icon: 'hands-pray', label: 'దర్శనం', color: '#E8751A' },
   { id: 'panchang', icon: 'pot-mix', label: 'పంచాంగం', color: '#D4600A' },
   { id: 'muhurtham', icon: 'clock-check', label: 'సమయాలు', color: '#C41E3A' },
   { id: 'festivals', icon: 'party-popper', label: 'పండుగలు', color: '#2E7D32' },
-  { id: 'holidays', icon: 'airplane-takeoff', label: 'సెలవులు', color: '#4A90D9' },
-  { id: 'gold', icon: 'gold', label: 'బంగారం', color: '#B8860B' },
+  { id: 'gold', icon: 'gold', label: 'బంగారం\nధరలు', color: '#B8860B' },
   { id: 'kids', icon: 'baby-face-outline', label: 'కథలు', color: '#7B1FA2' },
+  { id: 'holidays', icon: 'airplane-takeoff', label: 'సెలవులు', color: '#4A90D9' },
   { id: 'sloka', icon: 'format-quote-open', label: 'శ్లోకం', color: '#D4A017' },
+  { id: 'muhurtamFinder', icon: 'calendar-star', label: 'ముహూర్తం', color: '#2E7D32', premium: true },
+  { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం', color: '#4A1A6B', premium: true },
+  { id: 'gita', icon: 'book-open-page-variant', label: 'గీత', color: '#4A1A6B', premium: true },
   { id: 'donate', icon: 'hand-heart', label: 'దానం', color: '#2E7D32' },
 ];
 

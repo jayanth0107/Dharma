@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "scheme": "dharmadaily",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -18,7 +18,10 @@
       "bundleIdentifier": "com.dharmadaily.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "పంచాంగం గణనల కోసం మీ స్థానం అవసరం — సూర్యోదయం/సూర్యాస్తమయం సమయాలు",
-        "CFBundleLocalizations": ["te", "en"],
+        "CFBundleLocalizations": [
+          "te",
+          "en"
+        ],
         "CFBundleDevelopmentRegion": "en"
       }
     },
@@ -51,7 +54,11 @@
     "primaryColor": "#E8751A",
     "owner": "jayanth0107",
     "privacy": "public",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "githubUrl": "https://github.com/jayanth0107/DharmaDaily",
     "extra": {
       "eas": {
@@ -60,7 +67,8 @@
     },
     "plugins": [
       "expo-location",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font"
     ],
     "locales": {
       "te": "./locales/te.json"
