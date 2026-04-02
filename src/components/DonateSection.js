@@ -218,9 +218,8 @@ export function DonateModal({ visible, onClose, initialAmount }) {
     }
   }, [visible, initialAmount]);
 
-  const handleDonate = (amount, label) => {
+  const handleDonate = (amount) => {
     setSelectedAmount(amount);
-    openUpiPayment(amount, label);
   };
 
   const handleCopyUpi = () => {
@@ -273,7 +272,7 @@ export function DonateModal({ visible, onClose, initialAmount }) {
                       styles.amountCard,
                       selectedAmount === item.amount && styles.amountCardActive,
                     ]}
-                    onPress={() => handleDonate(item.amount, item.label)}
+                    onPress={() => handleDonate(item.amount)}
                     activeOpacity={0.7}
                   >
                     <Text style={styles.amountEmoji}>{item.emoji}</Text>
