@@ -5,7 +5,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { ANIMATIONS_ENABLED } from '../utils/deviceCapability';
 
-// Gentle pulsing glow for the crown button
+// Crown button — shows premium status clearly
 function PulsingCrown({ isPremium, onPress }) {
   const glow = useRef(new Animated.Value(0.12)).current;
   useEffect(() => {
@@ -18,11 +18,26 @@ function PulsingCrown({ isPremium, onPress }) {
     ).start();
   }, [isPremium]);
 
+  if (isPremium) {
+    // Premium user — solid gold crown with checkmark
+    return (
+      <TouchableOpacity onPress={onPress}>
+        <View style={[s.crownBtn, { backgroundColor: 'rgba(255,215,0,0.25)', borderColor: '#FFD700' }]}>
+          <MaterialCommunityIcons name="crown" size={20} color="#FFD700" />
+          <View style={s.crownCheck}>
+            <MaterialCommunityIcons name="check-bold" size={8} color="#fff" />
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  // Free user — pulsing crown with red dot (upgrade nudge)
   return (
     <TouchableOpacity onPress={onPress}>
       <Animated.View style={[s.crownBtn, { backgroundColor: glow.interpolate({ inputRange: [0.12, 0.3], outputRange: ['rgba(255,215,0,0.12)', 'rgba(255,215,0,0.3)'] }) }]}>
-        <MaterialCommunityIcons name="crown" size={20} color="#FFD700" />
-        {!isPremium && <View style={s.crownDot} />}
+        <MaterialCommunityIcons name="crown-outline" size={20} color="rgba(255,215,0,0.6)" />
+        <View style={s.crownDot} />
       </Animated.View>
     </TouchableOpacity>
   );
@@ -357,6 +372,12 @@ export function HeaderSection({ panchangam, onBellPress, isPremium, locationName
             <ShimmerTitle text="ధర్మ" />
             <View style={s.titleLine} />
             <Text style={s.tagline}>సనాతనం</Text>
+            {isPremium && (
+              <View style={s.premiumBadge}>
+                <MaterialCommunityIcons name="crown" size={10} color="#FFD700" />
+                <Text style={s.premiumBadgeText}>PREMIUM</Text>
+              </View>
+            )}
           </View>
           {/* Flag on left, Crown on right — above the centered title */}
           <View style={s.titleSide}><DharmaFlag /></View>
@@ -466,6 +487,14 @@ const s = StyleSheet.create({
     fontSize: 16, color: 'rgba(255,215,0,0.55)', fontWeight: '700',
     textAlign: 'center', letterSpacing: 7, zIndex: 1,
   },
+  premiumBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(255,215,0,0.15)', paddingHorizontal: 10, paddingVertical: 3,
+    borderRadius: 10, marginTop: 6, borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)', zIndex: 1,
+  },
+  premiumBadgeText: {
+    fontSize: 9, fontWeight: '800', color: '#FFD700', letterSpacing: 2,
+  },
   // Sub row — location centered with decorative lines
   subRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -485,6 +514,11 @@ const s = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: 'rgba(255,215,0,0.12)', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1.5, borderColor: 'rgba(255,215,0,0.3)', position: 'relative',
+  },
+  crownCheck: {
+    position: 'absolute', top: 4, right: 4, width: 12, height: 12, borderRadius: 6,
+    backgroundColor: '#2E7D32', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1.5, borderColor: '#FFD700',
   },
   crownDot: {
     position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: 4,
