@@ -34,7 +34,8 @@
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "com.google.android.gms.permission.AD_ID"
       ],
       "versionCode": 2,
       "googleServicesFile": "./google-services.json"
