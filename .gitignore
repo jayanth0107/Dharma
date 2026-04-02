@@ -24,3 +24,6 @@ Thumbs.db
 # Admin / Developer secrets
 ADMIN.md
 .claude/
+
+# Test files (contain API keys)
+test-*.html
