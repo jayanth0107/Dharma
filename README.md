@@ -146,7 +146,7 @@ The app is a single scrollable page with these sections (top to bottom):
 | Yearly | ₹299 | 365 days | 49% vs monthly |
 | Lifetime | ₹999 | Forever | Best value |
 
-All payments are via UPI (Google Pay, PhonePe, Paytm, BHIM). The system uses trust-based activation — users self-activate after payment. A 3-day free trial is available for first-time users.
+All payments are via UPI (Google Pay, PhonePe, Paytm, BHIM) under India's User Choice Billing (UCB) rules. Payment flow: user taps pay → UPI app opens → returns → verification spinner → premium activates. A 3-day free trial is available for first-time users. All payment records (amount, plan, anonymous device ID, timestamp) are synced to Firebase Firestore for cross-device admin visibility.
 
 ### Horoscope Feature (Rashi Phalam)
 
@@ -241,7 +241,7 @@ Find auspicious days for 6 event types:
 | **PDF** | expo-print 15.0 | Generate HTML-to-PDF reports |
 | **Sharing** | expo-sharing 14.0 | Native share sheet for PDFs and files |
 | **Notifications** | expo-notifications | (Ready, not yet wired) |
-| **Backend** | Firebase 12.11.0 | Analytics, auth (placeholder config) |
+| **Backend** | Firebase 12.11.0 | Firestore (payment sync), Analytics |
 | **Ads** | react-native-google-mobile-ads | AdMob (test IDs, ready for prod) |
 | **Platform** | iOS, Android, Web | All three supported |
 
@@ -316,7 +316,8 @@ Dharma/
 │   │   ├── horoscopeUsageTracker.js    # Horoscope generation limits per plan
 │   │   ├── notificationService.js      # Push notification scheduling
 │   │   ├── deviceCapability.js         # Animation/performance feature detection
-│   │   └── ratePrompt.js              # App rating prompt logic
+│   │   ├── ratePrompt.js              # App rating prompt logic
+│   │   └── paymentSync.js            # Firebase Firestore payment record sync
 │   │
 │   ├── config/
 │   │   └── firebase.js                 # Firebase config + Analytics
@@ -517,12 +518,20 @@ Cached: 2hr memory + 24hr localStorage
 
 ### Firebase (`src/config/firebase.js`)
 
-Currently uses placeholder keys. To connect:
+Connected to project `dharmadaily-1fa89`. Services in use:
 
-1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Add Android app with package name `com.dharmadaily.app`
-3. Download `google-services.json` → place in project root (gitignored)
-4. Update `src/config/firebase.js` with your config
+- **Firestore** — `payments` collection stores anonymous payment records from all devices
+- **Analytics** — user engagement tracking (when configured)
+
+Setup (already done):
+1. Firebase project: `dharmadaily-1fa89` at [console.firebase.google.com](https://console.firebase.google.com)
+2. Firestore database: `asia-south1 (Mumbai)` region
+3. Security rules: payments are create-only (no update/delete), all other collections blocked
+4. `google-services.json` in project root (gitignored)
+
+Payment sync flow:
+- `premiumService.js` → `activatePremium()` / `startTrial()` → saves locally → calls `paymentSync.syncPaymentToCloud()` (fire-and-forget)
+- Admin panel (Settings → Admin → Cloud Payments) calls `paymentSync.getPaymentStats()` to read all records
 
 ### AdMob (`src/components/AdBanner.js`)
 

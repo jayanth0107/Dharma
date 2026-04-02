@@ -11,7 +11,7 @@
 - **React Native 0.81.5** with **Expo 54** (managed workflow)
 - **JavaScript** — no TypeScript
 - **astronomy-engine 2.1.19** for astronomical calculations
-- **Firebase 12.11.0** (backend services — placeholder config, not yet connected)
+- **Firebase 12.11.0** (Firestore for payment sync, Analytics)
 - **expo-linear-gradient**, **@expo/vector-icons** for UI
 - **@react-native-async-storage/async-storage** for persistence
 - **expo-location** for GPS auto-detection (coarse location only — fine location removed)
@@ -39,6 +39,7 @@
   - `notificationService.js` — push notification scheduling and settings
   - `deviceCapability.js` — animation/performance feature detection
   - `ratePrompt.js` — app rating prompt logic
+  - `paymentSync.js` — Firebase Firestore payment record sync (cross-device admin visibility)
 
 ## Branding & Icon
 
@@ -116,7 +117,7 @@ All festival, ekadashi, holiday, and observance data in `src/data/` is hardcoded
 - `safeParseTime()` utility prevents NaN crashes on malformed time strings
 - The app has no navigation library — all sections live in a single ScrollView in App.js with nativeID-based scrolling (FloatingMenu triggers scroll via offsetTop DOM walk + scrollTop on web)
 - Deity images in DailyDarshan come from Wikimedia Commons URLs with fallback to vector icons
-- Firebase config at `src/config/firebase.js` — placeholder keys, not yet connected
+- **Firebase Firestore** (`src/config/firebase.js`) — connected to `dharmadaily-1fa89` project. Firestore `payments` collection stores anonymous payment records synced from all devices. Config keys are in source (standard for Firebase web SDK), security enforced via Firestore rules
 - **Geolocation** auto-detects on first launch via GPS → reverse geocode (Nominatim) → fallback to Hyderabad
 - **Location search** uses Nominatim API with debounced search, returns global results
 - **Ads** use Google AdMob test IDs. AdBanner.web.js is a no-op stub for web builds
@@ -124,10 +125,14 @@ All festival, ekadashi, holiday, and observance data in `src/data/` is hardcoded
 ## Security
 
 - **`google-services.json`** is gitignored — never committed to the repository
-- **`escapeHtml()`** utility is used to sanitize user input before rendering in HTML (e.g., PDF generation)
-- **Fine location permission removed** — app uses coarse location only (`expo-location`)
+- **`test-*.html`** files are gitignored — contain Firebase API keys for local testing
+- **`escapeHtml()`** utility (`src/utils/shareService.js`) sanitizes user input before HTML rendering (PDF generation, share text)
+- **Fine location permission removed** — app uses coarse location only (`ACCESS_COARSE_LOCATION`)
 - **Admin passcode** is XOR-obfuscated, never stored in plaintext or committed in comments/messages
 - **`ADMIN.md`** is gitignored and never committed
+- **Firebase Firestore rules** — payments collection: create-only (no update/delete), all other collections blocked
+- **Payment data is anonymous** — no PII (name, phone, email, UPI ID) stored in Firestore. Only: amount, plan, anonymous device ID, platform, timestamp
+- **Privacy policy** (`docs/privacy-policy.html`) discloses all data collection including Firebase sync
 
 ## Admin System (Developer-Only Controls)
 
@@ -141,6 +146,8 @@ The app has a hidden admin panel for developer-only access to premium toggle and
 ### Admin controls available:
 - Ad toggle (show/hide ads globally)
 - Premium toggle (activate/deactivate premium features)
+- Payment Records (device-local) — view payments from this device
+- Cloud Payments (all users) — view all payments from Firebase Firestore with stats (total revenue, unique devices, purchases, trials)
 
 ## Premium feature implementation
 
@@ -158,9 +165,19 @@ Feature gating:
 
 Activation flow:
   1. User taps PremiumBanner → PremiumModal opens
-  2. User taps "3-day free trial" → startTrial() → state saved
-  3. Or user taps pricing tier → activatePremium(source, days)
+  2. User taps "3-day free trial" → startTrial() → state saved → synced to Firestore
+  3. Or user selects plan → taps "₹XX చెల్లించి Premium పొందండి"
+     → UPI app opens with pre-filled amount
+     → User returns → verification spinner (2.5s)
+     → activatePremium(source, days, paymentInfo) → state saved → synced to Firestore
   4. handlePremiumActivated() refreshes App.js state
+
+Payment records:
+  - Stored locally in AsyncStorage (per-device)
+  - Synced to Firebase Firestore `payments` collection (cross-device)
+  - Each record: source, amount, planId, planName, screen, platform, deviceId, timestamp
+  - UPI payments use India's User Choice Billing (UCB) — compliant with Play Store policy
+  - Donations (DonateSection) grant zero digital benefits — separate from premium
 ```
 
 ## Build & Deploy
