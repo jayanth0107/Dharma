@@ -209,7 +209,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
             </TouchableOpacity>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>డెవలపర్</Text>
-              <Text style={s.infoValue}>DharmaDaily Team</Text>
+              <Text style={s.infoValue}>ధర్మ Team</Text>
             </View>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>గణనాలు</Text>

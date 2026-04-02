@@ -29,12 +29,14 @@ const MENU_ITEMS = [
   { id: 'horoscope', icon: 'zodiac-leo', label: 'రాశి ఫలం — జాతకం', sublabel: 'వేద జాతకం రూపొందించండి', color: '#4A1A6B', premium: true },
   { id: 'gita', icon: 'book-open-page-variant', label: 'భగవద్గీత', sublabel: '30 శ్లోకాలు — గ్రంథాలయం', color: '#4A1A6B', premium: true },
   { id: 'reminder', icon: 'bell-plus', label: 'రిమైండర్లు', sublabel: 'పండుగలు, వ్రతాలకు రిమైండర్', color: '#E8751A' },
-  { id: 'donate', icon: 'hand-heart', label: 'దానం', sublabel: 'ధర్మ Daily కి సహాయం', color: '#2E7D32' },
+  { id: 'donate', icon: 'hand-heart', label: 'దానం', sublabel: 'ధర్మ కి సహాయం', color: '#2E7D32' },
   { id: 'analytics', icon: 'chart-line', label: 'విశ్లేషణ', sublabel: 'యాప్ వాడకం', color: '#607D8B' },
 ];
 
-export function BottomTabBar({ activeTab, onTabPress, fontScale = 1.0, onZoomIn, onZoomOut }) {
-  const [showMenu, setShowMenu] = useState(false);
+export function BottomTabBar({ activeTab, onTabPress, fontScale = 1.0, onZoomIn, onZoomOut, showMenu: externalShowMenu, onMenuClose }) {
+  const [internalShowMenu, setInternalShowMenu] = useState(false);
+  const showMenu = externalShowMenu || internalShowMenu;
+  const setShowMenu = (v) => { setInternalShowMenu(v); if (!v && onMenuClose) onMenuClose(); };
 
   const renderTab = (tab) => {
     const isActive = activeTab === tab.id;
@@ -133,7 +135,7 @@ export function BottomTabBar({ activeTab, onTabPress, fontScale = 1.0, onZoomIn,
                 <TouchableOpacity
                   key={item.id}
                   style={styles.menuItem}
-                  onPress={() => { setShowMenu(false); onTabPress(item.id); }}
+                  onPress={() => { setShowMenu(false); setTimeout(() => onTabPress(item.id), 350); }}
                 >
                   <View style={{ position: 'relative' }}>
                     <View style={[styles.menuIcon, { backgroundColor: item.color + '12', borderColor: item.color + '25' }]}>

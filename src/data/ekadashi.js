@@ -1,4 +1,4 @@
-// Dharma Daily — Ekadashi Calendar 2026
+// ధర్మ — Ekadashi Calendar 2026
 // All 24 Ekadashi dates — recalculated based on corrected lunar calendar
 // Each Hindu lunar month has 2 Ekadashis (Shukla & Krishna paksha)
 

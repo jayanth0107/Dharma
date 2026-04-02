@@ -10,7 +10,7 @@ import { trackEvent } from '../utils/analytics';
 
 // ---- CONFIGURATION ----
 const UPI_ID = '9535251573@ibl';
-const APP_NAME = 'ధర్మ Daily';
+const APP_NAME = 'ధర్మ';
 const MERCHANT_NAME = 'DharmaDaily';
 
 // UPI app logos (local assets)
@@ -174,7 +174,7 @@ export function DonateCard({ onExpand }) {
             <MaterialCommunityIcons name="hand-heart" size={28} color="#FFD700" />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>ధర్మ Daily కి సహాయం చేయండి</Text>
+            <Text style={styles.cardTitle}>ధర్మ కి సహాయం చేయండి</Text>
             <Text style={styles.cardSubtitle}>మీ దానం యాప్‌ను మెరుగుపరుస్తుంది</Text>
           </View>
           <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.6)" />
@@ -256,7 +256,7 @@ export function DonateModal({ visible, onClose, initialAmount }) {
             <View style={styles.modalBody}>
               {/* Message */}
               <Text style={styles.modalMessage}>
-                ధర్మ Daily ఉచితంగా అందిస్తోంది. మీ దానం యాప్‌ను మెరుగుపరుస్తుంది. 🙏
+                ధర్మ ఉచితంగా అందిస్తోంది. మీ దానం యాప్‌ను మెరుగుపరుస్తుంది. 🙏
               </Text>
 
               {/* Amount buttons — FIRST so user picks amount */}

@@ -21,7 +21,7 @@ class ErrorBoundary extends Component {
       return (
         <View style={{ flex: 1, backgroundColor: '#0F0F1A', justifyContent: 'center', alignItems: 'center', padding: 30 }}>
           <MaterialCommunityIcons name="alert-circle-outline" size={60} color="#E8751A" />
-          <Text style={{ fontSize: 20, color: '#FFD700', marginTop: 16, fontWeight: '700' }}>ధర్మ Daily</Text>
+          <Text style={{ fontSize: 20, color: '#FFD700', marginTop: 16, fontWeight: '700' }}>ధర్మ</Text>
           <Text style={{ fontSize: 14, color: '#FFF8F0', marginTop: 12, textAlign: 'center' }}>
             ఏదో తప్పు జరిగింది. దయచేసి యాప్ మళ్ళీ ప్రారంభించండి.
           </Text>
@@ -118,8 +118,14 @@ function AppContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHoroscope, setShowHoroscope] = useState(false);
   const [showShareApp, setShowShareApp] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const scrollViewRef = useRef(null);
   const sectionPositions = useRef({});
+  const sectionRefs = useRef({});
+
+  const registerSection = useCallback((key, ref) => {
+    if (ref) sectionRefs.current[key] = ref;
+  }, []);
   const [visibleSection, setVisibleSection] = useState('darshan');
   const visibleSectionRef = useRef('darshan');
   const scrollLockRef = useRef(false);
@@ -250,17 +256,72 @@ function AppContent() {
   // Offset to account for sticky nav + header space so section title is visible
   const SCROLL_OFFSET = 140;
 
+  // Cross-platform scroll helper
+  const scrollToY = useCallback((y, animated = true) => {
+    if (Platform.OS === 'web') {
+      const scrollEl = scrollViewRef.current?.getScrollableNode?.()
+        || (scrollViewRef.current instanceof HTMLElement ? scrollViewRef.current : null)
+        || scrollViewRef.current?._nativeTag;
+      if (scrollEl) {
+        scrollEl.scrollTo({ top: Math.max(0, y), behavior: animated ? 'smooth' : 'auto' });
+        return;
+      }
+    }
+    scrollViewRef.current?.scrollTo({ y: Math.max(0, y), animated });
+  }, []);
+
   const scrollToSection = useCallback((key) => {
-    const yPos = sectionPositions.current[key];
-    if (yPos && scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: Math.max(0, yPos - SCROLL_OFFSET), animated: true });
-    } else {
-      setTimeout(() => {
-        const yRetry = sectionPositions.current[key];
-        if (yRetry && scrollViewRef.current) {
-          scrollViewRef.current.scrollTo({ y: Math.max(0, yRetry - SCROLL_OFFSET), animated: true });
+    const sectionRef = sectionRefs.current[key];
+
+    // Web: use DOM APIs directly (RNW 0.19+ refs are DOM elements)
+    if (Platform.OS === 'web') {
+      try {
+        // Get the scrollable DOM node from the ScrollView ref
+        const scrollEl = scrollViewRef.current?.getScrollableNode?.()
+          || (scrollViewRef.current instanceof HTMLElement ? scrollViewRef.current : null)
+          || scrollViewRef.current?._nativeTag;
+
+        // Get the section DOM element
+        const el = sectionRef instanceof HTMLElement ? sectionRef
+          : sectionRef?._node || sectionRef;
+
+        if (scrollEl && el && el.getBoundingClientRect) {
+          const scrollTop = scrollEl.scrollTop || 0;
+          const rect = el.getBoundingClientRect();
+          const scrollRect = scrollEl.getBoundingClientRect();
+          const y = rect.top - scrollRect.top + scrollTop;
+          scrollEl.scrollTo({ top: Math.max(0, y - SCROLL_OFFSET), behavior: 'smooth' });
+          return;
         }
-      }, 150);
+
+        // Fallback: use onLayout stored positions with DOM scrollTo
+        const yPos = sectionPositions.current[key];
+        if (yPos != null && scrollEl) {
+          scrollEl.scrollTo({ top: Math.max(0, yPos - SCROLL_OFFSET), behavior: 'smooth' });
+          return;
+        }
+      } catch {}
+    }
+
+    // Native: use measureLayout
+    if (sectionRef && scrollViewRef.current) {
+      try {
+        const scrollNode = scrollViewRef.current.getScrollableNode?.() || scrollViewRef.current.getInnerViewNode?.();
+        sectionRef.measureLayout(
+          scrollNode || scrollViewRef.current,
+          (x, y) => {
+            scrollViewRef.current.scrollTo({ y: Math.max(0, y - SCROLL_OFFSET), animated: true });
+          },
+          () => {}
+        );
+        return;
+      } catch {}
+    }
+
+    // Final fallback: onLayout stored position (native)
+    const yPos = sectionPositions.current[key];
+    if (yPos != null && scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: Math.max(0, yPos - SCROLL_OFFSET), animated: true });
     }
   }, []);
 
@@ -270,7 +331,7 @@ function AppContent() {
 
     switch (tabId) {
       case 'home':
-        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+        scrollToY(0);
         break;
       case 'reminder':
         setShowReminder(true);
@@ -287,8 +348,8 @@ function AppContent() {
         // Longer delay for first render
         setTimeout(() => {
           const yPos = sectionPositions.current.calendar;
-          if (yPos && scrollViewRef.current) {
-            scrollViewRef.current.scrollTo({ y: yPos - 10, animated: true });
+          if (yPos) {
+            scrollToY(yPos - 10);
           }
         }, 300);
         break;
@@ -350,7 +411,7 @@ function AppContent() {
         scrollToSection(tabId);
         break;
     }
-  }, [scrollToSection]);
+  }, [scrollToSection, scrollToY]);
 
   // Location search with debounce
   const searchTimeoutRef = useRef(null);
@@ -399,7 +460,7 @@ function AppContent() {
     return (
       <View style={styles.loadingContainer}>
         <MaterialCommunityIcons name="om" size={60} color={Colors.goldShimmer} />
-        <Text style={styles.loadingSubtext}>ధర్మ Daily</Text>
+        <Text style={styles.loadingSubtext}>ధర్మ</Text>
       </View>
     );
   }
@@ -425,6 +486,7 @@ function AppContent() {
             locationTelugu={location.telugu || LOCATIONS.find(l => l.name === location.name)?.telugu || ''}
             locationDetecting={locationDetecting}
             onLocationPress={() => setShowLocationPicker(true)}
+            onMenuPress={() => setShowMenu(true)}
           />
           {todayFestival && <FestivalConfetti />}
         </View>
@@ -474,8 +536,8 @@ function AppContent() {
           </View>
         )}
 
-        {/* Daily Darshan — Deity of the day */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
+        {/* దైనిక దర్శనం — Deity of the day */}
+        <View style={styles.section} ref={r => registerSection('darshan', r)} onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
             <MaterialCommunityIcons name="hands-pray" size={16} color="#E8751A" style={{ marginRight: 6 }} />
@@ -487,7 +549,7 @@ function AppContent() {
         </View>
 
         {/* Pancha Angam — includes calendar + date nav */}
-        <View style={styles.section} onLayout={(e) => { sectionPositions.current.panchang = e.nativeEvent.layout.y; sectionPositions.current.calendar = e.nativeEvent.layout.y; }}>
+        <View style={styles.section} ref={r => registerSection('panchang', r)} onLayout={(e) => { sectionPositions.current.panchang = e.nativeEvent.layout.y; sectionPositions.current.calendar = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionLine} />
             <MaterialCommunityIcons name="pot-mix" size={16} color={Colors.darkBrown} style={{ marginRight: 6 }} />
@@ -564,7 +626,7 @@ function AppContent() {
         </View>
 
         {/* శుభ & అశుభ సమయాలు — Combined timings section */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.muhurtham = e.nativeEvent.layout.y}>
+        <View style={styles.section} ref={r => registerSection('muhurtham', r)} onLayout={(e) => sectionPositions.current.muhurtham = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.tulasiGreen }]} />
             <MaterialCommunityIcons name="clock-check" size={16} color={Colors.tulasiGreen} style={{ marginRight: 6 }} />
@@ -642,7 +704,7 @@ function AppContent() {
         <CulturalDivider type="temple" />
 
         {/* పండుగలు, వ్రతాలు, ఏకాదశి — unified section with filter pills */}
-        <View style={styles.section} onLayout={(e) => { sectionPositions.current.festivals = e.nativeEvent.layout.y; sectionPositions.current.ekadashi = e.nativeEvent.layout.y; }}>
+        <View style={styles.section} ref={r => registerSection('festivals', r)} onLayout={(e) => { sectionPositions.current.festivals = e.nativeEvent.layout.y; sectionPositions.current.ekadashi = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.tulasiGreen }]} />
             <MaterialCommunityIcons name="party-popper" size={16} color={Colors.tulasiGreen} style={{ marginRight: 6 }} />
@@ -725,13 +787,13 @@ function AppContent() {
                 const ds = d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', weekday: 'short' });
                 return `${i + 1}. ${item.name} (${item.nameEnglish || ''})\n   📅 ${ds} — ${item.daysLeft} రోజులు`;
               }).join('\n');
-              return `🙏 ధర్మ Daily — ${filterNames[festivalFilter] || festivalFilter}\n\n${lines}\n\n━━━━━━━━━━━━━━━━\nధర్మ Daily App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+              return `🙏 ధర్మ — ${filterNames[festivalFilter] || festivalFilter}\n\n${lines}\n\n━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
             }}
           />
         </View>
 
         {/* Gold & Silver Prices */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.gold = e.nativeEvent.layout.y}>
+        <View style={styles.section} ref={r => registerSection('gold', r)} onLayout={(e) => sectionPositions.current.gold = e.nativeEvent.layout.y}>
           <GoldSilverPriceCard prices={goldSilverPrices} loading={pricesLoading} />
           <SectionShareRow section="gold" buildText={() => buildGoldShareText(goldSilverPrices)} />
         </View>
@@ -740,7 +802,7 @@ function AppContent() {
         <AdBannerWidget variant="gold" />
 
         {/* పిల్లల కథలు / Kids Section */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.kids = e.nativeEvent.layout.y}>
+        <View style={styles.section} ref={r => registerSection('kids', r)} onLayout={(e) => sectionPositions.current.kids = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
             <MaterialCommunityIcons name="baby-face-outline" size={16} color="#E8751A" style={{ marginRight: 6 }} />
@@ -748,12 +810,12 @@ function AppContent() {
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
           </View>
           <KidsSection dayOfWeek={selectedDate.getDay()} />
-          <SectionShareRow section="kids" buildText={() => `📖 ధర్మ Daily — పిల్లల కథలు\n\nపిల్లలకు కథలు & శ్లోకాలు\n\nధర్మ Daily App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`} />
+          <SectionShareRow section="kids" buildText={() => `📖 ధర్మ — పిల్లల కథలు\n\nపిల్లలకు కథలు & శ్లోకాలు\n\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`} />
         </View>
 
         {/* Public Holidays / సెలవులు */}
         {upcomingHolidays.length > 0 && (
-          <View style={styles.section} onLayout={(e) => sectionPositions.current.holidays = e.nativeEvent.layout.y}>
+          <View style={styles.section} ref={r => registerSection('holidays', r)} onLayout={(e) => sectionPositions.current.holidays = e.nativeEvent.layout.y}>
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionLine, { backgroundColor: '#4A90D9' }]} />
               <MaterialCommunityIcons name="airplane" size={16} color="#4A90D9" style={{ marginRight: 6 }} />
@@ -792,8 +854,8 @@ function AppContent() {
         {/* Cultural divider */}
         <CulturalDivider type="harvest" />
 
-        {/* సుభాషితం / Daily Sloka */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.sloka = e.nativeEvent.layout.y}>
+        {/* సుభాషితం */}
+        <View style={styles.section} ref={r => registerSection('sloka', r)} onLayout={(e) => sectionPositions.current.sloka = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.gold }]} />
             <MaterialCommunityIcons name="format-quote-open" size={16} color={Colors.gold} style={{ marginRight: 6 }} />
@@ -808,7 +870,7 @@ function AppContent() {
         <AdBannerWidget variant="spiritual" />
 
         {/* Premium విభాగాలు — after free value, user sees what they get */}
-        <View style={styles.section} onLayout={(e) => { sectionPositions.current.muhurtamFinder = e.nativeEvent.layout.y; sectionPositions.current.horoscope = e.nativeEvent.layout.y; sectionPositions.current.gita = e.nativeEvent.layout.y; }}>
+        <View style={styles.section} ref={r => registerSection('muhurtamFinder', r)} onLayout={(e) => { sectionPositions.current.muhurtamFinder = e.nativeEvent.layout.y; sectionPositions.current.horoscope = e.nativeEvent.layout.y; sectionPositions.current.gita = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#4A1A6B' }]} />
             <MaterialCommunityIcons name="crown" size={16} color="#FFD700" style={{ marginRight: 6 }} />
@@ -824,7 +886,7 @@ function AppContent() {
         </View>
 
         {/* Donate Section */}
-        <View style={styles.section} onLayout={(e) => sectionPositions.current.donate = e.nativeEvent.layout.y}>
+        <View style={styles.section} ref={r => registerSection('donate', r)} onLayout={(e) => sectionPositions.current.donate = e.nativeEvent.layout.y}>
           <DonateCard onExpand={(amount) => { setShowDonate(true); setDonateInitialAmount(amount); }} />
         </View>
 
@@ -869,6 +931,8 @@ function AppContent() {
         fontScale={fontScale}
         onZoomIn={() => setFontScale(s => Math.min(1.4, +(s + 0.1).toFixed(1)))}
         onZoomOut={() => setFontScale(s => Math.max(0.9, +(s - 0.1).toFixed(1)))}
+        showMenu={showMenu}
+        onMenuClose={() => setShowMenu(false)}
       />
 
       {/* Reminder Modal */}
@@ -926,7 +990,7 @@ function AppContent() {
           hideButton
           autoOpen
           onClose={() => setShowShareApp(false)}
-          buildText={() => `🙏 ధర్మ Daily — తెలుగు పంచాంగం యాప్\n\nరోజువారీ తిథి, నక్షత్రం, ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!\n\n📥 Download:\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n\n🙏 సర్వే జనాః సుఖినో భవంతు`}
+          buildText={() => `🙏 ధర్మ — తెలుగు పంచాంగం యాప్\n\nరోజువారీ తిథి, నక్షత్రం, ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!\n\n📥 Download:\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n\n🙏 సర్వే జనాః సుఖినో భవంతు`}
         />
       )}
 

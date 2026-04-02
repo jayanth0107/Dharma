@@ -1,4 +1,4 @@
-// Dharma Daily — Public Holidays 2026 (India / Telangana & AP)
+// ధర్మ — Public Holidays 2026 (India / Telangana & AP)
 // Verified against timeanddate.com gazetted holidays list
 
 export const PUBLIC_HOLIDAYS_2026 = [

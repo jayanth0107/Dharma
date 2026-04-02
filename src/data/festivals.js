@@ -1,4 +1,4 @@
-// Dharma Daily — Telugu Festival Calendar 2026
+// ధర్మ — Telugu Festival Calendar 2026
 // Verified against timeanddate.com, DrikPanchang, and ProKerala
 // Dates are for Indian Standard Time (IST)
 

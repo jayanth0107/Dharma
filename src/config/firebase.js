@@ -1,4 +1,4 @@
-// Firebase Configuration for Dharma Daily
+// Firebase Configuration for ధర్మ
 // ============================================
 // SETUP INSTRUCTIONS:
 // 1. Go to https://console.firebase.google.com

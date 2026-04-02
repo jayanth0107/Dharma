@@ -1,4 +1,4 @@
-// Dharma Daily — Geolocation Service
+// ధర్మ — Geolocation Service
 // Auto-detects user location using device GPS
 // Reverse geocodes to get city/area name using free Nominatim API (OpenStreetMap)
 // Falls back to IP-based geolocation if GPS is denied
@@ -57,7 +57,7 @@ export async function reverseGeocode(latitude, longitude) {
       `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=te,en&zoom=10`,
       {
         headers: {
-          'User-Agent': 'DharmaDaily/1.0 (Telugu Panchangam App)',
+          'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)',
           'Accept': 'application/json',
         },
         signal: controller.signal,
@@ -105,7 +105,7 @@ export async function searchLocation(query) {
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(sanitized)}&format=json&limit=8&accept-language=te,en&addressdetails=1`,
       {
         headers: {
-          'User-Agent': 'DharmaDaily/1.0 (Telugu Panchangam App)',
+          'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)',
           'Accept': 'application/json',
         },
         signal: controller.signal,

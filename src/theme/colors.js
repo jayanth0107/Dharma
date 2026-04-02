@@ -1,4 +1,4 @@
-// Dharma Daily — Sacred Color Palette
+// ధర్మ — Sacred Color Palette
 // Inspired by traditional temple architecture and puja aesthetics
 
 export const Colors = {

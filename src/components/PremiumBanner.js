@@ -1,4 +1,4 @@
-// Dharma Daily — Premium Banner & Payment Modal
+// ధర్మ — Premium Banner & Payment Modal
 // Shows upgrade prompt + handles payment via UPI (QR code, deep links, manual)
 // Same UPI flow as DonateSection for seamless payment experience
 
@@ -42,17 +42,17 @@ const PREMIUM_PERKS = [
 
 // ---- UPI Payment helpers ----
 function buildUpiDeepLink(amount) {
-  return `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&tn=${encodeURIComponent('DharmaDaily Premium')}&am=${amount}&cu=INR`;
+  return `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&tn=${encodeURIComponent('Dharma Premium')}&am=${amount}&cu=INR`;
 }
 
 function getQrCodeUrl(amount) {
-  const upiString = `upi://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=DharmaDaily Premium`;
+  const upiString = `upi://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR&tn=Dharma Premium`;
   return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
 }
 
 // Build app-specific UPI intent URLs that work reliably on Android
 function buildAppUpiUrl(scheme, amount) {
-  const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('DharmaDaily Premium')}&mc=5411`;
+  const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Dharma Premium')}&mc=5411`;
   switch (scheme) {
     case 'gpay':
       return `gpay://upi/pay?${params}`;
@@ -142,7 +142,7 @@ export function PremiumBanner({ onUpgrade, trialAvailable }) {
           <MaterialCommunityIcons name="crown" size={24} color="#FFD700" />
         </View>
         <View style={b.textWrap}>
-          <Text style={b.title}>ధర్మ Daily Premium</Text>
+          <Text style={b.title}>ధర్మ Premium</Text>
           <Text style={b.subtitle}>
             {trialAvailable ? '3 రోజులు ఉచితం — ముహూర్తం, రాశి ఫలం, గీత...' : 'ముహూర్తం ఫైండర్, రాశి ఫలం, గీత, ప్రకటనలు లేవు'}
           </Text>
@@ -209,7 +209,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
       <View style={s.overlay}>
         <View style={s.modal}>
           {/* Sticky Header — stays visible while scrolling */}
-          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={s.header}>
+          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={[s.header, selectedPlan && s.headerCompact]}>
             <TouchableOpacity style={s.closeX} onPress={handleClose}>
               <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
@@ -218,8 +218,8 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                 <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
             )}
-            <MaterialCommunityIcons name="crown" size={48} color="#FFD700" />
-            <Text style={s.title}>ధర్మ Daily Premium</Text>
+            <MaterialCommunityIcons name="crown" size={selectedPlan ? 28 : 48} color="#FFD700" />
+            <Text style={[s.title, selectedPlan && { fontSize: 18, marginTop: 4 }]}>ధర్మ Premium</Text>
             {!selectedPlan ? (
               <>
                 <Text style={s.subtitle}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>
@@ -301,19 +301,22 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                   </Text>
                 </View>
 
-                {/* Pay with specific UPI apps */}
+                {/* QR Code — scan to pay */}
+                <UpiQrCode amount={selectedPlan.price} />
+
+                {/* Pay with specific UPI apps — 2x2 grid below QR */}
                 <View style={s.appBtnsSection}>
-                  <Text style={s.appBtnsTitle}>UPI యాప్ ఎంచుకోండి</Text>
-                  <View style={s.appBtnsRow}>
+                  <Text style={s.appBtnsTitle}>UPI యాప్ ద్వారా ₹{selectedPlan.price} చెల్లించండి</Text>
+                  <View style={s.appBtnsGrid}>
                     {[
                       { name: 'Google Pay', letter: 'G', bg: '#4285F4', scheme: 'gpay', logo: 'tez' },
                       { name: 'PhonePe', letter: 'Pe', bg: '#5F259F', scheme: 'phonepe', logo: 'phonepe' },
                       { name: 'Paytm', letter: '₹', bg: '#00B9F1', scheme: 'paytmmp', logo: 'paytmmp' },
-                      { name: 'BHIM', letter: 'B', bg: '#00796B', scheme: 'upi', logo: 'upi' },
+                      { name: 'BHIM UPI', letter: 'B', bg: '#00796B', scheme: 'upi', logo: 'upi' },
                     ].map((app) => (
                       <TouchableOpacity
                         key={app.scheme}
-                        style={[s.appBtn, { borderColor: app.bg + '35' }]}
+                        style={[s.appGridBtn, { borderColor: app.bg + '30' }]}
                         onPress={async () => {
                           trackEvent('premium_upi_tap', { app: app.name, amount: selectedPlan.price });
                           if (Platform.OS === 'web') {
@@ -329,20 +332,18 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                         activeOpacity={0.7}
                       >
                         {UPI_LOGOS[app.logo] ? (
-                          <Image source={UPI_LOGOS[app.logo]} style={s.appLogoImg} resizeMode="contain" />
+                          <Image source={UPI_LOGOS[app.logo]} style={s.appGridLogo} resizeMode="contain" />
                         ) : (
                           <View style={[s.appLogo, { backgroundColor: app.bg }]}>
                             <Text style={s.appLogoText}>{app.letter}</Text>
                           </View>
                         )}
-                        <Text style={[s.appBtnText, { color: app.bg }]}>{app.name}</Text>
+                        <Text style={[s.appGridText, { color: app.bg }]}>{app.name}</Text>
+                        <Text style={s.appGridAmount}>₹{selectedPlan.price}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 </View>
-
-                {/* QR Code for scanning (web + mobile fallback) */}
-                <UpiQrCode amount={selectedPlan.price} />
 
                 {/* UPI ID + Copy */}
                 <View style={s.upiBox}>
@@ -407,8 +408,9 @@ const q = StyleSheet.create({
 
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  modal: { backgroundColor: Colors.cream, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' },
+  modal: { backgroundColor: Colors.cream, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%', overflow: 'hidden' },
   header: { alignItems: 'center', paddingVertical: 30, paddingHorizontal: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative' },
+  headerCompact: { paddingVertical: 14 },
   closeX: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   backX: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 26, fontWeight: '800', color: '#FFD700', marginTop: 12, letterSpacing: 1 },
@@ -455,8 +457,26 @@ const s = StyleSheet.create({
   paySummaryDuration: { fontSize: 12, color: Colors.textMuted, marginTop: 4 },
 
   // UPI app buttons
-  appBtnsSection: { marginTop: 16 },
-  appBtnsTitle: { fontSize: 14, fontWeight: '700', color: Colors.darkBrown, marginBottom: 10, textAlign: 'center' },
+  appBtnsSection: { marginTop: 20 },
+  appBtnsTitle: { fontSize: 15, fontWeight: '800', color: Colors.darkBrown, marginBottom: 12, textAlign: 'center' },
+  appBtnsGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
+  },
+  appGridBtn: {
+    width: '48%', alignItems: 'center',
+    backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
+    borderWidth: 1.5,
+    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4,
+  },
+  appGridLogo: { width: 40, height: 40, borderRadius: 8, marginBottom: 6 },
+  appLogo: {
+    width: 40, height: 40, borderRadius: 10, marginBottom: 6,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  appLogoText: { fontSize: 18, fontWeight: '900', color: '#fff' },
+  appGridText: { fontSize: 13, fontWeight: '700', marginBottom: 2 },
+  appGridAmount: { fontSize: 11, fontWeight: '600', color: Colors.textMuted },
+  // Legacy row styles (kept for donate section compatibility)
   appBtnsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   appBtn: {
     width: '48%', flexDirection: 'row', alignItems: 'center',
@@ -465,11 +485,6 @@ const s = StyleSheet.create({
     elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3,
   },
   appLogoImg: { width: 32, height: 32, borderRadius: 6 },
-  appLogo: {
-    width: 32, height: 32, borderRadius: 8,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  appLogoText: { fontSize: 16, fontWeight: '900', color: '#fff' },
   appBtnText: { fontSize: 13, fontWeight: '700', flex: 1 },
   anyUpiBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

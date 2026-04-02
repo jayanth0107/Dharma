@@ -334,7 +334,7 @@ function NaturalMoon({ tithiId, size }) {
 }
 
 // ── Header Section ──
-export function HeaderSection({ panchangam, onBellPress, isPremium, locationName, locationTelugu, locationDetecting, onLocationPress }) {
+export function HeaderSection({ panchangam, onBellPress, isPremium, locationName, locationTelugu, locationDetecting, onLocationPress, onMenuPress }) {
   if (!panchangam) return null;
 
   const { vaaram, teluguYear, teluguMonth, paksha, tithi,
@@ -365,13 +365,16 @@ export function HeaderSection({ panchangam, onBellPress, isPremium, locationName
           <DharmaFlag />
           <View style={s.titleCenter}>
             <ShimmerTitle text="ధర్మ దినచర్య" />
-            <Text style={s.tagline}>Dharma Daily</Text>
+            <Text style={s.tagline}>ధర్మ</Text>
           </View>
           <PulsingCrown isPremium={isPremium} onPress={onBellPress} />
         </View>
 
-        {/* Row 2: Location + Subtitle */}
+        {/* Row 2: Menu + Location */}
         <View style={s.subRow}>
+          <TouchableOpacity style={s.menuBtn} onPress={onMenuPress} activeOpacity={0.7}>
+            <MaterialCommunityIcons name="menu" size={18} color="#FFD700" />
+          </TouchableOpacity>
           <View style={s.subLine} />
           <TouchableOpacity style={s.locationPill} onPress={onLocationPress} activeOpacity={0.7}>
             <MaterialCommunityIcons name={locationDetecting ? 'crosshairs-gps' : 'map-marker'} size={13} color="#FFD700" />
@@ -469,6 +472,11 @@ const s = StyleSheet.create({
     flex: 1, height: 1,
     backgroundColor: 'rgba(255,215,0,0.15)', borderRadius: 1,
   },
+  menuBtn: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: 'rgba(255,215,0,0.12)', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,215,0,0.2)',
+  },
   locationPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: 'rgba(255,255,255,0.1)', paddingVertical: 9, paddingHorizontal: 16, borderRadius: 20,
@@ -487,11 +495,11 @@ const s = StyleSheet.create({
 
   // Hero Card
   hero: {
-    marginHorizontal: 14, marginTop: 14, marginBottom: 10,
-    backgroundColor: '#FFFFFF', borderRadius: 24,
-    borderWidth: 1.5, borderColor: 'rgba(212,160,23,0.22)',
-    elevation: 6, shadowColor: '#D4A017', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18, shadowRadius: 12,
+    marginHorizontal: 10, marginTop: 14, marginBottom: 10,
+    backgroundColor: '#FFFFFF', borderRadius: 20,
+    borderWidth: 1, borderColor: 'rgba(212,160,23,0.15)',
+    elevation: 4, shadowColor: '#D4A017', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12, shadowRadius: 8,
     overflow: 'hidden',
   },
 

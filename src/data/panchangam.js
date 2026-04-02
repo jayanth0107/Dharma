@@ -1,4 +1,4 @@
-// Dharma Daily — Panchangam Data
+// ధర్మ — Panchangam Data
 // Telugu Panchangam with authentic traditional details
 
 // Tithi (తిథి) — Lunar day

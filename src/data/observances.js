@@ -1,4 +1,4 @@
-// Dharma Daily — Recurring Monthly Observances 2026
+// ధర్మ — Recurring Monthly Observances 2026
 // Sankashti Chaturthi, Pournami, Amavasya, Pradosham dates
 
 export const CHATURTHI_2026 = [

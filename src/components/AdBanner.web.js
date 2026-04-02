@@ -32,7 +32,7 @@ export function AdBannerWidget({ style, variant = 'default' }) {
   if (_isPremium || !_adsEnabled) return null;
 
   const ads = {
-    default: { text: 'ధర్మ Daily Premium — ప్రకటనలు లేకుండా', sub: 'Upgrade to remove ads', color: '#4A1A6B', icon: 'crown' },
+    default: { text: 'ధర్మ Premium — ప్రకటనలు లేకుండా', sub: 'Upgrade to remove ads', color: '#4A1A6B', icon: 'crown' },
     gold: { text: 'బంగారం కొనాలనుకుంటున్నారా?', sub: 'Sample Ad — Gold Jewellery', color: '#B8860B', icon: 'gold' },
     festival: { text: 'పండుగ ఆఫర్లు!', sub: 'Sample Ad — Festival Deals', color: '#2E7D32', icon: 'party-popper' },
     spiritual: { text: 'తీర్థయాత్ర ప్యాకేజీలు', sub: 'Sample Ad — Pilgrimage Tours', color: '#E8751A', icon: 'bus' },

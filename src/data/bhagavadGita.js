@@ -1,4 +1,4 @@
-// Dharma Daily — Bhagavad Gita Daily Slokas
+// ధర్మ — Bhagavad Gita Daily Slokas
 // 30 slokas (one per day of the month) with Sanskrit, Telugu translation,
 // English meaning, and chapter/verse reference.
 // Premium users get access to the full library; free users see 1 sloka/day.

@@ -1,4 +1,4 @@
-// Dharma Daily — Analytics Service
+// ధర్మ — Analytics Service
 // Tracks user engagement to help improve the app and understand usage patterns.
 // Uses Firebase Analytics when configured, falls back to local storage tracking.
 // All data is anonymous — no personal information is collected.
