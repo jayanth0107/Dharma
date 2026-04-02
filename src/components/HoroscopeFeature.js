@@ -3,13 +3,14 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
-  TextInput, Platform, Alert, ActivityIndicator, Image, Linking,
+  TextInput, Platform, Alert, ActivityIndicator, Image, Linking, Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { trackEvent } from '../utils/analytics';
 import { searchLocation } from '../utils/geolocation';
+import { shareAsPdf } from '../utils/shareService';
 
 // ── Horoscope Card (shown in main feed) ──
 export function HoroscopeCard({ onOpen, isPremium }) {
@@ -242,9 +243,10 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
       if (win) { win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500); }
     } else {
       try {
-        const { shareAsPdf } = require('../utils/shareService');
         await shareAsPdf(html, `${horoscope.name} — జాతకం`);
-      } catch {}
+      } catch (e) {
+        if (__DEV__) console.warn('PDF share failed:', e);
+      }
     }
   };
 
@@ -609,16 +611,28 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     <MaterialCommunityIcons name="file-pdf-box" size={20} color="#C41E3A" />
                     <Text style={s.pdfBtnText}>PDF</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={s.shareResultBtn} onPress={() => {
-                    const { universalShare } = require('../utils/shareService');
-                    const text = `🙏 వేద జాతకం — ${horoscope.name}\n\n` +
-                      `రాశి: ${horoscope.rashi?.telugu} (${horoscope.rashi?.english})\n` +
-                      `నక్షత్రం: ${horoscope.nakshatra?.telugu} (పాద ${horoscope.nakshatra?.pada})\n` +
-                      `లగ్నం: ${horoscope.lagna?.telugu}\n` +
-                      `సూర్య రాశి: ${horoscope.sunSign?.telugu}\n\n` +
-                      `తిథి: ${horoscope.tithi?.telugu} | యోగం: ${horoscope.yoga?.telugu} | కరణం: ${horoscope.karana?.telugu}\n\n` +
-                      `━━━━━━━━━━━━━━━━\nధర్మ దినచర్య App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
-                    universalShare(text, `${horoscope.name} — జాతకం`);
+                  <TouchableOpacity style={s.shareResultBtn} onPress={async () => {
+                    try {
+                      const text = `🙏 వేద జాతకం — ${horoscope.name}\n\n` +
+                        `రాశి: ${horoscope.rashi?.telugu || ''} (${horoscope.rashi?.english || ''})\n` +
+                        `నక్షత్రం: ${horoscope.nakshatra?.telugu || ''} (పాద ${horoscope.nakshatra?.pada || ''})\n` +
+                        `లగ్నం: ${horoscope.lagna?.telugu || ''}\n` +
+                        `సూర్య రాశి: ${horoscope.sunSign?.telugu || ''}\n\n` +
+                        `తిథి: ${horoscope.tithi?.telugu || ''} | యోగం: ${horoscope.yoga?.telugu || ''} | కరణం: ${horoscope.karana?.telugu || ''}\n\n` +
+                        `━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+                      if (Platform.OS === 'web') {
+                        if (navigator.share) {
+                          await navigator.share({ text, title: `${horoscope.name} — జాతకం` });
+                        } else if (navigator.clipboard) {
+                          await navigator.clipboard.writeText(text);
+                          alert('క్లిప్‌బోర్డ్‌కు కాపీ అయింది!');
+                        }
+                      } else {
+                        await Share.share({ message: text, title: `${horoscope.name} — జాతకం` });
+                      }
+                    } catch (e) {
+                      if (__DEV__) console.warn('Share failed:', e);
+                    }
                   }}>
                     <Ionicons name="share-social" size={20} color={Colors.saffron} />
                     <Text style={s.shareResultText}>Share</Text>
