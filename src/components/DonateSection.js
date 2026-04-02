@@ -232,26 +232,30 @@ export function DonateModal({ visible, onClose, initialAmount }) {
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modal}>
+          {/* Fixed Header — stays visible while scrolling */}
+          <LinearGradient
+            colors={['#2E7D32', '#1B5E20', '#0D3B0F']}
+            style={styles.modalHeader}
+          >
+            <View style={styles.modalHeaderRow}>
+              <TouchableOpacity onPress={onClose} accessibilityLabel="వెనక్కి" accessibilityRole="button">
+                <Ionicons name="arrow-back" size={24} color={Colors.white} />
+              </TouchableOpacity>
+              <Text style={styles.modalHeaderTitle}>దానం</Text>
+              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel="UPI ID కాపీ" accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, gap: 4 }}>
+                <MaterialCommunityIcons name="content-copy" size={16} color="#FFD700" />
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFD700' }}>UPI ID</Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Header */}
-            <LinearGradient
-              colors={['#2E7D32', '#1B5E20', '#0D3B0F']}
-              style={styles.modalHeader}
-            >
-              <View style={styles.modalHeaderRow}>
-                <TouchableOpacity onPress={onClose} accessibilityLabel="వెనక్కి" accessibilityRole="button">
-                  <Ionicons name="arrow-back" size={24} color={Colors.white} />
-                </TouchableOpacity>
-                <Text style={styles.modalHeaderTitle}>దానం</Text>
-                <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel="UPI ID కాపీ" accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, gap: 4 }}>
-                  <MaterialCommunityIcons name="content-copy" size={16} color="#FFD700" />
-                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFD700' }}>UPI ID</Text>
-                </TouchableOpacity>
-              </View>
-              <MaterialCommunityIcons name="hand-heart" size={48} color="#FFD700" style={{ alignSelf: 'center', marginTop: 12 }} />
+            {/* Decorative icon + quote */}
+            <View style={{ alignItems: 'center', backgroundColor: '#0D3B0F', paddingBottom: 16 }}>
+              <MaterialCommunityIcons name="hand-heart" size={48} color="#FFD700" style={{ marginTop: 8 }} />
               <Text style={styles.modalQuote}>దానం పరమో ధర్మః</Text>
               <Text style={styles.modalQuoteEn}>దానమే పరమ ధర్మం</Text>
-            </LinearGradient>
+            </View>
 
             <View style={styles.modalBody}>
               {/* Message */}
