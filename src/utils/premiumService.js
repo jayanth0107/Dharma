@@ -227,7 +227,15 @@ export async function getTierInfo() {
 }
 
 /**
- * Start a free trial (7 days of premium)
+ * Get payment audit records (admin only)
+ */
+export async function getPaymentRecords() {
+  const state = await loadState();
+  return state.payments || [];
+}
+
+/**
+ * Start a free trial (3 days of premium)
  */
 export async function startTrial() {
   const state = await loadState();

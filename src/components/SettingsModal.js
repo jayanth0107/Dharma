@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '../utils/notificationService';
+import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
 import { setAdConfig } from './AdBanner';
 
 // Admin verification (obfuscated)
@@ -27,6 +28,8 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
   const [adminUnlocked, setAdminUnlocked] = useState(typeof __DEV__ !== 'undefined' ? __DEV__ : true);
   const [adminInput, setAdminInput] = useState('');
   const [adminError, setAdminError] = useState(false);
+  const [paymentRecords, setPaymentRecords] = useState([]);
+  const [showPayments, setShowPayments] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -171,6 +174,51 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                     thumbColor={isPremium ? '#FFD700' : '#ccc'}
                   />
                 </View>
+
+                {/* Payment Records */}
+                <TouchableOpacity
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: 12, padding: 12 }]}
+                  onPress={async () => {
+                    if (!showPayments) {
+                      const records = await getPaymentRecords();
+                      setPaymentRecords(records);
+                    }
+                    setShowPayments(!showPayments);
+                  }}
+                >
+                  <MaterialCommunityIcons name="receipt" size={22} color={Colors.saffron} style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.settingLabel}>Payment Records</Text>
+                    <Text style={s.settingSublabel}>UPI చెల్లింపు చరిత్ర</Text>
+                  </View>
+                  <MaterialCommunityIcons name={showPayments ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.textMuted} />
+                </TouchableOpacity>
+
+                {showPayments && (
+                  <View style={{ marginTop: 8, backgroundColor: '#f9f9f4', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' }}>
+                    {paymentRecords.length === 0 ? (
+                      <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 12 }}>చెల్లింపులు లేవు</Text>
+                    ) : (
+                      paymentRecords.map((r, i) => (
+                        <View key={i} style={{ paddingVertical: 8, borderBottomWidth: i < paymentRecords.length - 1 ? 1 : 0, borderBottomColor: 'rgba(0,0,0,0.06)' }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: Colors.darkBrown }}>
+                              {r.source === 'trial' ? '🆓 Trial' : `💳 ₹${r.amount || '—'}`}
+                            </Text>
+                            <Text style={{ fontSize: 11, color: Colors.textMuted }}>{r.days}d</Text>
+                          </View>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
+                            <Text style={{ fontSize: 11, color: Colors.textMuted }}>{r.planId || r.source}</Text>
+                            <Text style={{ fontSize: 10, color: '#aaa' }}>{r.date ? new Date(r.date).toLocaleDateString('te-IN') : '—'}</Text>
+                          </View>
+                        </View>
+                      ))
+                    )}
+                    <Text style={{ fontSize: 10, color: '#bbb', textAlign: 'center', marginTop: 8 }}>
+                      {paymentRecords.length} record(s) — Admin only
+                    </Text>
+                  </View>
+                )}
               </>
             )}
 
