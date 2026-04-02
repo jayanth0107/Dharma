@@ -36,8 +36,6 @@ const PREMIUM_PERKS = [
   { icon: 'zodiac-leo', text: 'రాశి ఫలం — జాతకం', textEn: 'Vedic horoscope & birth chart', detail: 'రాశి, లగ్నం, నక్షత్రం • నవగ్రహ స్థానాలు • వ్యక్తిత్వ విశ్లేషణ' },
   { icon: 'book-open-page-variant', text: 'భగవద్గీత లైబ్రరీ', textEn: 'Browse all 30 slokas with themes', detail: 'సంస్కృతం + తెలుగు + ఆంగ్లం • థీమ్ / అధ్యాయం వెతుకు • షేర్' },
   { icon: 'advertisements-off', text: 'ప్రకటనలు లేవు', textEn: 'Completely ad-free experience', detail: 'బ్యానర్ & ఇంటర్‌స్టీషియల్ ప్రకటనలు పూర్తిగా తొలగించబడతాయి' },
-  { icon: 'weather-night', text: 'డార్క్ మోడ్', textEn: 'Dark Mode (coming soon)', detail: 'రాత్రి చదవడానికి కంటి ఒత్తిడి తగ్గించే థీమ్' },
-  { icon: 'calendar-range', text: 'బహు సంవత్సర డేటా', textEn: 'Multi-year data (coming soon)', detail: '2024-2030 పండుగలు, ఏకాదశి, సెలవులు' },
 ];
 
 // ---- UPI Payment helpers ----
