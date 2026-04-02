@@ -10,7 +10,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { trackEvent } from '../utils/analytics';
 import { searchLocation } from '../utils/geolocation';
-import { shareAsPdf, universalShare } from '../utils/shareService';
+import { SectionShareRow } from './SectionShareRow';
 
 // ── Horoscope Card (shown in main feed) ──
 export function HoroscopeCard({ onOpen, isPremium }) {
@@ -235,20 +235,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
     }, 2500);
   };
 
-  const handlePdf = async () => {
-    if (!horoscope) return;
-    const html = buildHoroscopeHtml(horoscope);
-    if (Platform.OS === 'web') {
-      const win = window.open('', '_blank');
-      if (win) { win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500); }
-    } else {
-      try {
-        await shareAsPdf(html, `${horoscope.name} — జాతకం`);
-      } catch (e) {
-        if (__DEV__) console.warn('PDF share failed:', e);
-      }
-    }
-  };
+  // PDF + Share handled by SectionShareRow component
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
@@ -605,26 +592,20 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                   </View>
                 )}
 
-                {/* PDF + Share buttons */}
-                <View style={s.actionRow}>
-                  <TouchableOpacity style={s.pdfBtn} onPress={handlePdf}>
-                    <MaterialCommunityIcons name="file-pdf-box" size={20} color="#C41E3A" />
-                    <Text style={s.pdfBtnText}>PDF</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={s.shareResultBtn} onPress={() => {
-                    const text = `🙏 వేద జాతకం — ${horoscope.name}\n\n` +
-                      `రాశి: ${horoscope.rashi?.telugu || ''} (${horoscope.rashi?.english || ''})\n` +
-                      `నక్షత్రం: ${horoscope.nakshatra?.telugu || ''} (పాద ${horoscope.nakshatra?.pada || ''})\n` +
-                      `లగ్నం: ${horoscope.lagna?.telugu || ''}\n` +
-                      `సూర్య రాశి: ${horoscope.sunSign?.telugu || ''}\n\n` +
-                      `తిథి: ${horoscope.tithi?.telugu || ''} | యోగం: ${horoscope.yoga?.telugu || ''} | కరణం: ${horoscope.karana?.telugu || ''}\n\n` +
-                      `━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
-                    universalShare(text, `${horoscope.name} — జాతకం`);
-                  }}>
-                    <Ionicons name="share-social" size={20} color={Colors.saffron} />
-                    <Text style={s.shareResultText}>Share</Text>
-                  </TouchableOpacity>
-                </View>
+                {/* Share — same component used by all other sections */}
+                <SectionShareRow
+                  section="horoscope"
+                  insideModal
+                  buildText={() =>
+                    `🙏 వేద జాతకం — ${horoscope.name}\n\n` +
+                    `రాశి: ${horoscope.rashi?.telugu || ''} (${horoscope.rashi?.english || ''})\n` +
+                    `నక్షత్రం: ${horoscope.nakshatra?.telugu || ''} (పాద ${horoscope.nakshatra?.pada || ''})\n` +
+                    `లగ్నం: ${horoscope.lagna?.telugu || ''}\n` +
+                    `సూర్య రాశి: ${horoscope.sunSign?.telugu || ''}\n\n` +
+                    `తిథి: ${horoscope.tithi?.telugu || ''} | యోగం: ${horoscope.yoga?.telugu || ''} | కరణం: ${horoscope.karana?.telugu || ''}\n\n` +
+                    `━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`
+                  }
+                />
 
                 {/* Usage counter */}
                 <Text style={{ fontSize: 10, color: Colors.textMuted, textAlign: 'center', marginTop: 8 }}>
