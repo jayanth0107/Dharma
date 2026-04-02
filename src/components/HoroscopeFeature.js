@@ -596,15 +596,56 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                 <SectionShareRow
                   section="horoscope"
                   insideModal
-                  buildText={() =>
-                    `🙏 వేద జాతకం — ${horoscope.name}\n\n` +
-                    `రాశి: ${horoscope.rashi?.telugu || ''} (${horoscope.rashi?.english || ''})\n` +
-                    `నక్షత్రం: ${horoscope.nakshatra?.telugu || ''} (పాద ${horoscope.nakshatra?.pada || ''})\n` +
-                    `లగ్నం: ${horoscope.lagna?.telugu || ''}\n` +
-                    `సూర్య రాశి: ${horoscope.sunSign?.telugu || ''}\n\n` +
-                    `తిథి: ${horoscope.tithi?.telugu || ''} | యోగం: ${horoscope.yoga?.telugu || ''} | కరణం: ${horoscope.karana?.telugu || ''}\n\n` +
-                    `━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`
-                  }
+                  buildText={() => {
+                    const h = horoscope;
+                    let text = `🙏 వేద జాతకం — ${h.name}\n`;
+                    text += `━━━━━━━━━━━━━━━━\n\n`;
+
+                    // Birth details
+                    text += `📅 జన్మ వివరాలు\n`;
+                    text += `తేదీ: ${h.birthDate || ''}\n`;
+                    text += `సమయం: ${h.birthTime || ''}\n`;
+                    text += `స్థలం: ${h.birthPlace || ''}\n\n`;
+
+                    // Core astro data
+                    text += `🌙 రాశి: ${h.rashi?.telugu || ''} (${h.rashi?.english || ''})\n`;
+                    text += `⭐ నక్షత్రం: ${h.nakshatra?.telugu || ''} (పాద ${h.nakshatra?.pada || ''})\n`;
+                    text += `🔱 లగ్నం: ${h.lagna?.telugu || ''}\n`;
+                    text += `☀️ సూర్య రాశి: ${h.sunSign?.telugu || ''}\n\n`;
+
+                    // Birth panchangam
+                    text += `📿 జన్మ పంచాంగం\n`;
+                    text += `తిథి: ${h.tithi?.telugu || ''}\n`;
+                    text += `యోగం: ${h.yoga?.telugu || ''}\n`;
+                    text += `కరణం: ${h.karana?.telugu || ''}\n\n`;
+
+                    // Navagraha positions
+                    if (h.navagraha) {
+                      text += `🪐 నవగ్రహ స్థానాలు\n`;
+                      Object.values(h.navagraha).forEach(p => {
+                        text += `${p.telugu}: ${p.rashi}${p.retrograde ? ' (వక్ర)' : ''}\n`;
+                      });
+                      text += `\n`;
+                    }
+
+                    // Predictions
+                    if (h.predictions) {
+                      text += `📜 జాతక ఫలాలు\n`;
+                      if (h.predictions.personality) text += `👤 వ్యక్తిత్వం: ${h.predictions.personality}\n\n`;
+                      if (h.predictions.career) text += `💼 వృత్తి: ${h.predictions.career}\n\n`;
+                      if (h.predictions.health) text += `❤️ ఆరోగ్యం: ${h.predictions.health}\n\n`;
+                      if (h.predictions.relationships) text += `💑 సంబంధాలు: ${h.predictions.relationships}\n\n`;
+                      if (h.predictions.spiritual) text += `🧘 ఆధ్యాత్మికత: ${h.predictions.spiritual}\n\n`;
+                    }
+
+                    // Daily forecast
+                    if (h.dailyForecast) {
+                      text += `📅 నేటి ఫలం\n${h.dailyForecast}\n\n`;
+                    }
+
+                    text += `━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+                    return text;
+                  }}
                 />
 
                 {/* Usage counter */}
