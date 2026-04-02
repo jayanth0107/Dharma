@@ -372,18 +372,22 @@ export function HeaderSection({ panchangam, onBellPress, isPremium, locationName
             <ShimmerTitle text="ధర్మ" />
             <View style={s.titleLine} />
             <Text style={s.tagline}>సనాతనం</Text>
-            {isPremium && (
-              <View style={s.premiumBadge}>
-                <MaterialCommunityIcons name="crown" size={10} color="#FFD700" />
-                <Text style={s.premiumBadgeText}>PREMIUM</Text>
-              </View>
-            )}
           </View>
           {/* Flag on left, Crown on right — above the centered title */}
           <View style={s.titleSide}><DharmaFlag /></View>
           <View style={{ flex: 1 }} />
           <View style={s.titleSide}><PulsingCrown isPremium={isPremium} onPress={onBellPress} /></View>
         </View>
+
+        {/* Premium badge */}
+        {isPremium && (
+          <View style={{ alignItems: 'center', marginTop: 6 }}>
+            <View style={s.premiumBadge}>
+              <MaterialCommunityIcons name="crown" size={10} color="#FFD700" />
+              <Text style={s.premiumBadgeText}>PREMIUM</Text>
+            </View>
+          </View>
+        )}
 
         {/* Row 2: Location (centered) with decorative lines */}
         <View style={s.subRow}>
