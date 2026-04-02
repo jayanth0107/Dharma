@@ -9,7 +9,6 @@ dist/
 *.orig.*
 web-build/
 google-play-service-account.json
-google-services.json
 .env
 .env.local
 .env.production
