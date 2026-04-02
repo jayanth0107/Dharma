@@ -1,8 +1,10 @@
-# ధర్మ Daily — Telugu Panchangam App
+# ధర్మ — Telugu Panchangam App
 
 A comprehensive **React Native (Expo)** mobile app delivering daily **Telugu Panchangam** with astronomically accurate calculations, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, live gold prices, and cultural content — built for Telugu-speaking Hindu communities worldwide.
 
 > **Platforms:** Android, iOS, Web | **Language:** Bilingual (Telugu + English) | **Version:** 1.1.0
+
+**GitHub:** https://github.com/jayanth0107/Dharma
 
 ---
 
@@ -34,7 +36,7 @@ A comprehensive **React Native (Expo)** mobile app delivering daily **Telugu Pan
 
 ## What This App Does
 
-**DharmaDaily** is a daily spiritual companion for Telugu Hindu families. Think of it as a digital panchangam (Hindu almanac) that provides:
+**ధర్మ** is a daily spiritual companion for Telugu Hindu families. Think of it as a digital panchangam (Hindu almanac) that provides:
 
 1. **What day is it today?** — Tithi (lunar day), Nakshatra (star), Yoga, Karana, Telugu month/year
 2. **What are the auspicious times?** — Brahma Muhurtam, Abhijit Muhurtam, Amrit Kalam
@@ -55,7 +57,7 @@ The app is a single scrollable page with these sections (top to bottom):
 
 | Section | What it shows |
 |---------|--------------|
-| **Header** | Telugu year, month, sunrise/sunset, location |
+| **Header** | Bhagwa Dhwaj flag, shimmering "ధర్మ" title, "సనాతనం" subtitle, sunrise/sunset, centered location |
 | **Daily Darshan** | Deity of the day with mantra |
 | **Quick Access** | 6 shortcut buttons to jump to sections |
 | **Date Navigator** | Yesterday / Today / Tomorrow + WhatsApp & Share buttons |
@@ -73,6 +75,8 @@ The app is a single scrollable page with these sections (top to bottom):
 | **Kids Section** | Rotating stories and slokas |
 | **Daily Sloka** | Subhashitam / wisdom quote |
 | **Donate Section** | UPI donation with QR code |
+
+**Navigation:** A pulsating FloatingMenu (hamburger button) provides quick access to all sections. Replaces the previous StickyNavTabs + BottomTabBar pattern.
 
 ---
 
@@ -95,7 +99,6 @@ The app is a single scrollable page with these sections (top to bottom):
 - **Daily Sloka** — Subhashitam/wisdom verse
 - **Bhagavad Gita** — Daily sloka (1 per day, rotates by date)
 - **Analytics Dashboard** — Track your app usage (Menu → Analytics)
-- **Zoom Controls** — Font size adjuster below settings icon in bottom bar (90%-140%)
 - **Error Recovery** — Telugu/English crash recovery screen
 - **WhatsApp Share** — Share today's panchangam via WhatsApp with one tap
 - **Share** — Share deity images, Gita slokas, panchangam data via any app
@@ -143,7 +146,7 @@ The app is a single scrollable page with these sections (top to bottom):
 | Yearly | ₹299 | 365 days | 49% vs monthly |
 | Lifetime | ₹999 | Forever | Best value |
 
-All payments are via UPI (Google Pay, PhonePe, Paytm, BHIM). The system uses trust-based activation — users self-activate after payment. A 7-day free trial is available for first-time users.
+All payments are via UPI (Google Pay, PhonePe, Paytm, BHIM). The system uses trust-based activation — users self-activate after payment. A 3-day free trial is available for first-time users.
 
 ### Horoscope Feature (Rashi Phalam)
 
@@ -199,7 +202,7 @@ Find auspicious days for 6 event types:
 
 ### Usage Limits & Abuse Prevention
 
-- **Free trial:** One-time 7-day trial per device. Cannot be reset without clearing app data
+- **Free trial:** One-time 3-day trial per device. Cannot be reset without clearing app data
 - **Horoscope limits:** Enforced per plan (5/20/200 generations). Counter stored locally
 - **Trust-based activation:** Premium status is stored locally. Abuse detection may be added in future versions
 - **No account required:** The app does not require login or account creation
@@ -216,7 +219,7 @@ Find auspicious days for 6 event types:
 ### Premium Subscription Architecture (`src/utils/premiumService.js`)
 
 - **Tiers:** Free / Premium
-- **Trial:** 7-day free trial (one-time)
+- **Trial:** 3-day free trial (one-time)
 - **Pricing:** Weekly ₹19, Monthly ₹49, Yearly ₹299, Lifetime ₹999
 - **Storage:** AsyncStorage (native) / localStorage (web)
 - **Upsell:** Beautiful modal with perks list and pricing cards
@@ -234,7 +237,7 @@ Find auspicious days for 6 event types:
 | **Icons** | @expo/vector-icons | Ionicons + MaterialCommunityIcons |
 | **Gradients** | expo-linear-gradient | Beautiful gradient backgrounds |
 | **Storage** | @react-native-async-storage | Persistent local data |
-| **Location** | expo-location | GPS auto-detection |
+| **Location** | expo-location | GPS auto-detection (coarse only) |
 | **PDF** | expo-print 15.0 | Generate HTML-to-PDF reports |
 | **Sharing** | expo-sharing 14.0 | Native share sheet for PDFs and files |
 | **Notifications** | expo-notifications | (Ready, not yet wired) |
@@ -247,7 +250,7 @@ Find auspicious days for 6 event types:
 ## Project Structure
 
 ```
-DharmaDaily/
+Dharma/
 ├── App.js                              # Main entry — ALL state lives here
 ├── index.js                            # Expo entry point
 ├── package.json                        # Dependencies & scripts
@@ -255,17 +258,26 @@ DharmaDaily/
 ├── eas.json                            # EAS Build profiles
 ├── google-services.json                # Firebase Android config (gitignored)
 │
+├── assets/
+│   ├── flag.png                        # Bhagwa Dhwaj flag for header
+│   ├── deities/                        # Local deity images (Venkateswara, Krishna)
+│   ├── upi/                            # UPI payment logos (GPay, PhonePe, Paytm, BHIM)
+│   ├── icon-512.png                    # App icon
+│   └── feature-graphic.jpg             # Play Store feature graphic
+│
+├── scripts/
+│   └── generate-icons.js              # Generates all app icon assets
+│
 ├── src/
 │   ├── components/                     # All UI components (functional, hooks)
-│   │   ├── HeaderSection.js            # Animated header: year, month, sunrise/sunset, location
-│   │   ├── StickyNavTabs.js            # Horizontal scrolling section navigation bar
+│   │   ├── HeaderSection.js            # Flag header: "ధర్మ" title, "సనాతనం" subtitle, sun radiance, location
+│   │   ├── FloatingMenu.js             # Primary navigation — pulsating hamburger, section menu
 │   │   ├── PanchangaCard.js            # Tithi/Nakshatra/Yoga/Karana cards + Timing + Muhurtham + Sloka
 │   │   ├── FestivalCard.js             # Today's festival banner + upcoming list
 │   │   ├── EkadashiCard.js             # Ekadashi banners, list, and yearly modal
 │   │   ├── GoldPriceCard.js            # Live gold/silver prices with sparkle animation
 │   │   ├── MiniCalendar.js             # Monthly calendar with festival/ekadashi dots
 │   │   ├── FilterPills.js              # Observance type filter (Ekadashi, Sankashti, etc.)
-│   │   ├── BottomTabBar.js             # Fixed bottom nav (4 tabs + settings + zoom)
 │   │   ├── DailyDarshan.js             # Deity of the day with full-width image, mantra
 │   │   ├── DeityBanner.js              # Cultural divider/separator component
 │   │   ├── KidsSection.js              # Stories carousel + slokas for children
@@ -281,7 +293,9 @@ DharmaDaily/
 │   │   ├── MuhurtamFinder.js           # Auspicious day finder + PDF + WhatsApp share
 │   │   ├── HoroscopeFeature.js         # Vedic birth chart generator (premium)
 │   │   ├── PremiumBanner.js            # Premium upsell banner + subscription modal
-│   │   └── SettingsModal.js            # Settings + hidden admin panel (passcode-protected)
+│   │   ├── SettingsModal.js            # Settings + hidden admin panel (passcode-protected)
+│   │   ├── StickyNavTabs.js            # DEPRECATED — replaced by FloatingMenu
+│   │   └── BottomTabBar.js             # DEPRECATED — replaced by FloatingMenu
 │   │
 │   ├── data/                           # Static data files (2026 scope)
 │   │   ├── panchangam.js               # Tithi, Vaaram, Nakshatra, Yoga, Karana constants
@@ -309,12 +323,6 @@ DharmaDaily/
 │   │
 │   └── theme/
 │       └── colors.js                   # Sacred color palette & gradient definitions
-│
-├── assets/
-│   ├── deities/                        # Local deity images (Venkateswara, Krishna)
-│   ├── upi/                            # UPI payment logos (GPay, PhonePe, Paytm, BHIM)
-│   ├── icon-512.png                    # App icon
-│   └── feature-graphic.jpg             # Play Store feature graphic
 │
 ├── docs/
 │   ├── DharmaDaily-PlayStore-Guide.html  # Monetization & publishing schedule
@@ -347,8 +355,8 @@ Make sure you have these installed:
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/user/DharmaDaily.git
-cd DharmaDaily
+git clone https://github.com/jayanth0107/Dharma.git
+cd Dharma
 
 # 2. Install dependencies
 npm install
@@ -388,7 +396,7 @@ eas submit --platform android                       # Submit to Play Store
 
 ### Single-File State Management
 
-Unlike typical React Native apps with Redux/MobX, DharmaDaily uses a simple architecture:
+Unlike typical React Native apps with Redux/MobX, ధర్మ uses a simple architecture:
 
 ```
 App.js (all state)
@@ -406,9 +414,10 @@ App.js (all state)
        ├── MuhurtamFinder (props: isPremium)
        ├── KidsSection (props: dayOfWeek)
        └── DonateCard
+  └── FloatingMenu (fixed position, pulsating hamburger)
 ```
 
-**Why no navigation library?** The app is a single scrollable page (like a newspaper). All sections live in one `ScrollView` with ref-based scrolling. The `BottomTabBar` scrolls to sections or opens modals.
+**Why no navigation library?** The app is a single scrollable page (like a newspaper). All sections live in one `ScrollView` with nativeID-based scrolling. The `FloatingMenu` is a pulsating hamburger button that expands into a section menu, scrolling to sections via `offsetTop` DOM walk + direct `scrollTop` on web.
 
 ### Data Flow
 
@@ -431,7 +440,6 @@ User selects date
 | `todayEkadashi` | Object/null | Ekadashi on selected date |
 | `goldSilverPrices` | Object/null | Live gold/silver prices |
 | `premiumActive` | Boolean | Whether user has premium |
-| `activeTab` | String | Current bottom tab |
 | `fontScale` | Number | Zoom level (0.9 - 1.4) |
 
 ---
@@ -472,9 +480,9 @@ Western astronomy uses the **tropical zodiac** (based on equinoxes). Indian/Vedi
 
 | Data | Source | Module |
 |------|--------|--------|
-| Tithi | Moon-Sun angular difference ÷ 12° | `panchangamCalculator.js` |
-| Nakshatra | Moon's sidereal longitude ÷ 13.33° | `panchangamCalculator.js` |
-| Yoga | (Sun + Moon sidereal longitude) ÷ 13.33° | `panchangamCalculator.js` |
+| Tithi | Moon-Sun angular difference / 12 deg | `panchangamCalculator.js` |
+| Nakshatra | Moon's sidereal longitude / 13.33 deg | `panchangamCalculator.js` |
+| Yoga | (Sun + Moon sidereal longitude) / 13.33 deg | `panchangamCalculator.js` |
 | Karana | Half-tithi calculation | `panchangamCalculator.js` |
 | Sunrise/Sunset | astronomy-engine + location | `panchangamCalculator.js` |
 | Rahu Kalam | Weekday-based 8-period division | `panchangamCalculator.js` |
@@ -513,7 +521,7 @@ Currently uses placeholder keys. To connect:
 
 1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
 2. Add Android app with package name `com.dharmadaily.app`
-3. Download `google-services.json` → place in project root
+3. Download `google-services.json` → place in project root (gitignored)
 4. Update `src/config/firebase.js` with your config
 
 ### AdMob (`src/components/AdBanner.js`)
@@ -527,7 +535,7 @@ Currently uses Google's test ad IDs. To monetize:
 
 ### Location
 
-Default: **Hyderabad** (17.3850°N, 78.4867°E, 542m altitude)
+Default: **Hyderabad** (17.3850 deg N, 78.4867 deg E, 542m altitude)
 
 The app auto-detects location via GPS on first launch, with fallback to Hyderabad.
 
@@ -585,6 +593,12 @@ The app uses a **sacred Hindu temple-inspired** color palette:
 | **Ivory** | `#FFF8F0` | Sandalwood paste | Page backgrounds |
 | **Sandalwood** | `#C9A96E` | Temple wood | Borders, dividers |
 
+### Section Styling
+
+- White cards with shadows, rounded corners
+- Gold-tinted header borders on section cards
+- Consistent spacing and sacred color accents
+
 ### Gradients
 
 - **Sunrise:** `#0F0F1A → #1A1A2E → #C55A11 → #E8751A → #F5D77A`
@@ -602,7 +616,7 @@ Hyderabad (default), Visakhapatnam, Vijayawada, Tirupati, Warangal, Chennai, Ban
 ### GPS Auto-Detection
 
 On first launch, the app requests location permission and auto-detects your city using:
-1. **Device GPS** (expo-location)
+1. **Device GPS** (expo-location, coarse location)
 2. **Reverse geocoding** (OpenStreetMap Nominatim API)
 3. **Fallback:** Hyderabad
 
@@ -621,7 +635,7 @@ premiumService.js
   ├── initPremium()        → Load state from storage
   ├── isPremium()          → Check if user has active premium
   ├── hasFeature(id)       → Check specific feature access
-  ├── startTrial()         → Activate 7-day free trial
+  ├── startTrial()         → Activate 3-day free trial
   ├── activatePremium()    → Activate (after purchase/donation)
   ├── deactivatePremium()  → For testing/cancellation
   └── getPricingInfo()     → Display pricing
@@ -660,7 +674,7 @@ App.js
 
 ### Phase 2: Freemium (v1.1.0 — Current)
 - Premium subscription (₹19/week, ₹49/mo, ₹299/yr, ₹999/lifetime)
-- 7-day free trial
+- 3-day free trial
 - Gita Library + Muhurtam Finder + Horoscope as premium features
 - Horoscope usage-based pricing (₹19/5 uses, ₹49/20 uses, ₹299/200 uses)
 
@@ -732,13 +746,14 @@ App.js
 
 | Field | Value |
 |-------|-------|
-| **App Name** | ధర్మ Daily |
+| **App Name** | ధర్మ |
 | **Bundle ID (iOS)** | `com.dharmadaily.app` |
 | **Package (Android)** | `com.dharmadaily.app` |
 | **Version** | 1.1.0 |
 | **Expo SDK** | 54 |
 | **React Native** | 0.81.5 |
 | **Min Android** | API 21 (Android 5.0) |
+| **GitHub** | https://github.com/jayanth0107/Dharma |
 
 ---
 

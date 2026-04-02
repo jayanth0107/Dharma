@@ -1,8 +1,10 @@
-# CLAUDE.md — DharmaDaily
+# CLAUDE.md — ధర్మ (Dharma)
 
 ## What is this project?
 
-DharmaDaily (ధర్మ Daily) is a React Native (Expo) Telugu Panchangam mobile app. It provides astronomically accurate daily panchangam data (Tithi, Nakshatra, Yoga, Karana), auspicious/inauspicious timings, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, live gold/silver prices, and cultural content for Telugu-speaking users.
+ధర్మ (Dharma) is a React Native (Expo) Telugu Panchangam mobile app. It provides astronomically accurate daily panchangam data (Tithi, Nakshatra, Yoga, Karana), auspicious/inauspicious timings, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, live gold/silver prices, and cultural content for Telugu-speaking users.
+
+**GitHub:** https://github.com/jayanth0107/Dharma
 
 ## Tech stack
 
@@ -12,15 +14,18 @@ DharmaDaily (ధర్మ Daily) is a React Native (Expo) Telugu Panchangam mobi
 - **Firebase 12.11.0** (backend services — placeholder config, not yet connected)
 - **expo-linear-gradient**, **@expo/vector-icons** for UI
 - **@react-native-async-storage/async-storage** for persistence
-- **expo-location** for GPS auto-detection
+- **expo-location** for GPS auto-detection (coarse location only — fine location removed)
 - **expo-print** + **expo-sharing** for PDF generation and native sharing
 - **expo-notifications** (added, not yet wired)
 - Targets iOS, Android, and Web
 
 ## Architecture
 
-- **App.js** is the single entry point — holds all state (date, location, panchangam data, premium status) and renders the full scrollable layout. No routing/navigation library; sections are scrolled to via refs. All modals (Reminder, Donate, Analytics, Premium, MuhurtamFinder) are rendered at the bottom.
+- **App.js** is the single entry point — holds all state (date, location, panchangam data, premium status) and renders the full scrollable layout. No routing/navigation library. All modals (Reminder, Donate, Analytics, Premium, MuhurtamFinder) are rendered at the bottom.
+- **Navigation** uses a single **FloatingMenu** component — a pulsating hamburger button that expands into a section menu. Replaces the old StickyNavTabs + BottomTabBar pattern.
+- **Scroll** uses `nativeID` on sections + `offsetTop` DOM walk + direct `scrollTop` on web for section navigation.
 - **Components** (`src/components/`) are functional React components using hooks. Styling uses `StyleSheet.create()` with colors from `src/theme/colors.js`. Each component is self-contained with its own styles.
+- **Section styling** uses white cards with shadows, rounded corners, and gold-tinted header borders.
 - **Data** (`src/data/`) contains static arrays/objects for 2026 (festivals, ekadashi, holidays, observances, Gita slokas, panchangam constants).
 - **Utils** (`src/utils/`) has key modules:
   - `panchangamCalculator.js` — all astronomical math (Lahiri Ayanamsa, sun/moon longitude, tithi/nakshatra/yoga/karana, sunrise/sunset, rahu kalam, etc.)
@@ -35,12 +40,19 @@ DharmaDaily (ధర్మ Daily) is a React Native (Expo) Telugu Panchangam mobi
   - `deviceCapability.js` — animation/performance feature detection
   - `ratePrompt.js` — app rating prompt logic
 
-## Component inventory (22 active components)
+## Branding & Icon
+
+- **App name:** ధర్మ
+- **Icon:** Custom saffron Bhagwa Dhwaj with ॐ symbol, golden "ధర్మ" text, "సనాతనం" tagline, sun rays background
+- **Header:** Flag image from `assets/flag.png`, shimmering "ధర్మ" title, "సనాతనం" subtitle, sun radiance effect, centered location display
+- **Icon generator:** `scripts/generate-icons.js` generates all icon assets from the base design
+
+## Component inventory (22 components, 2 deprecated)
 
 | Component | Purpose |
 |-----------|---------|
-| `HeaderSection.js` | Animated gradient header with Telugu year, month, sunrise/sunset, location, pulsing crown |
-| `StickyNavTabs.js` | Horizontal scrolling section navigation with auto-highlight on scroll |
+| `HeaderSection.js` | Flag image header with shimmering "ధర్మ" title, "సనాతనం" subtitle, sun radiance, sunrise/sunset, centered location |
+| `FloatingMenu.js` | **Primary navigation** — pulsating hamburger button that expands into section menu |
 | `PanchangaCard.js` | Tithi/Nakshatra/Yoga/Karana cards + TimingCard + MuhurthamCard + SlokaCard |
 | `FestivalCard.js` | Today's festival banner + upcoming festival list items |
 | `EkadashiCard.js` | Ekadashi banners, upcoming list, and full-year modal |
@@ -50,7 +62,6 @@ DharmaDaily (ధర్మ Daily) is a React Native (Expo) Telugu Panchangam mobi
 | `MiniCalendar.js` | Monthly calendar with festival/ekadashi dot indicators |
 | `ReminderModal.js` | Full reminder CRUD modal |
 | `DonateSection.js` | UPI donation card + modal with QR codes |
-| `BottomTabBar.js` | Fixed bottom nav (4 tabs + raised settings + zoom controls) |
 | `DeityBanner.js` | Cultural divider/separator (CulturalDivider) |
 | `AnalyticsDashboard.js` | Local analytics viewer |
 | `FilterPills.js` | Observance type filter pills |
@@ -63,6 +74,8 @@ DharmaDaily (ధర్మ Daily) is a React Native (Expo) Telugu Panchangam mobi
 | `HoroscopeFeature.js` | Vedic birth chart generator (premium) |
 | `PremiumBanner.js` | Premium upsell banner + subscription modal |
 | `SettingsModal.js` | Notifications, app info + hidden admin panel (passcode-protected) |
+| ~~`StickyNavTabs.js`~~ | **DEPRECATED** — still in repo but not used. Replaced by FloatingMenu |
+| ~~`BottomTabBar.js`~~ | **DEPRECATED** — still in repo but not used. Replaced by FloatingMenu |
 
 ## Key conventions
 
@@ -91,7 +104,7 @@ All festival, ekadashi, holiday, and observance data in `src/data/` is hardcoded
 ## Important implementation details
 
 - **ErrorBoundary** wraps AppContent in App.js — crashes show Telugu/English recovery UI
-- **Premium system** (`src/utils/premiumService.js`) — tier-based feature gating with 7-day free trial. State persisted in AsyncStorage/localStorage. Features: Gita library, Muhurtam Finder, ad-free, dark mode (coming)
+- **Premium system** (`src/utils/premiumService.js`) — tier-based feature gating with 3-day free trial. State persisted in AsyncStorage/localStorage. Features: Gita library, Muhurtam Finder, ad-free, dark mode (coming)
 - **Bhagavad Gita** (`src/data/bhagavadGita.js`) — 30 slokas with Sanskrit, Telugu, English. Free users see 1/day; premium users access full library with theme/chapter browsing
 - **Muhurtam Finder** (`src/components/MuhurtamFinder.js`) — scans 90 days for 6 event types (wedding, griha pravesham, travel, business, vehicle, education). Scores dates 0-100% based on tithi, nakshatra, weekday, yoga, paksha. Generates beautiful HTML→PDF reports and shares via WhatsApp/native share sheet
 - **Share Service** (`src/utils/shareService.js`) — centralized sharing: WhatsApp deep link (whatsapp://send), wa.me fallback, native Share API, PDF via expo-print + expo-sharing. Used by panchangam share buttons and muhurtam finder
@@ -101,12 +114,20 @@ All festival, ekadashi, holiday, and observance data in `src/data/` is hardcoded
 - Gold price service uses a 3-tier API fallback: Gold-API.com → MetalpriceAPI → Frankfurter, with 2-hour memory cache and 24-hour localStorage cache
 - Panchangam calculator uses Lahiri Ayanamsa (tropical to sidereal conversion) for accuracy
 - `safeParseTime()` utility prevents NaN crashes on malformed time strings
-- The app has no navigation library — all sections live in a single ScrollView in App.js with ref-based scrolling
+- The app has no navigation library — all sections live in a single ScrollView in App.js with nativeID-based scrolling (FloatingMenu triggers scroll via offsetTop DOM walk + scrollTop on web)
 - Deity images in DailyDarshan come from Wikimedia Commons URLs with fallback to vector icons
 - Firebase config at `src/config/firebase.js` — placeholder keys, not yet connected
 - **Geolocation** auto-detects on first launch via GPS → reverse geocode (Nominatim) → fallback to Hyderabad
 - **Location search** uses Nominatim API with debounced search, returns global results
 - **Ads** use Google AdMob test IDs. AdBanner.web.js is a no-op stub for web builds
+
+## Security
+
+- **`google-services.json`** is gitignored — never committed to the repository
+- **`escapeHtml()`** utility is used to sanitize user input before rendering in HTML (e.g., PDF generation)
+- **Fine location permission removed** — app uses coarse location only (`expo-location`)
+- **Admin passcode** is XOR-obfuscated, never stored in plaintext or committed in comments/messages
+- **`ADMIN.md`** is gitignored and never committed
 
 ## Admin System (Developer-Only Controls)
 
@@ -115,8 +136,6 @@ The app has a hidden admin panel for developer-only access to premium toggle and
 - **Production:** Settings → tap version "1.1.0" 7 times → enter passcode → admin controls appear
 - **Development (`__DEV__`):** Admin controls are auto-unlocked (no tap/passcode needed)
 - **Admin mode resets** every time the Settings modal is closed
-- **Passcode** is XOR-obfuscated in `src/components/SettingsModal.js` (never stored in plaintext)
-- **`ADMIN.md`** contains full admin documentation — this file is gitignored and never committed
 - **Never commit admin passcode** in code comments, commit messages, or PRs
 
 ### Admin controls available:
@@ -139,7 +158,7 @@ Feature gating:
 
 Activation flow:
   1. User taps PremiumBanner → PremiumModal opens
-  2. User taps "7-day free trial" → startTrial() → state saved
+  2. User taps "3-day free trial" → startTrial() → state saved
   3. Or user taps pricing tier → activatePremium(source, days)
   4. handlePremiumActivated() refreshes App.js state
 ```

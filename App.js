@@ -51,8 +51,7 @@ import { MiniCalendar } from './src/components/MiniCalendar';
 import { FilterPills } from './src/components/FilterPills';
 import { ReminderModal } from './src/components/ReminderModal';
 import { CulturalDivider } from './src/components/DeityBanner';
-import { BottomTabBar } from './src/components/BottomTabBar';
-import { StickyNavTabs } from './src/components/StickyNavTabs';
+import { FloatingMenu } from './src/components/FloatingMenu';
 import { DailyDarshanCard } from './src/components/DailyDarshan';
 import { KidsSection } from './src/components/KidsSection';
 import { AnalyticsDashboard } from './src/components/AnalyticsDashboard';
@@ -102,7 +101,7 @@ function AppContent() {
   const [activeSection, setActiveSection] = useState('calendar');
   const [festivalFilter, setFestivalFilter] = useState('all');
   const [showReminder, setShowReminder] = useState(false);
-  const [activeTab, setActiveTab] = useState('home');
+  // activeTab removed — was causing unnecessary re-renders on every menu click
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showDonate, setShowDonate] = useState(false);
   const [donateInitialAmount, setDonateInitialAmount] = useState(null);
@@ -118,7 +117,7 @@ function AppContent() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHoroscope, setShowHoroscope] = useState(false);
   const [showShareApp, setShowShareApp] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  // Menu state managed by FloatingMenu component
   const scrollViewRef = useRef(null);
   const sectionPositions = useRef({});
   const sectionRefs = useRef({});
@@ -126,7 +125,7 @@ function AppContent() {
   const registerSection = useCallback((key, ref) => {
     if (ref) sectionRefs.current[key] = ref;
   }, []);
-  const [visibleSection, setVisibleSection] = useState('darshan');
+  // Single ref for visible section — NO state, so scroll is never interrupted by re-render
   const visibleSectionRef = useRef('darshan');
   const scrollLockRef = useRef(false);
 
@@ -139,22 +138,19 @@ function AppContent() {
 
   const premiumIds = useMemo(() => ['muhurtamFinder', 'horoscope', 'gita'], []);
 
+  // handleScroll updates ref ONLY — no setState, no re-renders, no scroll interruption
   const handleScroll = useCallback((e) => {
     if (scrollLockRef.current) return;
-    const y = e.nativeEvent.contentOffset.y + 120;
+    const y = e.nativeEvent.contentOffset.y + 20;
     const positions = sectionPositions.current;
     let current = sectionOrder[0];
     for (const key of sectionOrder) {
       if (positions[key] && y >= positions[key]) current = key;
     }
-    // If scrolled to premium section and a premium tab was manually selected, keep it
     if (current === 'muhurtamFinder' && premiumIds.includes(visibleSectionRef.current)) {
       return;
     }
-    if (current !== visibleSectionRef.current) {
-      visibleSectionRef.current = current;
-      setVisibleSection(current);
-    }
+    visibleSectionRef.current = current;
   }, [sectionOrder, premiumIds]);
 
   // Sync ad config when premium changes + load saved ad setting
@@ -254,79 +250,79 @@ function AppContent() {
   }, []);
 
   // Offset to account for sticky nav + header space so section title is visible
-  const SCROLL_OFFSET = 140;
+  const SCROLL_OFFSET = 20;
 
-  // Cross-platform scroll helper
+  // ─── Scroll helpers ───
+  // Approach A from test-scroll.html: offsetTop walk + direct DOM scroll()
+  // Tested: target=1671, got=1667 (4px off — correct)
+
+  const webScroll = useCallback((y) => {
+    if (Platform.OS !== 'web') return false;
+    const sv = document.getElementById('main-scroll');
+    if (sv && typeof sv.scroll === 'function') {
+      sv.scroll({ top: Math.max(0, y), behavior: 'smooth' });
+      return true;
+    }
+    return false;
+  }, []);
+
+  const getOffsetY = useCallback((el) => {
+    const sv = document.getElementById('main-scroll');
+    let top = 0;
+    let node = el;
+    while (node && node !== sv && node !== document.body) {
+      top += node.offsetTop || 0;
+      node = node.offsetParent;
+    }
+    return top;
+  }, []);
+
   const scrollToY = useCallback((y, animated = true) => {
     if (Platform.OS === 'web') {
-      const scrollEl = scrollViewRef.current?.getScrollableNode?.()
-        || (scrollViewRef.current instanceof HTMLElement ? scrollViewRef.current : null)
-        || scrollViewRef.current?._nativeTag;
-      if (scrollEl) {
-        scrollEl.scrollTo({ top: Math.max(0, y), behavior: animated ? 'smooth' : 'auto' });
-        return;
-      }
+      requestAnimationFrame(() => {
+        const sv = document.getElementById('main-scroll');
+        if (sv) sv.scrollTop = Math.max(0, y);
+      });
+      return;
     }
-    scrollViewRef.current?.scrollTo({ y: Math.max(0, y), animated });
+    scrollViewRef.current?.scrollTo({ x: 0, y: Math.max(0, y), animated });
   }, []);
 
   const scrollToSection = useCallback((key) => {
-    const sectionRef = sectionRefs.current[key];
-
-    // Web: use DOM APIs directly (RNW 0.19+ refs are DOM elements)
     if (Platform.OS === 'web') {
-      try {
-        // Get the scrollable DOM node from the ScrollView ref
-        const scrollEl = scrollViewRef.current?.getScrollableNode?.()
-          || (scrollViewRef.current instanceof HTMLElement ? scrollViewRef.current : null)
-          || scrollViewRef.current?._nativeTag;
-
-        // Get the section DOM element
-        const el = sectionRef instanceof HTMLElement ? sectionRef
-          : sectionRef?._node || sectionRef;
-
-        if (scrollEl && el && el.getBoundingClientRect) {
-          const scrollTop = scrollEl.scrollTop || 0;
-          const rect = el.getBoundingClientRect();
-          const scrollRect = scrollEl.getBoundingClientRect();
-          const y = rect.top - scrollRect.top + scrollTop;
-          scrollEl.scrollTo({ top: Math.max(0, y - SCROLL_OFFSET), behavior: 'smooth' });
-          return;
+      // Delay scroll to next frame so React finishes state updates/re-renders first.
+      // Wait one frame for any pending renders to complete before scrolling.
+      requestAnimationFrame(() => {
+        const sv = document.getElementById('main-scroll');
+        const el = document.getElementById('section-' + key);
+        if (sv && el) {
+          const y = getOffsetY(el);
+          const target = Math.max(0, y - SCROLL_OFFSET);
+          // Use scrollTop for instant reliable scroll, then smooth with scroll()
+          sv.scrollTop = target;
         }
-
-        // Fallback: use onLayout stored positions with DOM scrollTo
-        const yPos = sectionPositions.current[key];
-        if (yPos != null && scrollEl) {
-          scrollEl.scrollTo({ top: Math.max(0, yPos - SCROLL_OFFSET), behavior: 'smooth' });
-          return;
-        }
-      } catch {}
+      });
+      return;
     }
 
-    // Native: use measureLayout
-    if (sectionRef && scrollViewRef.current) {
+    // Native
+    const sv = scrollViewRef.current;
+    if (!sv) return;
+    const sectionRef = sectionRefs.current[key];
+    if (sectionRef) {
       try {
-        const scrollNode = scrollViewRef.current.getScrollableNode?.() || scrollViewRef.current.getInnerViewNode?.();
-        sectionRef.measureLayout(
-          scrollNode || scrollViewRef.current,
-          (x, y) => {
-            scrollViewRef.current.scrollTo({ y: Math.max(0, y - SCROLL_OFFSET), animated: true });
-          },
+        sectionRef.measureLayout(sv,
+          (x, y) => { sv.scrollTo({ x: 0, y: Math.max(0, y - SCROLL_OFFSET), animated: true }); },
           () => {}
         );
         return;
       } catch {}
     }
-
-    // Final fallback: onLayout stored position (native)
     const yPos = sectionPositions.current[key];
-    if (yPos != null && scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: Math.max(0, yPos - SCROLL_OFFSET), animated: true });
-    }
-  }, []);
+    if (yPos != null) sv.scrollTo({ x: 0, y: Math.max(0, yPos - SCROLL_OFFSET), animated: true });
+  }, [getOffsetY]);
 
   const handleTabPress = useCallback((tabId) => {
-    setActiveTab(tabId);
     trackScreenView(tabId);
 
     switch (tabId) {
@@ -380,7 +376,7 @@ function AppContent() {
       case 'gita':
         lockScrollTracker();
         visibleSectionRef.current = 'gita';
-        setVisibleSection('gita');
+        visibleSectionRef.current = 'gita';
         scrollToSection('muhurtamFinder');
         break;
       case 'darshan':
@@ -389,7 +385,7 @@ function AppContent() {
       case 'muhurtamFinder':
         lockScrollTracker();
         visibleSectionRef.current = 'muhurtamFinder';
-        setVisibleSection('muhurtamFinder');
+        visibleSectionRef.current = 'muhurtamFinder';
         setShowMuhurtamFinder(true);
         break;
       case 'premium':
@@ -404,7 +400,7 @@ function AppContent() {
       case 'horoscope':
         lockScrollTracker();
         visibleSectionRef.current = 'horoscope';
-        setVisibleSection('horoscope');
+        visibleSectionRef.current = 'horoscope';
         setShowHoroscope(true);
         break;
       default:
@@ -470,6 +466,7 @@ function AppContent() {
       <StatusBar style="light" />
       <ScrollView
         ref={scrollViewRef}
+        nativeID="main-scroll"
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -486,7 +483,6 @@ function AppContent() {
             locationTelugu={location.telugu || LOCATIONS.find(l => l.name === location.name)?.telugu || ''}
             locationDetecting={locationDetecting}
             onLocationPress={() => setShowLocationPicker(true)}
-            onMenuPress={() => setShowMenu(true)}
           />
           {todayFestival && <FestivalConfetti />}
         </View>
@@ -504,7 +500,7 @@ function AppContent() {
         )}
 
         {/* Sticky section navigation tabs */}
-        <StickyNavTabs activeSection={visibleSection} onTabPress={handleTabPress} />
+        {/* Navigation handled by FloatingMenu */}
 
         {/* Ad Banner */}
         <AdBannerWidget />
@@ -537,7 +533,7 @@ function AppContent() {
         )}
 
         {/* దైనిక దర్శనం — Deity of the day */}
-        <View style={styles.section} ref={r => registerSection('darshan', r)} onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
+        <View style={styles.section} nativeID="section-darshan" ref={r => registerSection('darshan', r)} onLayout={(e) => sectionPositions.current.darshan = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
             <MaterialCommunityIcons name="hands-pray" size={16} color="#E8751A" style={{ marginRight: 6 }} />
@@ -549,12 +545,12 @@ function AppContent() {
         </View>
 
         {/* Pancha Angam — includes calendar + date nav */}
-        <View style={styles.section} ref={r => registerSection('panchang', r)} onLayout={(e) => { sectionPositions.current.panchang = e.nativeEvent.layout.y; sectionPositions.current.calendar = e.nativeEvent.layout.y; }}>
+        <View style={styles.section} nativeID="section-panchang" ref={r => registerSection('panchang', r)} onLayout={(e) => { sectionPositions.current.panchang = e.nativeEvent.layout.y; sectionPositions.current.calendar = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionLine} />
-            <MaterialCommunityIcons name="pot-mix" size={16} color={Colors.darkBrown} style={{ marginRight: 6 }} />
-            <Text style={styles.sectionTitle}>పంచాంగం</Text>
-            <View style={styles.sectionLine} />
+            <View style={[styles.sectionLine, { backgroundColor: Colors.gold }]} />
+            <MaterialCommunityIcons name="pot-mix" size={16} color={Colors.gold} style={{ marginRight: 6 }} />
+            <Text style={[styles.sectionTitle, { color: Colors.gold }]}>పంచాంగం</Text>
+            <View style={[styles.sectionLine, { backgroundColor: Colors.gold }]} />
           </View>
           <Text style={styles.sectionSubtitle}>కాలం యొక్క ఐదు అంగాలు</Text>
 
@@ -626,7 +622,7 @@ function AppContent() {
         </View>
 
         {/* శుభ & అశుభ సమయాలు — Combined timings section */}
-        <View style={styles.section} ref={r => registerSection('muhurtham', r)} onLayout={(e) => sectionPositions.current.muhurtham = e.nativeEvent.layout.y}>
+        <View style={styles.section} nativeID="section-muhurtham" ref={r => registerSection('muhurtham', r)} onLayout={(e) => sectionPositions.current.muhurtham = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.tulasiGreen }]} />
             <MaterialCommunityIcons name="clock-check" size={16} color={Colors.tulasiGreen} style={{ marginRight: 6 }} />
@@ -704,7 +700,7 @@ function AppContent() {
         <CulturalDivider type="temple" />
 
         {/* పండుగలు, వ్రతాలు, ఏకాదశి — unified section with filter pills */}
-        <View style={styles.section} ref={r => registerSection('festivals', r)} onLayout={(e) => { sectionPositions.current.festivals = e.nativeEvent.layout.y; sectionPositions.current.ekadashi = e.nativeEvent.layout.y; }}>
+        <View style={styles.section} nativeID="section-festivals" ref={r => registerSection('festivals', r)} onLayout={(e) => { sectionPositions.current.festivals = e.nativeEvent.layout.y; sectionPositions.current.ekadashi = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.tulasiGreen }]} />
             <MaterialCommunityIcons name="party-popper" size={16} color={Colors.tulasiGreen} style={{ marginRight: 6 }} />
@@ -793,7 +789,7 @@ function AppContent() {
         </View>
 
         {/* Gold & Silver Prices */}
-        <View style={styles.section} ref={r => registerSection('gold', r)} onLayout={(e) => sectionPositions.current.gold = e.nativeEvent.layout.y}>
+        <View style={styles.section} nativeID="section-gold" ref={r => registerSection('gold', r)} onLayout={(e) => sectionPositions.current.gold = e.nativeEvent.layout.y}>
           <GoldSilverPriceCard prices={goldSilverPrices} loading={pricesLoading} />
           <SectionShareRow section="gold" buildText={() => buildGoldShareText(goldSilverPrices)} />
         </View>
@@ -802,7 +798,7 @@ function AppContent() {
         <AdBannerWidget variant="gold" />
 
         {/* పిల్లల కథలు / Kids Section */}
-        <View style={styles.section} ref={r => registerSection('kids', r)} onLayout={(e) => sectionPositions.current.kids = e.nativeEvent.layout.y}>
+        <View style={styles.section} nativeID="section-kids" ref={r => registerSection('kids', r)} onLayout={(e) => sectionPositions.current.kids = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#E8751A' }]} />
             <MaterialCommunityIcons name="baby-face-outline" size={16} color="#E8751A" style={{ marginRight: 6 }} />
@@ -815,7 +811,7 @@ function AppContent() {
 
         {/* Public Holidays / సెలవులు */}
         {upcomingHolidays.length > 0 && (
-          <View style={styles.section} ref={r => registerSection('holidays', r)} onLayout={(e) => sectionPositions.current.holidays = e.nativeEvent.layout.y}>
+          <View style={styles.section} nativeID="section-holidays" ref={r => registerSection('holidays', r)} onLayout={(e) => sectionPositions.current.holidays = e.nativeEvent.layout.y}>
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionLine, { backgroundColor: '#4A90D9' }]} />
               <MaterialCommunityIcons name="airplane" size={16} color="#4A90D9" style={{ marginRight: 6 }} />
@@ -855,7 +851,7 @@ function AppContent() {
         <CulturalDivider type="harvest" />
 
         {/* సుభాషితం */}
-        <View style={styles.section} ref={r => registerSection('sloka', r)} onLayout={(e) => sectionPositions.current.sloka = e.nativeEvent.layout.y}>
+        <View style={styles.section} nativeID="section-sloka" ref={r => registerSection('sloka', r)} onLayout={(e) => sectionPositions.current.sloka = e.nativeEvent.layout.y}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: Colors.gold }]} />
             <MaterialCommunityIcons name="format-quote-open" size={16} color={Colors.gold} style={{ marginRight: 6 }} />
@@ -870,7 +866,7 @@ function AppContent() {
         <AdBannerWidget variant="spiritual" />
 
         {/* Premium విభాగాలు — after free value, user sees what they get */}
-        <View style={styles.section} ref={r => registerSection('muhurtamFinder', r)} onLayout={(e) => { sectionPositions.current.muhurtamFinder = e.nativeEvent.layout.y; sectionPositions.current.horoscope = e.nativeEvent.layout.y; sectionPositions.current.gita = e.nativeEvent.layout.y; }}>
+        <View style={styles.section} nativeID="section-muhurtamFinder" ref={r => registerSection('muhurtamFinder', r)} onLayout={(e) => { sectionPositions.current.muhurtamFinder = e.nativeEvent.layout.y; sectionPositions.current.horoscope = e.nativeEvent.layout.y; sectionPositions.current.gita = e.nativeEvent.layout.y; }}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionLine, { backgroundColor: '#4A1A6B' }]} />
             <MaterialCommunityIcons name="crown" size={16} color="#FFD700" style={{ marginRight: 6 }} />
@@ -886,7 +882,7 @@ function AppContent() {
         </View>
 
         {/* Donate Section */}
-        <View style={styles.section} ref={r => registerSection('donate', r)} onLayout={(e) => sectionPositions.current.donate = e.nativeEvent.layout.y}>
+        <View style={styles.section} nativeID="section-donate" ref={r => registerSection('donate', r)} onLayout={(e) => sectionPositions.current.donate = e.nativeEvent.layout.y}>
           <DonateCard onExpand={(amount) => { setShowDonate(true); setDonateInitialAmount(amount); }} />
         </View>
 
@@ -924,35 +920,27 @@ function AppContent() {
         <View style={{ height: 300 }} />
       </ScrollView>
 
-      {/* Fixed Bottom Tab Bar */}
-      <BottomTabBar
-        activeTab={activeTab}
-        onTabPress={handleTabPress}
-        fontScale={fontScale}
-        onZoomIn={() => setFontScale(s => Math.min(1.4, +(s + 0.1).toFixed(1)))}
-        onZoomOut={() => setFontScale(s => Math.max(0.9, +(s - 0.1).toFixed(1)))}
-        showMenu={showMenu}
-        onMenuClose={() => setShowMenu(false)}
-      />
+      {/* Floating hamburger menu */}
+      <FloatingMenu onTabPress={handleTabPress} activeSection={visibleSectionRef.current} />
 
       {/* Reminder Modal */}
       <ReminderModal
         visible={showReminder}
-        onClose={() => { setShowReminder(false); setActiveTab('home'); }}
+        onClose={() => { setShowReminder(false); }}
         selectedDate={selectedDate}
       />
 
       {/* Donate Modal */}
       <DonateModal
         visible={showDonate}
-        onClose={() => { setShowDonate(false); setActiveTab('home'); setDonateInitialAmount(null); }}
+        onClose={() => { setShowDonate(false); setDonateInitialAmount(null); }}
         initialAmount={donateInitialAmount}
       />
 
       {/* Analytics Dashboard */}
       <AnalyticsDashboard
         visible={showAnalytics}
-        onClose={() => { setShowAnalytics(false); setActiveTab('home'); }}
+        onClose={() => { setShowAnalytics(false); }}
       />
 
       {/* Premium Upgrade Modal */}
@@ -1196,23 +1184,46 @@ const styles = StyleSheet.create({
 
   // Section — card-style container with border and shadow
   section: {
-    marginHorizontal: 16, marginTop: 6, marginBottom: 14,
-    paddingHorizontal: 16, paddingTop: 16, paddingBottom: 10,
-    backgroundColor: '#FFFDF5',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(212,160,23,0.15)',
-    // Subtle shadow
+    marginHorizontal: 16,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
     elevation: 2,
-    shadowColor: '#B8860B',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.04)',
   },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
-  sectionLine: { flex: 1, height: 1.5, backgroundColor: Colors.sandalwood, opacity: 0.3, borderRadius: 1 },
-  sectionTitle: { fontSize: 20, fontWeight: '800', color: Colors.darkBrown, marginHorizontal: 8, letterSpacing: 1 },
-  sectionSubtitle: { fontSize: 14, color: '#6B5B4B', textAlign: 'center', marginBottom: 12, letterSpacing: 0.3 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(212,160,23,0.15)',
+  },
+  sectionLine: {
+    flex: 1,
+    height: 1.5,
+    borderRadius: 1,
+    marginHorizontal: 8,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    color: '#888',
+    textAlign: 'center',
+    marginBottom: 12,
+    fontWeight: '500',
+  },
 
   // Premium nudge row
   premiumNudgeRow: {

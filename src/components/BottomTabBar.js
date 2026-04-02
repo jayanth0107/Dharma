@@ -116,7 +116,7 @@ export function BottomTabBar({ activeTab, onTabPress, fontScale = 1.0, onZoomIn,
       </View>
 
       {/* Menu Modal */}
-      <Modal visible={showMenu} animationType="slide" transparent onRequestClose={() => setShowMenu(false)}>
+      <Modal visible={showMenu} animationType="none" transparent onRequestClose={() => setShowMenu(false)}>
         <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={() => setShowMenu(false)}>
           <View style={styles.menuContent}>
             <View style={{ position: 'relative' }}>
@@ -130,35 +130,26 @@ export function BottomTabBar({ activeTab, onTabPress, fontScale = 1.0, onZoomIn,
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.menuList}>
+            <View style={styles.menuGrid}>
               {MENU_ITEMS.map((item) => (
                 <TouchableOpacity
                   key={item.id}
-                  style={styles.menuItem}
-                  onPress={() => { setShowMenu(false); setTimeout(() => onTabPress(item.id), 350); }}
+                  style={[styles.menuGridItem, { backgroundColor: item.color + '14', borderColor: item.color + '30' }]}
+                  onPress={() => { setShowMenu(false); requestAnimationFrame(() => requestAnimationFrame(() => onTabPress(item.id))); }}
+                  activeOpacity={0.7}
                 >
-                  <View style={{ position: 'relative' }}>
-                    <View style={[styles.menuIcon, { backgroundColor: item.color + '12', borderColor: item.color + '25' }]}>
-                      <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
-                    </View>
+                  <View style={[styles.menuGridIcon, { backgroundColor: item.color + '20' }]}>
+                    <MaterialCommunityIcons name={item.icon} size={26} color={item.color} />
                     {item.premium && (
-                      <View style={styles.menuCrown}>
-                        <MaterialCommunityIcons name="crown" size={10} color="#FFD700" />
+                      <View style={styles.menuGridCrown}>
+                        <MaterialCommunityIcons name="crown" size={9} color="#FFD700" />
                       </View>
                     )}
                   </View>
-                  <View style={styles.menuInfo}>
-                    <Text style={styles.menuLabel}>{item.label}</Text>
-                    <Text style={styles.menuSublabel}>{item.sublabel}</Text>
-                  </View>
-                  {item.premium ? (
-                    <MaterialCommunityIcons name="crown" size={16} color="#FFD700" />
-                  ) : (
-                    <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.textMuted} />
-                  )}
+                  <Text style={[styles.menuGridLabel, { color: item.color }]} numberOfLines={2}>{item.label}</Text>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
+            </View>
 
             <TouchableOpacity style={styles.menuClose} onPress={() => setShowMenu(false)}>
               <Text style={styles.menuCloseText}>మూసివేయండి</Text>
@@ -267,26 +258,29 @@ const styles = StyleSheet.create({
     width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.06)',
     alignItems: 'center', justifyContent: 'center',
   },
-  menuList: { paddingHorizontal: 20 },
-  menuItem: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+  menuGrid: {
+    flexDirection: 'row', flexWrap: 'wrap',
+    paddingHorizontal: 12, justifyContent: 'flex-start',
   },
-  menuIcon: {
-    width: 46, height: 46, borderRadius: 14,
-    alignItems: 'center', justifyContent: 'center', marginRight: 14,
+  menuGridItem: {
+    width: '30%', marginHorizontal: '1.5%', marginBottom: 12,
+    alignItems: 'center', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 6,
     borderWidth: 1,
   },
-  menuCrown: {
-    position: 'absolute', top: -4, right: -4,
+  menuGridIcon: {
+    width: 48, height: 48, borderRadius: 24,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+    position: 'relative',
+  },
+  menuGridCrown: {
+    position: 'absolute', top: -2, right: -2,
     width: 16, height: 16, borderRadius: 8,
     backgroundColor: '#4A1A6B', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#FFFDF5',
   },
-  menuInfo: { flex: 1 },
-  menuLabel: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown },
-  menuSublabel: { fontSize: 12, color: Colors.textMuted, marginTop: 1 },
+  menuGridLabel: {
+    fontSize: 11, fontWeight: '700', textAlign: 'center', lineHeight: 14,
+  },
   menuClose: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginTop: 6,
     backgroundColor: Colors.saffron, borderRadius: 14,

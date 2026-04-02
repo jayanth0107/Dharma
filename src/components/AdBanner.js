@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 
-// Ad Unit IDs — test IDs for dev, replace with real before production
+// TODO: Replace with production AdMob IDs before Play Store release
 const AD_IDS = {
   BANNER: Platform.select({
     android: __DEV__ ? 'ca-app-pub-3940256099942544/6300978111' : 'ca-app-pub-3940256099942544/6300978111',

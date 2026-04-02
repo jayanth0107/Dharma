@@ -40,7 +40,7 @@ const TABS = [
 
 const TAB_WIDTH = 82;
 
-export function StickyNavTabs({ activeSection, onTabPress }) {
+export function StickyNavTabs({ activeSection, onTabPress, onMenuPress }) {
   const scrollRef = useRef(null);
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(true);
@@ -127,6 +127,13 @@ export function StickyNavTabs({ activeSection, onTabPress }) {
       <TouchableOpacity style={s.arrowRight} onPress={() => scrollBy(1)} activeOpacity={0.7}>
         <PulsingArrow direction="right" />
       </TouchableOpacity>
+
+      {/* Hamburger menu button */}
+      {onMenuPress && (
+        <TouchableOpacity style={s.menuBtn} onPress={onMenuPress} activeOpacity={0.7}>
+          <MaterialCommunityIcons name="menu" size={20} color="#fff" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -190,5 +197,15 @@ const s = StyleSheet.create({
     elevation: 5,
     shadowColor: Colors.saffron, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.35, shadowRadius: 5,
+  },
+
+  // Hamburger menu
+  menuBtn: {
+    position: 'absolute', right: 40, top: 6,
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: Colors.saffron, alignItems: 'center', justifyContent: 'center',
+    zIndex: 20, elevation: 5,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2, shadowRadius: 4,
   },
 });

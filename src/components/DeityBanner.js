@@ -6,7 +6,7 @@ import { Colors } from '../theme/colors';
 
 const MONTH_DEITIES = {
   0: { name: 'శ్రీ వేంకటేశ్వరుడు', icon: 'temple-hindu', color: '#D4A017' },
-  1: { name: 'శ్రీ శివుడు', icon: 'trident', color: '#4A90D9' },
+  1: { name: 'శ్రీ శివుడు', icon: 'om', color: '#4A90D9' },
   2: { name: 'శ్రీ రాముడు', icon: 'bow-arrow', color: '#2E7D32' },
   3: { name: 'శ్రీ హనుమంతుడు', icon: 'shield-star', color: '#E8751A' },
   4: { name: 'శ్రీ కృష్ణుడు', icon: 'music-note', color: '#4A1A6B' },

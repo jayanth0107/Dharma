@@ -124,7 +124,7 @@ export const DAILY_DEITIES = {
   1: {
     name: 'శ్రీ శివుడు', english: 'త్రిశూలం & డమరుకం ధారి — మహాదేవుడు',
     mantra: 'ఓం నమః శివాయ', greeting: 'శుభ సోమవారం',
-    icon: 'trident', color: '#4A90D9', imageKey: 'shiva',
+    icon: 'om', color: '#4A90D9', imageKey: 'shiva',
   },
   2: {
     name: 'శ్రీ హనుమంతుడు', english: 'సంజీవని పర్వతధారి — వీర హనుమాన్',

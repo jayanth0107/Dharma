@@ -62,7 +62,7 @@ const KIDS_STORIES = [
 
 const KIDS_SLOKAS = [
   { telugu: 'ఓం గం గణపతయే నమః', meaning: 'గణేశునికి నమస్కారం — అడ్డంకులు తొలగించమని ప్రార్థన', deity: 'గణేశుడు', icon: 'elephant', color: '#E8751A' },
-  { telugu: 'ఓం నమః శివాయ', meaning: 'శివునికి నమస్కారం — శాంతి కోసం ప్రార్థన', deity: 'శివుడు', icon: 'trident', color: '#4A90D9' },
+  { telugu: 'ఓం నమః శివాయ', meaning: 'శివునికి నమస్కారం — శాంతి కోసం ప్రార్థన', deity: 'శివుడు', icon: 'om', color: '#4A90D9' },
   { telugu: 'సరస్వతి నమస్తుభ్యం వరదే కామరూపిణి', meaning: 'సరస్వతీ దేవికి నమస్కారం — చదువులో తెలివి కోసం', deity: 'సరస్వతి', icon: 'book-open-page-variant', color: '#7B1FA2' },
   { telugu: 'గురుర్బ్రహ్మా గురుర్విష్ణుః', meaning: 'గురువు బ్రహ్మ, గురువు విష్ణువు — టీచర్‌కు గౌరవం', deity: 'గురువు', icon: 'school', color: '#2E7D32' },
 ];

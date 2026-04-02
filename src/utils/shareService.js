@@ -6,6 +6,11 @@
 import { Platform, Share } from 'react-native';
 import { trackEvent } from './analytics';
 
+// Escape user input for safe HTML embedding
+export function escapeHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
 /**
  * Universal share — used by components that don't use SectionShareRow
  * (e.g. DailyDarshan internal share button, GitaCard internal button)

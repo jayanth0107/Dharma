@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
@@ -50,120 +50,109 @@ function ShimmerTitle({ text }) {
   );
 }
 
-// ── Nepal-style double pennant flag with saffron colors ──
+// ── Sun radiance rays behind title (like icon.png) ──
+function SunRadiance() {
+  const pulse = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!ANIMATIONS_ENABLED) return;
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 4000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 4000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  const opacity = ANIMATIONS_ENABLED
+    ? pulse.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.06, 0.14, 0.06] })
+    : 0.1;
+
+  const rays = [];
+  for (let i = 0; i < 36; i++) {
+    const deg = i * 10;
+    const isThick = i % 3 === 0;
+    rays.push(
+      <View key={i} style={{
+        position: 'absolute', bottom: '50%',
+        width: isThick ? 1.5 : 0.8,
+        height: isThick ? 95 : 70,
+        backgroundColor: '#FFD700',
+        opacity: isThick ? 1 : 0.5,
+        borderRadius: 1,
+        transformOrigin: 'bottom center',
+        transform: [{ rotate: `${deg}deg` }],
+      }} />
+    );
+  }
+
+  return (
+    <Animated.View style={[sr.container, { opacity }]}>
+      {rays}
+    </Animated.View>
+  );
+}
+
+const sr = StyleSheet.create({
+  container: {
+    position: 'absolute', width: 220, height: 220,
+    top: -70, alignSelf: 'center',
+    alignItems: 'center', justifyContent: 'center', zIndex: 0,
+  },
+});
+
+// ── Bhagwa Dhwaj — curved triangle flag from generated asset (matches icon.png) ──
+// Only the flag image waves; pole stays fixed via separate layers.
 function DharmaFlag() {
   const wave = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (!ANIMATIONS_ENABLED) return;
     Animated.loop(
-      Animated.timing(wave, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.sin), useNativeDriver: true })
+      Animated.sequence([
+        Animated.timing(wave, { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(wave, { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ])
     ).start();
   }, []);
 
-  const skewY = wave.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: ['0deg', '4deg', '0deg', '-3deg', '0deg'] });
-  const scaleX = wave.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [1, 1.04, 0.97, 1.03, 1] });
-  const translateX = wave.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 2.5, 0] });
-  const fold1 = wave.interpolate({ inputRange: [0, 0.3, 0.7, 1], outputRange: [0.05, 0.18, 0.05, 0.12] });
+  const scaleX = wave.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
+  const translateX = wave.interpolate({ inputRange: [0, 1], outputRange: [0, 1.5] });
 
   return (
     <View style={fl.wrapper}>
-      {/* Pole */}
-      <View style={fl.stick} />
-      {/* Finial */}
-      <View style={fl.finial}>
-        <MaterialCommunityIcons name="trident" size={9} color="#8B6914" />
-      </View>
-
-      {/* Double pennant — two stacked triangles */}
-      <Animated.View style={[fl.flagWrap, { transform: [{ skewY }, { scaleX }, { translateX }] }]}>
-        {/* Upper pennant — moon/crescent */}
-        <View style={fl.upperPennant}>
-          <LinearGradient colors={['#FF7700', '#E8751A']} style={fl.upperFill}>
-            <Animated.View style={[fl.foldLine, { opacity: fold1 }]} />
-            <MaterialCommunityIcons name="moon-waning-crescent" size={12} color="rgba(255,255,255,0.85)" />
-          </LinearGradient>
-          {/* Upper triangle point */}
-          <View style={fl.upperPoint} />
-        </View>
-
-        {/* Lower pennant — sun */}
-        <View style={fl.lowerPennant}>
-          <LinearGradient colors={['#E8751A', '#D4600A']} style={fl.lowerFill}>
-            <Animated.View style={[fl.foldLine, { opacity: fold1 }]} />
-            <MaterialCommunityIcons name="white-balance-sunny" size={12} color="rgba(255,255,255,0.85)" />
-          </LinearGradient>
-          {/* Lower triangle point */}
-          <View style={fl.lowerPoint} />
-        </View>
-      </Animated.View>
-
-      {/* Border outline — dark edge along pennants */}
-      <Animated.View style={[fl.borderWrap, { transform: [{ skewY }, { scaleX }, { translateX }] }]}>
-        <View style={fl.borderUpper} />
-        <View style={fl.borderLower} />
-      </Animated.View>
+      {/* Fixed pole */}
+      <View style={fl.pole} />
+      {/* Kalash finial */}
+      <View style={fl.finialGlow} />
+      <View style={fl.finial}><View style={fl.finialInner} /></View>
+      {/* Waving flag only */}
+      <Animated.Image
+        source={require('../../assets/flag.png')}
+        style={[fl.flagImage, { transform: [{ scaleX }, { translateX }] }]}
+        resizeMode="contain"
+      />
     </View>
   );
 }
 
 const fl = StyleSheet.create({
-  wrapper: { width: 52, height: 78, position: 'relative', marginRight: 8 },
-  stick: {
-    position: 'absolute', left: 4, top: 0, width: 3, height: 78,
-    backgroundColor: '#6B4F1A', borderRadius: 1.5, zIndex: 5,
+  wrapper: { width: 90, height: 100, position: 'relative', marginRight: 0 },
+  pole: {
+    position: 'absolute', left: 6, top: 0, width: 4, height: 100,
+    backgroundColor: '#C8A84E', borderRadius: 2, zIndex: 2,
+  },
+  finialGlow: {
+    position: 'absolute', left: -3, top: -7, width: 22, height: 22, borderRadius: 11,
+    backgroundColor: 'rgba(255,215,0,0.3)', zIndex: 3,
   },
   finial: {
-    position: 'absolute', left: 0, top: -3, width: 12, height: 12, borderRadius: 6,
-    backgroundColor: '#FFD700', zIndex: 6, borderWidth: 1, borderColor: '#8B6914',
+    position: 'absolute', left: 1, top: -4, width: 14, height: 14, borderRadius: 7,
+    backgroundColor: '#FFD700', zIndex: 4, borderWidth: 1, borderColor: '#C8A84E',
     alignItems: 'center', justifyContent: 'center',
   },
-  flagWrap: {
-    position: 'absolute', left: 7, top: 3, zIndex: 3,
-    transformOrigin: 'left center',
-  },
-  // Upper pennant
-  upperPennant: { flexDirection: 'row', marginBottom: -1 },
-  upperFill: {
-    width: 30, height: 22,
-    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-  },
-  upperPoint: {
-    width: 0, height: 0,
-    borderTopWidth: 11, borderBottomWidth: 11, borderLeftWidth: 10,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent',
-    borderLeftColor: '#E8751A', marginLeft: -1,
-  },
-  // Lower pennant (wider)
-  lowerPennant: { flexDirection: 'row' },
-  lowerFill: {
-    width: 36, height: 22,
-    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-  },
-  lowerPoint: {
-    width: 0, height: 0,
-    borderTopWidth: 11, borderBottomWidth: 11, borderLeftWidth: 10,
-    borderTopColor: 'transparent', borderBottomColor: 'transparent',
-    borderLeftColor: '#D4600A', marginLeft: -1,
-  },
-  // Fold line
-  foldLine: {
-    position: 'absolute', left: '50%', top: 0, width: 1.5, height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.12)', borderRadius: 1,
-  },
-  // Dark border edges
-  borderWrap: {
-    position: 'absolute', left: 7, top: 3, zIndex: 2,
-    transformOrigin: 'left center',
-  },
-  borderUpper: {
-    width: 30, height: 22, marginBottom: -1,
-    borderWidth: 1, borderColor: 'rgba(139,69,19,0.3)',
-    borderRightWidth: 0, backgroundColor: 'transparent',
-  },
-  borderLower: {
-    width: 36, height: 22,
-    borderWidth: 1, borderColor: 'rgba(139,69,19,0.3)',
-    borderRightWidth: 0, backgroundColor: 'transparent',
+  finialInner: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFF8DC' },
+  flagImage: {
+    position: 'absolute', left: 1, top: 2, width: 87, height: 92,
+    zIndex: 1, transformOrigin: 'left center',
   },
 });
 
@@ -334,7 +323,7 @@ function NaturalMoon({ tithiId, size }) {
 }
 
 // ── Header Section ──
-export function HeaderSection({ panchangam, onBellPress, isPremium, locationName, locationTelugu, locationDetecting, onLocationPress, onMenuPress }) {
+export function HeaderSection({ panchangam, onBellPress, isPremium, locationName, locationTelugu, locationDetecting, onLocationPress }) {
   if (!panchangam) return null;
 
   const { vaaram, teluguYear, teluguMonth, paksha, tithi,
@@ -360,21 +349,23 @@ export function HeaderSection({ panchangam, onBellPress, isPremium, locationName
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
         style={s.titleBar}
       >
-        {/* Row 1: Flag + Title + Crown */}
+        {/* Row 1: Flag + Title (centered) + Crown */}
         <View style={s.titleRow}>
-          <DharmaFlag />
+          {/* Title centered absolutely */}
           <View style={s.titleCenter}>
-            <ShimmerTitle text="ధర్మ దినచర్య" />
-            <Text style={s.tagline}>ధర్మ</Text>
+            <SunRadiance />
+            <ShimmerTitle text="ధర్మ" />
+            <View style={s.titleLine} />
+            <Text style={s.tagline}>సనాతనం</Text>
           </View>
-          <PulsingCrown isPremium={isPremium} onPress={onBellPress} />
+          {/* Flag on left, Crown on right — above the centered title */}
+          <View style={s.titleSide}><DharmaFlag /></View>
+          <View style={{ flex: 1 }} />
+          <View style={s.titleSide}><PulsingCrown isPremium={isPremium} onPress={onBellPress} /></View>
         </View>
 
-        {/* Row 2: Menu + Location */}
+        {/* Row 2: Location (centered) with decorative lines */}
         <View style={s.subRow}>
-          <TouchableOpacity style={s.menuBtn} onPress={onMenuPress} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="menu" size={18} color="#FFD700" />
-          </TouchableOpacity>
           <View style={s.subLine} />
           <TouchableOpacity style={s.locationPill} onPress={onLocationPress} activeOpacity={0.7}>
             <MaterialCommunityIcons name={locationDetecting ? 'crosshairs-gps' : 'map-marker'} size={13} color="#FFD700" />
@@ -449,19 +440,31 @@ const s = StyleSheet.create({
     paddingTop: 32, paddingBottom: 12, paddingHorizontal: 16,
     borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
     borderBottomWidth: 2, borderBottomColor: 'rgba(255,215,0,0.2)',
+    overflow: 'hidden',
   },
   titleRow: {
-    flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    position: 'relative', minHeight: 80,
   },
-  titleCenter: { flex: 1, alignItems: 'center', paddingHorizontal: 4 },
+  titleCenter: {
+    alignItems: 'center', position: 'absolute',
+    left: 0, right: 0, top: 0, bottom: 0,
+    justifyContent: 'center', zIndex: 0,
+  },
+  titleSide: { zIndex: 2 },
   appTitle: {
-    fontSize: 26, fontWeight: '900', color: '#FFD700',
-    letterSpacing: 2, textAlign: 'center',
-    textShadowColor: 'rgba(255,215,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 6,
+    fontSize: 52, fontWeight: '900', color: '#FFD700',
+    letterSpacing: 5, textAlign: 'center', zIndex: 1,
+    fontFamily: 'Noto Sans Telugu, sans-serif',
+    textShadowColor: 'rgba(255,185,0,0.4)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 18,
+  },
+  titleLine: {
+    width: 80, height: 2, backgroundColor: 'rgba(255,215,0,0.3)',
+    borderRadius: 1, marginTop: 5, marginBottom: 4, zIndex: 1,
   },
   tagline: {
-    fontSize: 13, color: 'rgba(255,248,240,0.6)', fontWeight: '700',
-    marginTop: 2, textAlign: 'center', letterSpacing: 1,
+    fontSize: 16, color: 'rgba(255,215,0,0.55)', fontWeight: '700',
+    textAlign: 'center', letterSpacing: 7, zIndex: 1,
   },
   // Sub row — location centered with decorative lines
   subRow: {
@@ -471,11 +474,6 @@ const s = StyleSheet.create({
   subLine: {
     flex: 1, height: 1,
     backgroundColor: 'rgba(255,215,0,0.15)', borderRadius: 1,
-  },
-  menuBtn: {
-    width: 34, height: 34, borderRadius: 17,
-    backgroundColor: 'rgba(255,215,0,0.12)', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: 'rgba(255,215,0,0.2)',
   },
   locationPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,

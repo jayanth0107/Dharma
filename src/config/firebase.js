@@ -51,7 +51,7 @@ if (isConfigured) {
     auth = getAuth(app);
     if (__DEV__) console.log('Firebase initialized successfully');
   } catch (error) {
-    console.warn('Firebase initialization failed:', error);
+    if (__DEV__) console.warn('Firebase initialization failed:', error);
   }
 }
 
