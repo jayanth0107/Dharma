@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "945414157606",
+    "project_id": "dharmadaily-1fa89",
+    "storage_bucket": "dharmadaily-1fa89.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:945414157606:android:dcbcf3806a35293bfdbde7",
+        "android_client_info": {
+          "package_name": "com.dharmadaily.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABqzkzK7lBdtrW3nyMH4KupZJw62udxaY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
