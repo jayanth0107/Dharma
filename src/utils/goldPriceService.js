@@ -16,7 +16,7 @@ const PersistentStore = {
   },
 };
 
-const CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const STORAGE_KEY = '@dharma_gold_prices';
 
 // Indian domestic premium over international spot:

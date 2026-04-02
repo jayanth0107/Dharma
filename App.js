@@ -215,19 +215,24 @@ function AppContent() {
       getTierInfo().then(info => setTrialAvailable(info.trialAvailable));
     }).catch(e => console.warn('Premium init failed:', e));
 
-    // Gold prices
-    setPricesLoading(true);
-    fetchGoldSilverPrices()
-      .then((prices) => {
-        setGoldSilverPrices(prices);
-        trackEvent('gold_prices_loaded', { source: prices?.source || 'unknown', isFallback: !!prices?.isFallback });
-      })
-      .catch((error) => {
-        console.warn('Gold price fetch failed:', error);
-        setGoldSilverPrices(null);
-        trackEvent('gold_prices_error');
-      })
-      .finally(() => setPricesLoading(false));
+    // Gold prices — fetch on load + auto-refresh every 5 minutes
+    const loadGoldPrices = () => {
+      setPricesLoading(true);
+      fetchGoldSilverPrices()
+        .then((prices) => {
+          setGoldSilverPrices(prices);
+          trackEvent('gold_prices_loaded', { source: prices?.source || 'unknown', isFallback: !!prices?.isFallback });
+        })
+        .catch((error) => {
+          if (__DEV__) console.warn('Gold price fetch failed:', error);
+          trackEvent('gold_prices_error');
+        })
+        .finally(() => setPricesLoading(false));
+    };
+    loadGoldPrices();
+    const goldRefreshInterval = setInterval(loadGoldPrices, 5 * 60 * 1000); // 5 min
+
+    return () => clearInterval(goldRefreshInterval);
   }, []);
 
   const navigateDate = useCallback((days) => {
