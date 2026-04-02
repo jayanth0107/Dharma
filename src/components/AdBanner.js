@@ -15,15 +15,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 
-// TODO: Replace with production AdMob IDs before Play Store release
+// Production AdMob IDs (test IDs used in __DEV__ mode)
 const AD_IDS = {
   BANNER: Platform.select({
-    android: __DEV__ ? 'ca-app-pub-3940256099942544/6300978111' : 'ca-app-pub-3940256099942544/6300978111',
+    android: __DEV__ ? 'ca-app-pub-3940256099942544/6300978111' : 'ca-app-pub-5349383180403542/9759492059',
     ios: __DEV__ ? 'ca-app-pub-3940256099942544/2934735716' : 'ca-app-pub-3940256099942544/2934735716',
     default: '',
   }),
   INTERSTITIAL: Platform.select({
-    android: __DEV__ ? 'ca-app-pub-3940256099942544/1033173712' : 'ca-app-pub-3940256099942544/1033173712',
+    android: __DEV__ ? 'ca-app-pub-3940256099942544/1033173712' : 'ca-app-pub-5349383180403542/6919472651',
     ios: __DEV__ ? 'ca-app-pub-3940256099942544/4411468910' : 'ca-app-pub-3940256099942544/4411468910',
     default: '',
   }),
