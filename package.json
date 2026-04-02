@@ -29,5 +29,9 @@
     "react-native": "0.81.5",
     "react-native-web": "^0.21.0"
   },
+  "overrides": {
+    "expo-constants": "~18.0.13",
+    "expo-modules-core": "~3.0.29"
+  },
   "private": true
 }

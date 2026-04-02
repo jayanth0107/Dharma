@@ -74,8 +74,5 @@
       ],
       "expo-font"
     ],
-    "locales": {
-      "te": "./locales/te.json"
-    }
   }
 }
