@@ -322,7 +322,8 @@ const s = StyleSheet.create({
   screenHeader: { paddingHorizontal: 16, paddingBottom: 4 },
   screenTitle: { fontSize: 24, fontWeight: '900', color: DarkColors.gold, letterSpacing: 0.5 },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 20 },
+  // Reserve bottom space so the last list item clears the bottom tab bar.
+  scrollContent: { paddingBottom: 40 },
   stickyFilterBar: {
     backgroundColor: DarkColors.bg,
     borderBottomWidth: 1,
