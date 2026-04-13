@@ -194,27 +194,37 @@ export function CalendarScreen({ route }) {
                 if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
                 const items = withDaysLeft(source, selectedDate);
                 if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
-                return items.map((item, idx) => {
-                  const d = new Date(item.date);
-                  return (
-                    <View key={item.date + idx} style={[s.observanceItem, item.isPast && s.pastItem]}>
-                      <View style={s.observanceDateCol}>
-                        <Text style={s.observanceDay}>{d.getDate()}</Text>
-                        <Text style={s.observanceMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={s.observanceName}>{item.name}</Text>
-                        <Text style={s.observanceSub}>{d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
-                      </View>
-                      <View style={s.observanceBadge}>
-                        <Text style={s.observanceDays}>{Math.abs(item.daysLeft)}</Text>
-                        <Text style={s.observanceDaysLabel}>
-                          {item.daysLeft === 0 ? t('నేడు', 'Today') : item.isPast ? t('గతం', 'ago') : t('రోజులు', 'days')}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                });
+                // Auto-scroll to the first non-past item so users land on "upcoming"
+                // instead of having to scroll past Jan/Feb entries.
+                return (
+                  <ScrollView
+                    style={s.innerScroll}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {items.map((item, idx) => {
+                      const d = new Date(item.date);
+                      return (
+                        <View key={item.date + idx} style={[s.observanceItem, item.isPast && s.pastItem]}>
+                          <View style={s.observanceDateCol}>
+                            <Text style={s.observanceDay}>{d.getDate()}</Text>
+                            <Text style={s.observanceMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={s.observanceName}>{item.name}</Text>
+                            <Text style={s.observanceSub}>{d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+                          </View>
+                          <View style={s.observanceBadge}>
+                            <Text style={s.observanceDays}>{Math.abs(item.daysLeft)}</Text>
+                            <Text style={s.observanceDaysLabel}>
+                              {item.daysLeft === 0 ? t('నేడు', 'Today') : item.isPast ? t('గతం', 'ago') : t('రోజులు', 'days')}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                );
               })()
             )}
             <SectionShareRow
@@ -328,6 +338,12 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bg,
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
+  },
+  // Nested scroll container for observance lists (pournami / amavasya /
+  // pradosham / chaturthi). Shows ~5 rows, user scrolls within the box
+  // instead of scrolling the outer page.
+  innerScroll: {
+    maxHeight: 460, // ~5 observance rows (each ~86px with marginBottom)
   },
   card: {
     marginHorizontal: 16, marginBottom: 16,
