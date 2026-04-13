@@ -99,7 +99,7 @@ export function HomeScreen({ navigation }) {
             style={s.flagImage}
             resizeMode="contain"
           />
-          <Text style={s.appTitleRow}>
+          <Text style={s.appTitleRow} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
             <Text style={s.appTitle}>{t(TR.appName.te, TR.appName.en)}</Text>
             <Text style={s.appHyphen}> | </Text>
             <Text style={s.appSubtitle}>{t(TR.sanatana.te, TR.sanatana.en)}</Text>
@@ -377,14 +377,14 @@ const s = StyleSheet.create({
     letterSpacing: 1.5,
   },
   appHyphen: {
-    fontSize: 26,
+    fontSize: 22,
     color: DarkColors.textMuted,
   },
   appSubtitle: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
     color: DarkColors.saffron,
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   headerIconBtn: {
     padding: 6,
