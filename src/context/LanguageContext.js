@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { TR } from '../data/translations';
+import { setUserProperties, trackEvent } from '../utils/analytics';
 
 const LanguageContext = createContext();
 
@@ -16,7 +17,12 @@ export function LanguageProvider({ children }) {
   const [lang, setLang] = useState('te'); // 'te' or 'en'
 
   const toggleLang = useCallback(() => {
-    setLang(prev => prev === 'te' ? 'en' : 'te');
+    setLang(prev => {
+      const next = prev === 'te' ? 'en' : 'te';
+      setUserProperties({ lang: next });
+      trackEvent('language_switch', { to: next });
+      return next;
+    });
   }, []);
 
   // t(telugu, english) — returns the correct language string

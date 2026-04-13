@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import { auth, db, isConfigured } from '../config/firebase';
 import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { setUserProperties, trackEvent } from '../utils/analytics';
 
 const AuthContext = createContext();
 
@@ -30,7 +31,9 @@ export function AuthProvider({ children }) {
     if (!auth) { setLoading(false); return; }
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
+      setUserProperties({ loggedIn: !!firebaseUser, userId: firebaseUser?.uid || null });
       if (firebaseUser) {
+        trackEvent('login_success', { uid: firebaseUser.uid });
         try {
           const userRef = doc(db, 'users', firebaseUser.uid);
           const profileDoc = await getDoc(userRef);
@@ -84,6 +87,7 @@ export function AuthProvider({ children }) {
   // Sign out — clear all local state
   const signOut = useCallback(async () => {
     if (!auth) return;
+    trackEvent('logout');
     try {
       await firebaseSignOut(auth);
     } catch (e) {
@@ -92,6 +96,7 @@ export function AuthProvider({ children }) {
     // Always clear local state even if signOut fails
     setUser(null);
     setProfile(null);
+    setUserProperties({ loggedIn: false, userId: null });
   }, []);
 
   const isLoggedIn = !!user;

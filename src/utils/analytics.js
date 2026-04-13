@@ -4,6 +4,10 @@
 // All data is anonymous — no personal information is collected.
 
 import { Platform } from 'react-native';
+import { logEventToCloud, setUserProperties } from './analyticsSync';
+
+// Re-export so callers have one import for analytics
+export { setUserProperties, getUserProperties, isCloudEvent } from './analyticsSync';
 
 // --- Local Analytics Storage ---
 // Stores event counts locally so you can see usage even without Firebase
@@ -120,11 +124,20 @@ export async function initAnalytics() {
   sessionStart = Date.now();
   sessionEvents = [];
 
+  // Set static user properties — dynamic ones (premium/login/lang) are set by contexts
+  setUserProperties({
+    platform: Platform.OS,
+    appVersion: '2.0.0',
+  });
+
   await saveAnalytics();
   await initFirebaseAnalytics();
 
-  // Log session start
-  trackEvent('session_start', { session_number: data.totalSessions });
+  // Log session start (cloud-worthy event)
+  trackEvent('session_start', {
+    session_number: data.totalSessions,
+    platform: Platform.OS,
+  });
 }
 
 /**
@@ -142,12 +155,15 @@ export async function trackEvent(eventName, params = {}) {
       timestamp: Date.now(),
     });
 
-    // Fire to Firebase if available
+    // Fire to Firebase Analytics (web only — SDK not supported on native)
     if (firebaseAnalytics && firebaseLogEvent) {
       try {
         firebaseLogEvent(firebaseAnalytics, eventName, params);
       } catch { /* Firebase log failed, local is fine */ }
     }
+
+    // Fire to Firestore analytics_events (all platforms — fire-and-forget)
+    logEventToCloud(eventName, params);
 
     // Save every 5 events to reduce I/O
     if (data.totalEvents % 5 === 0) {

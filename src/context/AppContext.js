@@ -8,7 +8,7 @@ import { getTodayFestival, getUpcomingFestivals } from '../data/festivals';
 import { getTodayEkadashi, getUpcomingEkadashis } from '../data/ekadashi';
 import { getUpcomingHolidays } from '../data/holidays';
 import { fetchGoldSilverPrices } from '../utils/goldPriceService';
-import { initAnalytics, trackEvent, trackScreenView } from '../utils/analytics';
+import { initAnalytics, trackEvent, trackScreenView, setUserProperties } from '../utils/analytics';
 import { autoDetectLocation, searchLocation } from '../utils/geolocation';
 import { checkRatePrompt } from '../utils/ratePrompt';
 import { initPremium, isPremium as checkIsPremium, getTierInfo } from '../utils/premiumService';
@@ -69,9 +69,10 @@ export function AppProvider({ children }) {
     setUpcomingHolidays(getUpcomingHolidays(selectedDate, 5));
   }, [selectedDate, location]);
 
-  // Ad config sync
+  // Ad config sync + analytics user property
   useEffect(() => {
     setAdConfig({ isPremium: premiumActive });
+    setUserProperties({ premium: premiumActive });
     loadNotifSettings().then(s => {
       if (s && s.adsEnabled === false) setAdConfig({ enabled: false });
     }).catch(() => {});

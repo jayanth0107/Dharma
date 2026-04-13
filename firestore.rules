@@ -25,6 +25,19 @@ service cloud.firestore {
       allow update, delete: if false; // Immutable payment records
     }
 
+    // ── Analytics events collection ──
+    // Anonymous create-only event log. Reads are done via Firebase Console /
+    // BigQuery export, never from the client.
+    // Schema enforced: event name + deviceId + platform + clientTs required.
+    match /analytics_events/{eventId} {
+      allow create: if request.resource.data.keys().hasAll(['event', 'deviceId', 'platform', 'clientTs'])
+                    && request.resource.data.event is string
+                    && request.resource.data.event.size() <= 60
+                    && request.resource.data.deviceId is string
+                    && request.resource.data.platform in ['web', 'ios', 'android', 'windows', 'macos'];
+      allow read, update, delete: if false; // Admin only (via Console)
+    }
+
     // ── Block all other collections ──
     match /{document=**} {
       allow read, write: if false;
