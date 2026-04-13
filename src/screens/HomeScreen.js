@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
-import { FeatureTile } from '../components/FeatureTile';
+import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 import { FlagWithPole } from '../components/FlagWithPole';
 import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { DrawerMenu } from '../components/DrawerMenu';
@@ -239,6 +239,7 @@ export function HomeScreen({ navigation }) {
 
       {/* ── Feature Grid (scrollable) ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
+        <FeatureGrid gap={12}>
           {/* Row 1 — Daily Essentials (most used daily) */}
           <FeatureTile
             icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t('Panchang', 'పంచాంగం')}
@@ -326,6 +327,7 @@ export function HomeScreen({ navigation }) {
             accentColor={DarkColors.saffron}
             onPress={() => navigation.navigate('Reminder')}
           />
+        </FeatureGrid>
         <View style={{ height: 16 }} />
       </ScrollView>
 
@@ -514,15 +516,11 @@ const s = StyleSheet.create({
   },
   yearWarningText: { flex: 1, fontSize: 11, color: '#FFD700', fontWeight: '600' },
 
-  // Grid (scrollable). space-between distributes the leftover pixels as
-  // inter-tile gap so the row has no gap on the right edge.
+  // Grid (scrollable). FeatureGrid handles the flex-wrap + equal row/column
+  // gaps internally, so gridContent just provides outer padding.
   gridScroll: { flex: 1 },
   gridContent: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
     paddingHorizontal: 12,
-    rowGap: 8,
     paddingTop: 8,
     paddingBottom: 16,
   },

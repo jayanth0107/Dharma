@@ -1,40 +1,43 @@
 // ధర్మ — Feature Tile Grid Component
 // Large, clear icons and labels — fills screen, no scroll needed
 
-import React from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, Type, Spacing, Radius, useColumns } from '../theme';
 
 const GRID_PADDING = 12;
-const TILE_GAP = 8;
+const TILE_GAP = 12;
 
-// Percentage-based tile widths — flex layout figures out exact px from the
-// real container width, so no scrollbar / wrapper / web-vs-native math
-// needs to match. The margin shaved from each row becomes inter-tile gap
-// when the parent uses justifyContent: 'space-between'.
+// Context shares the measured tile width from FeatureGrid down to tiles.
+// When a tile renders outside a FeatureGrid it falls back to percentage
+// widths (legacy path).
+const FeatureGridContext = createContext(null);
+
+// Fallback for tiles rendered without a FeatureGrid wrapper.
 function getTileWidthPercent(columns) {
-  // 3 cols: 30.66% × 3 = 92%, leaves 8% split as 2 gaps = ~4% each
-  //         (≈ 14-16px visible gap on a 380-430px viewport)
-  // 4 cols: 22.75% × 4 = 91%, leaves 9% split as 3 gaps = 3% each
-  // 5 cols: 18.0% × 5 = 90%, leaves 10% split as 4 gaps = 2.5% each
-  const gapFraction = 8; // percent of row width used for all inter-tile gaps
+  const gapFraction = 8;
   return `${((100 - gapFraction) / columns).toFixed(2)}%`;
 }
 
 export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, disabled, tileHeight }) {
   const color = accentColor || DarkColors.gold;
   const columns = useColumns();
-  const widthPct = getTileWidthPercent(columns);
-  // Estimate height proportional to expected tile width (1.15:1 aspect).
-  // Used only when explicit tileHeight isn't provided.
+  const gridCtx = useContext(FeatureGridContext);
+
+  // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
+  const widthStyle = gridCtx?.tileWidth
+    ? { width: gridCtx.tileWidth }
+    : { width: getTileWidthPercent(columns) };
+
   const height = tileHeight || Math.round(120 * 1.15);
 
   return (
     <TouchableOpacity
       style={[
         s.tile,
-        { width: widthPct, height },
+        widthStyle,
+        { height },
         isPremium && s.tilePremium,
         disabled && s.tileDisabled,
       ]}
@@ -69,6 +72,44 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
         </View>
       )}
     </TouchableOpacity>
+  );
+}
+
+// Measured grid wrapper — equal horizontal + vertical gaps between tiles.
+// Wraps tiles in a flex row that measures its own width, then computes an
+// exact pixel tile width so columnGap === rowGap regardless of container
+// padding, scrollbar presence, or safe areas.
+//
+//   <FeatureGrid gap={12}>
+//     <FeatureTile ... />
+//     ...
+//   </FeatureGrid>
+export function FeatureGrid({ children, gap = TILE_GAP, columns: propColumns }) {
+  const [containerW, setContainerW] = useState(0);
+  const autoCols = useColumns();
+  const cols = propColumns || autoCols;
+
+  const tileWidth = containerW > 0
+    ? Math.floor((containerW - gap * (cols - 1)) / cols)
+    : null;
+
+  return (
+    <FeatureGridContext.Provider value={{ tileWidth, gap, columns: cols }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          columnGap: gap,
+          rowGap: gap,
+        }}
+        onLayout={(e) => {
+          const w = e.nativeEvent.layout.width;
+          if (Math.abs(w - containerW) > 0.5) setContainerW(w);
+        }}
+      >
+        {children}
+      </View>
+    </FeatureGridContext.Provider>
   );
 }
 
