@@ -278,7 +278,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   cardTitle: { fontSize: 22, fontWeight: '900', color: DarkColors.gold, textAlign: 'center' },
-  cardSub: { fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', marginBottom: 20 },
+  cardSub: { fontSize: 15, color: DarkColors.textSecondary, textAlign: 'center', marginBottom: 20, fontWeight: '500', lineHeight: 21 },
   input: {
     backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 16,
     fontSize: 17, color: DarkColors.textPrimary, marginBottom: 12,

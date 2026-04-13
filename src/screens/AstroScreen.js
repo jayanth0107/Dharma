@@ -91,5 +91,5 @@ const s = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
     alignItems: 'center',
   },
-  comingSoonText: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600' },
+  comingSoonText: { fontSize: 14, color: DarkColors.textSecondary, fontWeight: '600' },
 });

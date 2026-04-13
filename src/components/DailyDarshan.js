@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Image, Animated, Easing, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Animated, Easing, useWindowDimensions } from 'react-native';
 import { SectionShareRow } from './SectionShareRow';
 import { buildDarshanShareText } from '../utils/shareService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +11,7 @@ const FLOWERS = ['🌸', '🌺', '🌼', '🪷', '💐'];
 const PETAL_COUNT = 8;
 
 function FallingFlowers() {
-  const screenW = Dimensions.get('window').width;
+  const { width: screenW } = useWindowDimensions();
   const petals = useMemo(() =>
     Array.from({ length: PETAL_COUNT }, (_, i) => ({
       id: i,
@@ -20,7 +20,7 @@ function FallingFlowers() {
       delay: i * 600,
       duration: 3500 + Math.random() * 2000,
       size: 14 + Math.random() * 8,
-    })), []);
+    })), [screenW]);
 
   return (
     <View style={flowerStyles.container} pointerEvents="none">

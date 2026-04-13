@@ -2,26 +2,30 @@
 // Large, clear icons and labels — fills screen, no scroll needed
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors, Type, Spacing, Radius } from '../theme';
+import { DarkColors, Type, Spacing, Radius, useColumns } from '../theme';
 
-const { width: SCREEN_W } = Dimensions.get('window');
-
-const COLUMNS = 3;
 const GRID_PADDING = 12;
 const TILE_GAP = 8;
-const TILE_WIDTH = Math.floor((SCREEN_W - GRID_PADDING * 2 - TILE_GAP * (COLUMNS - 1)) / COLUMNS);
+
+// Reactive tile width — recomputed on every window resize / rotation
+function useTileWidth() {
+  const { width } = useWindowDimensions();
+  const columns = useColumns();
+  return Math.floor((width - GRID_PADDING * 2 - TILE_GAP * (columns - 1)) / columns);
+}
 
 export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, disabled, tileHeight }) {
   const color = accentColor || DarkColors.gold;
-  const height = tileHeight || TILE_WIDTH * 1.15;
+  const tileWidth = useTileWidth();
+  const height = tileHeight || tileWidth * 1.15;
 
   return (
     <TouchableOpacity
       style={[
         s.tile,
-        { width: TILE_WIDTH, height },
+        { width: tileWidth, height },
         isPremium && s.tilePremium,
         disabled && s.tileDisabled,
       ]}
@@ -81,7 +85,8 @@ export function FeatureTileGrid({ children, rows }) {
   );
 }
 
-export const GRID_METRICS = { COLUMNS, GRID_PADDING, TILE_GAP, TILE_WIDTH };
+// Layout constants (TILE_WIDTH and COLUMNS are reactive — use the hooks instead)
+export const GRID_METRICS = { GRID_PADDING, TILE_GAP };
 
 const s = StyleSheet.create({
   grid: {
@@ -138,10 +143,11 @@ const s = StyleSheet.create({
     paddingHorizontal: Spacing.xxs,
   },
   sublabel: {
-    ...Type.micro,
-    color: DarkColors.textMuted,
+    ...Type.small,
+    color: DarkColors.textSecondary,
     textAlign: 'center',
     marginTop: Spacing.xs,
+    fontWeight: '600',
   },
   crownBadge: {
     position: 'absolute',

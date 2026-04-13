@@ -274,6 +274,89 @@ Since most components consume `Type.X` / `DarkColors.X` directly, a single token
 
 ---
 
+## Responsive design
+
+`src/theme/responsive.js` provides reactive hooks. Always use these instead
+of `Dimensions.get('window')` at module level — module-level calls capture
+the size once on import and never update on rotation, browser-resize, or
+fold/unfold.
+
+### Hooks
+
+```js
+import { useWindow, useColumns, useIsAtLeast, usePick, Breakpoints } from '../theme';
+
+// Reactive width/height
+const { width, height } = useWindow();
+
+// Auto-pick column count for tile grids
+const columns = useColumns();
+// → 3 on phones (<768px)
+// → 4 on tablets (768-1023px)
+// → 5 on desktop (1024+)
+
+// Boolean breakpoint check
+const isTablet = useIsAtLeast('xl');
+
+// Pick value by breakpoint
+const padding = usePick({ default: 12, xl: 24, xxl: 40 });
+```
+
+### Breakpoints
+
+| Token | Pixels | Device class |
+|---|---|---|
+| `sm` | 360 | Small phones (iPhone SE, older Android) |
+| `md` | 414 | Standard phones (iPhone 14, Pixel) |
+| `lg` | 500 | Large phones / phablets |
+| `xl` | 768 | Small tablets (iPad mini, 7-9" Android) |
+| `xxl` | 1024 | Large tablets / desktop browser |
+
+### Web max-width
+
+On web the app is wrapped in a centered `maxWidth: 600` container so it
+doesn't sprawl across desktop monitors. The wrapper lives in `App.js` —
+gated by `IS_WEB` from `src/theme/responsive.js`. Change `WEB_MAX_WIDTH`
+in that file to widen/narrow the cap.
+
+### Migrating an existing component
+
+Before:
+
+```js
+import { Dimensions } from 'react-native';
+const SCREEN_W = Dimensions.get('window').width;       // ❌ frozen
+const TILE_WIDTH = (SCREEN_W - 24) / 3;
+```
+
+After:
+
+```js
+import { useWindowDimensions } from 'react-native';
+import { useColumns } from '../theme';
+
+function MyComponent() {
+  const { width } = useWindowDimensions();             // ✅ reactive
+  const columns = useColumns();
+  const tileWidth = (width - 24) / columns;
+}
+```
+
+### Migrated to responsive hooks
+
+- `App.js` (web max-width wrapper)
+- `src/components/FeatureTile.js` (tile width + column count)
+- `src/components/DailyDarshan.js` (falling petals re-spread on resize)
+- `src/components/KidsSection.js` + `OnboardingScreen.js` (cleaned up unused
+  Dimensions imports)
+
+### Still using module-level Dimensions
+
+None in active code. Files in `src/components/_deprecated/` may still have
+the anti-pattern but they aren't rendered.
+
+---
+
 ## Future: light theme
 
 `src/theme/colors.js` exports `Colors` (light) — currently unused. To support a light/dark toggle:

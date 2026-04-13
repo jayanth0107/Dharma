@@ -224,16 +224,16 @@ const s = StyleSheet.create({
     color: DarkColors.gold,
   },
   profileSub: {
-    fontSize: 13,
+    fontSize: 15,
     color: DarkColors.saffron,
-    fontWeight: '600',
-    marginTop: 2,
+    fontWeight: '700',
+    marginTop: 4,
   },
   profilePhone: {
-    fontSize: 14,
+    fontSize: 15,
     color: DarkColors.textSecondary,
     fontWeight: '600',
-    marginTop: 2,
+    marginTop: 4,
   },
   profileDivider: {
     height: 1,

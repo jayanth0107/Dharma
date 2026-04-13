@@ -64,6 +64,6 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   gridContainer: { flex: 1, paddingTop: 4, paddingBottom: 4 },
   footer: { alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
-  footerText: { fontSize: 12, color: DarkColors.saffron, fontWeight: '600', fontStyle: 'italic' },
-  versionText: { fontSize: 10, color: DarkColors.textMuted, marginTop: 4 },
+  footerText: { fontSize: 14, color: DarkColors.saffron, fontWeight: '700', fontStyle: 'italic' },
+  versionText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4, fontWeight: '500' },
 });

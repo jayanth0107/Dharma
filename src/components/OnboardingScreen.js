@@ -1,12 +1,10 @@
 // ధర్మ — Onboarding (3-page intro for first-time users)
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DarkColors } from '../theme/colors';
-
-const { width: SW } = Dimensions.get('window');
 
 const PAGES = [
   {

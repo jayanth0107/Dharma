@@ -14,7 +14,7 @@ import { trackScreenView } from './src/utils/analytics';
 import { checkRatePrompt } from './src/utils/ratePrompt';
 import { OnboardingScreen } from './src/components/OnboardingScreen';
 import { TabNavigator } from './src/navigation/TabNavigator';
-import { DarkColors } from './src/theme/colors';
+import { DarkColors, WEB_MAX_WIDTH, IS_WEB } from './src/theme';
 
 // --- Error Boundary (catches component crashes) ---
 class ErrorBoundary extends Component {
@@ -109,9 +109,19 @@ export default function App() {
   }
   if (showOnboarding) return <OnboardingScreen onDone={dismiss} />;
 
+  // On web, center the app and cap its width so it doesn't sprawl on desktops.
+  // Outer wrapper has the dark page background; inner cap holds the actual app.
+  const RootWrapper = ({ children }) =>
+    IS_WEB ? (
+      <View style={styles.webRoot}>
+        <View style={styles.webApp}>{children}</View>
+      </View>
+    ) : children;
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
+        <RootWrapper>
         <LanguageProvider>
         <AuthProvider>
         <AppProvider>
@@ -164,12 +174,25 @@ export default function App() {
         </AppProvider>
         </AuthProvider>
         </LanguageProvider>
+        </RootWrapper>
       </SafeAreaProvider>
     </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
+  // Web-only: dark page outside the app, centered phone-sized panel inside
+  webRoot: {
+    flex: 1, backgroundColor: '#000',
+    alignItems: 'center', justifyContent: 'flex-start',
+  },
+  webApp: {
+    flex: 1, width: '100%', maxWidth: WEB_MAX_WIDTH,
+    backgroundColor: DarkColors.bg,
+    // Subtle separation from the page background
+    borderLeftWidth: 1, borderRightWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
+  },
   bootScreen: {
     flex: 1, backgroundColor: DarkColors.bg,
     justifyContent: 'center', alignItems: 'center',
