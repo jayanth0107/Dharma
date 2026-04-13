@@ -276,7 +276,7 @@ export function HomeScreen({ navigation }) {
 
           {/* Row 3 — Astro Premium */}
           <FeatureTile
-            icon="zodiac-leo" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t(TR.jaatakamSub.te, TR.jaatakamSub.en)}
+            icon="zodiac-leo" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Birth Chart', 'జన్మ కుండలి')}
             accentColor={DarkColors.saffron}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Horoscope')}
