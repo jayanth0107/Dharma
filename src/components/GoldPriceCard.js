@@ -255,7 +255,7 @@ const gs = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 14,
   },
   sectionSubtitle: {
-    fontSize: 12, color: DarkColors.gold, fontWeight: '500',
+    fontSize: 14, color: DarkColors.gold, fontWeight: '600',
   },
 
   // Card
@@ -278,8 +278,8 @@ const gs = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 10, gap: 10,
   },
   titleCol: { flex: 1 },
-  title: { fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
-  subtitle: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '500', marginTop: 1 },
+  title: { fontSize: 19, fontWeight: '800', letterSpacing: 0.3 },
+  subtitle: { fontSize: 14, color: DarkColors.textSecondary, fontWeight: '600', marginTop: 2 },
 
   // Ornament border
   ornamentRow: {
@@ -297,28 +297,28 @@ const gs = StyleSheet.create({
   },
   priceCol: { flex: 1, alignItems: 'center' },
   priceCenter: { marginHorizontal: 8 },
-  priceLabel: { fontSize: 11, color: DarkColors.textMuted, fontWeight: '600', marginBottom: 4, letterSpacing: 0.3 },
-  priceValue: { fontSize: 20, fontWeight: '900' },
+  priceLabel: { fontSize: 13, color: DarkColors.textSecondary, fontWeight: '700', marginBottom: 5, letterSpacing: 0.5 },
+  priceValue: { fontSize: 22, fontWeight: '900' },
 
   // Live badge
   liveBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
   },
-  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4CAF50' },
-  liveText: { fontSize: 10, fontWeight: '800', color: '#4CAF50' },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4CAF50' },
+  liveText: { fontSize: 12, fontWeight: '800', color: '#4CAF50', letterSpacing: 0.5 },
 
   // Loading
   loadingWrap: { borderRadius: 20, overflow: 'hidden', marginBottom: 12 },
   loadingGradient: { alignItems: 'center', paddingVertical: 30 },
-  loadingTitle: { fontSize: 17, fontWeight: '800', color: DarkColors.goldLight, marginTop: 10, letterSpacing: 0.5 },
-  loadingText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 6 },
+  loadingTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, marginTop: 10, letterSpacing: 0.5 },
+  loadingText: { fontSize: 14, color: DarkColors.textSecondary, marginTop: 8, fontWeight: '500' },
 
   // Footer
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  footerText: { fontSize: 10, color: DarkColors.textMuted, textAlign: 'center' },
+  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 6 },
+  footerText: { fontSize: 12, color: DarkColors.textSecondary, textAlign: 'center', fontWeight: '500' },
   disclaimer: {
-    fontSize: 9, color: DarkColors.textMuted, textAlign: 'center', marginTop: 4,
-    fontStyle: 'italic', lineHeight: 14, paddingHorizontal: 10,
+    fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 6,
+    fontStyle: 'italic', lineHeight: 16, paddingHorizontal: 10,
   },
 });

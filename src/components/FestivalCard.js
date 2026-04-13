@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, paddingHorizontal: 20,
   },
   bannerContent: { flex: 1, alignItems: 'center', marginHorizontal: 12 },
-  bannerTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
-  bannerEnglish: { fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: '500', marginTop: 2 },
+  bannerTitle: { fontSize: 24, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.3 },
+  bannerEnglish: { fontSize: 15, color: 'rgba(255,255,255,0.9)', fontWeight: '600', marginTop: 3 },
 
   // Festival Item
   festivalItem: {
@@ -115,24 +115,24 @@ const styles = StyleSheet.create({
   festivalDateCol: {
     alignItems: 'center', width: 52,
   },
-  festivalDay: { fontSize: 26, fontWeight: '900', color: DarkColors.saffron, lineHeight: 28 },
-  festivalMonth: { fontSize: 13, fontWeight: '700', color: DarkColors.textSecondary, textTransform: 'uppercase' },
-  festivalWeekday: { fontSize: 11, fontWeight: '600', color: DarkColors.textMuted, marginTop: 1 },
+  festivalDay: { fontSize: 28, fontWeight: '900', color: DarkColors.saffron, lineHeight: 30 },
+  festivalMonth: { fontSize: 14, fontWeight: '800', color: DarkColors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  festivalWeekday: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, marginTop: 2, letterSpacing: 0.3 },
   festivalDivider: {
     width: 1.5, height: 48, backgroundColor: DarkColors.gold, opacity: 0.3,
     marginHorizontal: 12, borderRadius: 1,
   },
   festivalInfo: { flex: 1 },
-  festivalName: { fontSize: 17, fontWeight: '700', color: DarkColors.textPrimary },
-  festivalEnglish: { fontSize: 14, color: DarkColors.textSecondary, fontWeight: '500', marginTop: 1 },
-  festivalDateTe: { fontSize: 13, color: DarkColors.saffronLight, fontWeight: '600', marginTop: 4 },
+  festivalName: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary, lineHeight: 24 },
+  festivalEnglish: { fontSize: 15, color: DarkColors.textSecondary, fontWeight: '600', marginTop: 2 },
+  festivalDateTe: { fontSize: 14, color: DarkColors.saffronLight, fontWeight: '700', marginTop: 5 },
   festivalDaysBadge: {
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: DarkColors.saffronDim, borderRadius: 12,
     paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8,
   },
-  festivalDaysNum: { fontSize: 18, fontWeight: '900', color: DarkColors.saffron },
-  festivalDaysLabel: { fontSize: 8, color: DarkColors.saffron, fontWeight: '700' },
+  festivalDaysNum: { fontSize: 20, fontWeight: '900', color: DarkColors.saffron },
+  festivalDaysLabel: { fontSize: 10, color: DarkColors.saffron, fontWeight: '800', letterSpacing: 0.5 },
 
   // Detail Modal
   detailOverlay: {
