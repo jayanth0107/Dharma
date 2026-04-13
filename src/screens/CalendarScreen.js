@@ -76,15 +76,14 @@ export function CalendarScreen({ route }) {
   } = useApp();
 
   const { t } = useLanguage();
-  const { height: winHeight } = useWindow();
   const [activeSubTab, setActiveSubTab] = useState(route?.params?.tab || 'panchang');
   const [festivalFilter, setFestivalFilter] = useState('all');
 
-  // Responsive inner-scroll height: fills the area between the sticky bars
-  // above and the bottom tab bar below. Clamped to a sane min/max so tiny
-  // landscape phones still show ~3 rows and big tablets don't show 15.
-  // 280 = header + sub-tabs + filter pills + card padding + bottom tab bar.
-  const innerMaxHeight = Math.max(280, Math.min(720, winHeight - 280));
+  // Fixed 5-row window for every list on every device. Users scroll within
+  // the box to see the rest. One row ≈ 86px (padding + content + margin).
+  const VISIBLE_ROWS = 5;
+  const ROW_HEIGHT = 86;
+  const innerMaxHeight = VISIBLE_ROWS * ROW_HEIGHT;
 
   // Update tab when navigated with new params (use _ts to force re-trigger)
   useEffect(() => {
@@ -261,15 +260,29 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Ekadashi Tab ── all 24 Ekadashis for 2026 ── */}
+        {/* ── Ekadashi Tab ── 5 visible, scroll for the rest ── */}
         {activeSubTab === 'ekadashi' && (
           <View style={s.card}>
-            <EkadashiSection
-              todayEkadashi={todayEkadashi}
-              upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)}
-              selectedDate={selectedDate}
-              showAll
-            />
+            {todayEkadashi && (
+              <EkadashiSection
+                todayEkadashi={todayEkadashi}
+                upcomingEkadashis={[]}
+                selectedDate={selectedDate}
+                showAll
+              />
+            )}
+            <ScrollView
+              style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+            >
+              <EkadashiSection
+                todayEkadashi={null}
+                upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)}
+                selectedDate={selectedDate}
+                showAll
+              />
+            </ScrollView>
             <SectionShareRow section="ekadashi" buildText={() => buildEkadashiShareText(upcomingEkadashiList, EKADASHI_2026)} />
           </View>
         )}
@@ -284,7 +297,13 @@ export function CalendarScreen({ route }) {
             {(() => {
               const items = withDaysLeft(PUBLIC_HOLIDAYS_2026, selectedDate);
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noHolidays.te, TR.noHolidays.en)}</Text>;
-              return items.map((holiday, idx) => {
+              return (
+                <ScrollView
+                  style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}
+                >
+                  {items.map((holiday, idx) => {
                 const hDate = new Date(holiday.date);
                 return (
                   <View key={holiday.date + idx} style={[s.holidayItem, holiday.isPast && s.pastItem]}>
@@ -306,7 +325,9 @@ export function CalendarScreen({ route }) {
                     </View>
                   </View>
                 );
-              });
+              })}
+                </ScrollView>
+              );
             })()}
             <SectionShareRow section="holidays" buildText={() => buildHolidaysShareText(upcomingHolidays, PUBLIC_HOLIDAYS_2026)} />
           </View>
