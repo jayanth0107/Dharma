@@ -122,7 +122,6 @@ export async function setupDailyNotifications(settings) {
           data: { type: 'daily_panchangam' },
         },
         trigger: {
-          type: 'daily',
           hour: settings.notifHour,
           minute: settings.notifMinute,
           repeats: true,
@@ -139,7 +138,6 @@ export async function setupDailyNotifications(settings) {
           data: { type: 'daily_quote' },
         },
         trigger: {
-          type: 'daily',
           hour: 12,
           minute: 0,
           repeats: true,

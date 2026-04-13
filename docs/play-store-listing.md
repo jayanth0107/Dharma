@@ -1,15 +1,15 @@
-# Google Play Store Listing — ధర్మ Daily
+# Google Play Store Listing — Dharma v2.0
 
 ## App Name (30 chars max)
-ధర్మ Daily - Telugu Panchangam
+Dharma: Telugu Astro, Calendar & Gold
 
 ## Short Description (80 chars max)
-Daily Telugu Panchangam — Tithi, Nakshatra, Muhurtam, Festivals & Gold Prices 🙏
+Telugu Panchangam, Horoscope, Matchmaking, Muhurtam, Festivals & Gold Prices 🙏
 
 ## Full Description (4000 chars max)
 --- COPY BELOW ---
 
-🙏 ధర్మ Daily — మీ రోజువారీ తెలుగు పంచాంగం యాప్!
+🙏 ధర్మ 2.0 — Complete Telugu Panchangam & Vedic Astrology App!
 
 ప్రతిరోజూ ఖగోళ శాస్త్ర ఆధారంగా ఖచ్చితమైన పంచాంగ సమాచారం — తిథి, నక్షత్రం, యోగం, కరణం, శుభ ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!
 

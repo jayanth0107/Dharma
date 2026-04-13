@@ -6,12 +6,13 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Modal, FlatList, Platform,
+  View, Text, StyleSheet, TouchableOpacity, FlatList, Platform,
   Share, Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { ModalOrView } from './ModalOrView';
 import { getDailyPanchangam, DEFAULT_LOCATION } from '../utils/panchangamCalculator';
 import { trackEvent } from '../utils/analytics';
 import { SectionShareRow } from './SectionShareRow';
@@ -23,7 +24,7 @@ const EVENT_TYPES = [
     telugu: 'వివాహం',
     english: 'Wedding',
     icon: 'ring',
-    color: Colors.kumkum,
+    color: DarkColors.kumkum,
     goodTithis: [2, 3, 5, 7, 10, 11, 13],
     goodNakshatras: [3, 4, 11, 12, 14, 16, 20, 21, 26],
     avoidWeekdays: [2, 6],
@@ -33,7 +34,7 @@ const EVENT_TYPES = [
     telugu: 'గృహ ప్రవేశం',
     english: 'House Warming',
     icon: 'home-heart',
-    color: Colors.tulasiGreen,
+    color: DarkColors.tulasiGreen,
     goodTithis: [1, 2, 3, 5, 7, 10, 11, 13],
     goodNakshatras: [3, 5, 6, 7, 11, 12, 14, 16, 20, 21, 26],
     avoidWeekdays: [2, 6],
@@ -53,7 +54,7 @@ const EVENT_TYPES = [
     telugu: 'వ్యాపారం ప్రారంభం',
     english: 'New Business',
     icon: 'store',
-    color: Colors.gold,
+    color: DarkColors.gold,
     goodTithis: [1, 2, 3, 5, 7, 10, 11, 13],
     goodNakshatras: [1, 3, 7, 11, 12, 14, 16, 20, 21, 25, 26],
     avoidWeekdays: [2, 6],
@@ -63,7 +64,7 @@ const EVENT_TYPES = [
     telugu: 'వాహనం కొనుగోలు',
     english: 'Vehicle Purchase',
     icon: 'car',
-    color: Colors.saffron,
+    color: DarkColors.saffron,
     goodTithis: [2, 3, 5, 7, 10, 11, 13],
     goodNakshatras: [1, 3, 7, 11, 12, 14, 21, 25, 26],
     avoidWeekdays: [2, 6],
@@ -415,17 +416,17 @@ export function MuhurtamFinderCard({ onOpen, isPremium = false }) {
         style={mStyles.cardGradient}
       >
         <View style={mStyles.cardIcon}>
-          <MaterialCommunityIcons name="calendar-star" size={28} color={Colors.tulasiGreen} />
+          <MaterialCommunityIcons name="calendar-star" size={28} color={DarkColors.tulasiGreen} />
         </View>
         <View style={mStyles.cardContent}>
           <Text style={mStyles.cardTitle}>ముహూర్తం ఫైండర్</Text>
           <Text style={mStyles.cardDesc}>వివాహం, గృహ ప్రవేశం, ప్రయాణం... శుభ దినాలు తెలుసుకోండి</Text>
         </View>
         {isPremium ? (
-          <Ionicons name="chevron-forward" size={20} color={Colors.tulasiGreen} />
+          <Ionicons name="chevron-forward" size={20} color={DarkColors.tulasiGreen} />
         ) : (
           <View style={mStyles.premiumLock}>
-            <MaterialCommunityIcons name="crown" size={16} color={Colors.gold} />
+            <MaterialCommunityIcons name="crown" size={16} color={DarkColors.gold} />
             <Text style={mStyles.premiumText}>Premium</Text>
           </View>
         )}
@@ -452,7 +453,7 @@ function ShareBar({ eventType, results, locationName }) {
 /**
  * MuhurtamFinderModal — Full finder experience
  */
-export function MuhurtamFinderModal({ visible, onClose, location, isPremium = false, onOpenPremium }) {
+export function MuhurtamFinderModal({ visible, onClose, location, isPremium = false, onOpenPremium, embedded = false }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -484,12 +485,10 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={s.overlay}>
-        <View style={s.modal}>
+    <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
           {/* Header */}
           <LinearGradient
-            colors={[Colors.tulasiGreen, '#1B5E20']}
+            colors={[DarkColors.tulasiGreen, '#1B5E20']}
             style={s.modalHeader}
           >
             <MaterialCommunityIcons name="calendar-star" size={28} color="#F5D77A" />
@@ -503,7 +502,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
           {!isPremium ? (
             /* Premium Lock Overlay */
             <View style={s.premiumOverlay}>
-              <MaterialCommunityIcons name="lock" size={48} color={Colors.gold} />
+              <MaterialCommunityIcons name="lock" size={48} color={DarkColors.gold} />
               <Text style={s.premiumOverlayTitle}>Premium అవసరం</Text>
               <Text style={s.premiumOverlayDesc}>
                 ముహూర్తం ఫైండర్ ప్రీమియం ఫీచర్. శుభ దినాలు కనుగొనడానికి ప్రీమియం యాక్టివేట్ చేయండి.
@@ -530,7 +529,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                 }}
               >
                 <LinearGradient
-                  colors={[Colors.saffron, Colors.gold]}
+                  colors={[DarkColors.saffron, DarkColors.gold]}
                   style={s.premiumActivateBtnGradient}
                 >
                   <MaterialCommunityIcons name="crown" size={18} color="#FFF" />
@@ -550,8 +549,8 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                   style={s.eventCard}
                   onPress={() => handleEventSelect(item)}
                 >
-                  <View style={[s.eventIcon, { backgroundColor: item.color + '15' }]}>
-                    <MaterialCommunityIcons name={item.icon} size={28} color={item.color} />
+                  <View style={[s.eventIcon, { backgroundColor: item.color + '20' }]}>
+                    <MaterialCommunityIcons name={item.icon} size={36} color={item.color} />
                   </View>
                   <Text style={s.eventTelugu}>{item.telugu}</Text>
                   <Text style={s.eventEnglish}>{item.english}</Text>
@@ -564,7 +563,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
               {/* Back + Event info */}
               <View style={s.resultHeader}>
                 <TouchableOpacity onPress={() => { setSelectedEvent(null); setResults([]); }}>
-                  <Ionicons name="arrow-back" size={22} color={Colors.darkBrown} />
+                  <Ionicons name="arrow-back" size={22} color={DarkColors.textPrimary} />
                 </TouchableOpacity>
                 <MaterialCommunityIcons name={selectedEvent.icon} size={20} color={selectedEvent.color} style={{ marginLeft: 10 }} />
                 <Text style={s.resultEventName}>{selectedEvent.telugu}</Text>
@@ -582,12 +581,12 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
 
               {searching ? (
                 <View style={s.searchingBox}>
-                  <MaterialCommunityIcons name="magnify" size={40} color={Colors.tulasiGreen} />
+                  <MaterialCommunityIcons name="magnify" size={40} color={DarkColors.tulasiGreen} />
                   <Text style={s.searchingText}>శుభ దినాలు వెతుకుతోంది...</Text>
                 </View>
               ) : results.length === 0 ? (
                 <View style={s.searchingBox}>
-                  <MaterialCommunityIcons name="calendar-remove" size={40} color={Colors.textMuted} />
+                  <MaterialCommunityIcons name="calendar-remove" size={40} color={DarkColors.textMuted} />
                   <Text style={s.searchingText}>ఈ కాలంలో శుభ దినాలు లేవు</Text>
                 </View>
               ) : (
@@ -598,10 +597,10 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                     const d = item.date;
                     const isExpanded = selectedResult?.dateStr === item.dateStr;
                     const ratingColors = {
-                      excellent: Colors.tulasiGreen,
+                      excellent: DarkColors.tulasiGreen,
                       good: '#4A90D9',
-                      fair: Colors.saffron,
-                      avoid: Colors.kumkum,
+                      fair: DarkColors.saffron,
+                      avoid: DarkColors.kumkum,
                     };
 
                     return (
@@ -635,7 +634,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                           <Ionicons
                             name={isExpanded ? 'chevron-up' : 'chevron-down'}
                             size={16}
-                            color={Colors.textMuted}
+                            color={DarkColors.textMuted}
                           />
                         </View>
 
@@ -643,14 +642,14 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                           <View style={s.resultDetails}>
                             {item.reasons.map((r, i) => (
                               <View key={`r-${i}`} style={s.reasonRow}>
-                                <Ionicons name="checkmark-circle" size={14} color={Colors.tulasiGreen} />
+                                <Ionicons name="checkmark-circle" size={14} color={DarkColors.tulasiGreen} />
                                 <Text style={s.reasonText}>{r}</Text>
                               </View>
                             ))}
                             {item.warnings.map((w, i) => (
                               <View key={`w-${i}`} style={s.reasonRow}>
-                                <Ionicons name="alert-circle" size={14} color={Colors.saffron} />
-                                <Text style={[s.reasonText, { color: Colors.saffronDark }]}>{w}</Text>
+                                <Ionicons name="alert-circle" size={14} color={DarkColors.saffron} />
+                                <Text style={[s.reasonText, { color: DarkDarkColors.saffronLight }]}>{w}</Text>
                               </View>
                             ))}
                           </View>
@@ -667,9 +666,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
           <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
             <Text style={s.closeBtnText}>మూసివేయండి</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    </ModalOrView>
   );
 }
 
@@ -687,16 +684,16 @@ const mStyles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   cardContent: { flex: 1, marginLeft: 12 },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown },
-  cardDesc: { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 18 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary },
+  cardDesc: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2, lineHeight: 18 },
   premiumLock: { alignItems: 'center' },
-  premiumText: { fontSize: 9, color: Colors.gold, fontWeight: '700', marginTop: 2 },
+  premiumText: { fontSize: 9, color: DarkColors.gold, fontWeight: '700', marginTop: 2 },
 });
 
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modal: {
-    backgroundColor: Colors.cream,
+    backgroundColor: DarkColors.bgCard,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '90%', flex: 1,
   },
@@ -715,55 +712,55 @@ const s = StyleSheet.create({
   },
 
   eventCard: {
-    flex: 1, margin: 6, padding: 16,
-    backgroundColor: Colors.white, borderRadius: 16,
+    flex: 1, margin: 8, paddingVertical: 22, paddingHorizontal: 12,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 18,
     alignItems: 'center',
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   eventIcon: {
-    width: 56, height: 56, borderRadius: 28,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+    width: 68, height: 68, borderRadius: 34,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
-  eventTelugu: { fontSize: 14, fontWeight: '700', color: Colors.darkBrown, textAlign: 'center' },
-  eventEnglish: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  eventTelugu: { fontSize: 17, fontWeight: '800', color: DarkColors.textPrimary, textAlign: 'center' },
+  eventEnglish: { fontSize: 13, color: DarkColors.textSecondary, marginTop: 4, fontWeight: '600' },
 
   resultHeader: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
   },
-  resultEventName: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown, marginLeft: 6, flex: 1 },
-  resultCount: { fontSize: 12, color: Colors.tulasiGreen, fontWeight: '600' },
+  resultEventName: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginLeft: 6, flex: 1 },
+  resultCount: { fontSize: 12, color: DarkColors.tulasiGreen, fontWeight: '600' },
 
   searchingBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  searchingText: { fontSize: 15, color: Colors.textMuted, marginTop: 12 },
+  searchingText: { fontSize: 15, color: DarkColors.textMuted, marginTop: 12 },
 
   resultItem: {
     paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
   },
-  resultItemExpanded: { backgroundColor: 'rgba(46,125,50,0.04)' },
+  resultItemExpanded: { backgroundColor: 'rgba(46,125,50,0.12)' },
   resultRow: { flexDirection: 'row', alignItems: 'center' },
   resultDateCol: { width: 50, alignItems: 'center' },
-  resultDay: { fontSize: 22, fontWeight: '800', color: Colors.tulasiGreen },
-  resultMonth: { fontSize: 10, fontWeight: '600', color: Colors.textMuted, textTransform: 'uppercase' },
-  resultWeekday: { fontSize: 10, color: Colors.textSecondary },
+  resultDay: { fontSize: 22, fontWeight: '800', color: DarkColors.tulasiGreen },
+  resultMonth: { fontSize: 10, fontWeight: '600', color: DarkColors.textMuted, textTransform: 'uppercase' },
+  resultWeekday: { fontSize: 10, color: DarkColors.textSecondary },
   resultInfo: { flex: 1, marginLeft: 12 },
-  resultDateFull: { fontSize: 14, fontWeight: '600', color: Colors.darkBrown },
+  resultDateFull: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
   resultBadges: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   scoreBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  scoreText: { fontSize: 11, color: Colors.white, fontWeight: '700' },
-  scorePercent: { fontSize: 11, color: Colors.textMuted, marginLeft: 8, fontWeight: '600' },
+  scoreText: { fontSize: 11, color: '#fff', fontWeight: '700' },
+  scorePercent: { fontSize: 11, color: DarkColors.textMuted, marginLeft: 8, fontWeight: '600' },
 
-  resultDetails: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' },
+  resultDetails: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
   reasonRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 },
-  reasonText: { fontSize: 13, color: Colors.textSecondary, marginLeft: 6, flex: 1, lineHeight: 20 },
+  reasonText: { fontSize: 13, color: DarkColors.textSecondary, marginLeft: 6, flex: 1, lineHeight: 20 },
 
   closeBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginVertical: 12,
-    backgroundColor: Colors.tulasiGreen, borderRadius: 12,
+    backgroundColor: DarkColors.tulasiGreen, borderRadius: 12,
   },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: Colors.white },
+  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
   // Premium lock overlay styles
   premiumOverlay: {
@@ -771,11 +768,11 @@ const s = StyleSheet.create({
     paddingHorizontal: 24, paddingVertical: 32,
   },
   premiumOverlayTitle: {
-    fontSize: 22, fontWeight: '800', color: Colors.darkBrown,
+    fontSize: 22, fontWeight: '800', color: DarkColors.textPrimary,
     marginTop: 16, marginBottom: 8,
   },
   premiumOverlayDesc: {
-    fontSize: 14, color: Colors.textMuted, textAlign: 'center',
+    fontSize: 14, color: DarkColors.textMuted, textAlign: 'center',
     lineHeight: 22, marginBottom: 24, paddingHorizontal: 12,
   },
   premiumPlans: {
@@ -783,25 +780,25 @@ const s = StyleSheet.create({
     marginBottom: 24, gap: 10,
   },
   premiumPlanCard: {
-    backgroundColor: Colors.white, borderRadius: 14,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14,
     padding: 14, alignItems: 'center', width: 100,
-    borderWidth: 1, borderColor: 'rgba(212,160,23,0.2)',
+    borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   premiumPlanBadge: {
-    fontSize: 9, fontWeight: '700', color: Colors.white,
-    backgroundColor: Colors.tulasiGreen, borderRadius: 6,
+    fontSize: 9, fontWeight: '700', color: '#fff',
+    backgroundColor: DarkColors.tulasiGreen, borderRadius: 6,
     paddingHorizontal: 6, paddingVertical: 2, marginBottom: 6,
     overflow: 'hidden',
   },
-  premiumPlanTelugu: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
-  premiumPlanPrice: { fontSize: 22, fontWeight: '800', color: Colors.saffron, marginVertical: 4 },
-  premiumPlanDuration: { fontSize: 10, color: Colors.textMuted },
+  premiumPlanTelugu: { fontSize: 12, fontWeight: '600', color: DarkColors.textSecondary },
+  premiumPlanPrice: { fontSize: 22, fontWeight: '800', color: DarkColors.saffron, marginVertical: 4 },
+  premiumPlanDuration: { fontSize: 10, color: DarkColors.textMuted },
   premiumActivateBtn: { borderRadius: 12, overflow: 'hidden', width: '100%' },
   premiumActivateBtnGradient: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 14, paddingHorizontal: 24, borderRadius: 12,
   },
   premiumActivateBtnText: {
-    fontSize: 15, fontWeight: '700', color: Colors.white, marginLeft: 8,
+    fontSize: 15, fontWeight: '700', color: '#fff', marginLeft: 8,
   },
 });

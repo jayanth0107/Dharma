@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "ధర్మ — Telugu Panchangam",
+    "name": "Dharma: Telugu Astro, Calendar & Gold",
     "slug": "DharmaDaily",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
@@ -37,13 +37,13 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 2,
+      "versionCode": 3,
       "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "name": "ధర్మ — Telugu Panchangam",
-      "shortName": "ధర్మ",
+      "name": "Dharma: Telugu Astro, Calendar & Gold",
+      "shortName": "Dharma",
       "lang": "te",
       "description": "Free Telugu Panchangam app with daily Tithi, Nakshatram, Yogam, Karanam, Muhurtam timings, festival calendar, Ekadashi dates, gold prices, and Bhagavad Gita slokas.",
       "themeColor": "#E8751A",

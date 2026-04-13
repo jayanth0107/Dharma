@@ -5,13 +5,16 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
+import { useLanguage } from '../context/LanguageContext';
+import { TR } from '../data/translations';
 
 // ---- CONFIGURATION ----
 const UPI_ID = '9535251573@ibl';
 const APP_NAME = 'ధర్మ';
-const MERCHANT_NAME = 'DharmaDaily';
+const MERCHANT_NAME = 'Jayanth';
 
 // UPI app logos (local assets)
 const UPI_LOGOS = {
@@ -39,7 +42,7 @@ function getAppIntentUrls(amount) {
   const note = encodeURIComponent(`${APP_NAME} Donation`);
   const pa = encodeURIComponent(UPI_ID);
   const pn = encodeURIComponent(MERCHANT_NAME);
-  const params = `pa=${pa}&pn=${pn}&am=${amount}&cu=INR&tn=${note}&mc=5411`;
+  const params = `pa=${pa}&pn=${pn}&am=${amount}&cu=INR&tn=${note}`;
   return [
     { url: `gpay://upi/pay?${params}`, name: 'Google Pay' },
     { url: `phonepe://pay?${params}`, name: 'PhonePe' },
@@ -60,14 +63,14 @@ function getGenericQrCodeUrl() {
   return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
 }
 
-async function openUpiPayment(amount, label) {
+async function openUpiPayment(amount, label, t = (te) => te) {
   trackEvent('donate_initiated', { amount, label });
 
   // On web, UPI deep links don't work — show QR code instead
   if (Platform.OS === 'web') {
     Alert.alert(
-      'UPI పేమెంట్',
-      `దయచేసి QR కోడ్ స్కాన్ చేయండి లేదా UPI ID కి మాన్యువల్‌గా ₹${amount} పంపండి:\n\n${UPI_ID}`,
+      t(TR.upiPaymentTitle.te, TR.upiPaymentTitle.en),
+      `${t(TR.upiScanOrSend.te, TR.upiScanOrSend.en)} ₹${amount}:\n\n${UPI_ID}`,
     );
     return;
   }
@@ -96,35 +99,36 @@ async function openUpiPayment(amount, label) {
 
   // Nothing worked — show UPI ID for manual payment
   Alert.alert(
-    'UPI యాప్ కనుగొనబడలేదు',
-    `దయచేసి ఈ UPI ID కి మాన్యువల్‌గా ₹${amount} పంపండి:\n\n${UPI_ID}\n\nGoogle Pay, PhonePe, Paytm లేదా ఏదైనా UPI యాప్ ఉపయోగించండి`,
+    t(TR.upiAppNotFound.te, TR.upiAppNotFound.en),
+    `${t(TR.upiScanOrSend.te, TR.upiScanOrSend.en)} ₹${amount}:\n\n${UPI_ID}\n\n${t(TR.donateUpiNote.te, TR.donateUpiNote.en)}`,
     [
-      { text: 'UPI ID కాపీ', onPress: () => copyToClipboard(UPI_ID) },
-      { text: 'సరే', style: 'cancel' },
+      { text: `${t(TR.copy.te, TR.copy.en)} UPI ID`, onPress: () => copyToClipboard(UPI_ID, t) },
+      { text: t(TR.ok.te, TR.ok.en), style: 'cancel' },
     ]
   );
 }
 
-async function copyToClipboard(text) {
+async function copyToClipboard(text, t = (te) => te) {
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(text);
-      Alert.alert('కాపీ అయింది!', `UPI ID: ${text}`);
+      Alert.alert(t(TR.upiCopied.te, TR.upiCopied.en), `UPI ID: ${text}`);
       return;
     }
   } catch { /* fallback */ }
-  Alert.alert('UPI ID కాపీ చేయండి', text);
+  Alert.alert(t(TR.upiIdLabel.te, TR.upiIdLabel.en), text);
 }
 
 // ---- QR Code Component ----
 function UpiQrCode({ amount }) {
   const [qrError, setQrError] = useState(false);
+  const { t } = useLanguage();
   const qrUrl = amount ? getQrCodeUrl(amount) : getGenericQrCodeUrl();
 
   return (
     <View style={styles.qrContainer}>
-      <Text style={styles.qrTitle}>QR కోడ్ స్కాన్ చేయండి</Text>
-      <Text style={styles.qrSubtitle}>ఏదైనా UPI యాప్‌తో స్కాన్ చేయండి</Text>
+      <Text style={styles.qrTitle}>{t(TR.qrScan.te, TR.qrScan.en)}</Text>
+      <Text style={styles.qrSubtitle}>{t(TR.qrScanSub.te, TR.qrScanSub.en)}</Text>
       <View style={styles.qrBox}>
         {!qrError ? (
           <Image
@@ -135,8 +139,8 @@ function UpiQrCode({ amount }) {
           />
         ) : (
           <View style={styles.qrFallback}>
-            <MaterialCommunityIcons name="qrcode" size={48} color={Colors.vibhuti} />
-            <Text style={styles.qrFallbackText}>QR లోడ్ కాలేదు</Text>
+            <MaterialCommunityIcons name="qrcode" size={48} color={DarkColors.silver} />
+            <Text style={styles.qrFallbackText}>{t(TR.qrLoadFailed.te, TR.qrLoadFailed.en)}</Text>
           </View>
         )}
         {amount && (
@@ -145,19 +149,20 @@ function UpiQrCode({ amount }) {
           </View>
         )}
       </View>
-      <Text style={styles.qrNote}>Google Pay • PhonePe • Paytm • BHIM • ఏదైనా UPI యాప్</Text>
+      <Text style={styles.qrNote}>{t(TR.qrAppsList.te, TR.qrAppsList.en)}</Text>
     </View>
   );
 }
 
 // ---- Inline Donate Card (shown in main scroll) ----
 export function DonateCard({ onExpand }) {
+  const { t } = useLanguage();
   // On web, all buttons open the full modal with QR code
   const handleQuickDonate = (amount, label) => {
     if (Platform.OS === 'web') {
       onExpand(amount);
     } else {
-      openUpiPayment(amount, label);
+      openUpiPayment(amount, label, t);
     }
   };
 
@@ -174,8 +179,8 @@ export function DonateCard({ onExpand }) {
             <MaterialCommunityIcons name="hand-heart" size={28} color="#FFD700" />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>ధర్మ కి సహాయం చేయండి</Text>
-            <Text style={styles.cardSubtitle}>మీ దానం యాప్‌ను మెరుగుపరుస్తుంది</Text>
+            <Text style={styles.cardTitle}>{t(TR.donateTitleCard.te, TR.donateTitleCard.en)}</Text>
+            <Text style={styles.cardSubtitle}>{t(TR.donateSubtitleCard.te, TR.donateSubtitleCard.en)}</Text>
           </View>
           <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.6)" />
         </View>
@@ -195,12 +200,12 @@ export function DonateCard({ onExpand }) {
           ))}
           <TouchableOpacity style={styles.quickBtn} onPress={() => onExpand(null)} activeOpacity={0.7}>
             <Text style={styles.quickEmoji}>🙏</Text>
-            <Text style={styles.quickAmount}>మరిన్ని</Text>
+            <Text style={styles.quickAmount}>{t(TR.donateMore.te, TR.donateMore.en)}</Text>
           </TouchableOpacity>
         </View>
 
         <Text style={styles.cardNote}>
-          100% UPI — ఎటువంటి ఛార్జీలు లేవు • తక్షణ బదిలీ
+          {t(TR.donateCardNote.te, TR.donateCardNote.en)}
         </Text>
       </LinearGradient>
     </TouchableOpacity>
@@ -208,8 +213,9 @@ export function DonateCard({ onExpand }) {
 }
 
 // ---- Full Donate Modal ----
-export function DonateModal({ visible, onClose, initialAmount }) {
-  const [selectedAmount, setSelectedAmount] = useState(initialAmount || null);
+export function DonateModal({ visible, onClose, initialAmount, embedded = false }) {
+  const [selectedAmount, setSelectedAmount] = useState(initialAmount || 101);
+  const { t } = useLanguage();
 
   // Sync initialAmount when modal opens
   React.useEffect(() => {
@@ -223,25 +229,23 @@ export function DonateModal({ visible, onClose, initialAmount }) {
   };
 
   const handleCopyUpi = () => {
-    copyToClipboard(UPI_ID);
+    copyToClipboard(UPI_ID, t);
     trackEvent('donate_upi_copied');
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
+    <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
           {/* Fixed Header — stays visible while scrolling */}
           <LinearGradient
             colors={['#2E7D32', '#1B5E20', '#0D3B0F']}
             style={styles.modalHeader}
           >
             <View style={styles.modalHeaderRow}>
-              <TouchableOpacity onPress={onClose} accessibilityLabel="వెనక్కి" accessibilityRole="button">
-                <Ionicons name="arrow-back" size={24} color={Colors.white} />
+              <TouchableOpacity onPress={onClose} accessibilityLabel={t(TR.back.te, TR.back.en)} accessibilityRole="button">
+                <Ionicons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>
-              <Text style={styles.modalHeaderTitle}>దానం</Text>
-              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel="UPI ID కాపీ" accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, gap: 4 }}>
+              <Text style={styles.modalHeaderTitle}>{t(TR.donateHeaderTitle.te, TR.donateHeaderTitle.en)}</Text>
+              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, gap: 4 }}>
                 <MaterialCommunityIcons name="content-copy" size={16} color="#FFD700" />
                 <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFD700' }}>UPI ID</Text>
               </TouchableOpacity>
@@ -252,18 +256,18 @@ export function DonateModal({ visible, onClose, initialAmount }) {
             {/* Decorative icon + quote */}
             <View style={{ alignItems: 'center', backgroundColor: '#0D3B0F', paddingBottom: 16 }}>
               <MaterialCommunityIcons name="hand-heart" size={48} color="#FFD700" style={{ marginTop: 8 }} />
-              <Text style={styles.modalQuote}>దానం పరమో ధర్మః</Text>
-              <Text style={styles.modalQuoteEn}>దానమే పరమ ధర్మం</Text>
+              <Text style={styles.modalQuote}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
+              <Text style={styles.modalQuoteEn}>{t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}</Text>
             </View>
 
             <View style={styles.modalBody}>
               {/* Message */}
               <Text style={styles.modalMessage}>
-                ధర్మ ఉచితంగా అందిస్తోంది. మీ దానం యాప్‌ను మెరుగుపరుస్తుంది. 🙏
+                {t(TR.donateMessage.te, TR.donateMessage.en)}
               </Text>
 
               {/* Amount buttons — FIRST so user picks amount */}
-              <Text style={styles.amountLabel}>మొత్తం ఎంచుకోండి</Text>
+              <Text style={styles.amountLabel}>{t(TR.donateSelectAmount.te, TR.donateSelectAmount.en)}</Text>
               <View style={styles.amountGrid}>
                 {DONATION_AMOUNTS.map((item) => (
                   <TouchableOpacity
@@ -289,7 +293,7 @@ export function DonateModal({ visible, onClose, initialAmount }) {
 
               {/* UPI app buttons — always visible */}
               <View style={styles.appBtnsSection}>
-                <Text style={styles.appBtnsTitle}>UPI యాప్ ఎంచుకోండి</Text>
+                <Text style={styles.appBtnsTitle}>{t(TR.donateSelectUpiApp.te, TR.donateSelectUpiApp.en)}</Text>
                 <View style={styles.appBtnsRow}>
                   {[
                     { name: 'Google Pay', letter: 'G', bg: '#4285F4', scheme: 'tez' },
@@ -303,8 +307,8 @@ export function DonateModal({ visible, onClose, initialAmount }) {
                       onPress={async () => {
                         const amt = selectedAmount || 51;
                         if (Platform.OS === 'web') {
-                          await copyToClipboard(UPI_ID);
-                          alert(`UPI ID కాపీ అయింది!\n\n${UPI_ID}\n\nమీ ఫోన్‌లో ${app.name} తెరిచి ₹${amt} పంపండి.\nలేదా QR కోడ్ స్కాన్ చేయండి.`);
+                          await copyToClipboard(UPI_ID, t);
+                          alert(`${t(TR.upiCopied.te, TR.upiCopied.en)}\n\n${UPI_ID}\n\n${app.name} • ₹${amt}`);
                           return;
                         }
                         const url = `${app.scheme}://upi/pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amt}&cu=INR&tn=${encodeURIComponent(APP_NAME + ' Donation')}`;
@@ -313,7 +317,7 @@ export function DonateModal({ visible, onClose, initialAmount }) {
                           if (canOpen) { await Linking.openURL(url); return; }
                         } catch {}
                         try { await Linking.openURL(buildUpiDeepLink(amt)); } catch {}
-                        Alert.alert(`${app.name} కనుగొనబడలేదు`, `QR కోడ్ స్కాన్ చేయండి లేదా UPI ID కి ₹${amt} పంపండి:\n\n${UPI_ID}`);
+                        Alert.alert(`${app.name} — ${t(TR.upiAppNotFound.te, TR.upiAppNotFound.en)}`, `${t(TR.upiScanOrSend.te, TR.upiScanOrSend.en)} ₹${amt}:\n\n${UPI_ID}`);
                       }}
                       activeOpacity={0.7}
                     >
@@ -335,29 +339,29 @@ export function DonateModal({ visible, onClose, initialAmount }) {
 
               {/* UPI ID display */}
               <View style={styles.upiBox}>
-                <Text style={styles.upiLabel}>UPI ID</Text>
+                <Text style={styles.upiLabel}>{t(TR.upiIdLabel.te, TR.upiIdLabel.en)}</Text>
                 <View style={styles.upiRow}>
                   <Text style={styles.upiId}>{UPI_ID}</Text>
                   <TouchableOpacity
-                    onPress={() => copyToClipboard(UPI_ID)}
+                    onPress={() => copyToClipboard(UPI_ID, t)}
                     style={styles.copyBtn}
-                    accessibilityLabel="UPI ID కాపీ చేయండి"
+                    accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`}
                     accessibilityRole="button"
                   >
-                    <MaterialCommunityIcons name="content-copy" size={18} color={Colors.tulasiGreen} />
-                    <Text style={styles.copyText}>కాపీ</Text>
+                    <MaterialCommunityIcons name="content-copy" size={18} color={DarkColors.tulasiGreen} />
+                    <Text style={styles.copyText}>{t(TR.copy.te, TR.copy.en)}</Text>
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.upiNote}>
-                  Google Pay, PhonePe, Paytm లేదా ఏదైనా UPI యాప్ ఉపయోగించండి
+                  {t(TR.donateUpiNote.te, TR.donateUpiNote.en)}
                 </Text>
               </View>
 
               {/* Thank you note */}
               <View style={styles.thankYouBox}>
-                <MaterialCommunityIcons name="flower-tulip" size={20} color={Colors.saffron} />
+                <MaterialCommunityIcons name="flower-tulip" size={20} color={DarkColors.saffron} />
                 <Text style={styles.thankYouText}>
-                  మీ దానానికి ధన్యవాదాలు! మీకు మరియు మీ కుటుంబానికి శుభం కలగాలని ప్రార్థిస్తున్నాము. 🙏
+                  {t(TR.donateThankYou.te, TR.donateThankYou.en)}
                 </Text>
               </View>
             </View>
@@ -365,11 +369,9 @@ export function DonateModal({ visible, onClose, initialAmount }) {
 
           {/* Close button */}
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>మూసివేయండి</Text>
+            <Text style={styles.closeBtnText}>{t(TR.close.te, TR.close.en)}</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    </ModalOrView>
   );
 }
 
@@ -379,20 +381,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 16,
     paddingVertical: 16,
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgElevated,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(46,125,50,0.15)',
+    borderColor: DarkColors.borderCard,
   },
   qrTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
     letterSpacing: 0.3,
   },
   qrSubtitle: {
     fontSize: 11,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 2,
     marginBottom: 12,
   },
@@ -417,7 +419,7 @@ const styles = StyleSheet.create({
   },
   qrFallbackText: {
     fontSize: 12,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 8,
   },
   qrAmountBadge: {
@@ -431,11 +433,11 @@ const styles = StyleSheet.create({
   qrAmountText: {
     fontSize: 14,
     fontWeight: '800',
-    color: Colors.white,
+    color: '#fff',
   },
   qrNote: {
     fontSize: 10,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 16,
     textAlign: 'center',
   },
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginRight: 14,
   },
   cardContent: { flex: 1 },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: Colors.white, letterSpacing: 0.3 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: '#fff', letterSpacing: 0.3 },
   cardSubtitle: { fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: '500', marginTop: 2 },
   quickRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, gap: 8 },
   quickBtn: {
@@ -465,35 +467,35 @@ const styles = StyleSheet.create({
     paddingVertical: 10, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
   },
   quickEmoji: { fontSize: 16 },
-  quickAmount: { fontSize: 13, fontWeight: '700', color: Colors.white, marginTop: 2 },
+  quickAmount: { fontSize: 13, fontWeight: '700', color: '#fff', marginTop: 2 },
   cardNote: { fontSize: 9, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginTop: 10 },
 
   // ---- Modal ----
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modal: { backgroundColor: '#FFFDF5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' },
+  modal: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' },
   modalHeader: { paddingTop: 16, paddingBottom: 20, paddingHorizontal: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   modalHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  modalHeaderTitle: { fontSize: 20, fontWeight: '800', color: Colors.white },
+  modalHeaderTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
   modalQuote: { fontSize: 18, fontWeight: '700', color: '#FFD700', textAlign: 'center', marginTop: 12, fontStyle: 'italic' },
   modalQuoteEn: { fontSize: 13, color: 'rgba(255,255,255,0.8)', textAlign: 'center', marginTop: 4 },
   modalBody: { padding: 20 },
-  modalMessage: { fontSize: 14, color: Colors.darkBrown, lineHeight: 22, marginBottom: 8 },
+  modalMessage: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 8 },
 
   // Amount selection
-  amountLabel: { fontSize: 14, fontWeight: '700', color: Colors.darkBrown, marginBottom: 12, marginTop: 8, letterSpacing: 0.3 },
+  amountLabel: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 12, marginTop: 8, letterSpacing: 0.3 },
   amountGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10 },
   amountCard: {
-    width: '30%', backgroundColor: Colors.white, borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(46,125,50,0.15)',
+    width: '30%', backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14,
+    alignItems: 'center', borderWidth: 1.5, borderColor: DarkColors.borderCard,
   },
-  amountCardActive: { borderColor: '#2E7D32', backgroundColor: 'rgba(46,125,50,0.06)' },
+  amountCardActive: { borderColor: '#2E7D32', backgroundColor: 'rgba(46,125,50,0.15)' },
   // UPI app buttons
   appBtnsSection: { marginTop: 16, marginBottom: 8 },
-  appBtnsTitle: { fontSize: 14, fontWeight: '700', color: Colors.darkBrown, marginBottom: 10, textAlign: 'center' },
+  appBtnsTitle: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 10, textAlign: 'center' },
   appBtnsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   appBtn: {
     width: '48%', flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14, padding: 12, marginBottom: 10,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 12, marginBottom: 10,
     borderWidth: 1.5, gap: 10,
   },
   appLogoImg: { width: 32, height: 32, borderRadius: 6 },
@@ -505,33 +507,33 @@ const styles = StyleSheet.create({
   appBtnText: { fontSize: 13, fontWeight: '700', flex: 1 },
 
   amountEmoji: { fontSize: 22, marginBottom: 6 },
-  amountValue: { fontSize: 18, fontWeight: '800', color: Colors.darkBrown },
+  amountValue: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary },
   amountValueActive: { color: '#2E7D32' },
-  amountTelugu: { fontSize: 10, color: Colors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
+  amountTelugu: { fontSize: 10, color: DarkColors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
 
   // UPI box
   upiBox: {
-    backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 14, padding: 16,
-    marginTop: 20, borderWidth: 1, borderColor: 'rgba(46,125,50,0.15)',
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 16,
+    marginTop: 20, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  upiLabel: { fontSize: 11, fontWeight: '700', color: Colors.tulasiGreen, letterSpacing: 1, marginBottom: 8 },
+  upiLabel: { fontSize: 11, fontWeight: '700', color: DarkColors.tulasiGreen, letterSpacing: 1, marginBottom: 8 },
   upiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  upiId: { fontSize: 18, fontWeight: '700', color: Colors.darkBrown, letterSpacing: 0.5 },
+  upiId: { fontSize: 18, fontWeight: '700', color: DarkColors.textPrimary, letterSpacing: 0.5 },
   copyBtn: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(46,125,50,0.1)',
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, gap: 4,
   },
-  copyText: { fontSize: 12, fontWeight: '700', color: Colors.tulasiGreen },
-  upiNote: { fontSize: 11, color: Colors.textMuted, marginTop: 8 },
+  copyText: { fontSize: 12, fontWeight: '700', color: DarkColors.tulasiGreen },
+  upiNote: { fontSize: 11, color: DarkColors.textMuted, marginTop: 8 },
 
   // Thank you
   thankYouBox: {
-    flexDirection: 'row', alignItems: 'flex-start', backgroundColor: 'rgba(232,117,26,0.06)',
-    borderRadius: 12, padding: 14, marginTop: 20, gap: 10, borderWidth: 1, borderColor: 'rgba(232,117,26,0.15)',
+    flexDirection: 'row', alignItems: 'flex-start', backgroundColor: DarkColors.saffronDim,
+    borderRadius: 12, padding: 14, marginTop: 20, gap: 10, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  thankYouText: { flex: 1, fontSize: 13, color: Colors.darkBrown, lineHeight: 20, fontStyle: 'italic' },
+  thankYouText: { flex: 1, fontSize: 13, color: DarkColors.textSecondary, lineHeight: 20, fontStyle: 'italic' },
 
   // Close
   closeBtn: { alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20, backgroundColor: '#2E7D32', borderRadius: 14 },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: Colors.white },
+  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 });

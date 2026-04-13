@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
 import { EKADASHI_2026 } from '../data/ekadashi';
 
 export function TodayEkadashiBanner({ ekadashi }) {
@@ -44,7 +44,7 @@ export function UpcomingEkadashiItem({ ekadashi }) {
             <MaterialCommunityIcons
               name={ekadashi.pakshaEnglish === 'Shukla' ? 'moon-waxing-crescent' : 'moon-waning-crescent'}
               size={10}
-              color={Colors.textSecondary}
+              color={DarkColors.textSecondary}
               style={{ marginRight: 3 }}
             />
             <Text style={styles.pakshaText}>{ekadashi.paksha}</Text>
@@ -75,9 +75,9 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
           ))}
 
           <TouchableOpacity style={styles.viewAllBtn} onPress={() => setShowAll(true)}>
-            <MaterialCommunityIcons name="calendar-month" size={16} color="#4A1A6B" style={{ marginRight: 6 }} />
+            <MaterialCommunityIcons name="calendar-month" size={16} color={DarkColors.goldLight} style={{ marginRight: 6 }} />
             <Text style={styles.viewAllText}>అన్ని ఏకాదశులు చూడండి</Text>
-            <MaterialCommunityIcons name="chevron-right" size={16} color="#4A1A6B" />
+            <MaterialCommunityIcons name="chevron-right" size={16} color={DarkColors.goldLight} />
           </TouchableOpacity>
         </View>
       )}
@@ -92,14 +92,14 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={[styles.modalHeader, { position: 'relative' }]}>
-              <MaterialCommunityIcons name="calendar-star" size={22} color="#4A1A6B" />
+              <MaterialCommunityIcons name="calendar-star" size={22} color={DarkColors.goldLight} />
               <Text style={styles.modalTitle}> 2026 ఏకాదశి దినాలు</Text>
               <Text style={styles.modalSubtitle}>మొత్తం 24 ఏకాదశి దినాలు</Text>
               <TouchableOpacity
-                style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' }}
+                style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}
                 onPress={() => setShowAll(false)}
               >
-                <Ionicons name="close" size={24} color="#2C1810" />
+                <Ionicons name="close" size={24} color={DarkColors.textPrimary} />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -118,7 +118,7 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
                       <MaterialCommunityIcons
                         name={item.pakshaEnglish === 'Shukla' ? 'moon-waxing-crescent' : 'moon-waning-crescent'}
                         size={10}
-                        color={isPast ? Colors.vibhuti : (item.pakshaEnglish === 'Shukla' ? '#D4A017' : '#1A1A2E')}
+                        color={isPast ? DarkColors.textMuted : (item.pakshaEnglish === 'Shukla' ? DarkColors.gold : DarkColors.textSecondary)}
                       />
                     </View>
                     <View style={styles.allEkRight}>
@@ -126,7 +126,7 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
                       <Text style={styles.allEkEnglish}>{item.nameEnglish}</Text>
                       {isToday && (
                         <View style={styles.todayTagContainer}>
-                          <MaterialCommunityIcons name="check-circle" size={10} color="#4A1A6B" />
+                          <MaterialCommunityIcons name="check-circle" size={10} color={DarkColors.goldLight} />
                           <Text style={styles.todayTag}> నేడు</Text>
                         </View>
                       )}
@@ -153,9 +153,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 4,
-    shadowColor: '#4A1A6B',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.4,
     shadowRadius: 8,
   },
   bannerGradient: {
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   bannerTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: Colors.white,
+    color: DarkColors.textPrimary,
     textAlign: 'center',
     marginTop: 2,
   },
@@ -190,13 +190,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   significanceRow: {
-    backgroundColor: 'rgba(74, 26, 107, 0.08)',
+    backgroundColor: 'rgba(74, 26, 107, 0.15)',
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
   significanceText: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: DarkColors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
     lineHeight: 18,
@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
   ekadashiItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.ivory,
+    backgroundColor: DarkColors.bgCard,
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: 'rgba(74, 26, 107, 0.12)',
+    borderColor: DarkColors.borderCard,
   },
   ekadashiBadge: {
     width: 52,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   ekadashiDaysNum: {
     fontSize: 18,
     fontWeight: '800',
-    color: Colors.white,
+    color: DarkColors.textPrimary,
   },
   ekadashiDaysLabel: {
     fontSize: 8,
@@ -245,16 +245,16 @@ const styles = StyleSheet.create({
   ekadashiName: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
   },
   ekadashiEnglish: {
     fontSize: 13,
-    color: '#4A3A2A',
+    color: DarkColors.textSecondary,
     fontWeight: '500',
   },
   ekadashiDate: {
     fontSize: 13,
-    color: '#6B5B4B',
+    color: DarkColors.textMuted,
     marginTop: 2,
   },
   pakshaBadge: {
@@ -264,12 +264,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
   },
-  shukla: { backgroundColor: 'rgba(212, 160, 23, 0.15)' },
-  krishna: { backgroundColor: 'rgba(26, 26, 46, 0.1)' },
+  shukla: { backgroundColor: DarkColors.goldDim },
+  krishna: { backgroundColor: 'rgba(255, 255, 255, 0.08)' },
   pakshaText: {
     fontSize: 9,
     fontWeight: '700',
-    color: Colors.textSecondary,
+    color: DarkColors.textSecondary,
   },
 
   viewAllBtn: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: 13,
-    color: '#4A1A6B',
+    color: DarkColors.goldLight,
     fontWeight: '700',
     letterSpacing: 0.3,
   },
@@ -289,11 +289,11 @@ const styles = StyleSheet.create({
   // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: DarkColors.overlay,
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.cream,
+    backgroundColor: DarkColors.bgElevated,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '80%',
@@ -303,16 +303,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: DarkColors.borderCard,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
   },
   modalSubtitle: {
     fontSize: 12,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 4,
   },
   allEkItem: {
@@ -321,11 +321,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.04)',
+    borderBottomColor: DarkColors.borderCard,
   },
   allEkItemPast: { opacity: 0.45 },
   allEkItemToday: {
-    backgroundColor: 'rgba(74, 26, 107, 0.08)',
+    backgroundColor: 'rgba(74, 26, 107, 0.2)',
   },
   allEkLeft: {
     width: 65,
@@ -336,18 +336,18 @@ const styles = StyleSheet.create({
   allEkDate: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.textSecondary,
+    color: DarkColors.textSecondary,
   },
-  allEkTextPast: { color: Colors.vibhuti },
+  allEkTextPast: { color: DarkColors.textMuted },
   allEkRight: { flex: 1 },
   allEkName: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
   },
   allEkEnglish: {
     fontSize: 11,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 1,
   },
   todayTagContainer: {
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   todayTag: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#4A1A6B',
+    color: DarkColors.goldLight,
   },
   modalClose: {
     alignItems: 'center',
@@ -371,6 +371,6 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.white,
+    color: DarkColors.textPrimary,
   },
 });

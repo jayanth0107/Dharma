@@ -57,3 +57,73 @@ export const Gradients = {
   evening: ['#0F0F1A', '#1A1A2E', '#6B1C23'],
   card: ['rgba(255,248,240,0.98)', 'rgba(245,230,211,0.95)'],
 };
+
+// ── Dark Theme (v2 Rewrite) ──
+// Dark background + saffron accents + gold/silver labels & icons
+export const DarkColors = {
+  // Backgrounds
+  bg:           '#0A0A0A',
+  bgCard:       '#1A1A1A',
+  bgElevated:   '#222222',
+  bgSubtab:     '#141414',
+  bgInput:      '#1E1E1E',
+
+  // Saffron accents (primary action color)
+  saffron:      '#E8751A',
+  saffronLight: '#F4A460',
+  saffronDark:  '#C55A11',
+  saffronDim:   'rgba(232,117,26,0.15)',
+
+  // Gold (labels, icons, active states)
+  gold:         '#D4A017',
+  goldLight:    '#F5D77A',
+  goldShimmer:  '#FFD700',
+  goldDim:      'rgba(212,160,23,0.15)',
+
+  // Silver (secondary labels, icons, muted elements)
+  silver:       '#C0C0C0',
+  silverLight:  '#D8D8D8',
+  silverDim:    'rgba(192,192,192,0.15)',
+
+  // Sacred
+  kumkum:       '#C41E3A',
+  tulasiGreen:  '#2E7D32',
+
+  // Text
+  textPrimary:   '#FFFFFF',
+  textSecondary: '#C0C0C0',     // silver
+  textMuted:     '#999999',
+  textGold:      '#D4A017',
+  textSaffron:   '#E8751A',
+  textSilver:    '#C0C0C0',
+
+  // Borders
+  border:        'rgba(232,117,26,0.12)',
+  borderCard:    'rgba(255,255,255,0.06)',
+  borderGold:    'rgba(212,160,23,0.25)',
+
+  // Tab bar
+  tabBarBg:      '#111111',
+  tabBarBorder:  'rgba(232,117,26,0.2)',
+  tabActive:     '#E8751A',     // saffron active
+  tabInactive:   '#777777',
+
+  // Functional
+  success:       '#2E7D32',
+  error:         '#C41E3A',
+  warning:       '#E8751A',
+  premium:       '#D4A017',
+
+  // Overlay
+  overlay:       'rgba(10,10,10,0.85)',
+};
+
+export const DarkGradients = {
+  saffronGlow:  ['#0A0A0A', '#1A1008', '#2A1506'],
+  cardSaffron:  ['#1A1A1A', '#1A1208'],
+  cardGold:     ['#1A1A1A', '#1A1810'],
+  header:       ['#0A0A0A', '#151008', '#0A0A0A'],
+  saffronFire:  ['#C55A11', '#E8751A', '#F4A460'],
+  goldenShine:  ['#C55A11', '#D4A017', '#F5D77A'],
+  premium:      ['#1A1008', '#2A1506', '#1A1008'],
+};

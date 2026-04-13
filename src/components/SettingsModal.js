@@ -5,11 +5,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { ModalOrView } from './ModalOrView';
 import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '../utils/notificationService';
 import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
 import { getPaymentStats } from '../utils/paymentSync';
 import { setAdConfig } from './AdBanner';
+import { useLanguage } from '../context/LanguageContext';
+import { TR } from '../data/translations';
 
 // Admin verification (obfuscated)
 const _k = 42;
@@ -22,7 +25,8 @@ function verifyAdmin(input) {
   return true;
 }
 
-export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) {
+export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, embedded = false }) {
+  const { t } = useLanguage();
   const [settings, setSettings] = useState(null);
   const [tapCount, setTapCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -81,51 +85,49 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
   if (!settings) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={s.overlay}>
-        <View style={s.modal}>
+    <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
           {/* Header */}
           <LinearGradient colors={['#2C1810', '#4A1A0A']} style={s.header}>
             <TouchableOpacity style={s.closeX} onPress={onClose}>
               <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
             <MaterialCommunityIcons name="cog" size={36} color="#FFD700" />
-            <Text style={s.title}>సెట్టింగ్స్</Text>
-            <Text style={s.subtitle}>Settings</Text>
+            <Text style={s.title}>{t(TR.settings.te, TR.settings.en)}</Text>
+            <Text style={s.subtitle}>{t(TR.settings.en, TR.settings.en)}</Text>
           </LinearGradient>
 
           <ScrollView style={s.body} showsVerticalScrollIndicator={false}>
             {/* Notifications Section */}
-            <Text style={s.sectionTitle}>🔔 నోటిఫికేషన్లు</Text>
+            <Text style={s.sectionTitle}>{t(TR.notifications.te, TR.notifications.en)}</Text>
 
             <SettingRow
-              icon="bell" label="నోటిఫికేషన్లు" sublabel="అన్ని నోటిఫికేషన్లు ఆన్/ఆఫ్"
+              icon="bell" label={t(TR.allNotifications.te, TR.allNotifications.en)} sublabel={t(TR.allNotifSub.te, TR.allNotifSub.en)}
               value={settings.enabled} onChange={(v) => updateSetting('enabled', v)}
             />
 
             {settings.enabled && (
               <>
                 <SettingRow
-                  icon="pot-mix" label="దైనిక పంచాంగం" sublabel="ప్రతిరోజూ సూర్యోదయం సమయంలో పంచాంగ సారాంశం"
+                  icon="pot-mix" label={t(TR.dailyPanchang.te, TR.dailyPanchang.en)} sublabel={t(TR.dailyPanchangSub.te, TR.dailyPanchangSub.en)}
                   value={settings.dailyPanchangam} onChange={(v) => updateSetting('dailyPanchangam', v)}
                 />
                 <SettingRow
-                  icon="format-quote-open" label="దైనిక సుభాషితం" sublabel="మధ్యాహ్నం 12 గంటలకు ప్రేరణాత్మక శ్లోకం"
+                  icon="format-quote-open" label={t(TR.dailyQuote.te, TR.dailyQuote.en)} sublabel={t(TR.dailyQuoteSub.te, TR.dailyQuoteSub.en)}
                   value={settings.dailyQuote} onChange={(v) => updateSetting('dailyQuote', v)}
                 />
                 <SettingRow
-                  icon="party-popper" label="పండుగ రిమైండర్" sublabel="పండుగకు 1 రోజు ముందు రిమైండర్"
+                  icon="party-popper" label={t(TR.festivalReminder.te, TR.festivalReminder.en)} sublabel={t(TR.festivalReminderSub.te, TR.festivalReminderSub.en)}
                   value={settings.festivalReminder} onChange={(v) => updateSetting('festivalReminder', v)}
                 />
                 <SettingRow
-                  icon="hands-pray" label="ఏకాదశి రిమైండర్" sublabel="ఏకాదశికి 1 రోజు ముందు రిమైండర్"
+                  icon="hands-pray" label={t(TR.ekadashiReminder.te, TR.ekadashiReminder.en)} sublabel={t(TR.ekadashiReminderSub.te, TR.ekadashiReminderSub.en)}
                   value={settings.ekadashiReminder} onChange={(v) => updateSetting('ekadashiReminder', v)}
                 />
 
                 {/* Time picker */}
                 <View style={s.timeRow}>
-                  <MaterialCommunityIcons name="clock-outline" size={20} color={Colors.saffron} />
-                  <Text style={s.timeLabel}>పంచాంగం నోటిఫికేషన్ సమయం</Text>
+                  <MaterialCommunityIcons name="clock-outline" size={20} color={DarkColors.saffron} />
+                  <Text style={s.timeLabel}>{t(TR.notifTime.te, TR.notifTime.en)}</Text>
                   <View style={s.timePickerRow}>
                     <TouchableOpacity
                       style={s.timeBtn}
@@ -150,10 +152,10 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
             {/* Admin-only controls — hidden behind version tap + passcode */}
             {adminUnlocked && (
               <>
-                <Text style={[s.sectionTitle, { marginTop: 20 }]}>🔐 Admin Controls</Text>
+                <Text style={[s.sectionTitle, { marginTop: 20 }]}>{t(TR.adminControls.te, TR.adminControls.en)}</Text>
                 <SettingRow
-                  icon="advertisements" label="ప్రకటనలు చూపించు"
-                  sublabel={isPremium ? 'Premium — ప్రకటనలు ఆఫ్' : 'ఉచిత వినియోగదారులకు ప్రకటనలు చూపబడతాయి'}
+                  icon="advertisements" label={t(TR.adsShow.te, TR.adsShow.en)}
+                  sublabel={isPremium ? t(TR.adsShowSubPremium.te, TR.adsShowSubPremium.en) : t(TR.adsShowSubFree.te, TR.adsShowSubFree.en)}
                   value={!isPremium && (settings?.adsEnabled !== false)}
                   onChange={(v) => {
                     updateSetting('adsEnabled', v);
@@ -163,8 +165,8 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                 <View style={s.settingRow}>
                   <MaterialCommunityIcons name="crown" size={22} color="#FFD700" style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.settingLabel}>Premium {isPremium ? 'సక్రియం ✅' : 'నిష్క్రియం'}</Text>
-                    <Text style={s.settingSublabel}>{isPremium ? 'అన్ని ఫీచర్లు అన్‌లాక్ + ప్రకటనలు లేవు' : 'ముహూర్తం ఫైండర్, జాతకం, గీత లైబ్రరీ లాక్'}</Text>
+                    <Text style={s.settingLabel}>{isPremium ? t(TR.premiumActive.te, TR.premiumActive.en) : `Premium ${t(TR.premiumInactive.te, TR.premiumInactive.en)}`}</Text>
+                    <Text style={s.settingSublabel}>{isPremium ? t(TR.premiumUnlocked.te, TR.premiumUnlocked.en) : t(TR.premiumLocked.te, TR.premiumLocked.en)}</Text>
                   </View>
                   <Switch
                     value={isPremium}
@@ -181,7 +183,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
 
                 {/* Payment Records */}
                 <TouchableOpacity
-                  style={[s.settingRow, { marginTop: 12, backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: 12, padding: 12 }]}
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 12 }]}
                   onPress={async () => {
                     if (!showPayments) {
                       const records = await getPaymentRecords();
@@ -190,18 +192,18 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                     setShowPayments(!showPayments);
                   }}
                 >
-                  <MaterialCommunityIcons name="receipt" size={22} color={Colors.saffron} style={{ marginRight: 12 }} />
+                  <MaterialCommunityIcons name="receipt" size={22} color={DarkColors.saffron} style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.settingLabel}>Payment Records</Text>
-                    <Text style={s.settingSublabel}>UPI చెల్లింపు చరిత్ర</Text>
+                    <Text style={s.settingLabel}>{t(TR.paymentRecords.te, TR.paymentRecords.en)}</Text>
+                    <Text style={s.settingSublabel}>{t(TR.paymentHistory.te, TR.paymentHistory.en)}</Text>
                   </View>
-                  <MaterialCommunityIcons name={showPayments ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.textMuted} />
+                  <MaterialCommunityIcons name={showPayments ? 'chevron-up' : 'chevron-down'} size={20} color={DarkColors.textMuted} />
                 </TouchableOpacity>
 
                 {showPayments && (
-                  <View style={{ marginTop: 8, backgroundColor: '#f9f9f4', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' }}>
+                  <View style={{ marginTop: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: DarkColors.borderCard }}>
                     {paymentRecords.length === 0 ? (
-                      <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 12 }}>చెల్లింపులు లేవు</Text>
+                      <Text style={{ fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 12 }}>{t(TR.noPayments.te, TR.noPayments.en)}</Text>
                     ) : (
                       paymentRecords.slice().reverse().map((r, i) => {
                         const sourceLabel = r.source === 'trial' ? '🆓 Free Trial'
@@ -211,15 +213,15 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                           : r.source === 'promo' ? '🎁 Promo Code'
                           : `📦 ${r.source}`;
                         return (
-                          <View key={i} style={{ paddingVertical: 8, borderBottomWidth: i < paymentRecords.length - 1 ? 1 : 0, borderBottomColor: 'rgba(0,0,0,0.06)' }}>
+                          <View key={i} style={{ paddingVertical: 8, borderBottomWidth: i < paymentRecords.length - 1 ? 1 : 0, borderBottomColor: DarkColors.borderCard }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Text style={{ fontSize: 13, fontWeight: '700', color: Colors.darkBrown }}>{sourceLabel}</Text>
-                              <Text style={{ fontSize: 12, fontWeight: '700', color: r.amount ? Colors.tulasiGreen : Colors.textMuted }}>
+                              <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary }}>{sourceLabel}</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '700', color: r.amount ? DarkColors.tulasiGreen : DarkColors.textMuted }}>
                                 {r.amount ? `₹${r.amount}` : 'Free'}
                               </Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
-                              <Text style={{ fontSize: 11, color: Colors.textMuted }}>
+                              <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>
                                 {r.planName || r.planId || '—'} • {r.days}d
                               </Text>
                               <Text style={{ fontSize: 10, color: '#aaa' }}>
@@ -253,39 +255,39 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                     setShowCloud(!showCloud);
                   }}
                 >
-                  <MaterialCommunityIcons name="cloud-download" size={22} color="#4A1A6B" style={{ marginRight: 12 }} />
+                  <MaterialCommunityIcons name="cloud-download" size={22} color="#9B6FCF" style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.settingLabel}>Cloud Payments (All Users)</Text>
-                    <Text style={s.settingSublabel}>Firebase — అన్ని పరికరాల చెల్లింపులు</Text>
+                    <Text style={s.settingLabel}>{t(TR.cloudPayments.te, TR.cloudPayments.en)}</Text>
+                    <Text style={s.settingSublabel}>{t(TR.cloudPaymentsSub.te, TR.cloudPaymentsSub.en)}</Text>
                   </View>
-                  <MaterialCommunityIcons name={showCloud ? 'chevron-up' : 'chevron-down'} size={20} color={Colors.textMuted} />
+                  <MaterialCommunityIcons name={showCloud ? 'chevron-up' : 'chevron-down'} size={20} color={DarkColors.textMuted} />
                 </TouchableOpacity>
 
                 {showCloud && (
-                  <View style={{ marginTop: 8, backgroundColor: '#f5f0fa', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(74,26,107,0.1)' }}>
+                  <View style={{ marginTop: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: DarkColors.borderCard }}>
                     {cloudLoading ? (
-                      <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 16 }}>Firebase లోడ్ అవుతోంది...</Text>
+                      <Text style={{ fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 16 }}>{t(TR.firebaseLoading.te, TR.firebaseLoading.en)}</Text>
                     ) : !cloudStats ? (
-                      <Text style={{ fontSize: 13, color: Colors.textMuted, textAlign: 'center', paddingVertical: 12 }}>డేటా లేదు</Text>
+                      <Text style={{ fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 12 }}>{t(TR.noData.te, TR.noData.en)}</Text>
                     ) : (
                       <>
                         {/* Stats summary */}
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.06)', marginBottom: 10 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, marginBottom: 10 }}>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
-                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Total Revenue</Text>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: DarkColors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
+                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.totalRevenue.te, TR.totalRevenue.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: '#4A1A6B' }}>{cloudStats.uniqueDevices}</Text>
-                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Devices</Text>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: '#9B6FCF' }}>{cloudStats.uniqueDevices}</Text>
+                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.devicesLabel.te, TR.devicesLabel.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.saffron }}>{cloudStats.purchases}</Text>
-                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Purchases</Text>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: DarkColors.saffron }}>{cloudStats.purchases}</Text>
+                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.purchasesLabel.te, TR.purchasesLabel.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: Colors.gold }}>{cloudStats.trials}</Text>
-                            <Text style={{ fontSize: 10, color: Colors.textMuted }}>Trials</Text>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: DarkColors.gold }}>{cloudStats.trials}</Text>
+                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.trialsLabel.te, TR.trialsLabel.en)}</Text>
                           </View>
                         </View>
 
@@ -293,9 +295,9 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                         {cloudStats.records.slice(0, 20).map((r, i) => {
                           const srcLabel = r.source === 'trial' ? '🆓' : r.source?.includes('horoscope') ? '🔮' : '💳';
                           return (
-                            <View key={r.id || i} style={{ paddingVertical: 6, borderBottomWidth: i < 19 ? 1 : 0, borderBottomColor: 'rgba(0,0,0,0.04)' }}>
+                            <View key={r.id || i} style={{ paddingVertical: 6, borderBottomWidth: i < 19 ? 1 : 0, borderBottomColor: DarkColors.borderCard }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ fontSize: 12, fontWeight: '700', color: Colors.darkBrown }}>
+                                <Text style={{ fontSize: 12, fontWeight: '700', color: DarkColors.textPrimary }}>
                                   {srcLabel} {r.amount ? `₹${r.amount}` : 'Free'} — {r.planName || r.planId || r.source}
                                 </Text>
                                 <Text style={{ fontSize: 10, color: '#aaa' }}>{r.days}d</Text>
@@ -320,10 +322,10 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
             {/* Admin login prompt */}
             {showAdminLogin && !adminUnlocked && (
               <View style={s.adminLogin}>
-                <Text style={s.adminTitle}>🔐 Admin Login</Text>
+                <Text style={s.adminTitle}>{t(TR.adminLogin.te, TR.adminLogin.en)}</Text>
                 <TextInput
                   style={s.adminInput}
-                  placeholder="Passcode"
+                  placeholder={t(TR.passcodePlaceholder.te, TR.passcodePlaceholder.en)}
                   placeholderTextColor="#999"
                   secureTextEntry
                   autoCapitalize="none"
@@ -335,60 +337,58 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium }) 
                   onSubmitEditing={handleAdminLogin}
                   autoFocus
                 />
-                {adminError && <Text style={s.adminError}>Incorrect passcode</Text>}
+                {adminError && <Text style={s.adminError}>{t(TR.incorrectPasscode.te, TR.incorrectPasscode.en)}</Text>}
                 <TouchableOpacity style={s.adminBtn} onPress={handleAdminLogin}>
-                  <Text style={s.adminBtnText}>Login</Text>
+                  <Text style={s.adminBtnText}>{t(TR.adminLoginBtn.te, TR.adminLoginBtn.en)}</Text>
                 </TouchableOpacity>
               </View>
             )}
 
-            <Text style={[s.sectionTitle, { marginTop: 20 }]}>📱 యాప్ సమాచారం</Text>
+            <Text style={[s.sectionTitle, { marginTop: 20 }]}>{t(TR.appInfo.te, TR.appInfo.en)}</Text>
 
             <TouchableOpacity onPress={handleVersionTap} activeOpacity={1}>
               <View style={s.infoRow}>
-                <Text style={s.infoLabel}>వెర్షన్</Text>
+                <Text style={s.infoLabel}>{t(TR.versionLabel.te, TR.versionLabel.en)}</Text>
                 <Text style={s.infoValue}>1.1.0</Text>
               </View>
             </TouchableOpacity>
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>డెవలపర్</Text>
-              <Text style={s.infoValue}>ధర్మ Team</Text>
+              <Text style={s.infoLabel}>{t(TR.developer.te, TR.developer.en)}</Text>
+              <Text style={s.infoValue}>{t(TR.devTeam.te, TR.devTeam.en)}</Text>
             </View>
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>గణనాలు</Text>
+              <Text style={s.infoLabel}>{t(TR.calculations.te, TR.calculations.en)}</Text>
               <Text style={s.infoValue}>Drik Ganita + Lahiri Ayanamsa</Text>
             </View>
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>డేటా సంవత్సరం</Text>
+              <Text style={s.infoLabel}>{t(TR.dataYear.te, TR.dataYear.en)}</Text>
               <Text style={s.infoValue}>2026</Text>
             </View>
 
             {Platform.OS !== 'web' && (
               <Text style={s.noteText}>
-                నోటిఫికేషన్లు మీ ఫోన్‌లో స్థానికంగా షెడ్యూల్ చేయబడతాయి. ఇంటర్నెట్ అవసరం లేదు.
+                {t(TR.notifLocalNote.te, TR.notifLocalNote.en)}
               </Text>
             )}
             {Platform.OS === 'web' && (
               <Text style={s.noteText}>
-                నోటిఫికేషన్లు మొబైల్ యాప్‌లో మాత్రమే అందుబాటులో ఉంటాయి.
+                {t(TR.notifWebNote.te, TR.notifWebNote.en)}
               </Text>
             )}
           </ScrollView>
 
           {/* Close */}
           <TouchableOpacity style={s.closeBtn} onPress={onClose}>
-            <Text style={s.closeBtnText}>మూసివేయండి</Text>
+            <Text style={s.closeBtnText}>{t(TR.close.te, TR.close.en)}</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    </ModalOrView>
   );
 }
 
 function SettingRow({ icon, label, sublabel, value, onChange }) {
   return (
     <View style={s.settingRow}>
-      <MaterialCommunityIcons name={icon} size={22} color={Colors.saffron} style={{ marginRight: 12 }} />
+      <MaterialCommunityIcons name={icon} size={22} color={DarkColors.saffron} style={{ marginRight: 12 }} />
       <View style={{ flex: 1 }}>
         <Text style={s.settingLabel}>{label}</Text>
         <Text style={s.settingSublabel}>{sublabel}</Text>
@@ -396,17 +396,17 @@ function SettingRow({ icon, label, sublabel, value, onChange }) {
       <Switch
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: '#ddd', true: Colors.saffron + '60' }}
-        thumbColor={value ? Colors.saffron : '#ccc'}
+        trackColor={{ false: DarkColors.bgElevated, true: DarkColors.saffron + '60' }}
+        thumbColor={value ? DarkColors.saffron : DarkColors.silver}
       />
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   modal: {
-    backgroundColor: '#FFFDF5', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '90%',
   },
   header: {
@@ -424,67 +424,67 @@ const s = StyleSheet.create({
   body: { paddingHorizontal: 20, paddingTop: 16 },
 
   sectionTitle: {
-    fontSize: 16, fontWeight: '800', color: Colors.darkBrown,
+    fontSize: 16, fontWeight: '800', color: DarkColors.textPrimary,
     marginBottom: 12, letterSpacing: 0.5,
   },
 
   settingRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14, marginBottom: 10,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  settingLabel: { fontSize: 15, fontWeight: '700', color: Colors.darkBrown },
-  settingSublabel: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
+  settingLabel: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
+  settingSublabel: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2 },
 
   timeRow: {
     flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap',
-    backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14, marginBottom: 10,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  timeLabel: { flex: 1, fontSize: 14, fontWeight: '700', color: Colors.darkBrown, marginLeft: 10 },
+  timeLabel: { flex: 1, fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, marginLeft: 10 },
   timePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   timeBtn: {
     width: 32, height: 32, borderRadius: 16,
-    backgroundColor: Colors.saffron, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: DarkColors.saffron, alignItems: 'center', justifyContent: 'center',
   },
   timeBtnText: { fontSize: 18, fontWeight: '800', color: '#fff' },
-  timeValue: { fontSize: 18, fontWeight: '800', color: Colors.darkBrown, minWidth: 50, textAlign: 'center' },
+  timeValue: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary, minWidth: 50, textAlign: 'center' },
 
   infoRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)',
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  infoLabel: { fontSize: 14, color: Colors.textMuted, fontWeight: '600' },
-  infoValue: { fontSize: 14, color: Colors.darkBrown, fontWeight: '700' },
+  infoLabel: { fontSize: 14, color: DarkColors.textMuted, fontWeight: '600' },
+  infoValue: { fontSize: 14, color: DarkColors.textPrimary, fontWeight: '700' },
 
   noteText: {
-    fontSize: 12, color: Colors.textMuted, fontStyle: 'italic',
+    fontSize: 12, color: DarkColors.textMuted, fontStyle: 'italic',
     textAlign: 'center', marginTop: 16, marginBottom: 8, lineHeight: 18,
   },
 
   adminLogin: {
-    marginTop: 16, padding: 16, backgroundColor: '#fff',
-    borderRadius: 14, borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)',
+    marginTop: 16, padding: 16, backgroundColor: DarkColors.bgElevated,
+    borderRadius: 14, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   adminTitle: {
-    fontSize: 15, fontWeight: '800', color: Colors.darkBrown, marginBottom: 12,
+    fontSize: 15, fontWeight: '800', color: DarkColors.textPrimary, marginBottom: 12,
   },
   adminInput: {
-    backgroundColor: '#F5F0E8', borderRadius: 10, padding: 12,
-    fontSize: 15, color: Colors.darkBrown, borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: DarkColors.bgCard, borderRadius: 10, padding: 12,
+    fontSize: 15, color: DarkColors.textPrimary, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   adminError: {
     fontSize: 12, color: '#C41E3A', fontWeight: '600', marginTop: 6,
   },
   adminBtn: {
-    backgroundColor: Colors.saffron, borderRadius: 10, paddingVertical: 10,
+    backgroundColor: DarkColors.saffron, borderRadius: 10, paddingVertical: 10,
     alignItems: 'center', marginTop: 10,
   },
   adminBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   closeBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20,
-    backgroundColor: Colors.saffron, borderRadius: 14,
+    backgroundColor: DarkColors.saffron, borderRadius: 14,
   },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: Colors.white },
+  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 });

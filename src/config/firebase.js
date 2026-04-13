@@ -22,7 +22,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-// Auth removed — not used, was causing 400 error on identitytoolkit API
+import { getAuth } from 'firebase/auth';
 
 // Firebase project config
 // Values from google-services.json + web app registration
@@ -42,14 +42,16 @@ const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
 let app = null;
 let db = null;
+let auth = null;
 if (isConfigured) {
   try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
+    auth = getAuth(app);
     if (__DEV__) console.log('Firebase initialized successfully');
   } catch (error) {
     if (__DEV__) console.warn('Firebase initialization failed:', error);
   }
 }
 
-export { app, db, isConfigured };
+export { app, db, auth, isConfigured };

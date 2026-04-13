@@ -9,13 +9,16 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
 import { startTrial, activatePremium } from '../utils/premiumService';
 import { trackEvent } from '../utils/analytics';
+import { ModalOrView } from './ModalOrView';
+import { useLanguage } from '../context/LanguageContext';
+import { TR } from '../data/translations';
 
 // ---- UPI Config (same as DonateSection) ----
 const UPI_ID = '9535251573@ibl';
-const MERCHANT_NAME = 'DharmaDaily';
+const MERCHANT_NAME = 'Jayanth';
 
 const UPI_LOGOS = {
   tez: require('../../assets/upi/googlepay.png'),
@@ -50,7 +53,7 @@ function getQrCodeUrl(amount) {
 
 // Build app-specific UPI intent URLs that work reliably on Android
 function buildAppUpiUrl(scheme, amount) {
-  const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Dharma Premium')}&mc=5411`;
+  const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Dharma Premium')}`;
   switch (scheme) {
     case 'gpay':
       return `gpay://upi/pay?${params}`;
@@ -136,6 +139,7 @@ function UpiQrCode({ amount }) {
 // ── PremiumBanner (compact, shown in feed) ───────────────────────
 
 export function PremiumBanner({ onUpgrade, trialAvailable }) {
+  const { t } = useLanguage();
   return (
     <TouchableOpacity style={b.container} onPress={() => { onUpgrade(); trackEvent('premium_banner_tap'); }} activeOpacity={0.85}>
       <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.5 }} style={b.gradient}>
@@ -143,9 +147,9 @@ export function PremiumBanner({ onUpgrade, trialAvailable }) {
           <MaterialCommunityIcons name="crown" size={24} color="#FFD700" />
         </View>
         <View style={b.textWrap}>
-          <Text style={b.title}>ధర్మ Premium</Text>
+          <Text style={b.title}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
           <Text style={b.subtitle}>
-            {trialAvailable ? '3 రోజులు ఉచితం — ముహూర్తం, రాశి ఫలం, గీత...' : 'ముహూర్తం ఫైండర్, రాశి ఫలం, గీత, ప్రకటనలు లేవు'}
+            {trialAvailable ? t(TR.premiumSubtitleTrial.te, TR.premiumSubtitleTrial.en) : t(TR.premiumSubtitleStd.te, TR.premiumSubtitleStd.en)}
           </Text>
         </View>
         <View style={b.badge}>
@@ -158,7 +162,8 @@ export function PremiumBanner({ onUpgrade, trialAvailable }) {
 
 // ── PremiumModal (full payment screen) ───────────────────────────
 
-export function PremiumModal({ visible, onClose, onActivated }) {
+export function PremiumModal({ visible, onClose, onActivated, embedded = false }) {
+  const { t } = useLanguage();
   const [activating, setActivating] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null); // null = perks view, plan object = payment view
 
@@ -168,13 +173,17 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     const result = await startTrial();
     setActivating(false);
     if (result.success) {
-      if (Platform.OS === 'web') alert('🎉 3 రోజులు Premium ఉచితం!');
-      else Alert.alert('🎉 Trial Activated!', '3 రోజులు Premium ఉచితం!\nMuhurtam Finder, Horoscope, Gita Library, Ad-free!');
+      const title = t(TR.trialActivatedTitle.te, TR.trialActivatedTitle.en);
+      const msg = t(TR.trialActivatedMsg.te, TR.trialActivatedMsg.en);
+      if (Platform.OS === 'web') alert(`${title}\n\n${msg}`);
+      else Alert.alert(title, msg);
       onActivated?.();
       onClose();
     } else {
-      if (Platform.OS === 'web') alert('ట్రయల్ ఇప్పటికే వాడారు. Premium కొనుగోలు చేయండి.');
-      else Alert.alert('ట్రయల్ ముగిసింది', 'ట్రయల్ ఇప్పటికే వాడారు. Premium కొనుగోలు చేయండి.');
+      const title = t(TR.trialExpiredTitle.te, TR.trialExpiredTitle.en);
+      const msg = t(TR.trialExpiredMsg.te, TR.trialExpiredMsg.en);
+      if (Platform.OS === 'web') alert(`${title}\n\n${msg}`);
+      else Alert.alert(title, msg);
     }
   };
 
@@ -217,8 +226,10 @@ export function PremiumModal({ visible, onClose, onActivated }) {
     trackEvent('premium_activated', { plan: selectedPlan.id });
     setPaymentStep('idle');
 
-    if (Platform.OS === 'web') alert(`🎉 Premium Activated! ${selectedPlan.english} plan.`);
-    else Alert.alert('🎉 Premium సక్రియం!', `${selectedPlan.telugu} ప్లాన్ విజయవంతంగా సక్రియం అయింది!`);
+    const pTitle = t(TR.premiumActivatedTitle.te, TR.premiumActivatedTitle.en);
+    const pMsg = `${t(selectedPlan.telugu, selectedPlan.english)} — ${t(TR.premiumActivatedMsg.te, TR.premiumActivatedMsg.en)}`;
+    if (Platform.OS === 'web') alert(`${pTitle}\n\n${pMsg}`);
+    else Alert.alert(pTitle, pMsg);
 
     onActivated?.();
     setSelectedPlan(null);
@@ -230,9 +241,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
   const handleClose = () => { setSelectedPlan(null); onClose(); };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={s.overlay}>
-        <View style={s.modal}>
+    <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
           {/* Sticky Header — stays visible while scrolling */}
           <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={[s.header, selectedPlan && s.headerCompact]}>
             <TouchableOpacity style={s.closeX} onPress={handleClose}>
@@ -244,7 +253,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
               </TouchableOpacity>
             )}
             <MaterialCommunityIcons name="crown" size={selectedPlan ? 28 : 48} color="#FFD700" />
-            <Text style={[s.title, selectedPlan && { fontSize: 18, marginTop: 4 }]}>ధర్మ Premium</Text>
+            <Text style={[s.title, selectedPlan && { fontSize: 18, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
             {!selectedPlan ? (
               <>
                 <Text style={s.subtitle}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>
@@ -264,14 +273,14 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                   {PREMIUM_PERKS.map((perk, i) => (
                     <View key={i} style={s.perkRow}>
                       <View style={s.perkIcon}>
-                        <MaterialCommunityIcons name={perk.icon} size={22} color="#4A1A6B" />
+                        <MaterialCommunityIcons name={perk.icon} size={22} color="#9B6FCF" />
                       </View>
                       <View style={s.perkText}>
                         <Text style={s.perkTelugu}>{perk.text}</Text>
                         <Text style={s.perkEnglish}>{perk.textEn}</Text>
                         {perk.detail && <Text style={s.perkDetail}>{perk.detail}</Text>}
                       </View>
-                      <Ionicons name="checkmark-circle" size={20} color={Colors.tulasiGreen} />
+                      <Ionicons name="checkmark-circle" size={20} color={DarkColors.tulasiGreen} />
                     </View>
                   ))}
                 </View>
@@ -279,10 +288,10 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                 {/* Free Trial */}
                 <View style={s.trialSection}>
                   <TouchableOpacity style={s.trialBtn} onPress={handleStartTrial} disabled={activating}>
-                    <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.trialGradient}>
+                    <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.trialGradient}>
                       <MaterialCommunityIcons name="gift" size={22} color="#FFF" />
                       <Text style={s.trialBtnText}>
-                        {activating ? 'ఆక్టివేట్ చేస్తోంది...' : '3 రోజులు ఉచితంగా ప్రయత్నించండి'}
+                        {activating ? t(TR.activating.te, TR.activating.en) : t(TR.trialCta.te, TR.trialCta.en)}
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -304,11 +313,11 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                       )}
                       <Text style={s.planEmoji}>{plan.emoji}</Text>
                       <View style={s.planInfo}>
-                        <Text style={[s.planName, plan.best && { color: '#4A1A6B' }]}>{plan.telugu} / {plan.english}</Text>
+                        <Text style={[s.planName, plan.best && { color: '#9B6FCF' }]}>{plan.telugu} / {plan.english}</Text>
                         {plan.savings && <Text style={s.planSavings}>{plan.savings} savings</Text>}
                       </View>
-                      <Text style={[s.planPrice, plan.best && { color: '#4A1A6B' }]}>{plan.label}</Text>
-                      <Ionicons name="chevron-forward" size={18} color={plan.best ? '#4A1A6B' : Colors.textMuted} />
+                      <Text style={[s.planPrice, plan.best && { color: '#9B6FCF' }]}>{plan.label}</Text>
+                      <Ionicons name="chevron-forward" size={18} color={plan.best ? '#9B6FCF' : DarkColors.textMuted} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -346,7 +355,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                           trackEvent('premium_upi_tap', { app: app.name, amount: selectedPlan.price });
                           if (Platform.OS === 'web') {
                             await copyUpiId();
-                            alert(`UPI ID కాపీ అయింది!\n\n${UPI_ID}\n\nమీ ఫోన్‌లో ${app.name} తెరిచి ₹${selectedPlan.price} పంపండి.\nలేదా QR కోడ్ స్కాన్ చేయండి.`);
+                            alert(`${t(TR.upiCopied.te, TR.upiCopied.en)}\n\n${UPI_ID}\n\n${app.name} • ₹${selectedPlan.price}`);
                             return;
                           }
                           const opened = await openUpiApp(app.scheme, selectedPlan.price);
@@ -375,8 +384,8 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                   <Text style={s.upiLabel}>UPI ID (మాన్యువల్‌గా పంపండి)</Text>
                   <View style={s.upiRow}>
                     <Text style={s.upiId}>{UPI_ID}</Text>
-                    <TouchableOpacity style={s.copyBtn} onPress={() => { copyUpiId(); if (Platform.OS === 'web') alert('UPI ID copied!'); else Alert.alert('కాపీ అయింది!', UPI_ID); }}>
-                      <MaterialCommunityIcons name="content-copy" size={16} color={Colors.tulasiGreen} />
+                    <TouchableOpacity style={s.copyBtn} onPress={() => { copyUpiId(); if (Platform.OS === 'web') alert(t(TR.upiCopied.te, TR.upiCopied.en)); else Alert.alert(t(TR.upiCopied.te, TR.upiCopied.en), UPI_ID); }}>
+                      <MaterialCommunityIcons name="content-copy" size={16} color={DarkColors.tulasiGreen} />
                       <Text style={s.copyText}>కాపీ</Text>
                     </TouchableOpacity>
                   </View>
@@ -386,7 +395,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                 {paymentStep === 'idle' && (
                   <>
                     <TouchableOpacity style={s.activateBtn} onPress={handlePay} activeOpacity={0.8}>
-                      <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
+                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
                         <MaterialCommunityIcons name="bank-transfer" size={22} color="#FFF" />
                         <Text style={s.activateBtnText}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
                       </LinearGradient>
@@ -400,7 +409,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                 {/* Loading state */}
                 {paymentStep === 'paying' && (
                   <View style={s.verifyingBox}>
-                    <ActivityIndicator size="large" color={Colors.tulasiGreen} />
+                    <ActivityIndicator size="large" color={DarkColors.tulasiGreen} />
                     <Text style={s.verifyingText}>ప్రాసెస్ అవుతోంది...</Text>
                   </View>
                 )}
@@ -409,20 +418,20 @@ export function PremiumModal({ visible, onClose, onActivated }) {
                 {paymentStep === 'confirm' && (
                   <>
                     <View style={s.confirmBox}>
-                      <MaterialCommunityIcons name="check-circle-outline" size={32} color={Colors.tulasiGreen} />
+                      <MaterialCommunityIcons name="check-circle-outline" size={32} color={DarkColors.tulasiGreen} />
                       <Text style={s.confirmTitle}>పేమెంట్ పూర్తయిందా?</Text>
                       <Text style={s.confirmSubtext}>
                         UPI యాప్‌లో ₹{selectedPlan?.price} పంపిన తర్వాత క్రింది బటన్ నొక్కండి
                       </Text>
                     </View>
                     <TouchableOpacity style={s.activateBtn} onPress={handleConfirmPayment} activeOpacity={0.8}>
-                      <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
+                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
                         <MaterialCommunityIcons name="check-circle" size={22} color="#FFF" />
                         <Text style={s.activateBtnText}>అవును, పేమెంట్ చేశాను ✓</Text>
                       </LinearGradient>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setPaymentStep('idle')} style={{ marginTop: 10, alignItems: 'center' }}>
-                      <Text style={{ fontSize: 13, color: Colors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
+                      <Text style={{ fontSize: 13, color: DarkColors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
                     </TouchableOpacity>
                   </>
                 )}
@@ -434,9 +443,7 @@ export function PremiumModal({ visible, onClose, onActivated }) {
               <Text style={s.closeBtnText}>తర్వాత / Maybe Later</Text>
             </TouchableOpacity>
           </ScrollView>
-        </View>
-      </View>
-    </Modal>
+    </ModalOrView>
   );
 }
 
@@ -454,20 +461,20 @@ const b = StyleSheet.create({
 });
 
 const q = StyleSheet.create({
-  container: { alignItems: 'center', marginVertical: 16, paddingVertical: 16, backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(74,26,107,0.15)' },
-  title: { fontSize: 15, fontWeight: '700', color: Colors.darkBrown },
-  subtitle: { fontSize: 11, color: Colors.textMuted, marginTop: 2, marginBottom: 12 },
-  box: { width: 220, height: 220, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'rgba(74,26,107,0.2)', padding: 10 },
+  container: { alignItems: 'center', marginVertical: 16, paddingVertical: 16, backgroundColor: DarkColors.bgElevated, borderRadius: 16, borderWidth: 1, borderColor: DarkColors.borderCard },
+  title: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
+  subtitle: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2, marginBottom: 12 },
+  box: { width: 220, height: 220, borderRadius: 16, backgroundColor: DarkColors.bgElevated, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: DarkColors.borderCard, padding: 10 },
   image: { width: 200, height: 200 },
   fallback: { alignItems: 'center', justifyContent: 'center' },
-  fallbackText: { fontSize: 12, color: Colors.textMuted, marginTop: 8 },
-  badge: { position: 'absolute', bottom: -10, backgroundColor: '#4A1A6B', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 12 },
+  fallbackText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 8 },
+  badge: { position: 'absolute', bottom: -10, backgroundColor: '#9B6FCF', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 12 },
   badgeText: { fontSize: 14, fontWeight: '800', color: '#FFD700' },
 });
 
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  modal: { backgroundColor: Colors.cream, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%', overflow: 'hidden' },
+  modal: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%', overflow: 'hidden' },
   header: { alignItems: 'center', paddingVertical: 30, paddingHorizontal: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative' },
   headerCompact: { paddingVertical: 14 },
   closeX: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
@@ -477,53 +484,53 @@ const s = StyleSheet.create({
   subtitleEn: { fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
 
   perksSection: { paddingHorizontal: 20, paddingTop: 20 },
-  perksTitle: { fontSize: 18, fontWeight: '700', color: Colors.darkBrown, marginBottom: 12 },
-  perkRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)' },
-  perkIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(74,26,107,0.08)', alignItems: 'center', justifyContent: 'center' },
+  perksTitle: { fontSize: 18, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 12 },
+  perkRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
+  perkIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(155,111,207,0.15)', alignItems: 'center', justifyContent: 'center' },
   perkText: { flex: 1, marginLeft: 12 },
-  perkTelugu: { fontSize: 14, fontWeight: '600', color: Colors.darkBrown },
-  perkEnglish: { fontSize: 11, color: Colors.textMuted, marginTop: 1 },
-  perkDetail: { fontSize: 10, color: '#8A7A6A', marginTop: 4, lineHeight: 14, fontStyle: 'italic' },
+  perkTelugu: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
+  perkEnglish: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
+  perkDetail: { fontSize: 10, color: DarkColors.textMuted, marginTop: 4, lineHeight: 14, fontStyle: 'italic' },
 
   trialSection: { paddingHorizontal: 20, paddingTop: 24 },
   trialBtn: { borderRadius: 16, overflow: 'hidden' },
   trialGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16 },
   trialBtnText: { fontSize: 16, fontWeight: '800', color: '#FFF', marginLeft: 8 },
-  trialNote: { fontSize: 11, color: Colors.textMuted, textAlign: 'center', marginTop: 8 },
+  trialNote: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 8 },
 
   pricingSection: { paddingHorizontal: 20, paddingTop: 24 },
-  pricingTitle: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown, marginBottom: 12 },
+  pricingTitle: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 12 },
   planCard: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14, padding: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 16, marginBottom: 10,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  planCardBest: { borderColor: '#4A1A6B', borderWidth: 2, position: 'relative' },
-  bestBadge: { position: 'absolute', top: -10, right: 12, backgroundColor: '#4A1A6B', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
+  planCardBest: { borderColor: '#9B6FCF', borderWidth: 2, position: 'relative' },
+  bestBadge: { position: 'absolute', top: -10, right: 12, backgroundColor: '#9B6FCF', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
   bestBadgeText: { fontSize: 9, fontWeight: '800', color: '#FFD700' },
   planEmoji: { fontSize: 24, marginRight: 12 },
   planInfo: { flex: 1 },
-  planName: { fontSize: 15, fontWeight: '700', color: Colors.darkBrown },
-  planSavings: { fontSize: 11, color: Colors.tulasiGreen, fontWeight: '600', marginTop: 2 },
-  planPrice: { fontSize: 20, fontWeight: '800', color: Colors.darkBrown, marginRight: 8 },
+  planName: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
+  planSavings: { fontSize: 11, color: DarkColors.tulasiGreen, fontWeight: '600', marginTop: 2 },
+  planPrice: { fontSize: 20, fontWeight: '800', color: DarkColors.textPrimary, marginRight: 8 },
 
   // Payment screen
   paySection: { paddingHorizontal: 20, paddingTop: 16 },
-  paySummary: { alignItems: 'center', paddingVertical: 16, backgroundColor: 'rgba(74,26,107,0.05)', borderRadius: 16 },
+  paySummary: { alignItems: 'center', paddingVertical: 16, backgroundColor: 'rgba(155,111,207,0.12)', borderRadius: 16 },
   paySummaryEmoji: { fontSize: 36 },
-  paySummaryPlan: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown, marginTop: 8 },
-  paySummaryPrice: { fontSize: 32, fontWeight: '800', color: '#4A1A6B', marginTop: 4 },
-  paySummaryDuration: { fontSize: 12, color: Colors.textMuted, marginTop: 4 },
+  paySummaryPlan: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginTop: 8 },
+  paySummaryPrice: { fontSize: 32, fontWeight: '800', color: '#9B6FCF', marginTop: 4 },
+  paySummaryDuration: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4 },
 
   // UPI app buttons
   appBtnsSection: { marginTop: 20 },
-  appBtnsTitle: { fontSize: 15, fontWeight: '800', color: Colors.darkBrown, marginBottom: 12, textAlign: 'center' },
+  appBtnsTitle: { fontSize: 15, fontWeight: '800', color: DarkColors.textPrimary, marginBottom: 12, textAlign: 'center' },
   appBtnsGrid: {
     flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
   },
   appGridBtn: {
     width: '48%', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 16, padding: 14, marginBottom: 10,
     borderWidth: 1.5,
     elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4,
   },
@@ -534,12 +541,12 @@ const s = StyleSheet.create({
   },
   appLogoText: { fontSize: 18, fontWeight: '900', color: '#fff' },
   appGridText: { fontSize: 13, fontWeight: '700', marginBottom: 2 },
-  appGridAmount: { fontSize: 11, fontWeight: '600', color: Colors.textMuted },
+  appGridAmount: { fontSize: 11, fontWeight: '600', color: DarkColors.textMuted },
   // Legacy row styles (kept for donate section compatibility)
   appBtnsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   appBtn: {
     width: '48%', flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14, padding: 12, marginBottom: 10,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 12, marginBottom: 10,
     borderWidth: 1.5, gap: 10,
     elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3,
   },
@@ -547,32 +554,32 @@ const s = StyleSheet.create({
   appBtnText: { fontSize: 13, fontWeight: '700', flex: 1 },
   anyUpiBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(74,26,107,0.06)', borderRadius: 14, paddingVertical: 14,
-    borderWidth: 1, borderColor: 'rgba(74,26,107,0.15)', gap: 8, marginBottom: 8,
+    backgroundColor: 'rgba(155,111,207,0.1)', borderRadius: 14, paddingVertical: 14,
+    borderWidth: 1, borderColor: 'rgba(155,111,207,0.2)', gap: 8, marginBottom: 8,
   },
-  anyUpiBtnText: { fontSize: 14, fontWeight: '700', color: '#4A1A6B' },
+  anyUpiBtnText: { fontSize: 14, fontWeight: '700', color: '#9B6FCF' },
 
   upiBox: {
-    marginTop: 16, padding: 14, backgroundColor: '#fff', borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(74,26,107,0.12)',
+    marginTop: 16, padding: 14, backgroundColor: DarkColors.bgElevated, borderRadius: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  upiLabel: { fontSize: 12, fontWeight: '600', color: Colors.textMuted, marginBottom: 6 },
+  upiLabel: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, marginBottom: 6 },
   upiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  upiId: { fontSize: 16, fontWeight: '700', color: Colors.darkBrown, letterSpacing: 0.5 },
+  upiId: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, letterSpacing: 0.5 },
   copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(46,125,50,0.08)', borderRadius: 10 },
-  copyText: { fontSize: 12, fontWeight: '600', color: Colors.tulasiGreen },
-  upiNote: { fontSize: 11, color: Colors.textMuted, marginTop: 8 },
+  copyText: { fontSize: 12, fontWeight: '600', color: DarkColors.tulasiGreen },
+  upiNote: { fontSize: 11, color: DarkColors.textMuted, marginTop: 8 },
 
   activateBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 16 },
   activateGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16 },
   activateBtnText: { fontSize: 15, fontWeight: '800', color: '#FFF', marginLeft: 8 },
-  activateNote: { fontSize: 11, color: Colors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 16 },
+  activateNote: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 16 },
   verifyingBox: { alignItems: 'center', paddingVertical: 24, gap: 10 },
-  verifyingText: { fontSize: 16, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 },
-  confirmBox: { alignItems: 'center', paddingVertical: 16, gap: 6, marginBottom: 12, backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 14, padding: 16 },
-  confirmTitle: { fontSize: 18, fontWeight: '800', color: Colors.tulasiGreen },
-  confirmSubtext: { fontSize: 13, color: Colors.textMuted, textAlign: 'center', lineHeight: 18 },
+  verifyingText: { fontSize: 16, fontWeight: '700', color: DarkColors.tulasiGreen, marginTop: 8 },
+  confirmBox: { alignItems: 'center', paddingVertical: 16, gap: 6, marginBottom: 12, backgroundColor: 'rgba(46,125,50,0.12)', borderRadius: 14, padding: 16 },
+  confirmTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.tulasiGreen },
+  confirmSubtext: { fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', lineHeight: 18 },
 
   closeBtn: { alignItems: 'center', paddingVertical: 16, marginBottom: 20 },
-  closeBtnText: { fontSize: 14, color: Colors.textMuted, fontWeight: '600' },
+  closeBtnText: { fontSize: 14, color: DarkColors.textMuted, fontWeight: '600' },
 });

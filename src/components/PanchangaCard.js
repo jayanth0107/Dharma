@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors, DarkGradients } from '../theme/colors';
 
 // Icon mapping for panchangam elements
 const PANCHANGA_ICONS = {
@@ -22,12 +22,12 @@ export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel
   return (
     <View style={styles.card}>
       <LinearGradient
-        colors={['rgba(255,248,240,0.98)', 'rgba(245,230,211,0.92)']}
+        colors={DarkGradients.cardGold}
         style={styles.cardGradient}
       >
         <View style={styles.cardHeader}>
-          <PanchangaIcon label={label} size={18} color={accentColor || Colors.textSecondary} />
-          <Text style={[styles.cardLabel, { color: accentColor || Colors.textSecondary }]}>
+          <PanchangaIcon label={label} size={18} color={accentColor || DarkColors.gold} />
+          <Text style={[styles.cardLabel, { color: accentColor || DarkColors.gold }]}>
             {' '}{label}
           </Text>
         </View>
@@ -50,7 +50,7 @@ const TIMING_DESCRIPTIONS = {
 };
 
 export function TimingCard({ icon, label, startTime, endTime, isActive, accentColor, iconName, isAuspicious }) {
-  const color = accentColor || Colors.kumkum;
+  const color = accentColor || DarkColors.kumkum;
   const info = TIMING_DESCRIPTIONS[label] || {};
 
   return (
@@ -99,7 +99,7 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
     ? ['rgba(46,125,50,0.08)', 'rgba(76,175,80,0.04)']
     : ['rgba(196,30,58,0.06)', 'rgba(232,117,26,0.04)'];
   const borderColor = isAuspicious ? 'rgba(46,125,50,0.2)' : 'rgba(196,30,58,0.15)';
-  const iconColor = isAuspicious ? Colors.tulasiGreen : Colors.kumkum;
+  const iconColor = isAuspicious ? DarkColors.tulasiGreen : DarkColors.kumkum;
   const iconName = isAuspicious ? 'check-decagram' : 'close-octagon-outline';
 
   return (
@@ -136,20 +136,20 @@ export function SlokaCard({ sloka }) {
   return (
     <View style={styles.slokaContainer}>
       <LinearGradient
-        colors={['#2C1810', '#6B1C23', '#2C1810']}
+        colors={[DarkColors.bgCard, '#6B1C23', DarkColors.bgCard]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.slokaGradient}
       >
         <View style={styles.slokaDecoTop}>
-          <MaterialCommunityIcons name="fleur-de-lis" size={20} color={Colors.goldShimmer} />
+          <MaterialCommunityIcons name="fleur-de-lis" size={20} color={DarkColors.goldShimmer} />
         </View>
         <Text style={styles.slokaDeity}>{sloka.deity}</Text>
         <Text style={styles.slokaText}>{sloka.sanskrit}</Text>
         <View style={styles.slokaDivider} />
         <Text style={styles.slokaMeaning}>{sloka.meaning}</Text>
         <View style={styles.slokaDecoBottom}>
-          <MaterialCommunityIcons name="fleur-de-lis" size={20} color={Colors.goldShimmer} />
+          <MaterialCommunityIcons name="fleur-de-lis" size={20} color={DarkColors.goldShimmer} />
         </View>
       </LinearGradient>
     </View>
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     minHeight: 100,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(212, 160, 23, 0.2)',
+    borderColor: DarkColors.borderGold,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -194,17 +194,17 @@ const styles = StyleSheet.create({
   teluguValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
     marginBottom: 2,
   },
   englishValue: {
     fontSize: 15,
-    color: '#3A2A1A',
+    color: DarkColors.textSecondary,
     fontWeight: '500',
   },
   sublabel: {
     fontSize: 13,
-    color: '#4A3A2A',
+    color: DarkColors.textMuted,
     marginTop: 4,
     fontStyle: 'italic',
   },
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   },
   timingEnglish: {
     fontSize: 13,
-    color: '#6B5B4B',
+    color: DarkColors.textMuted,
     fontWeight: '500',
     marginTop: 1,
   },
@@ -236,12 +236,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: DarkColors.borderCard,
     marginLeft: 30,
   },
   timingDesc: {
     fontSize: 12,
-    color: '#6B5B4B',
+    color: DarkColors.textMuted,
     fontStyle: 'italic',
     marginTop: 6,
     marginLeft: 30,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: DarkColors.borderCard,
     marginLeft: 30,
   },
   muhurthamName: {
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   muhurthamEnglish: {
     fontSize: 13,
-    color: '#6B5B4B',
+    color: DarkColors.textMuted,
     fontWeight: '500',
     marginTop: 1,
   },
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   muhurthamDesc: {
     fontSize: 14,
-    color: '#4A3A2A',
+    color: DarkColors.textMuted,
     fontStyle: 'italic',
     paddingHorizontal: 14,
     paddingBottom: 10,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   activeBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: Colors.white,
+    color: DarkColors.textPrimary,
   },
 
   // Sloka Card
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   slokaDeity: {
-    color: Colors.goldShimmer,
+    color: DarkColors.goldShimmer,
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: 2,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   slokaText: {
-    color: Colors.textOnDark,
+    color: DarkColors.textPrimary,
     fontSize: 16,
     lineHeight: 28,
     textAlign: 'center',
@@ -368,12 +368,12 @@ const styles = StyleSheet.create({
   slokaDivider: {
     width: 60,
     height: 1,
-    backgroundColor: Colors.goldShimmer,
+    backgroundColor: DarkColors.goldShimmer,
     marginVertical: 14,
     opacity: 0.5,
   },
   slokaMeaning: {
-    color: 'rgba(255,248,240,0.8)',
+    color: DarkColors.textSecondary,
     fontSize: 13,
     lineHeight: 22,
     textAlign: 'center',

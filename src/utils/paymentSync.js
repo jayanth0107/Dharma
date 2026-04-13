@@ -67,9 +67,19 @@ export async function syncPaymentToCloud(paymentRecord) {
     if (!ready) return false;
 
     const deviceId = await getDeviceId();
+
+    // Link to authenticated user if logged in
+    let userId = null;
+    try {
+      const { getAuth } = require('firebase/auth');
+      const auth = getAuth();
+      userId = auth.currentUser?.uid || null;
+    } catch {}
+
     const doc = {
       ...paymentRecord,
       deviceId,
+      userId, // null for anonymous, uid for logged-in users
       platform: Platform.OS,
       syncedAt: new Date().toISOString(),
     };

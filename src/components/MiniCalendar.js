@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
 import { getTodayFestival } from '../data/festivals';
 import { getTodayEkadashi } from '../data/ekadashi';
 
@@ -49,13 +49,13 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
       {/* Month Header */}
       <View style={styles.monthHeader}>
         <TouchableOpacity onPress={prevMonth} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-left" size={22} color={Colors.saffron} />
+          <MaterialCommunityIcons name="chevron-left" size={22} color={DarkColors.saffron} />
         </TouchableOpacity>
         <View style={styles.monthTitleCol}>
           <Text style={styles.monthTitle}>{monthNames[month]} {year}</Text>
         </View>
         <TouchableOpacity onPress={nextMonth} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-right" size={22} color={Colors.saffron} />
+          <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.saffron} />
         </TouchableOpacity>
       </View>
 
@@ -128,7 +128,7 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
           <Text style={styles.legendText}>ఏకాదశి</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: Colors.saffron }]} />
+          <View style={[styles.legendDot, { backgroundColor: DarkColors.saffron }]} />
           <Text style={styles.legendText}>ఎంపిక</Text>
         </View>
       </View>
@@ -138,12 +138,12 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgCard,
     borderRadius: 16,
     padding: 16,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: 'rgba(212, 160, 23, 0.15)',
+    borderColor: DarkColors.borderCard,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   monthTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
     letterSpacing: 0.5,
   },
   dayHeaderRow: {
@@ -180,10 +180,10 @@ const styles = StyleSheet.create({
   dayHeaderText: {
     fontSize: 14,
     fontWeight: '800',
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
   },
   sundayText: {
-    color: Colors.kumkum,
+    color: DarkColors.kumkum,
   },
   grid: {
     flexDirection: 'row',
@@ -196,25 +196,25 @@ const styles = StyleSheet.create({
     minHeight: 46,
   },
   selectedCell: {
-    backgroundColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
     borderRadius: 22,
   },
   todayCell: {
     borderWidth: 2,
-    borderColor: Colors.saffron,
+    borderColor: DarkColors.gold,
     borderRadius: 22,
   },
   dateText: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textSecondary,
   },
   selectedText: {
-    color: Colors.white,
+    color: DarkColors.textPrimary,
     fontWeight: '900',
   },
   todayText: {
-    color: Colors.saffron,
+    color: DarkColors.gold,
     fontWeight: '900',
   },
   indicators: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   festivalDot: {
-    backgroundColor: Colors.tulasiGreen,
+    backgroundColor: DarkColors.tulasiGreen,
   },
   ekadashiDot: {
     backgroundColor: '#4A1A6B',
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.06)',
+    borderTopColor: DarkColors.borderCard,
   },
   legendItem: {
     flexDirection: 'row',
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 13,
-    color: Colors.darkBrown,
+    color: DarkColors.textSecondary,
     fontWeight: '600',
   },
 });

@@ -6,12 +6,19 @@ const PersistentStore = {
   async getItem(key) {
     try {
       if (typeof localStorage !== 'undefined') return localStorage.getItem(key);
+      // Native: use AsyncStorage
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      return await AsyncStorage.getItem(key);
     } catch {}
     return null;
   },
   async setItem(key, value) {
     try {
       if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
+      else {
+        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+        await AsyncStorage.setItem(key, value);
+      }
     } catch {}
   },
 };

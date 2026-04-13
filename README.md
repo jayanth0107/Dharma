@@ -1,6 +1,8 @@
-# ధర్మ — Telugu Panchangam App
+# Dharma: Telugu Astro, Calendar & Gold
 
-A comprehensive **React Native (Expo)** mobile app delivering daily **Telugu Panchangam** with astronomically accurate calculations, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, live gold prices, and cultural content — built for Telugu-speaking Hindu communities worldwide.
+**ధర్మ — సనాతనం**
+
+A comprehensive **React Native (Expo)** mobile app delivering daily **Telugu Panchangam**, Vedic astrology (horoscope, muhurtam finder), festival calendar, Ekadashi tracking, Bhagavad Gita slokas, live gold/silver prices, and cultural content — built for Telugu-speaking Hindu communities worldwide.
 
 > **Platforms:** Android, iOS, Web | **Language:** Bilingual (Telugu + English) | **Version:** 1.1.0
 

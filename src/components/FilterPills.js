@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager, Animated, Easing } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
 
 function PulsingChevron({ direction }) {
   const pulse = useRef(new Animated.Value(1)).current;
@@ -79,18 +79,17 @@ export function FilterPills({ activeFilter, onFilterChange }) {
               key={filter.id}
               style={[
                 styles.pill,
-                { borderColor: filter.color + '30', backgroundColor: filter.color + '08' },
-                isActive && { backgroundColor: filter.color, borderColor: filter.color },
+                isActive && { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
               ]}
               onPress={() => handlePress(filter.id)}
             >
               <MaterialCommunityIcons
                 name={filter.icon}
                 size={16}
-                color={isActive ? Colors.white : filter.color}
+                color={isActive ? '#FFFFFF' : DarkColors.textMuted}
                 style={{ marginRight: 5 }}
               />
-              <Text style={[styles.pillText, { color: filter.color }, isActive && styles.pillTextActive]}>
+              <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
                 {filter.label}
               </Text>
             </TouchableOpacity>
@@ -122,22 +121,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgCard,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
+    borderColor: DarkColors.borderCard,
     marginRight: 8,
   },
   pillActive: {
-    backgroundColor: Colors.saffron,
-    borderColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
+    borderColor: DarkColors.saffron,
   },
   pillText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#3A2A1A',
+    color: DarkColors.textMuted,
   },
   pillTextActive: {
-    color: Colors.white,
+    color: '#FFFFFF',
   },
   arrowLeft: {
     position: 'absolute',
@@ -157,9 +156,9 @@ const styles = StyleSheet.create({
   },
   chevronCircle: {
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: Colors.saffron, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: DarkColors.saffron, alignItems: 'center', justifyContent: 'center',
     elevation: 4,
-    shadowColor: Colors.saffron, shadowOffset: { width: 0, height: 2 },
+    shadowColor: DarkColors.saffron, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3, shadowRadius: 4,
   },
 });

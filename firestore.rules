@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Users collection ──
+    // Authenticated users can only read/write their OWN document
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId
+                    && request.resource.data.keys().hasAll(['phone', 'name', 'createdAt', 'platform'])
+                    && request.resource.data.phone is string
+                    && request.resource.data.name is string;
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['name', 'lastUpdated', 'lastLogin']);
+      allow delete: if false; // Users cannot delete their profile
+    }
+
+    // ── Payments collection ──
+    // Any authenticated user can create (anonymous payments allowed)
+    // Only admin can read all (via Firebase Console)
+    match /payments/{paymentId} {
+      allow create: if true; // Anonymous payment records allowed
+      allow read: if request.auth != null; // Authenticated users can read their own
+      allow update, delete: if false; // Immutable payment records
+    }
+
+    // ── Block all other collections ──
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

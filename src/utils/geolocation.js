@@ -106,64 +106,214 @@ export async function reverseGeocode(latitude, longitude) {
   }
 }
 
+// --- MapMyIndia (Mappls) API Key ---
+// Sign up at https://developer.mappls.com/ for free (5000 req/day)
+// Set your key here after registration:
+const MAPPLS_API_KEY = ''; // e.g. 'your-api-key-here'
+
 // --- Search locations by name (for typing custom location) ---
-// Uses Nominatim search API
+// Cascade: Photon (fast, no key) → Mappls (India-best, needs key) → Nominatim (fallback)
 export async function searchLocation(query) {
   if (!query || query.trim().length < 2) return [];
-  // Input validation: limit length, strip control characters
   const sanitized = query.trim().slice(0, 100).replace(/[\x00-\x1f]/g, '');
 
+  // 1. Try Photon first (fast, no rate limit, great for auto-suggest)
   try {
-    await nominatimThrottle();
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(sanitized)}&format=json&limit=8&accept-language=te,en&addressdetails=1`,
-      {
-        headers: {
-          'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)',
-          'Accept': 'application/json',
-        },
-        signal: controller.signal,
-      }
-    );
-    clearTimeout(timeout);
-
-    if (!response.ok) throw new Error(`Location search failed with HTTP ${response.status}`);
-    const results = await response.json();
-
-    return results.map((r) => {
-      const addr = r.address || {};
-      const city = addr.city || addr.town || addr.village || addr.county || '';
-      const state = addr.state || '';
-      const country = addr.country || '';
-
-      return {
-        name: city || r.display_name.split(',')[0],
-        telugu: city, // Nominatim returns Telugu if available (we set accept-language=te)
-        displayName: `${city || r.display_name.split(',')[0]}${state ? ', ' + state : ''}${country ? ', ' + country : ''}`,
-        latitude: parseFloat(r.lat),
-        longitude: parseFloat(r.lon),
-        altitude: 0,
-        country,
-        isCustom: true,
-      };
-    }).filter(r => r.latitude && r.longitude);
+    const results = await searchWithPhoton(sanitized);
+    if (results.length > 0) return results;
   } catch (e) {
-    const msg = e?.name === 'AbortError'
-      ? 'Location search timed out after 8s'
-      : `Location search failed: ${e?.message || e}`;
-    console.warn(msg);
+    if (__DEV__) console.warn('Photon search failed:', e?.message);
+  }
+
+  // 2. Try MapMyIndia/Mappls (best India coverage, needs API key)
+  if (MAPPLS_API_KEY) {
+    try {
+      const results = await searchWithMappls(sanitized);
+      if (results.length > 0) return results;
+    } catch (e) {
+      if (__DEV__) console.warn('Mappls search failed:', e?.message);
+    }
+  }
+
+  // 3. Fallback to Nominatim
+  try {
+    return await searchWithNominatim(sanitized);
+  } catch (e) {
+    console.warn('Location search failed:', e?.message || e);
     return [];
   }
 }
 
-// --- Full auto-detect: GPS → Reverse Geocode → Build location object ---
+// Photon API — open source, no rate limit, fast auto-suggest
+// Biased to India center (lat=20.5, lon=78.9) for Indian location priority
+async function searchWithPhoton(query) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+
+  const response = await fetch(
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lat=20.5&lon=78.9&lang=en`,
+    {
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
+    }
+  );
+  clearTimeout(timeout);
+
+  if (!response.ok) throw new Error(`Photon search HTTP ${response.status}`);
+  const data = await response.json();
+
+  return (data.features || []).map((f) => {
+    const p = f.properties || {};
+    const coords = f.geometry?.coordinates || [];
+    const city = p.city || p.name || '';
+    const state = p.state || '';
+    const country = p.country || '';
+    const district = p.county || '';
+
+    return {
+      name: city || p.name || '',
+      telugu: city,
+      displayName: [city, district, state, country].filter(Boolean).join(', '),
+      latitude: coords[1],
+      longitude: coords[0],
+      altitude: 0,
+      state,
+      country,
+      isCustom: true,
+    };
+  }).filter(r => r.latitude && r.longitude && r.name);
+}
+
+// MapMyIndia (Mappls) — best India coverage, needs API key
+// Free tier: 5000 requests/day. Sign up: https://developer.mappls.com/
+async function searchWithMappls(query) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 6000);
+
+  const response = await fetch(
+    `https://atlas.mappls.com/api/places/search/json?query=${encodeURIComponent(query)}&region=IND&location=20.5,78.9`,
+    {
+      headers: {
+        'Authorization': `Bearer ${MAPPLS_API_KEY}`,
+        'Accept': 'application/json',
+      },
+      signal: controller.signal,
+    }
+  );
+  clearTimeout(timeout);
+
+  if (!response.ok) throw new Error(`Mappls search HTTP ${response.status}`);
+  const data = await response.json();
+
+  return (data.suggestedLocations || []).map((p) => {
+    return {
+      name: p.placeName || p.placeAddress?.split(',')[0] || '',
+      telugu: p.placeName || '',
+      displayName: p.placeAddress || p.placeName || '',
+      latitude: parseFloat(p.latitude) || 0,
+      longitude: parseFloat(p.longitude) || 0,
+      altitude: 0,
+      state: p.state || '',
+      country: 'India',
+      isCustom: true,
+    };
+  }).filter(r => r.latitude && r.longitude && r.name);
+}
+
+// Nominatim fallback — 1 req/sec rate limit
+async function searchWithNominatim(query) {
+  await nominatimThrottle();
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&accept-language=te,en&addressdetails=1`,
+    {
+      headers: {
+        'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)',
+        'Accept': 'application/json',
+      },
+      signal: controller.signal,
+    }
+  );
+  clearTimeout(timeout);
+
+  if (!response.ok) throw new Error(`Nominatim search HTTP ${response.status}`);
+  const results = await response.json();
+
+  return results.map((r) => {
+    const addr = r.address || {};
+    const city = addr.city || addr.town || addr.village || addr.county || '';
+    const state = addr.state || '';
+    const country = addr.country || '';
+
+    return {
+      name: city || r.display_name.split(',')[0],
+      telugu: city,
+      displayName: `${city || r.display_name.split(',')[0]}${state ? ', ' + state : ''}${country ? ', ' + country : ''}`,
+      latitude: parseFloat(r.lat),
+      longitude: parseFloat(r.lon),
+      altitude: 0,
+      country,
+      isCustom: true,
+    };
+  }).filter(r => r.latitude && r.longitude);
+}
+
+// --- IP-based location fallback (no GPS needed, instant) ---
+async function getLocationByIP() {
+  try {
+    // Free IP geolocation APIs — try multiple
+    const apis = [
+      'https://ipapi.co/json/',
+      'https://ip-api.com/json/?fields=lat,lon,city,regionName,country',
+    ];
+    for (const url of apis) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        const data = await resp.json();
+        const lat = data.latitude || data.lat;
+        const lon = data.longitude || data.lon;
+        if (lat && lon) {
+          return {
+            latitude: lat,
+            longitude: lon,
+            city: data.city || '',
+            state: data.region || data.regionName || '',
+            country: data.country_name || data.country || '',
+          };
+        }
+      } catch {}
+    }
+  } catch {}
+  return null;
+}
+
+// --- Full auto-detect: GPS → IP fallback → Reverse Geocode ---
 export async function autoDetectLocation() {
+  // 1. Try GPS
   const coords = await getCurrentPosition();
-  if (!coords) return null;
+
+  // 2. If GPS fails, try IP-based location
+  if (!coords) {
+    const ipLoc = await getLocationByIP();
+    if (ipLoc) {
+      return {
+        name: ipLoc.city || 'Current Location',
+        telugu: ipLoc.city || 'ప్రస్తుత స్థానం',
+        displayName: [ipLoc.city, ipLoc.state, ipLoc.country].filter(Boolean).join(', '),
+        area: '',
+        state: ipLoc.state || '',
+        country: ipLoc.country || '',
+        latitude: ipLoc.latitude,
+        longitude: ipLoc.longitude,
+        altitude: 0,
+        isAutoDetected: true,
+      };
+    }
+    return null;
+  }
 
   const geo = await reverseGeocode(coords.latitude, coords.longitude);
 
@@ -180,3 +330,6 @@ export async function autoDetectLocation() {
     isAutoDetected: true,
   };
 }
+
+// Export IP location for direct use
+export { getLocationByIP };

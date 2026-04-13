@@ -4,7 +4,9 @@ import {
   Platform, Alert, ScrollView,
 } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { ModalOrView } from './ModalOrView';
+import { CalendarPicker } from './CalendarPicker';
 
 // --- Persistent Storage (AsyncStorage on native, localStorage on web) ---
 const Storage = {
@@ -55,17 +57,19 @@ export function ReminderFAB({ onPress }) {
       accessibilityLabel="Add reminder"
       accessibilityRole="button"
     >
-      <MaterialCommunityIcons name="plus" size={28} color={Colors.white} />
+      <MaterialCommunityIcons name="plus" size={28} color="#fff" />
     </TouchableOpacity>
   );
 }
 
-export function ReminderModal({ visible, onClose, selectedDate }) {
+export function ReminderModal({ visible, onClose, selectedDate, embedded = false }) {
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
   const [dateStr, setDateStr] = useState(
     selectedDate ? formatDateForInput(selectedDate) : formatDateForInput(new Date())
   );
+  const [dateObj, setDateObj] = useState(selectedDate || new Date());
+  const [showCalendar, setShowCalendar] = useState(false);
   const [timeStr, setTimeStr] = useState('09:00');
   const [showList, setShowList] = useState(false);
   const [reminders, setReminders] = useState([]);
@@ -179,18 +183,11 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
   const sortedReminders = [...reminders].sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <View style={styles.content}>
+    <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} accessibilityLabel="వెనక్కి" accessibilityRole="button">
-              <Ionicons name="arrow-back" size={24} color={Colors.white} />
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>
               {showList ? 'రిమైండర్లు' : 'కొత్త రిమైండర్'}
@@ -200,11 +197,11 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
               <MaterialCommunityIcons
                 name={showList ? 'plus-circle' : 'format-list-bulleted'}
                 size={24}
-                color={Colors.white}
+                color="#fff"
               />
             </TouchableOpacity>
             <TouchableOpacity onPress={onClose} accessibilityLabel="మూసివేయండి" accessibilityRole="button">
-              <Ionicons name="close" size={24} color={Colors.white} />
+              <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
             </View>
           </View>
@@ -214,7 +211,7 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
             <ScrollView style={styles.listContainer}>
               {sortedReminders.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <MaterialCommunityIcons name="bell-sleep" size={48} color={Colors.vibhuti} />
+                  <MaterialCommunityIcons name="bell-sleep" size={48} color={DarkColors.silver} />
                   <Text style={styles.emptyText}>రిమైండర్లు లేవు</Text>
                   <Text style={styles.emptySubtext}>ఇంకా రిమైండర్లు లేవు</Text>
                 </View>
@@ -227,7 +224,7 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
                         <MaterialCommunityIcons
                           name={isPast ? 'bell-check' : 'bell-ring'}
                           size={20}
-                          color={isPast ? Colors.vibhuti : Colors.saffron}
+                          color={isPast ? DarkColors.silver : DarkColors.saffron}
                         />
                       </View>
                       <View style={styles.reminderInfo}>
@@ -238,7 +235,7 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
                         {r.note ? <Text style={styles.reminderNote}>{r.note}</Text> : null}
                       </View>
                       <TouchableOpacity onPress={() => handleDelete(r.id)} style={styles.deleteBtn} accessibilityLabel="Delete reminder" accessibilityRole="button">
-                        <MaterialCommunityIcons name="delete-outline" size={20} color={Colors.kumkum} />
+                        <MaterialCommunityIcons name="delete-outline" size={20} color={DarkColors.kumkum} />
                       </TouchableOpacity>
                     </View>
                   );
@@ -248,34 +245,60 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
           ) : (
             /* New Reminder Form */
             <ScrollView style={styles.form}>
-              {/* Date */}
-              <View style={styles.fieldRow}>
+              {/* Date — Calendar Picker */}
+              <TouchableOpacity style={styles.fieldRow} onPress={() => setShowCalendar(true)}>
                 <MaterialCommunityIcons name="calendar" size={20} color="#4A90D9" style={styles.fieldIcon} />
                 <Text style={styles.fieldLabel}>తేదీ</Text>
-                <TextInput
-                  style={styles.fieldInput}
-                  value={dateStr}
-                  onChangeText={setDateStr}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={Colors.vibhuti}
-                  accessibilityLabel="Date input"
-                  maxLength={10}
+                <Text style={[styles.fieldInput, { paddingVertical: 14 }]}>
+                  {dateStr || 'తేదీ ఎంచుకోండి'}
+                </Text>
+              </TouchableOpacity>
+              {showCalendar && (
+                <CalendarPicker
+                  selectedDate={dateObj}
+                  title="రిమైండర్ తేదీ"
+                  onSelect={(d) => {
+                    setDateObj(d);
+                    setDateStr(formatDateForInput(d));
+                    setShowCalendar(false);
+                  }}
+                  onClose={() => setShowCalendar(false)}
                 />
-              </View>
+              )}
 
-              {/* Time */}
+              {/* Time — Hour/Minute Picker */}
               <View style={styles.fieldRow}>
                 <MaterialCommunityIcons name="clock-outline" size={20} color="#4A90D9" style={styles.fieldIcon} />
                 <Text style={styles.fieldLabel}>సమయం</Text>
-                <TextInput
-                  style={styles.fieldInput}
-                  value={timeStr}
-                  onChangeText={setTimeStr}
-                  placeholder="HH:MM"
-                  placeholderTextColor={Colors.vibhuti}
-                  accessibilityLabel="Time input"
-                  maxLength={5}
-                />
+                <View style={styles.timePickerRow}>
+                  <TouchableOpacity style={styles.timeBtn} onPress={() => {
+                    const [h, m] = timeStr.split(':').map(Number);
+                    setTimeStr(`${String(Math.max(0, h - 1)).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                  }}>
+                    <Text style={styles.timeBtnText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.timeDisplay}>{timeStr}</Text>
+                  <TouchableOpacity style={styles.timeBtn} onPress={() => {
+                    const [h, m] = timeStr.split(':').map(Number);
+                    setTimeStr(`${String(Math.min(23, h + 1)).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                  }}>
+                    <Text style={styles.timeBtnText}>+</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.timeSep}>:</Text>
+                  <TouchableOpacity style={styles.timeBtn} onPress={() => {
+                    const [h, m] = timeStr.split(':').map(Number);
+                    setTimeStr(`${String(h).padStart(2, '0')}:${String(Math.max(0, m - 15) % 60).padStart(2, '0')}`);
+                  }}>
+                    <Text style={styles.timeBtnText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.timeMinLabel}>min</Text>
+                  <TouchableOpacity style={styles.timeBtn} onPress={() => {
+                    const [h, m] = timeStr.split(':').map(Number);
+                    setTimeStr(`${String(h).padStart(2, '0')}:${String((m + 15) % 60).padStart(2, '0')}`);
+                  }}>
+                    <Text style={styles.timeBtnText}>+</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* Title */}
@@ -289,7 +312,7 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
                   value={title}
                   onChangeText={setTitle}
                   placeholder="రిమైండర్ పేరు..."
-                  placeholderTextColor={Colors.vibhuti}
+                  placeholderTextColor={DarkColors.textMuted}
                   maxLength={100}
                   accessibilityLabel="Reminder title"
                 />
@@ -306,7 +329,7 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
                   value={note}
                   onChangeText={setNote}
                   placeholder="వివరాలు జోడించండి..."
-                  placeholderTextColor={Colors.vibhuti}
+                  placeholderTextColor={DarkColors.textMuted}
                   multiline
                   numberOfLines={3}
                   maxLength={300}
@@ -325,9 +348,7 @@ export function ReminderModal({ visible, onClose, selectedDate }) {
           <TouchableOpacity style={styles.fixedCloseBtn} onPress={onClose} accessibilityLabel="మూసివేయండి" accessibilityRole="button">
             <Text style={styles.fixedCloseBtnText}>మూసివేయండి</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    </ModalOrView>
   );
 }
 
@@ -340,11 +361,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 8,
-    shadowColor: Colors.saffron,
+    shadowColor: DarkColors.saffron,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -376,7 +397,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.white,
+    color: '#fff',
   },
 
   // Form
@@ -386,7 +407,7 @@ const styles = StyleSheet.create({
   fieldRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgCard,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 14,
@@ -400,7 +421,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
     minWidth: 60,
   },
   fieldInput: {
@@ -410,8 +431,17 @@ const styles = StyleSheet.create({
     color: '#4A90D9',
     textAlign: 'right',
   },
+  timePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'flex-end' },
+  timeBtn: {
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: DarkColors.saffron, alignItems: 'center', justifyContent: 'center',
+  },
+  timeBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  timeDisplay: { fontSize: 20, fontWeight: '800', color: '#4A90D9', minWidth: 55, textAlign: 'center' },
+  timeSep: { fontSize: 14, color: DarkColors.textMuted },
+  timeMinLabel: { fontSize: 10, color: DarkColors.textMuted },
   fieldBlock: {
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgCard,
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
@@ -425,7 +455,7 @@ const styles = StyleSheet.create({
   },
   fieldTextInput: {
     fontSize: 15,
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
     paddingVertical: 4,
   },
   noteInput: {
@@ -443,20 +473,20 @@ const styles = StyleSheet.create({
   saveBtnText: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.white,
+    color: '#fff',
   },
   fixedCloseBtn: {
     alignItems: 'center',
     paddingVertical: 14,
     marginHorizontal: 20,
     marginBottom: 20,
-    backgroundColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
     borderRadius: 14,
   },
   fixedCloseBtnText: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.white,
+    color: '#fff',
   },
 
   // List
@@ -470,18 +500,18 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 12,
   },
   emptySubtext: {
     fontSize: 12,
-    color: Colors.vibhuti,
+    color: DarkColors.silver,
     marginTop: 4,
   },
   reminderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgCard,
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
@@ -500,19 +530,19 @@ const styles = StyleSheet.create({
   reminderTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
   },
   reminderTitlePast: {
     textDecorationLine: 'line-through',
   },
   reminderDateTime: {
     fontSize: 11,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 2,
   },
   reminderNote: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: DarkColors.textSecondary,
     marginTop: 4,
     fontStyle: 'italic',
   },

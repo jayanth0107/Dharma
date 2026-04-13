@@ -13,7 +13,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+
 
 // Production AdMob IDs (test IDs used in __DEV__ mode)
 const AD_IDS = {

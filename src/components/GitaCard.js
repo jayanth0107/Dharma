@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { useLanguage } from '../context/LanguageContext';
 import { getTodayGitaSloka, GITA_SLOKAS } from '../data/bhagavadGita';
 import { trackEvent } from '../utils/analytics';
 import { buildGitaShareText } from '../utils/shareService';
@@ -21,6 +22,7 @@ import { SectionShareRow } from './SectionShareRow';
 export function GitaDailyCard({ date, isPremium = false }) {
   const [expanded, setExpanded] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const { lang, t } = useLanguage();
   const sloka = getTodayGitaSloka(date);
 
   if (!sloka) return null;
@@ -36,9 +38,9 @@ export function GitaDailyCard({ date, isPremium = false }) {
         <View style={s.headerRow}>
           <MaterialCommunityIcons name="book-open-page-variant" size={22} color="#F5D77A" />
           <View style={s.headerText}>
-            <Text style={s.headerTitle}>భగవద్గీత</Text>
+            <Text style={s.headerTitle}>{t('భగవద్గీత', 'Bhagavad Gita')}</Text>
             <Text style={s.headerSub}>
-              అధ్యాయం {sloka.chapter}, శ్లోకం {sloka.verse}
+              {t(`అధ్యాయం ${sloka.chapter}, శ్లోకం ${sloka.verse}`, `Chapter ${sloka.chapter}, Verse ${sloka.verse}`)}
             </Text>
           </View>
           <View style={s.themeBadge}>
@@ -52,13 +54,13 @@ export function GitaDailyCard({ date, isPremium = false }) {
         <Text style={s.sanskritText}>{sloka.sanskrit}</Text>
       </View>
 
-      {/* Telugu Translation */}
+      {/* Primary Translation — based on language */}
       <View style={s.teluguBox}>
-        <Text style={s.teluguLabel}>తెలుగు అర్థం</Text>
-        <Text style={s.teluguText}>{sloka.telugu}</Text>
+        <Text style={s.teluguLabel}>{t('తెలుగు అర్థం', 'Meaning')}</Text>
+        <Text style={s.teluguText}>{t(sloka.telugu, sloka.english)}</Text>
       </View>
 
-      {/* English — expandable */}
+      {/* Secondary translation — expandable */}
       <TouchableOpacity
         style={s.englishToggle}
         onPress={() => {
@@ -69,16 +71,16 @@ export function GitaDailyCard({ date, isPremium = false }) {
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color={Colors.textMuted}
+          color={DarkColors.textMuted}
         />
         <Text style={s.englishToggleText}>
-          {expanded ? 'Hide English' : 'Show English Meaning'}
+          {expanded ? t('దాచు', 'Hide') : t('English అర్థం చూడండి', 'తెలుగు అర్థం చూడండి')}
         </Text>
       </TouchableOpacity>
 
       {expanded && (
         <View style={s.englishBox}>
-          <Text style={s.englishText}>{sloka.english}</Text>
+          <Text style={s.englishText}>{t(sloka.english, sloka.telugu)}</Text>
         </View>
       )}
 
@@ -95,9 +97,9 @@ export function GitaDailyCard({ date, isPremium = false }) {
             }
           }}
         >
-          <MaterialCommunityIcons name="bookshelf" size={18} color="#4A1A6B" />
-          <Text style={s.libraryBtnText}>30 శ్లోకాలు చూడండి</Text>
-          {!isPremium && <MaterialCommunityIcons name="crown" size={14} color={Colors.gold} style={{ marginLeft: 4 }} />}
+          <MaterialCommunityIcons name="bookshelf" size={18} color={DarkColors.goldLight} />
+          <Text style={s.libraryBtnText}>{t('30 శ్లోకాలు చూడండి', 'Browse all 30 Slokas')}</Text>
+          {!isPremium && <MaterialCommunityIcons name="crown" size={14} color={DarkColors.gold} style={{ marginLeft: 4 }} />}
         </TouchableOpacity>
       </View>
 
@@ -184,7 +186,7 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
                     <Ionicons
                       name={isSelected ? 'chevron-up' : 'chevron-down'}
                       size={16}
-                      color={Colors.textMuted}
+                      color={DarkColors.textMuted}
                     />
                   </View>
 
@@ -215,7 +217,7 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
                 } catch {}
               }
             }}>
-              <MaterialCommunityIcons name="file-pdf-box" size={18} color="#C41E3A" />
+              <MaterialCommunityIcons name="file-pdf-box" size={18} color="#E8495A" />
               <Text style={s.modalPdfText}>30 శ్లోకాలు PDF</Text>
             </TouchableOpacity>
           </View>
@@ -277,11 +279,11 @@ function buildAll30Html() {
 
 const s = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: DarkColors.bgCard,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(74, 26, 107, 0.15)',
+    borderColor: DarkColors.borderCard,
   },
   header: {
     paddingHorizontal: 16,
@@ -292,35 +294,35 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   headerText: { flex: 1, marginLeft: 10 },
-  headerTitle: { fontSize: 18, fontWeight: '800', color: '#F5D77A', letterSpacing: 1 },
-  headerSub: { fontSize: 12, color: 'rgba(245,215,122,0.7)', marginTop: 2 },
+  headerTitle: { fontSize: 22, fontWeight: '900', color: DarkColors.goldLight, letterSpacing: 1 },
+  headerSub: { fontSize: 14, color: 'rgba(245,215,122,0.7)', marginTop: 2 },
   themeBadge: {
-    backgroundColor: 'rgba(245,215,122,0.15)',
+    backgroundColor: DarkColors.goldDim,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  themeText: { fontSize: 11, color: '#F5D77A', fontWeight: '600' },
+  themeText: { fontSize: 12, color: DarkColors.goldLight, fontWeight: '700' },
 
   sanskritBox: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(74, 26, 107, 0.04)',
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    backgroundColor: DarkColors.bgElevated,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(74, 26, 107, 0.08)',
+    borderBottomColor: DarkColors.borderCard,
   },
   sanskritText: {
-    fontSize: 16,
-    color: '#4A1A6B',
-    lineHeight: 26,
+    fontSize: 19,
+    color: DarkColors.goldLight,
+    lineHeight: 30,
     fontWeight: '500',
     textAlign: 'center',
     fontStyle: 'italic',
   },
 
-  teluguBox: { paddingHorizontal: 16, paddingVertical: 12 },
-  teluguLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '600', marginBottom: 4, letterSpacing: 0.5 },
-  teluguText: { fontSize: 15, color: Colors.darkBrown, lineHeight: 24, fontWeight: '500' },
+  teluguBox: { paddingHorizontal: 18, paddingVertical: 14 },
+  teluguLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '700', marginBottom: 6, letterSpacing: 0.5 },
+  teluguText: { fontSize: 17, color: DarkColors.textPrimary, lineHeight: 28, fontWeight: '500' },
 
   englishToggle: {
     flexDirection: 'row',
@@ -328,12 +330,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: DarkColors.borderCard,
   },
-  englishToggleText: { fontSize: 12, color: Colors.textMuted, marginLeft: 4 },
+  englishToggleText: { fontSize: 14, color: DarkColors.textMuted, marginLeft: 6, fontWeight: '600' },
 
-  englishBox: { paddingHorizontal: 16, paddingBottom: 12 },
-  englishText: { fontSize: 14, color: Colors.textSecondary, lineHeight: 22, fontStyle: 'italic' },
+  englishBox: { paddingHorizontal: 18, paddingBottom: 14 },
+  englishText: { fontSize: 16, color: DarkColors.textSecondary, lineHeight: 26, fontStyle: 'italic' },
 
   actions: {
     flexDirection: 'row',
@@ -342,7 +344,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+    borderTopColor: DarkColors.borderCard,
   },
   libraryBtn: {
     flexDirection: 'row',
@@ -350,21 +352,21 @@ const s = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(74,26,107,0.08)',
+    backgroundColor: DarkColors.goldDim,
   },
-  libraryBtnText: { fontSize: 12, color: '#4A1A6B', fontWeight: '600', marginLeft: 4 },
+  libraryBtnText: { fontSize: 12, color: DarkColors.goldLight, fontWeight: '600', marginLeft: 4 },
 
   premiumHint: {
     flexDirection: 'row',
     alignItems: 'center',
     opacity: 0.7,
   },
-  premiumHintText: { fontSize: 11, color: Colors.gold, fontWeight: '600', marginLeft: 4 },
+  premiumHintText: { fontSize: 11, color: DarkColors.gold, fontWeight: '600', marginLeft: 4 },
 
   // Modal
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalOverlay: { flex: 1, backgroundColor: DarkColors.overlay, justifyContent: 'flex-end' },
   modalContent: {
-    backgroundColor: Colors.cream,
+    backgroundColor: DarkColors.bgCard,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
@@ -377,8 +379,8 @@ const s = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
   },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: '#F5D77A', letterSpacing: 1 },
-  modalSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1 },
+  modalSubtitle: { fontSize: 13, color: DarkColors.textMuted, marginTop: 4 },
   modalCloseX: {
     position: 'absolute', top: 16, right: 16,
     width: 36, height: 36, borderRadius: 18,
@@ -390,10 +392,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomColor: DarkColors.borderCard,
   },
-  listItemToday: { backgroundColor: 'rgba(74,26,107,0.06)' },
-  listItemSelected: { backgroundColor: 'rgba(74,26,107,0.04)' },
+  listItemToday: { backgroundColor: 'rgba(212,160,23,0.1)' },
+  listItemSelected: { backgroundColor: DarkColors.bgElevated },
   listItemHeader: { flexDirection: 'row', alignItems: 'center' },
   listChapterBadge: {
     backgroundColor: '#4A1A6B',
@@ -402,27 +404,27 @@ const s = StyleSheet.create({
     borderRadius: 8,
     marginRight: 10,
   },
-  listChapterText: { fontSize: 11, color: '#F5D77A', fontWeight: '700' },
-  listTheme: { fontSize: 14, fontWeight: '600', color: Colors.darkBrown },
+  listChapterText: { fontSize: 11, color: DarkColors.goldLight, fontWeight: '700' },
+  listTheme: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
   todayBadge: {
-    backgroundColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
     marginRight: 8,
   },
-  todayBadgeText: { fontSize: 10, color: Colors.white, fontWeight: '700' },
+  todayBadgeText: { fontSize: 10, color: DarkColors.textPrimary, fontWeight: '700' },
 
-  listItemExpanded: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.05)' },
-  listSanskrit: { fontSize: 14, color: '#4A1A6B', fontStyle: 'italic', lineHeight: 22, marginBottom: 8, textAlign: 'center' },
-  listTelugu: { fontSize: 14, color: Colors.darkBrown, lineHeight: 22, marginBottom: 6 },
-  listEnglish: { fontSize: 13, color: Colors.textSecondary, lineHeight: 20, fontStyle: 'italic' },
+  listItemExpanded: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
+  listSanskrit: { fontSize: 14, color: DarkColors.goldLight, fontStyle: 'italic', lineHeight: 22, marginBottom: 8, textAlign: 'center' },
+  listTelugu: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 6 },
+  listEnglish: { fontSize: 13, color: DarkColors.textSecondary, lineHeight: 20, fontStyle: 'italic' },
 
   modalCloseBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginVertical: 12,
-    backgroundColor: '#4A1A6B', borderRadius: 12,
+    backgroundColor: DarkColors.saffron, borderRadius: 12,
   },
-  modalCloseBtnText: { fontSize: 15, fontWeight: '700', color: '#F5D77A' },
+  modalCloseBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
   modalActions: {
     flexDirection: 'row', justifyContent: 'center', gap: 12,
     paddingHorizontal: 20, paddingTop: 10,
@@ -430,13 +432,13 @@ const s = StyleSheet.create({
   modalPdfBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingVertical: 10, paddingHorizontal: 18, borderRadius: 14,
-    backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#C41E3A30',
+    backgroundColor: DarkColors.bgElevated, borderWidth: 1.5, borderColor: 'rgba(196,30,58,0.3)',
   },
-  modalPdfText: { fontSize: 13, fontWeight: '700', color: '#C41E3A' },
+  modalPdfText: { fontSize: 13, fontWeight: '700', color: '#E8495A' },
   modalShareBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingVertical: 10, paddingHorizontal: 18, borderRadius: 14,
-    backgroundColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
   },
-  modalShareText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  modalShareText: { fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary },
 });

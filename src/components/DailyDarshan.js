@@ -4,7 +4,7 @@ import { SectionShareRow } from './SectionShareRow';
 import { buildDarshanShareText } from '../utils/shareService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
 import { ANIMATIONS_ENABLED } from '../utils/deviceCapability';
 
 const FLOWERS = ['🌸', '🌺', '🌼', '🪷', '💐'];
@@ -88,27 +88,17 @@ const flowerStyles = StyleSheet.create({
   },
 });
 
-// Deity images from Wikimedia Commons (CC BY-SA / Public Domain)
-// Using remote URLs — images are cached after first load
-// Deity images from Wikimedia Commons (CC BY-SA / Public Domain)
-// Selected for: clarity, weapons visible, traditional depictions
+// Deity images — ALL bundled locally for reliable offline display
+// Source: Wikimedia Commons (CC BY-SA / Public Domain)
 const DEITY_IMAGES = {
-  // Tirumala idol — Shankha & Sudarshana Chakra visible (local image)
-  venkateswara: require('../../assets/deities/venkateswara.jpg'),
-  // Murdeshwara statue — Trishula (trident) & Damaru (drum) visible
-  shiva: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Lord_Shiva_Statue_at_Murdeshwara.JPG/400px-Lord_Shiva_Statue_at_Murdeshwara.JPG',
-  // Hanuman carrying mountain — Gada (mace) visible, Ravi Varma Press 1910s classic
-  hanuman: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Hanuman_fetches_the_herb-bearing_mountain%2C_in_a_print_from_the_Ravi_Varma_Press%2C_1910%27s.jpg/400px-Hanuman_fetches_the_herb-bearing_mountain%2C_in_a_print_from_the_Ravi_Varma_Press%2C_1910%27s.jpg',
-  // Krishna with Sudarshana Chakra — local image
-  krishna: require('../../assets/deities/krishna.webp'),
-  // Ganesha with Parashu (axe), Paasha (noose), Ankusha (goad)
-  ganesha: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Lord_ganesha_%28ganpati_bappa%29.jpg/400px-Lord_ganesha_%28ganpati_bappa%29.jpg',
-  // Lakshmi — Raja Ravi Varma painting with lotus and gold
-  lakshmi: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Raja_Ravi_Varma%2C_Goddess_Lakshmi%2C_1896.jpg/400px-Raja_Ravi_Varma%2C_Goddess_Lakshmi%2C_1896.jpg',
-  // Ram Darbar — Sri Rama (with bow), Sita, Lakshmana & Hanuman together (Dhurandar painting)
-  rama: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Sree_Raghunandan_-_Ram_Laxman_Sita_and_Hanuman%2C_M_V_Dhurandar.jpg/400px-Sree_Raghunandan_-_Ram_Laxman_Sita_and_Hanuman%2C_M_V_Dhurandar.jpg',
-  // Surya Deva — Seven-horse chariot, classic Poona painting c.1800
-  surya: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/SURYA_GOD.JPG/400px-SURYA_GOD.JPG',
+  surya: require('../../assets/deities/surya.jpg'),           // Sunday — Surya
+  shiva: require('../../assets/deities/shiva.jpg'),          // Monday — Shiva
+  hanuman: require('../../assets/deities/hanuman.jpg'),      // Tuesday — Hanuman
+  krishna: require('../../assets/deities/krishna.webp'),     // Wednesday — Krishna
+  venkateswara: require('../../assets/deities/venkateswara.jpg'), // Thursday — Venkateswara
+  ganesha: require('../../assets/deities/ganesha.jpg'),      // Friday — Ganesha (used for Lakshmi day too)
+  lakshmi: require('../../assets/deities/lakshmi.jpg'),      // Friday — Lakshmi
+  rama: require('../../assets/deities/rama.jpg'),            // Saturday — Rama
 };
 
 // Traditional deity-day mapping (Vaara Devata):
@@ -222,13 +212,13 @@ export function DailyDarshanCard({ dayOfWeek }) {
         {/* Mantra */}
         <View style={styles.mantraRow}>
           <Animated.View style={{ opacity: diyaOpacity, transform: [{ scale: diyaScale }] }}>
-            <MaterialCommunityIcons name="candle" size={18} color="#E8751A" />
+            <MaterialCommunityIcons name="candle" size={18} color={DarkColors.saffron} />
           </Animated.View>
           <View style={[styles.mantraLine, { backgroundColor: deity.color }]} />
           <MaterialCommunityIcons name="om" size={14} color={deity.color} style={{ marginHorizontal: 8 }} />
           <View style={[styles.mantraLine, { backgroundColor: deity.color }]} />
           <Animated.View style={{ opacity: diyaOpacity, transform: [{ scale: diyaScale }] }}>
-            <MaterialCommunityIcons name="candle" size={18} color="#E8751A" />
+            <MaterialCommunityIcons name="candle" size={18} color={DarkColors.saffron} />
           </Animated.View>
         </View>
         <Text style={[styles.mantraText, { color: deity.color }]}>{deity.mantra}</Text>
@@ -246,19 +236,19 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     overflow: 'hidden',
     elevation: 2,
-    shadowColor: '#B8860B',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   card: {
-    backgroundColor: '#FFFDF5',
+    backgroundColor: DarkColors.bgCard,
     paddingHorizontal: 16,
     paddingBottom: 16,
     paddingTop: 8,
     alignItems: 'center',
-    borderWidth: 0,
-    borderColor: 'rgba(212,160,23,0.25)',
+    borderWidth: 1,
+    borderColor: DarkColors.borderCard,
   },
   greetingRow: {
     flexDirection: 'row',
@@ -270,12 +260,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.darkBrown,
+    color: DarkColors.textPrimary,
   },
   dayGreetingInline: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#8A7A6A',
+    color: DarkColors.textMuted,
     letterSpacing: 0.5,
   },
   imageContainer: {
@@ -284,7 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     overflow: 'hidden',
     marginBottom: 12,
-    backgroundColor: '#FFF8E7',
+    backgroundColor: DarkColors.bgElevated,
   },
   deityImage: {
     width: '100%',
@@ -301,17 +291,17 @@ const styles = StyleSheet.create({
   overlayName: {
     fontSize: 22,
     fontWeight: '800',
-    color: Colors.white,
+    color: DarkColors.textPrimary,
     letterSpacing: 1,
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
   overlayEnglish: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: DarkColors.textSecondary,
     fontWeight: '600',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
@@ -320,7 +310,7 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF8E7',
+    backgroundColor: DarkColors.bgElevated,
   },
   fallbackName: {
     fontSize: 18,
@@ -329,7 +319,7 @@ const styles = StyleSheet.create({
   },
   fallbackEnglish: {
     fontSize: 12,
-    color: Colors.textMuted,
+    color: DarkColors.textMuted,
     marginTop: 2,
   },
   mantraRow: {

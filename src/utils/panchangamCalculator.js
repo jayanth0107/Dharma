@@ -468,7 +468,7 @@ export function getDailyPanchangam(date = new Date(), location = DEFAULT_LOCATIO
 }
 
 // Export for location-based usage
-export { DEFAULT_LOCATION };
+export { DEFAULT_LOCATION, calculateNakshatra };
 export const LOCATIONS = [
   { name: 'Hyderabad', telugu: 'హైదరాబాద్', latitude: 17.3850, longitude: 78.4867, altitude: 542 },
   { name: 'Chennai', telugu: 'చెన్నై', latitude: 13.0827, longitude: 80.2707, altitude: 6 },

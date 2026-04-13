@@ -2,14 +2,16 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { useLanguage } from '../context/LanguageContext';
+import { TR } from '../data/translations';
 import { formatINR } from '../utils/goldPriceService';
 
 // Full-width banner images — gold biscuits/bars, silver bullion
 const BANNERS = {
   gold22k: require('../../assets/gold-22k.jpg'),
-  gold24k: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Gold_bullion_ap_001.JPG/600px-Gold_bullion_ap_001.JPG',
-  silver: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/SilverB.JPG/600px-SilverB.JPG',
+  gold24k: require('../../assets/gold-24k.jpg'),
+  silver: require('../../assets/silver-bars.jpg'),
 };
 
 // Animated golden sparkle
@@ -86,7 +88,7 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
         )}
         {/* Gradient overlay on image */}
         <LinearGradient
-          colors={['transparent', 'rgba(255,248,240,0.7)', '#FFFDF5']}
+          colors={['transparent', 'rgba(26,26,26,0.7)', DarkColors.bgCard]}
           style={gs.bannerOverlay}
         />
         {/* Sparkles on gold */}
@@ -137,14 +139,15 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
 }
 
 export function GoldSilverPriceCard({ prices, loading }) {
+  const { t } = useLanguage();
   if (loading) {
     return (
       <View style={gs.loadingWrap}>
-        <LinearGradient colors={['#FFF8E7', '#FFE8C0', '#FFF8E7']} style={gs.loadingGradient}>
-          <MaterialCommunityIcons name="gold" size={36} color="#D4A017" />
-          <Text style={gs.loadingTitle}>బంగారం & వెండి ధరలు</Text>
-          <ActivityIndicator size="small" color="#D4A017" style={{ marginTop: 10 }} />
-          <Text style={gs.loadingText}>ధరలు లోడ్ అవుతోంది...</Text>
+        <LinearGradient colors={[DarkColors.bgCard, DarkColors.bgElevated, DarkColors.bgCard]} style={gs.loadingGradient}>
+          <MaterialCommunityIcons name="gold" size={36} color={DarkColors.gold} />
+          <Text style={gs.loadingTitle}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
+          <ActivityIndicator size="small" color={DarkColors.gold} style={{ marginTop: 10 }} />
+          <Text style={gs.loadingText}>{t(TR.loadingPrices.te, TR.loadingPrices.en)}</Text>
         </LinearGradient>
       </View>
     );
@@ -157,30 +160,30 @@ export function GoldSilverPriceCard({ prices, loading }) {
       {/* Section header — jewellery themed */}
       <View style={gs.sectionHeader}>
         <View style={gs.headerOrnamentLine} />
-        <MaterialCommunityIcons name="diamond-stone" size={10} color="#D4A017" />
-        <MaterialCommunityIcons name="gold" size={18} color="#B8860B" style={{ marginHorizontal: 8 }} />
-        <MaterialCommunityIcons name="diamond-stone" size={10} color="#D4A017" />
+        <MaterialCommunityIcons name="diamond-stone" size={10} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="gold" size={18} color={DarkColors.gold} style={{ marginHorizontal: 8 }} />
+        <MaterialCommunityIcons name="diamond-stone" size={10} color={DarkColors.gold} />
         <View style={gs.headerOrnamentLine} />
       </View>
-      <Text style={gs.sectionTitle}>బంగారం & వెండి ధరలు</Text>
+      <Text style={gs.sectionTitle}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
       <View style={gs.sectionSubRow}>
-        <MaterialCommunityIcons name="necklace" size={12} color="#B8860B" />
-        <Text style={gs.sectionSubtitle}>నేటి భారతీయ మార్కెట్ ధరలు</Text>
-        <MaterialCommunityIcons name="ring" size={12} color="#B8860B" />
+        <MaterialCommunityIcons name="necklace" size={12} color={DarkColors.gold} />
+        <Text style={gs.sectionSubtitle}>{t(TR.todayMarketPrices.te, TR.todayMarketPrices.en)}</Text>
+        <MaterialCommunityIcons name="ring" size={12} color={DarkColors.gold} />
       </View>
 
       {/* Gold 22K */}
       <MetalPriceCard
         banner={BANNERS.gold22k}
-        gradientColors={['#FFF8E7', '#FFE8C0']}
-        accentColor="#B8860B"
-        lightAccent="#D4A017"
-        title="బంగారం 22 క్యారెట్"
-        subtitle="ఆభరణాల తరగతి — నగలు, గాజులు"
+        gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
+        accentColor={DarkColors.gold}
+        lightAccent={DarkColors.goldLight}
+        title={t(TR.gold22k.te, TR.gold22k.en)}
+        subtitle={t(TR.gold22kSub.te, TR.gold22kSub.en)}
         icon="gold"
-        label1="ప్రతి గ్రాం"
+        label1={t(TR.perGram.te, TR.perGram.en)}
         value1={formatINR(prices.gold22k?.perGram || prices.gold?.perGram)}
-        label2="10 గ్రాములు"
+        label2={t(TR.per10g.te, TR.per10g.en)}
         value2={formatINR(prices.gold22k?.per10g || prices.gold?.per10g)}
         isLive={!prices.isFallback}
         showSparkles={true}
@@ -189,15 +192,15 @@ export function GoldSilverPriceCard({ prices, loading }) {
       {/* Gold 24K */}
       <MetalPriceCard
         banner={BANNERS.gold24k}
-        gradientColors={['#FFF8E7', '#FFFACD']}
-        accentColor="#996515"
-        lightAccent="#FFD700"
-        title="బంగారం 24 క్యారెట్"
-        subtitle="స్వచ్ఛమైనది — బిస్కట్లు, పెట్టుబడి"
+        gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
+        accentColor={DarkColors.goldShimmer}
+        lightAccent={DarkColors.goldLight}
+        title={t(TR.gold24k.te, TR.gold24k.en)}
+        subtitle={t(TR.gold24kSub.te, TR.gold24kSub.en)}
         icon="star-circle"
-        label1="ప్రతి గ్రాం"
+        label1={t(TR.perGram.te, TR.perGram.en)}
         value1={formatINR(prices.gold24k?.perGram || prices.gold?.perGram)}
-        label2="10 గ్రాములు"
+        label2={t(TR.per10g.te, TR.per10g.en)}
         value2={formatINR(prices.gold24k?.per10g || prices.gold?.per10g)}
         isLive={!prices.isFallback}
         showSparkles={true}
@@ -206,15 +209,15 @@ export function GoldSilverPriceCard({ prices, loading }) {
       {/* Silver */}
       <MetalPriceCard
         banner={BANNERS.silver}
-        gradientColors={['#F0F0F5', '#E8E8EE']}
-        accentColor="#5A5A6A"
-        lightAccent="#A0A0B0"
-        title="వెండి"
-        subtitle="స్వచ్ఛమైన వెండి — బార్లు, నాణేలు"
+        gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
+        accentColor={DarkColors.silver}
+        lightAccent={DarkColors.silverLight}
+        title={t(TR.silver.te, TR.silver.en)}
+        subtitle={t(TR.silverSub.te, TR.silverSub.en)}
         icon="circle-slice-8"
-        label1="ప్రతి గ్రాం"
+        label1={t(TR.perGram.te, TR.perGram.en)}
         value1={formatINR(prices.silver?.perGram)}
-        label2="ప్రతి కేజీ"
+        label2={t(TR.perKg.te, TR.perKg.en)}
         value2={formatINR(prices.silver?.perKg)}
         isLive={!prices.isFallback}
         showSparkles={false}
@@ -222,15 +225,15 @@ export function GoldSilverPriceCard({ prices, loading }) {
 
       {/* Footer */}
       <View style={gs.footer}>
-        <MaterialCommunityIcons name="information-outline" size={12} color="#8A7A6A" />
+        <MaterialCommunityIcons name="information-outline" size={12} color={DarkColors.textMuted} />
         <Text style={gs.footerText}>
-          {prices.isFallback ? ' అంచనా ధరలు (ఆన్‌లైన్ అందుబాటులో లేదు)' :
-            prices.lastUpdated ? ` నవీకరించబడింది: ${prices.lastUpdated} • ${prices.source || 'భారతీయ మార్కెట్'}` : ''}
+          {prices.isFallback ? t(` ${TR.estimatedPrices.te}`, ` ${TR.estimatedPrices.en}`) :
+            prices.lastUpdated ? ` ${t(TR.updated.te, TR.updated.en)}: ${prices.lastUpdated} • ${prices.source || t(TR.indianMarket.te, TR.indianMarket.en)}` : ''}
         </Text>
       </View>
       {!prices.isFallback && (
         <Text style={gs.disclaimer}>
-          * అంతర్జాతీయ మార్కెట్ + దిగుమతి సుంకం + GST. వాస్తవ ధరలు దుకాణం ప్రకారం మారవచ్చు.
+          {t(TR.disclaimer.te, TR.disclaimer.en)}
         </Text>
       )}
     </View>
@@ -244,23 +247,23 @@ const gs = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  headerOrnamentLine: { flex: 1, height: 1.5, backgroundColor: '#D4A017', opacity: 0.3, borderRadius: 1 },
+  headerOrnamentLine: { flex: 1, height: 1.5, backgroundColor: DarkColors.gold, opacity: 0.3, borderRadius: 1 },
   sectionTitle: {
-    fontSize: 19, fontWeight: '800', color: '#8B6914', textAlign: 'center', letterSpacing: 1,
+    fontSize: 19, fontWeight: '800', color: DarkColors.goldLight, textAlign: 'center', letterSpacing: 1,
   },
   sectionSubRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 14,
   },
   sectionSubtitle: {
-    fontSize: 12, color: '#8B6914', fontWeight: '500',
+    fontSize: 12, color: DarkColors.gold, fontWeight: '500',
   },
 
   // Card
   card: {
     borderRadius: 20, overflow: 'hidden', marginBottom: 14,
-    backgroundColor: '#FFFDF5',
+    backgroundColor: DarkColors.bgCard,
     borderWidth: 1, elevation: 4,
-    shadowColor: '#D4A017', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 8,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 8,
   },
 
   // Banner
@@ -276,7 +279,7 @@ const gs = StyleSheet.create({
   },
   titleCol: { flex: 1 },
   title: { fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
-  subtitle: { fontSize: 12, color: '#6B5B4B', fontWeight: '500', marginTop: 1 },
+  subtitle: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '500', marginTop: 1 },
 
   // Ornament border
   ornamentRow: {
@@ -294,28 +297,28 @@ const gs = StyleSheet.create({
   },
   priceCol: { flex: 1, alignItems: 'center' },
   priceCenter: { marginHorizontal: 8 },
-  priceLabel: { fontSize: 11, color: '#6B5B4B', fontWeight: '600', marginBottom: 4, letterSpacing: 0.3 },
+  priceLabel: { fontSize: 11, color: DarkColors.textMuted, fontWeight: '600', marginBottom: 4, letterSpacing: 0.3 },
   priceValue: { fontSize: 20, fontWeight: '900' },
 
   // Live badge
   liveBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.9)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
   },
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4CAF50' },
-  liveText: { fontSize: 10, fontWeight: '800', color: '#2E7D32' },
+  liveText: { fontSize: 10, fontWeight: '800', color: '#4CAF50' },
 
   // Loading
   loadingWrap: { borderRadius: 20, overflow: 'hidden', marginBottom: 12 },
   loadingGradient: { alignItems: 'center', paddingVertical: 30 },
-  loadingTitle: { fontSize: 17, fontWeight: '800', color: '#8B6914', marginTop: 10, letterSpacing: 0.5 },
-  loadingText: { fontSize: 12, color: '#8A7A6A', marginTop: 6 },
+  loadingTitle: { fontSize: 17, fontWeight: '800', color: DarkColors.goldLight, marginTop: 10, letterSpacing: 0.5 },
+  loadingText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 6 },
 
   // Footer
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  footerText: { fontSize: 10, color: '#8A7A6A', textAlign: 'center' },
+  footerText: { fontSize: 10, color: DarkColors.textMuted, textAlign: 'center' },
   disclaimer: {
-    fontSize: 9, color: '#8A7A6A', textAlign: 'center', marginTop: 4,
+    fontSize: 9, color: DarkColors.textMuted, textAlign: 'center', marginTop: 4,
     fontStyle: 'italic', lineHeight: 14, paddingHorizontal: 10,
   },
 });

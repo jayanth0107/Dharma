@@ -2,15 +2,17 @@
 // Beautiful form for birth details → generates Vedic horoscope → PDF + share
 import React, { useState, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView,
   TextInput, Platform, Alert, ActivityIndicator, Image, Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Colors } from '../theme/colors';
+import { DarkColors } from '../theme/colors';
+import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
 import { searchLocation } from '../utils/geolocation';
 import { SectionShareRow } from './SectionShareRow';
+import { CalendarPicker } from './CalendarPicker';
 
 // ── Horoscope Card (shown in main feed) ──
 export function HoroscopeCard({ onOpen, isPremium }) {
@@ -21,21 +23,21 @@ export function HoroscopeCard({ onOpen, isPremium }) {
       activeOpacity={0.8}
     >
       <LinearGradient
-        colors={['rgba(74,26,107,0.08)', 'rgba(212,160,23,0.06)']}
+        colors={['rgba(74,26,107,0.2)', 'rgba(212,160,23,0.12)']}
         style={cs.cardGradient}
       >
         <View style={cs.cardIcon}>
-          <MaterialCommunityIcons name="zodiac-leo" size={28} color="#4A1A6B" />
+          <MaterialCommunityIcons name="zodiac-leo" size={28} color="#9B6FCF" />
         </View>
         <View style={cs.cardContent}>
           <Text style={cs.cardTitle}>రాశి ఫలం — జాతకం</Text>
           <Text style={cs.cardDesc}>మీ జన్మ వివరాలతో వేద జాతకం రూపొందించండి</Text>
         </View>
         {isPremium ? (
-          <Ionicons name="chevron-forward" size={20} color="#4A1A6B" />
+          <Ionicons name="chevron-forward" size={20} color="#9B6FCF" />
         ) : (
           <View style={cs.premiumLock}>
-            <MaterialCommunityIcons name="crown" size={16} color={Colors.gold} />
+            <MaterialCommunityIcons name="crown" size={16} color={DarkColors.gold} />
             <Text style={cs.premiumText}>Premium</Text>
           </View>
         )}
@@ -48,17 +50,17 @@ const cs = StyleSheet.create({
   card: { marginBottom: 10 },
   cardGradient: {
     flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 16,
-    borderWidth: 1, borderColor: 'rgba(74,26,107,0.12)',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   cardIcon: {
     width: 50, height: 50, borderRadius: 14,
-    backgroundColor: 'rgba(74,26,107,0.1)', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(74,26,107,0.25)', alignItems: 'center', justifyContent: 'center',
   },
   cardContent: { flex: 1, marginLeft: 14 },
-  cardTitle: { fontSize: 16, fontWeight: '800', color: '#4A1A6B' },
-  cardDesc: { fontSize: 12, color: '#6B5B4B', marginTop: 3, lineHeight: 18 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  cardDesc: { fontSize: 12, color: '#C0C0C0', marginTop: 3, lineHeight: 18 },
   premiumLock: { alignItems: 'center' },
-  premiumText: { fontSize: 9, fontWeight: '700', color: Colors.gold, marginTop: 2 },
+  premiumText: { fontSize: 9, fontWeight: '700', color: DarkColors.gold, marginTop: 2 },
 });
 
 // Horoscope pricing plans
@@ -69,7 +71,7 @@ const HOROSCOPE_PLANS = [
 ];
 
 const UPI_ID_H = '9535251573@ibl';
-const MERCHANT_H = 'DharmaDaily';
+const MERCHANT_H = 'Jayanth';
 
 const UPI_LOGOS_H = {
   tez: require('../../assets/upi/googlepay.png'),
@@ -84,10 +86,12 @@ function getHoroscopeQrUrl(amount) {
 }
 
 // ── Horoscope Modal (form + payment + results) ──
-export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
+export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, embedded = false }) {
   const [step, setStep] = useState(isPremium ? 'form' : 'locked'); // 'locked' | 'form' | 'payment' | 'loading' | 'result'
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [birthDateObj, setBirthDateObj] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [birthTime, setBirthTime] = useState('');
   const [birthPlace, setBirthPlace] = useState(null);
   const [placeQuery, setPlaceQuery] = useState('');
@@ -118,16 +122,16 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
     searchTimer.current = setTimeout(async () => {
       setSearching(true);
       try {
-        // Try direct search first
+        // Photon API is fast — search directly, biased to India
         let results = await searchLocation(text);
-        // If no results, try appending "India" for Indian villages/towns
+        // If no results, try appending "India" for small villages/towns
         if (!results || results.length === 0) {
           results = await searchLocation(text + ', India');
         }
-        setPlaceResults((results || []).slice(0, 8));
+        setPlaceResults((results || []).slice(0, 10));
       } catch { setPlaceResults([]); }
       setSearching(false);
-    }, 400);
+    }, 250);
   };
 
   const handleSelectPlace = (place) => {
@@ -242,9 +246,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
   // PDF + Share handled by SectionShareRow component
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={s.overlay}>
-        <View style={s.modal}>
+    <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
           {/* Header */}
           <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={s.header}>
             <TouchableOpacity style={s.closeX} onPress={handleClose}>
@@ -263,7 +265,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {step === 'locked' && (
               <View style={s.lockedWrap}>
-                <MaterialCommunityIcons name="lock" size={48} color="#4A1A6B" />
+                <MaterialCommunityIcons name="lock" size={48} color="#9B6FCF" />
                 <Text style={s.lockedTitle}>Premium ఫీచర్</Text>
                 <Text style={s.lockedDesc}>
                   రాశి ఫలం — వేద జాతకం Premium వినియోగదారులకు మాత్రమే అందుబాటులో ఉంటుంది.
@@ -293,7 +295,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                 {/* Name */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="account" size={18} color="#4A1A6B" />
+                    <MaterialCommunityIcons name="account" size={18} color="#9B6FCF" />
                     <Text style={s.fieldLabel}>పేరు / Name</Text>
                   </View>
                   <TextInput
@@ -301,50 +303,78 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     value={name}
                     onChangeText={setName}
                     placeholder="మీ పూర్తి పేరు"
-                    placeholderTextColor="#aaa"
+                    placeholderTextColor="#777777"
                     maxLength={50}
                   />
                 </View>
 
-                {/* Birth Date */}
+                {/* Birth Date — Calendar Picker */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="calendar" size={18} color="#4A1A6B" />
+                    <MaterialCommunityIcons name="calendar" size={18} color="#9B6FCF" />
                     <Text style={s.fieldLabel}>జన్మ తేదీ / Date of Birth</Text>
                   </View>
-                  <TextInput
-                    style={s.input}
-                    value={birthDate}
-                    onChangeText={setBirthDate}
-                    placeholder="DD-MM-YYYY (ఉదా: 15-05-1990)"
-                    placeholderTextColor="#aaa"
-                    keyboardType="numbers-and-punctuation"
-                    maxLength={10}
-                  />
+                  <TouchableOpacity style={s.input} onPress={() => setShowDatePicker(true)}>
+                    <Text style={birthDate ? { fontSize: 15, color: '#FFFFFF' } : { fontSize: 15, color: '#777777' }}>
+                      {birthDate || 'తేదీ ఎంచుకోండి / Select Date'}
+                    </Text>
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <CalendarPicker
+                      selectedDate={birthDateObj}
+                      title="జన్మ తేదీ / Date of Birth"
+                      onSelect={(d) => {
+                        setBirthDateObj(d);
+                        setBirthDate(`${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`);
+                        setShowDatePicker(false);
+                      }}
+                      onClose={() => setShowDatePicker(false)}
+                    />
+                  )}
                 </View>
 
-                {/* Birth Time */}
+                {/* Birth Time — Hour/Minute Picker */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="clock-outline" size={18} color="#4A1A6B" />
+                    <MaterialCommunityIcons name="clock-outline" size={18} color="#9B6FCF" />
                     <Text style={s.fieldLabel}>జన్మ సమయం / Time of Birth</Text>
                   </View>
-                  <TextInput
-                    style={s.input}
-                    value={birthTime}
-                    onChangeText={setBirthTime}
-                    placeholder="HH:MM (24 గంటల ఫార్మాట్, ఉదా: 06:30)"
-                    placeholderTextColor="#aaa"
-                    keyboardType="numbers-and-punctuation"
-                    maxLength={5}
-                  />
+                  <View style={s.timePickerRow}>
+                    <TouchableOpacity style={s.timeBtn} onPress={() => {
+                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
+                      setBirthTime(`${String(Math.max(0, h - 1)).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                    }}>
+                      <Text style={s.timeBtnText}>−</Text>
+                    </TouchableOpacity>
+                    <Text style={s.timeDisplay}>{birthTime || '06:00'}</Text>
+                    <TouchableOpacity style={s.timeBtn} onPress={() => {
+                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
+                      setBirthTime(`${String(Math.min(23, h + 1)).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                    }}>
+                      <Text style={s.timeBtnText}>+</Text>
+                    </TouchableOpacity>
+                    <Text style={s.timeSep}>:</Text>
+                    <TouchableOpacity style={s.timeBtn} onPress={() => {
+                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
+                      setBirthTime(`${String(h).padStart(2, '0')}:${String(Math.max(0, m - 5) % 60).padStart(2, '0')}`);
+                    }}>
+                      <Text style={s.timeBtnText}>−</Text>
+                    </TouchableOpacity>
+                    <Text style={s.timeMinText}>min</Text>
+                    <TouchableOpacity style={s.timeBtn} onPress={() => {
+                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
+                      setBirthTime(`${String(h).padStart(2, '0')}:${String((m + 5) % 60).padStart(2, '0')}`);
+                    }}>
+                      <Text style={s.timeBtnText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
                   <Text style={s.fieldHint}>ఖచ్చితమైన సమయం తెలియకపోతే అంచనా సమయం నమోదు చేయండి</Text>
                 </View>
 
                 {/* Birth Place — with search + GPS */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="map-marker" size={18} color="#4A1A6B" />
+                    <MaterialCommunityIcons name="map-marker" size={18} color="#9B6FCF" />
                     <Text style={s.fieldLabel}>జన్మ స్థలం / Place of Birth</Text>
                     <TouchableOpacity
                       style={s.gpsBtn}
@@ -366,7 +396,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                         } catch {} finally { setSearching(false); }
                       }}
                     >
-                      <MaterialCommunityIcons name="crosshairs-gps" size={14} color="#4A1A6B" />
+                      <MaterialCommunityIcons name="crosshairs-gps" size={14} color="#9B6FCF" />
                       <Text style={s.gpsBtnText}>GPS</Text>
                     </TouchableOpacity>
                   </View>
@@ -375,17 +405,17 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     value={placeQuery}
                     onChangeText={handlePlaceSearch}
                     placeholder="నగరం / గ్రామం / పట్టణం పేరు"
-                    placeholderTextColor="#aaa"
+                    placeholderTextColor="#777777"
                   />
-                  {searching && <ActivityIndicator size="small" color="#4A1A6B" style={{ marginTop: 6 }} />}
+                  {searching && <ActivityIndicator size="small" color="#9B6FCF" style={{ marginTop: 6 }} />}
                   {birthPlace && (
                     <View style={s.selectedPlace}>
-                      <MaterialCommunityIcons name="check-circle" size={14} color={Colors.tulasiGreen} />
+                      <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
                       <Text style={s.selectedPlaceText}>{birthPlace.name} ({birthPlace.latitude.toFixed(2)}°, {birthPlace.longitude.toFixed(2)}°)</Text>
                     </View>
                   )}
                   {!searching && placeQuery.length >= 2 && placeResults.length === 0 && !birthPlace && (
-                    <Text style={{ fontSize: 12, color: Colors.textMuted, marginTop: 6, fontStyle: 'italic' }}>
+                    <Text style={{ fontSize: 12, color: '#999999', marginTop: 6, fontStyle: 'italic' }}>
                       ఫలితాలు లేవు. ఆంగ్లంలో లేదా తెలుగులో ప్రయత్నించండి.
                     </Text>
                   )}
@@ -397,7 +427,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                           style={s.placeItem}
                           onPress={() => handleSelectPlace(place)}
                         >
-                          <MaterialCommunityIcons name="map-marker-outline" size={16} color="#4A1A6B" />
+                          <MaterialCommunityIcons name="map-marker-outline" size={16} color="#9B6FCF" />
                           <Text style={s.placeItemText} numberOfLines={2}>{place.displayName || place.name}</Text>
                         </TouchableOpacity>
                       ))}
@@ -423,7 +453,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
             {step === 'payment' && (
               <View style={s.form}>
                 <Text style={s.formTitle}>జాతకం రూపొందించడానికి ప్లాన్ ఎంచుకోండి</Text>
-                <Text style={{ fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 12, color: '#999999', textAlign: 'center', marginBottom: 16 }}>
                   Premium ఫీచర్ — వేద జ్యోతిష్య ఆధారిత ఖచ్చితమైన జాతకం
                 </Text>
 
@@ -449,7 +479,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                 {selectedPlan && (
                   <View style={{ marginTop: 16 }}>
                     {/* UPI App buttons */}
-                    <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.darkBrown, textAlign: 'center', marginBottom: 10 }}>
+                    <Text style={{ fontSize: 14, fontWeight: '700', color: '#FFFFFF', textAlign: 'center', marginBottom: 10 }}>
                       {selectedPlan.label} — UPI యాప్ ఎంచుకోండి
                     </Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
@@ -482,30 +512,30 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     </View>
 
                     {/* QR Code */}
-                    <View style={{ alignItems: 'center', marginTop: 14, padding: 12, backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(74,26,107,0.1)' }}>
-                      <Text style={{ fontSize: 12, fontWeight: '600', color: Colors.textMuted, marginBottom: 8 }}>QR కోడ్ స్కాన్ చేయండి</Text>
+                    <View style={{ alignItems: 'center', marginTop: 14, padding: 12, backgroundColor: '#222222', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                      <Text style={{ fontSize: 12, fontWeight: '600', color: '#999999', marginBottom: 8 }}>QR కోడ్ స్కాన్ చేయండి</Text>
                       {!qrFailed ? (
                         <Image source={{ uri: getHoroscopeQrUrl(selectedPlan.price) }} style={{ width: 160, height: 160 }} resizeMode="contain" onError={() => setQrFailed(true)} />
                       ) : (
                         <View style={{ alignItems: 'center', justifyContent: 'center', width: 160, height: 160 }}>
-                          <MaterialCommunityIcons name="qrcode" size={48} color={Colors.textMuted} />
-                          <Text style={{ fontSize: 12, color: Colors.textMuted, marginTop: 8 }}>QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.</Text>
+                          <MaterialCommunityIcons name="qrcode" size={48} color="#999999" />
+                          <Text style={{ fontSize: 12, color: '#999999', marginTop: 8 }}>QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.</Text>
                         </View>
                       )}
-                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#4A1A6B', marginTop: 8 }}>₹{selectedPlan.price}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: '#9B6FCF', marginTop: 8 }}>₹{selectedPlan.price}</Text>
                     </View>
 
                     {/* UPI ID */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, gap: 8 }}>
-                      <Text style={{ fontSize: 13, color: Colors.textMuted }}>UPI ID:</Text>
-                      <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.darkBrown }}>{UPI_ID_H}</Text>
+                      <Text style={{ fontSize: 13, color: '#999999' }}>UPI ID:</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: '#FFFFFF' }}>{UPI_ID_H}</Text>
                     </View>
 
                     {/* Single pay button with verification animation */}
                     {/* Step 1: Pay */}
                     {horoPayStep === 'idle' && (
                       <TouchableOpacity style={s.activatePayBtn} onPress={handleOpenHoroPayment}>
-                        <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
+                        <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
                           <MaterialCommunityIcons name="bank-transfer" size={20} color="#FFF" />
                           <Text style={s.activatePayText}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
                         </LinearGradient>
@@ -514,26 +544,26 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                     {/* Processing */}
                     {horoPayStep === 'processing' && (
                       <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                        <ActivityIndicator size="large" color={Colors.tulasiGreen} />
-                        <Text style={{ fontSize: 14, fontWeight: '700', color: Colors.tulasiGreen, marginTop: 8 }}>ప్రాసెస్ అవుతోంది...</Text>
+                        <ActivityIndicator size="large" color={DarkColors.tulasiGreen} />
+                        <Text style={{ fontSize: 14, fontWeight: '700', color: DarkColors.tulasiGreen, marginTop: 8 }}>ప్రాసెస్ అవుతోంది...</Text>
                       </View>
                     )}
                     {/* Step 2: Confirm */}
                     {horoPayStep === 'confirm' && (
                       <>
                         <View style={{ alignItems: 'center', paddingVertical: 12, gap: 4, marginBottom: 10, backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 12, padding: 14 }}>
-                          <MaterialCommunityIcons name="check-circle-outline" size={28} color={Colors.tulasiGreen} />
-                          <Text style={{ fontSize: 15, fontWeight: '800', color: Colors.tulasiGreen }}>పేమెంట్ పూర్తయిందా?</Text>
-                          <Text style={{ fontSize: 12, color: Colors.textMuted, textAlign: 'center' }}>₹{selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి</Text>
+                          <MaterialCommunityIcons name="check-circle-outline" size={28} color={DarkColors.tulasiGreen} />
+                          <Text style={{ fontSize: 15, fontWeight: '800', color: DarkColors.tulasiGreen }}>పేమెంట్ పూర్తయిందా?</Text>
+                          <Text style={{ fontSize: 12, color: '#999999', textAlign: 'center' }}>₹{selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి</Text>
                         </View>
                         <TouchableOpacity style={s.activatePayBtn} onPress={handleConfirmHoroPayment}>
-                          <LinearGradient colors={[Colors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
+                          <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
                             <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
                             <Text style={s.activatePayText}>అవును, పేమెంట్ చేశాను ✓</Text>
                           </LinearGradient>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setHoroPayStep('idle')} style={{ marginTop: 8, alignItems: 'center' }}>
-                          <Text style={{ fontSize: 12, color: Colors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
+                          <Text style={{ fontSize: 12, color: '#999999' }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -541,14 +571,14 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                 )}
 
                 <TouchableOpacity onPress={() => setStep('form')} style={{ marginTop: 12, alignItems: 'center' }}>
-                  <Text style={{ fontSize: 13, color: Colors.textMuted }}>← వెనక్కి</Text>
+                  <Text style={{ fontSize: 13, color: '#999999' }}>← వెనక్కి</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {step === 'loading' && (
               <View style={s.loadingBox}>
-                <ActivityIndicator size="large" color="#4A1A6B" />
+                <ActivityIndicator size="large" color="#9B6FCF" />
                 <Text style={s.loadingText}>గ్రహ స్థానాలు గణిస్తోంది...</Text>
                 <Text style={s.loadingSubtext}>Calculating planetary positions...</Text>
               </View>
@@ -566,9 +596,9 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
 
                 {/* Rashi + Nakshatra + Lagna — key info */}
                 <View style={s.keyInfoGrid}>
-                  <KeyInfoCard label="రాశి" value={horoscope.rashi?.telugu} sub={horoscope.rashi?.english} icon="zodiac-leo" color="#4A1A6B" />
-                  <KeyInfoCard label="నక్షత్రం" value={horoscope.nakshatra?.telugu} sub={`పాద ${horoscope.nakshatra?.pada}`} icon="star-four-points" color={Colors.gold} />
-                  <KeyInfoCard label="లగ్నం" value={horoscope.lagna?.telugu} sub={horoscope.lagna?.english} icon="compass" color={Colors.saffron} />
+                  <KeyInfoCard label="రాశి" value={horoscope.rashi?.telugu} sub={horoscope.rashi?.english} icon="zodiac-leo" color="#9B6FCF" />
+                  <KeyInfoCard label="నక్షత్రం" value={horoscope.nakshatra?.telugu} sub={`పాద ${horoscope.nakshatra?.pada}`} icon="star-four-points" color={DarkColors.gold} />
+                  <KeyInfoCard label="లగ్నం" value={horoscope.lagna?.telugu} sub={horoscope.lagna?.english} icon="compass" color={DarkColors.saffron} />
                   <KeyInfoCard label="సూర్య రాశి" value={horoscope.sunSign?.telugu} sub={horoscope.sunSign?.english} icon="white-balance-sunny" color="#E8751A" />
                 </View>
 
@@ -592,7 +622,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                 {horoscope.navagraha && (
                   <View style={s.navagrahaSection}>
                     <Text style={s.predTitle}>నవగ్రహ స్థానాలు</Text>
-                    <Text style={{ fontSize: 11, color: Colors.textMuted, marginBottom: 10 }}>Source: {horoscope.source}</Text>
+                    <Text style={{ fontSize: 11, color: '#999999', marginBottom: 10 }}>Source: {horoscope.source}</Text>
                     <View style={s.navagrahaGrid}>
                       {Object.values(horoscope.navagraha).map((planet, i) => (
                         <View key={i} style={s.navagrahaItem}>
@@ -688,7 +718,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
                 />
 
                 {/* Usage counter */}
-                <Text style={{ fontSize: 10, color: Colors.textMuted, textAlign: 'center', marginTop: 8 }}>
+                <Text style={{ fontSize: 10, color: '#999999', textAlign: 'center', marginTop: 8 }}>
                   Source: {horoscope.source || 'astronomy-engine'}
                 </Text>
               </View>
@@ -699,9 +729,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium }) {
           <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
             <Text style={s.closeBtnText}>మూసివేయండి</Text>
           </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    </ModalOrView>
   );
 }
 
@@ -720,7 +748,7 @@ function PredictionSection({ icon, title, text }) {
   if (!text) return null;
   return (
     <View style={s.predRow}>
-      <MaterialCommunityIcons name={icon} size={18} color="#4A1A6B" style={{ marginRight: 10, marginTop: 2 }} />
+      <MaterialCommunityIcons name={icon} size={18} color="#9B6FCF" style={{ marginRight: 10, marginTop: 2 }} />
       <View style={{ flex: 1 }}>
         <Text style={s.predSectionTitle}>{title}</Text>
         <Text style={s.predText}>{text}</Text>
@@ -771,7 +799,7 @@ function buildHoroscopeHtml(h) {
 
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  modal: { backgroundColor: '#FFFDF5', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '94%' },
+  modal: { backgroundColor: '#1A1A1A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '94%' },
   header: {
     alignItems: 'center', paddingVertical: 24, paddingHorizontal: 20,
     borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative',
@@ -786,13 +814,13 @@ const s = StyleSheet.create({
     alignItems: 'center', padding: 40, paddingTop: 50,
   },
   lockedTitle: {
-    fontSize: 22, fontWeight: '800', color: '#4A1A6B', marginTop: 16,
+    fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 16,
   },
   lockedDesc: {
-    fontSize: 14, color: '#6B5B4B', textAlign: 'center', marginTop: 12, lineHeight: 22,
+    fontSize: 14, color: '#C0C0C0', textAlign: 'center', marginTop: 12, lineHeight: 22,
   },
   lockedDescEn: {
-    fontSize: 12, color: '#8A7A6A', textAlign: 'center', marginTop: 6, lineHeight: 18,
+    fontSize: 12, color: '#999999', textAlign: 'center', marginTop: 6, lineHeight: 18,
   },
   lockedBtn: {
     marginTop: 24, borderRadius: 14, overflow: 'hidden', width: '100%',
@@ -805,64 +833,70 @@ const s = StyleSheet.create({
     fontSize: 16, fontWeight: '800', color: '#FFD700',
   },
   lockedCancel: {
-    fontSize: 13, color: '#8A7A6A', fontWeight: '600',
+    fontSize: 13, color: '#999999', fontWeight: '600',
   },
 
   // Form
   form: { padding: 20 },
-  formTitle: { fontSize: 16, fontWeight: '800', color: Colors.darkBrown, marginBottom: 16, textAlign: 'center' },
+  formTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginBottom: 16, textAlign: 'center' },
   field: { marginBottom: 16 },
   fieldHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 },
-  fieldLabel: { fontSize: 14, fontWeight: '700', color: '#4A1A6B', flex: 1 },
+  fieldLabel: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', flex: 1 },
   gpsBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(74,26,107,0.08)', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 12,
+    backgroundColor: 'rgba(155,111,207,0.15)', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 12,
   },
-  gpsBtnText: { fontSize: 11, fontWeight: '700', color: '#4A1A6B' },
+  gpsBtnText: { fontSize: 11, fontWeight: '700', color: '#9B6FCF' },
   input: {
-    backgroundColor: '#fff', borderRadius: 14, padding: 14,
-    borderWidth: 1.5, borderColor: 'rgba(74,26,107,0.15)',
-    fontSize: 16, fontWeight: '600', color: Colors.darkBrown,
+    backgroundColor: '#1E1E1E', borderRadius: 14, padding: 14,
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
+    fontSize: 16, fontWeight: '600', color: '#FFFFFF',
   },
-  fieldHint: { fontSize: 11, color: Colors.textMuted, fontStyle: 'italic', marginTop: 4, marginLeft: 4 },
+  fieldHint: { fontSize: 11, color: '#999999', fontStyle: 'italic', marginTop: 4, marginLeft: 4 },
+  timePickerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10 },
+  timeBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#9B6FCF', alignItems: 'center', justifyContent: 'center' },
+  timeBtnText: { fontSize: 18, fontWeight: '800', color: '#fff' },
+  timeDisplay: { fontSize: 28, fontWeight: '900', color: '#FFFFFF', minWidth: 70, textAlign: 'center' },
+  timeSep: { fontSize: 16, color: '#999999', marginHorizontal: 2 },
+  timeMinText: { fontSize: 10, color: '#999999' },
   selectedPlace: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     marginTop: 8, paddingVertical: 6, paddingHorizontal: 10,
     backgroundColor: 'rgba(46,125,50,0.08)', borderRadius: 10,
   },
-  selectedPlaceText: { fontSize: 12, color: Colors.tulasiGreen, fontWeight: '600', flex: 1 },
-  placeList: { marginTop: 6, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
+  selectedPlaceText: { fontSize: 12, color: DarkColors.tulasiGreen, fontWeight: '600', flex: 1 },
+  placeList: { marginTop: 6, backgroundColor: '#222222', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
   placeItem: {
     flexDirection: 'row', alignItems: 'flex-start', padding: 12, gap: 8,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)',
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  placeItemText: { fontSize: 13, color: Colors.darkBrown, flex: 1, lineHeight: 18 },
+  placeItemText: { fontSize: 13, color: '#FFFFFF', flex: 1, lineHeight: 18 },
   generateBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 8 },
   generateGradient: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 16, borderRadius: 16, gap: 10,
   },
   generateText: { fontSize: 17, fontWeight: '800', color: '#FFD700' },
-  disclaimer: { fontSize: 11, color: Colors.textMuted, fontStyle: 'italic', textAlign: 'center', marginTop: 16, lineHeight: 18 },
+  disclaimer: { fontSize: 11, color: '#999999', fontStyle: 'italic', textAlign: 'center', marginTop: 16, lineHeight: 18 },
 
   // Payment step
   planCard: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1.5, borderColor: 'rgba(0,0,0,0.06)', gap: 10, position: 'relative',
+    backgroundColor: '#222222', borderRadius: 14, padding: 14, marginBottom: 10,
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)', gap: 10, position: 'relative',
   },
-  planCardSelected: { borderColor: '#4A1A6B', backgroundColor: 'rgba(74,26,107,0.04)' },
-  planCardBest: { borderColor: '#4A1A6B', borderWidth: 2 },
+  planCardSelected: { borderColor: '#9B6FCF', backgroundColor: 'rgba(155,111,207,0.1)' },
+  planCardBest: { borderColor: '#9B6FCF', borderWidth: 2 },
   bestTag: { position: 'absolute', top: -8, right: 12, backgroundColor: '#4A1A6B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   bestTagText: { fontSize: 8, fontWeight: '800', color: '#FFD700' },
   planEmoji: { fontSize: 24 },
-  planName: { fontSize: 15, fontWeight: '700', color: Colors.darkBrown },
-  planDesc: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
-  planPrice: { fontSize: 20, fontWeight: '900', color: '#4A1A6B' },
+  planName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  planDesc: { fontSize: 11, color: '#999999', marginTop: 2 },
+  planPrice: { fontSize: 20, fontWeight: '900', color: '#9B6FCF' },
   upiAppBtn: {
     width: '48%', flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 12, padding: 10, marginBottom: 8,
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.08)', gap: 8,
+    backgroundColor: '#222222', borderRadius: 12, padding: 10, marginBottom: 8,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 8,
   },
   upiLetter: { width: 24, height: 24, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
   upiAppText: { fontSize: 12, fontWeight: '700' },
@@ -872,70 +906,70 @@ const s = StyleSheet.create({
 
   // Loading
   loadingBox: { alignItems: 'center', padding: 60 },
-  loadingText: { fontSize: 16, fontWeight: '700', color: '#4A1A6B', marginTop: 16 },
-  loadingSubtext: { fontSize: 12, color: Colors.textMuted, marginTop: 4 },
+  loadingText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', marginTop: 16 },
+  loadingSubtext: { fontSize: 12, color: '#999999', marginTop: 4 },
 
   // Result
   result: { padding: 20 },
   resultHeader: { alignItems: 'center', marginBottom: 16 },
-  resultName: { fontSize: 24, fontWeight: '900', color: '#4A1A6B' },
-  resultBirth: { fontSize: 13, color: Colors.textMuted, marginTop: 4 },
+  resultName: { fontSize: 24, fontWeight: '900', color: '#FFFFFF' },
+  resultBirth: { fontSize: 13, color: '#999999', marginTop: 4 },
   keyInfoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   keyCard: {
-    width: '47%', backgroundColor: '#F8F5F0', borderRadius: 14, padding: 12,
+    width: '47%', backgroundColor: '#222222', borderRadius: 14, padding: 12,
     borderLeftWidth: 3, alignItems: 'center',
   },
-  keyLabel: { fontSize: 11, color: '#8A7A6A', fontWeight: '600', marginTop: 4 },
+  keyLabel: { fontSize: 11, color: '#999999', fontWeight: '600', marginTop: 4 },
   keyValue: { fontSize: 18, fontWeight: '800', marginTop: 2 },
-  keySub: { fontSize: 11, color: '#6B5B4B', marginTop: 1 },
+  keySub: { fontSize: 11, color: '#C0C0C0', marginTop: 1 },
 
   // Navagraha
   navagrahaSection: { marginBottom: 16 },
   navagrahaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   navagrahaItem: {
-    width: '31%', backgroundColor: '#F8F5F0', borderRadius: 10, padding: 8, alignItems: 'center',
-    borderWidth: 1, borderColor: 'rgba(74,26,107,0.08)',
+    width: '31%', backgroundColor: '#222222', borderRadius: 10, padding: 8, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  ngName: { fontSize: 12, fontWeight: '700', color: '#4A1A6B' },
-  ngRashi: { fontSize: 11, color: '#6B5B4B', marginTop: 2 },
+  ngName: { fontSize: 12, fontWeight: '700', color: '#9B6FCF' },
+  ngRashi: { fontSize: 11, color: '#C0C0C0', marginTop: 2 },
   ngRetro: { fontSize: 9, fontWeight: '700', color: '#C41E3A', marginTop: 1 },
 
   birthPanchangRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   birthPanchangItem: {
-    flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 10, alignItems: 'center',
-    borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
+    flex: 1, backgroundColor: '#222222', borderRadius: 12, padding: 10, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  bpLabel: { fontSize: 11, color: '#8A7A6A', fontWeight: '600' },
-  bpValue: { fontSize: 15, fontWeight: '700', color: Colors.darkBrown, marginTop: 2 },
+  bpLabel: { fontSize: 11, color: '#999999', fontWeight: '600' },
+  bpValue: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
 
   predictions: { marginBottom: 16 },
-  predTitle: { fontSize: 18, fontWeight: '800', color: '#4A1A6B', marginBottom: 12 },
+  predTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginBottom: 12 },
   predRow: {
     flexDirection: 'row', alignItems: 'flex-start',
-    backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(74,26,107,0.08)',
+    backgroundColor: '#222222', borderRadius: 14, padding: 14, marginBottom: 10,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  predSectionTitle: { fontSize: 14, fontWeight: '700', color: '#4A1A6B', marginBottom: 4 },
-  predText: { fontSize: 13, color: '#4A3A2A', lineHeight: 20 },
+  predSectionTitle: { fontSize: 14, fontWeight: '700', color: '#9B6FCF', marginBottom: 4 },
+  predText: { fontSize: 13, color: '#C0C0C0', lineHeight: 20 },
 
   dailyBox: {
-    backgroundColor: 'rgba(74,26,107,0.05)', borderRadius: 16, padding: 16, marginBottom: 16,
-    borderWidth: 1, borderColor: 'rgba(74,26,107,0.1)',
+    backgroundColor: 'rgba(155,111,207,0.08)', borderRadius: 16, padding: 16, marginBottom: 16,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  dailyTitle: { fontSize: 16, fontWeight: '800', color: '#4A1A6B', marginBottom: 8 },
-  dailyText: { fontSize: 14, color: '#4A3A2A', lineHeight: 22 },
+  dailyTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
+  dailyText: { fontSize: 14, color: '#C0C0C0', lineHeight: 22 },
 
   actionRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 12 },
   pdfBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 12, paddingHorizontal: 24, borderRadius: 16,
-    backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#C41E3A30',
+    backgroundColor: '#222222', borderWidth: 1.5, borderColor: '#C41E3A30',
   },
   pdfBtnText: { fontSize: 14, fontWeight: '700', color: '#C41E3A' },
   shareResultBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 12, paddingHorizontal: 24, borderRadius: 16,
-    backgroundColor: Colors.saffron,
+    backgroundColor: DarkColors.saffron,
   },
   shareResultText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
