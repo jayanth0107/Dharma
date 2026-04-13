@@ -371,20 +371,20 @@ const s = StyleSheet.create({
     flexShrink: 1,
   },
   appTitle: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: '900',
     color: DarkColors.gold,
-    letterSpacing: 1,
+    letterSpacing: 1.5,
   },
   appHyphen: {
-    fontSize: 22,
+    fontSize: 26,
     color: DarkColors.textMuted,
   },
   appSubtitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: DarkColors.saffron,
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
   headerIconBtn: {
     padding: 6,
