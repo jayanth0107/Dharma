@@ -251,6 +251,8 @@ eas submit --platform android                     # Submit to Play Store (intern
 - `ARCHITECTURE.md` — deep-dive on navigation, state, i18n, premium
 - `TESTING.md` — full manual test plan (Web vs Mobile)
 - `ANALYTICS.md` — event catalog + backend tracking
+- `DATA-SOURCES.md` — feature-by-feature audit of every data source + fallback
+- `OPERATIONS.md` — how to run the app in production (payment verification, login troubleshooting, incident response)
 - `docs/SECURITY-CHECKLIST.md` — security audit
 - `docs/release-notes-v2.md` — Play Store release notes
 - `docs/play-store-listing.md` — store copy, keywords
