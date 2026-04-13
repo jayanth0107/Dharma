@@ -339,6 +339,78 @@ export async function deactivatePremium() {
  * Get premium pricing info (for display)
  */
 /**
+ * Functions-free fallback: scan the user's verified payments and grant premium
+ * for the latest active one. Use when Cloud Functions aren't deployed —
+ * admin only needs to set `verified: true` on a payment doc and the client
+ * picks it up on next sync.
+ *
+ * Selection rule: pick the verified payment whose computed expiry is furthest
+ * in the future (so a yearly purchased after a monthly correctly extends).
+ */
+export async function syncPremiumFromPayments(uid) {
+  if (!uid) return { success: false, reason: 'no_uid' };
+  try {
+    const { db, isConfigured } = require('../config/firebase');
+    if (!isConfigured || !db) return { success: false, reason: 'firebase_unavailable' };
+
+    const { collection, query, where, getDocs } = await import('firebase/firestore');
+    const q = query(
+      collection(db, 'payments'),
+      where('userId', '==', uid),
+      where('verified', '==', true),
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return { success: true, hasPremium: false };
+
+    // Compute the best (most generous) active payment
+    const now = Date.now();
+    let best = null;
+    snap.forEach((doc) => {
+      const p = doc.data();
+      if (p.refunded === true || p.flagged === true) return;
+      // Activated time = verifiedAt > processedAt > timestamp > syncedAt
+      const startMs = (p.processedAt?.toMillis?.() || p.timestamp || Date.parse(p.syncedAt) || now);
+      const days = p.days || 0;
+      const expiryMs = days > 0 ? startMs + days * 24 * 60 * 60 * 1000 : Date.parse('2099-12-31');
+      if (expiryMs < now) return; // already expired
+      if (!best || expiryMs > best.expiryMs) {
+        best = { id: doc.id, p, startMs, expiryMs };
+      }
+    });
+
+    if (!best) return { success: true, hasPremium: false };
+
+    const state = await loadState();
+    state.tier = TIERS.PREMIUM;
+    state.activatedAt = best.startMs;
+    state.unlockSource = (best.p.source || 'premium_upi') + '_payments_scan';
+    state.expiresAt = best.expiryMs >= Date.parse('2099-01-01') ? null : best.expiryMs;
+    if (!state.payments) state.payments = [];
+    state.payments.push({
+      source: state.unlockSource,
+      amount: best.p.amount || 0,
+      planId: best.p.planId || best.p.plan || '',
+      planName: best.p.planName || '',
+      days: best.p.days || 0,
+      screen: 'payments_scan',
+      platform: 'cloud',
+      timestamp: now,
+      date: new Date(now).toISOString(),
+    });
+    await saveState();
+    return {
+      success: true,
+      hasPremium: true,
+      plan: best.p.planId || best.p.plan,
+      expiresAt: state.expiresAt ? new Date(state.expiresAt) : null,
+    };
+  } catch (err) {
+    if (__DEV__) console.warn('syncPremiumFromPayments failed:', err?.message);
+    return { success: false, reason: 'error', error: err?.message };
+  }
+}
+
+/**
  * Sync premium state from Firestore users/{uid}.premium.
  * This is the authoritative source — the cloud overrides local state
  * when more generous (active + longer expiry), otherwise local wins
@@ -357,12 +429,16 @@ export async function syncPremiumFromCloud(uid) {
 
     const { doc, getDoc } = await import('firebase/firestore');
     const userSnap = await getDoc(doc(db, 'users', uid));
-    if (!userSnap.exists()) return { success: false, reason: 'no_user_doc' };
+    if (!userSnap.exists()) {
+      // No profile yet — still try the payments scan in case admin verified a payment
+      return await syncPremiumFromPayments(uid);
+    }
 
     const data = userSnap.data();
     const cloudPremium = data?.premium;
     if (!cloudPremium || cloudPremium.active !== true) {
-      return { success: true, hasPremium: false };
+      // Fall back to scanning payments for verified entries (works without Cloud Functions)
+      return await syncPremiumFromPayments(uid);
     }
 
     // Adopt the cloud state — it is more authoritative than client memory

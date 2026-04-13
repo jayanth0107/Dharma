@@ -18,6 +18,7 @@ import { TR } from '../data/translations';
 import { TextInput } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { redeemClaimCode } from '../utils/premiumService';
+import { FEATURES } from '../config/features';
 
 // ---- UPI Config (same as DonateSection) ----
 const UPI_ID = '9535251573@ibl';
@@ -358,8 +359,8 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                   ))}
                 </View>
 
-                {/* Claim code entry — for users who paid offline and admin issued a code */}
-                <View style={s.claimSection}>
+                {/* Claim code entry — only shown when Cloud Functions are deployed */}
+                {FEATURES.CLAIM_CODES_UI && <View style={s.claimSection}>
                   <TouchableOpacity
                     style={s.claimToggle}
                     onPress={() => setClaimExpanded(!claimExpanded)}
@@ -401,7 +402,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                       </TouchableOpacity>
                     </View>
                   )}
-                </View>
+                </View>}
               </>
             ) : (
               /* ─── Payment Screen ─── */

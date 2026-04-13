@@ -62,35 +62,65 @@ Operational reference for the person running the app post-launch: how to know wh
 
 Three realistic options, ordered by effort:
 
-### Option A — Manual admin verification (IMPLEMENTED ✅)
+### Option A — Manual admin verification
 
-**Status:** Built and deployed. See `functions/index.js`.
+There are two ways to run Option A. Pick one based on whether you want to deal with Cloud Functions / Blaze billing.
 
-**When to use:** Early users (<50/day), you can spend 5–15 min/day on verification.
+#### A0 — Functions-free (current default, no billing required) ✅
 
-**Flow (current code):**
-1. User picks plan → client writes `payments/{id}` with `verified: false` (Cloud Function `onPaymentCreated` backstops this)
-2. User pays via their UPI app
-3. You receive bank SMS with UPI txn ID + amount
-4. You open Firestore Console → `payments` → find matching doc (by amount + timestamp + deviceId)
-5. **Set `verified: true`** in the doc
-6. Cloud Function `onPaymentVerified` fires automatically:
-   - If `userId` is present → writes `users/{userId}.premium = { active, plan, expiresAt, ... }`
-   - If anonymous (no userId) → generates an 8-char claim code in `claim_codes/{CODE}`, stamps `payments.claimCode = CODE`
-7. Client picks up premium:
-   - **Logged-in users:** `users/{uid}.premium` is synced on every login (`AuthContext` → `syncPremiumFromCloud`)
-   - **Anonymous users:** contact them out-of-band (WhatsApp/SMS) with their claim code → they log in in the app → tap "Have a claim code?" in Premium screen → paste code → redeemed + synced
-8. Cloud Function `onClaimRedemption` fires when a claim code is marked claimed → writes `users/{uid}.premium`
+**Status:** Active. `FEATURES.CLOUD_FUNCTIONS_ENABLED = false` in `src/config/features.js`. The claim-code UI is hidden; only logged-in users can be granted premium.
 
-**Admin workflow per payment (daily):**
-1. Open Firestore Console → `payments`, sort by `syncedAt desc`, filter `verified == false`
-2. Match each to your UPI bank SMS (amount + approximate time window)
-3. Tap doc → edit → set `verified: true` → Save
-4. If `processedMethod` becomes `claim_code`, copy `claimCode` and send to the customer
-5. If `processedMethod` becomes `user_linked`, the customer's premium unlocks on their next login / app refresh
+**Daily admin workflow:**
+1. Firestore Console → `payments`, filter `verified == false`
+2. Match each payment to your UPI bank SMS (amount + time + deviceId)
+3. **Set `verified: true`** on the payment doc → save
+4. That's it. No second step needed for logged-in users.
 
-**Pros:** No merchant account, zero fees, zero monthly cost (Firestore + Cloud Functions free tier).
-**Cons:** Manual — doesn't scale beyond ~50 txns/day. Anonymous users need out-of-band claim code delivery. Unverified users experience hours of delay.
+**Client behavior:**
+- On every login, `AuthContext` calls `syncPremiumFromCloud(uid)` which:
+  1. Reads `users/{uid}.premium` first (admin-grant path — see below)
+  2. Falls back to scanning `payments` where `userId == uid && verified == true && refunded != true`
+  3. Picks the verified payment with the most generous remaining expiry
+  4. Activates premium locally
+
+**For users who haven't logged in:** they can't be granted premium without Functions. Ask them to log in (Phone OTP) — once they do, their `userId` is set on any future payments and the workflow works.
+
+**Direct admin grant** (skips even the payment doc):
+- Firestore Console → `users/{uid}` → merge field:
+  ```json
+  "premium": {
+    "active": true,
+    "plan": "yearly",
+    "days": 365,
+    "amount": 499,
+    "source": "manual_unlock",
+    "activatedAt": <serverTimestamp>,
+    "expiresAt": <Timestamp 365d from now>
+  }
+  ```
+- Client `syncPremiumFromCloud` reads this directly.
+
+#### A1 — With Cloud Functions (auto-grant + claim codes for anonymous)
+
+**Status:** Code is in `functions/index.js`, but **not deployed** because Cloud Functions require the Firebase **Blaze plan** (credit card on file; free tier covers Dharma's expected usage).
+
+**To enable later:**
+1. Upgrade Firebase project to Blaze: https://console.firebase.google.com/project/dharmadaily-1fa89/usage/details
+2. `cd functions && npm install && cd ..`
+3. `firebase deploy --only firestore:rules,functions`
+4. Edit `src/config/features.js` → set both `CLOUD_FUNCTIONS_ENABLED` and `CLAIM_CODES_UI` to `true`
+5. Rebuild client (`eas build` or `expo start`)
+
+**What this adds:**
+- `onPaymentVerified` Cloud Function fires when admin sets `verified: true` → automatically writes `users/{uid}.premium` (logged-in) or generates a claim code in `claim_codes/{CODE}` (anonymous)
+- Anonymous users can be granted premium by sending them the 8-char claim code; they log in + paste code in the Premium screen
+- `onClaimRedemption` listener processes the redemption automatically
+- `onPaymentCreated` backstop ensures `verified: false` + `receivedAt` are stamped
+
+See `functions/index.js` for the full implementation. Both paths converge on `users/{uid}.premium` so client code is identical.
+
+**Pros (both A0 and A1):** No merchant account, zero transaction fees, no monthly cost (Firestore free tier covers expected usage; A1 only adds Functions free tier).
+**Cons:** Manual — doesn't scale beyond ~50 txns/day. A0 requires users to log in. A1 enables anonymous users via claim codes but needs Blaze plan.
 
 ### Option B — Payment gateway with webhook (recommended at scale)
 
