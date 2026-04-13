@@ -139,6 +139,9 @@ src/
     firebase.js                     # Firebase app + Firestore + Auth config
   theme/
     colors.js                       # DarkColors + DarkGradients (primary); Colors legacy
+    typography.js                   # FontSizes, FontWeights, LineHeights, LetterSpacing, Type
+    spacing.js                      # Spacing, Radius, Shadow
+    index.js                        # Barrel — single import for everything theme-related
 ```
 
 ## Branding
@@ -175,7 +178,7 @@ Gita, Horoscope, Muhurtam, Matchmaking, DailyRashi, Market, TempleNearby, Servic
 - **i18n**: every user-facing string goes through `useLanguage().t(te, en)` or `t(TR.key.te, TR.key.en)`. All new keys must be added to `src/data/translations.js`.
 - **Bilingual data**: objects in data files have `telugu` and `english` string properties (separate from TR keys).
 - **Dates**: ISO 8601 (`YYYY-MM-DD`) in data files.
-- **Colors**: `DarkColors` from `src/theme/colors.js` — never hardcode hex in components.
+- **Colors / fonts / spacing**: import tokens from `src/theme` (barrel) — `import { DarkColors, Type, Spacing, Radius, Shadow } from '../theme';`. Never hardcode hex, font sizes, or pixel paddings — see `THEME.md`.
 - **Default location**: Hyderabad (17.3850°N, 78.4867°E, 542m).
 - **Component exports**: named exports (`export function HomeScreen`).
 - **Styles**: `StyleSheet.create()` at file bottom.
@@ -253,6 +256,7 @@ eas submit --platform android                     # Submit to Play Store (intern
 - `ANALYTICS.md` — event catalog + backend tracking
 - `DATA-SOURCES.md` — feature-by-feature audit of every data source + fallback
 - `OPERATIONS.md` — how to run the app in production (payment verification, login troubleshooting, incident response)
+- `THEME.md` — design system tokens (colors, typography, spacing, radius, shadow) — single source of truth
 - `functions/` — Cloud Functions: `onPaymentVerified`, `onClaimRedemption`, `onPaymentCreated`
 - `docs/SECURITY-CHECKLIST.md` — security audit
 - `docs/release-notes-v2.md` — Play Store release notes

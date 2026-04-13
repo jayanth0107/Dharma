@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors } from '../theme/colors';
+import { DarkColors, Type } from '../theme';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 import { formatINR } from '../utils/goldPriceService';
@@ -278,8 +278,8 @@ const gs = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 10, gap: 10,
   },
   titleCol: { flex: 1 },
-  title: { fontSize: 19, fontWeight: '800', letterSpacing: 0.3 },
-  subtitle: { fontSize: 14, color: DarkColors.textSecondary, fontWeight: '600', marginTop: 2 },
+  title: { ...Type.title, fontSize: 19 },
+  subtitle: { ...Type.body, color: DarkColors.textSecondary, fontWeight: '600', marginTop: 2 },
 
   // Ornament border
   ornamentRow: {
@@ -297,8 +297,8 @@ const gs = StyleSheet.create({
   },
   priceCol: { flex: 1, alignItems: 'center' },
   priceCenter: { marginHorizontal: 8 },
-  priceLabel: { fontSize: 13, color: DarkColors.textSecondary, fontWeight: '700', marginBottom: 5, letterSpacing: 0.5 },
-  priceValue: { fontSize: 22, fontWeight: '900' },
+  priceLabel: { ...Type.small, color: DarkColors.textSecondary, fontWeight: '700', marginBottom: 5, letterSpacing: 0.5 },
+  priceValue: { ...Type.h2, fontWeight: '900' },
 
   // Live badge
   liveBadge: {
@@ -306,19 +306,19 @@ const gs = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
   },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4CAF50' },
-  liveText: { fontSize: 12, fontWeight: '800', color: '#4CAF50', letterSpacing: 0.5 },
+  liveText: { ...Type.caption, fontWeight: '800', color: '#4CAF50', letterSpacing: 0.5 },
 
   // Loading
   loadingWrap: { borderRadius: 20, overflow: 'hidden', marginBottom: 12 },
   loadingGradient: { alignItems: 'center', paddingVertical: 30 },
   loadingTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, marginTop: 10, letterSpacing: 0.5 },
-  loadingText: { fontSize: 14, color: DarkColors.textSecondary, marginTop: 8, fontWeight: '500' },
+  loadingText: { ...Type.body, color: DarkColors.textSecondary, marginTop: 8 },
 
   // Footer
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 6 },
-  footerText: { fontSize: 12, color: DarkColors.textSecondary, textAlign: 'center', fontWeight: '500' },
+  footerText: { ...Type.caption, color: DarkColors.textSecondary, textAlign: 'center' },
   disclaimer: {
-    fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 6,
-    fontStyle: 'italic', lineHeight: 16, paddingHorizontal: 10,
+    ...Type.micro, color: DarkColors.textMuted, textAlign: 'center', marginTop: 6,
+    fontStyle: 'italic', paddingHorizontal: 10,
   },
 });

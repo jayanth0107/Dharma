@@ -4,7 +4,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors } from '../theme/colors';
+import { DarkColors, Type, Spacing, Radius } from '../theme';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
@@ -132,21 +132,16 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: 'rgba(255,215,0,0.4)',
   },
   label: {
-    fontSize: 16,
-    fontWeight: '800',
+    ...Type.label,
+    color: DarkColors.textPrimary,
     textAlign: 'center',
-    lineHeight: 21,
-    color: '#FFFFFF',
-    letterSpacing: 0.2,
-    paddingHorizontal: 2,
+    paddingHorizontal: Spacing.xxs,
   },
   sublabel: {
-    fontSize: 11,
+    ...Type.micro,
     color: DarkColors.textMuted,
     textAlign: 'center',
-    marginTop: 4,
-    fontWeight: '600',
-    letterSpacing: 0.3,
+    marginTop: Spacing.xs,
   },
   crownBadge: {
     position: 'absolute',

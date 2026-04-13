@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DarkColors } from '../theme/colors';
+import { DarkColors, Type } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -258,10 +258,9 @@ const s = StyleSheet.create({
     flex: 1,
   },
   menuLabel: {
+    ...Type.title,
     fontSize: 17,
-    fontWeight: '700',
     color: DarkColors.textPrimary,
-    letterSpacing: 0.2,
   },
   menuDivider: {
     height: 1,

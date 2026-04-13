@@ -5,7 +5,7 @@
 import React from 'react';
 import { Text, StyleSheet, TouchableOpacity, ScrollView, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { DarkColors } from '../theme/colors';
+import { DarkColors, Type, Spacing } from '../theme';
 import { useLanguage, T } from '../context/LanguageContext';
 
 const GLOBAL_TABS = [
@@ -78,13 +78,11 @@ const s = StyleSheet.create({
     borderBottomColor: DarkColors.saffron,
   },
   tabText: {
-    fontSize: 15,
-    fontWeight: '700',
+    ...Type.bodyLg,
     color: DarkColors.textSecondary,
-    letterSpacing: 0.2,
   },
   tabTextActive: {
-    color: '#FFFFFF',
+    color: DarkColors.textPrimary,
     fontWeight: '800',
   },
 });

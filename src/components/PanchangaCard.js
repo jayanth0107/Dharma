@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors, DarkGradients } from '../theme/colors';
+import { DarkColors, DarkGradients, Type } from '../theme';
 
 // Icon mapping for panchangam elements
 const PANCHANGA_ICONS = {
@@ -192,20 +192,18 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   teluguValue: {
+    ...Type.teluguDisplay,
     fontSize: 26,
-    fontWeight: '800',
     color: DarkColors.textPrimary,
     marginBottom: 3,
-    lineHeight: 32,
   },
   englishValue: {
-    fontSize: 16,
+    ...Type.label,
     color: DarkColors.textSecondary,
     fontWeight: '600',
-    lineHeight: 22,
   },
   sublabel: {
-    fontSize: 14,
+    ...Type.body,
     color: DarkColors.textMuted,
     marginTop: 4,
     fontStyle: 'italic',
@@ -227,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timingEnglish: {
-    fontSize: 14,
+    ...Type.body,
     color: DarkColors.textSecondary,
     fontWeight: '600',
     marginTop: 2,
@@ -242,12 +240,11 @@ const styles = StyleSheet.create({
     marginLeft: 30,
   },
   timingDesc: {
-    fontSize: 14,
+    ...Type.body,
     color: DarkColors.textSecondary,
     fontStyle: 'italic',
     marginTop: 6,
     marginLeft: 30,
-    lineHeight: 20,
   },
   timingCardActive: {
     elevation: 3,

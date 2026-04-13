@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { DarkColors } from '../theme/colors';
+import { DarkColors, Type, Spacing } from '../theme';
 
 export function PageHeader({ title, onMenuPress }) {
   const insets = useSafeAreaInsets();
@@ -60,11 +60,10 @@ const s = StyleSheet.create({
     marginRight: 4,
   },
   title: {
-    fontSize: 20,
+    ...Type.h3,
     fontWeight: '900',
     color: DarkColors.gold,
-    letterSpacing: 0.5,
-    marginLeft: 4,
+    marginLeft: Spacing.xs,
   },
   divider: {
     height: 1,
