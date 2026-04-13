@@ -64,10 +64,10 @@ A comprehensive **React Native (Expo)** app delivering daily **Telugu Panchangam
 
 | Plan | Price | Duration |
 |------|-------|----------|
-| Weekly | ₹9 | 7 days |
-| Monthly | ₹29 | 30 days |
-| Yearly | ₹199 | 365 days |
-| Lifetime | ₹499 | Forever |
+| Weekly | ₹29 | 7 days |
+| Monthly | ₹99 | 30 days |
+| Yearly | ₹499 | 365 days |
+| Lifetime | ₹999 | Forever |
 
 Payments via UPI (Google Pay, PhonePe, Paytm, BHIM). Payment records synced anonymously to Firebase Firestore.
 
@@ -349,7 +349,7 @@ premiumService.js
   └── getPricingInfo()      — for UI display
 ```
 
-Plans: ₹9 weekly, ₹29 monthly, ₹199 yearly, ₹499 lifetime. All via UPI deep links or QR. Records synced to Firestore.
+Plans: ₹29 weekly, ₹99 monthly, ₹499 yearly, ₹999 lifetime. All via UPI deep links or QR. Records synced to Firestore.
 
 ---
 

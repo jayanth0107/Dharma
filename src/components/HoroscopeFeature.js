@@ -65,9 +65,9 @@ const cs = StyleSheet.create({
 
 // Horoscope pricing plans
 const HOROSCOPE_PLANS = [
-  { id: 'weekly', telugu: 'వారపు', english: 'Weekly', price: 19, label: '₹19', days: 7, emoji: '📅', uses: 5, desc: '5 జాతకాలు / 7 రోజులు' },
-  { id: 'monthly', telugu: 'నెలవారీ', english: 'Monthly', price: 49, label: '₹49', days: 30, emoji: '⭐', uses: 20, desc: '20 జాతకాలు / 30 రోజులు', best: true },
-  { id: 'yearly', telugu: 'వార్షిక', english: 'Yearly', price: 299, label: '₹299', days: 365, emoji: '👑', uses: 200, desc: 'అపరిమిత జాతకాలు / 365 రోజులు' },
+  { id: 'weekly', telugu: 'వారపు', english: 'Weekly', price: 29, label: '₹29', days: 7, emoji: '📅', uses: 5, desc: '5 జాతకాలు / 7 రోజులు' },
+  { id: 'monthly', telugu: 'నెలవారీ', english: 'Monthly', price: 99, label: '₹99', days: 30, emoji: '⭐', uses: 20, desc: '20 జాతకాలు / 30 రోజులు', best: true },
+  { id: 'yearly', telugu: 'వార్షిక', english: 'Yearly', price: 499, label: '₹499', days: 365, emoji: '👑', uses: 200, desc: 'అపరిమిత జాతకాలు / 365 రోజులు' },
 ];
 
 const UPI_ID_H = '9535251573@ibl';

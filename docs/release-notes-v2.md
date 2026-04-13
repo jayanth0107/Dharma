@@ -38,7 +38,7 @@
 - Login is optional — app works fully without an account
 
 ### 💳 Premium & Payments
-- New pricing: ₹9 weekly, ₹29 monthly, ₹199 yearly, ₹499 lifetime
+- New pricing: ₹29 weekly, ₹99 monthly, ₹499 yearly, ₹999 lifetime
 - 3-day free trial (first-time users)
 - UPI payments (Google Pay, PhonePe, Paytm, BHIM)
 - Payment records synced anonymously to Firebase Firestore
@@ -98,7 +98,7 @@ Improved: offline images, faster location search, bilingual alerts, better reada
 
 ## Breaking changes from v1.x
 
-- Pricing reduced: weekly ₹19 → ₹9, monthly ₹49 → ₹29, yearly ₹299 → ₹199, lifetime ₹999 → ₹499
+- Pricing updated: weekly ₹19 → ₹29, monthly ₹49 → ₹99, yearly ₹299 → ₹499, lifetime ₹999 (unchanged)
 - Previous single-page UI with FloatingMenu replaced by tabbed navigation
 - Horoscope tile renamed from "రాశి ఫలం" to "మీ జాతకం" (Daily Rashi now a separate tile)
 - Light theme replaced by dark theme (legacy light theme retained in code for reference)

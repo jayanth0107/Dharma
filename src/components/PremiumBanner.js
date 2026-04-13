@@ -28,10 +28,10 @@ const UPI_LOGOS = {
 };
 
 const PREMIUM_PLANS = [
-  { id: 'weekly', telugu: 'వారం', english: 'Weekly', price: 9, label: '₹9', days: 7, emoji: '🔓' },
-  { id: 'monthly', telugu: 'నెలవారీ', english: 'Monthly', price: 29, label: '₹29', days: 30, emoji: '📅', savings: '54%' },
-  { id: 'yearly', telugu: 'వార్షిక', english: 'Yearly', price: 199, label: '₹199', days: 365, emoji: '⭐', best: true, savings: '86%' },
-  { id: 'lifetime', telugu: 'జీవితకాలం', english: 'Lifetime', price: 499, label: '₹499', days: 0, emoji: '👑' },
+  { id: 'weekly', telugu: 'వారం', english: 'Weekly', price: 29, label: '₹29', days: 7, emoji: '🔓' },
+  { id: 'monthly', telugu: 'నెలవారీ', english: 'Monthly', price: 99, label: '₹99', days: 30, emoji: '📅', savings: '21%' },
+  { id: 'yearly', telugu: 'వార్షిక', english: 'Yearly', price: 499, label: '₹499', days: 365, emoji: '⭐', best: true, savings: '58%' },
+  { id: 'lifetime', telugu: 'జీవితకాలం', english: 'Lifetime', price: 999, label: '₹999', days: 0, emoji: '👑' },
 ];
 
 const PREMIUM_PERKS = [

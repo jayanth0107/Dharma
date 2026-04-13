@@ -224,7 +224,7 @@ eas submit --platform android                     # Submit to Play Store (intern
 ## Premium system
 
 - **Tiers:** Free / Premium (3-day trial)
-- **Plans:** Weekly ₹9, Monthly ₹29, Yearly ₹199, Lifetime ₹499
+- **Plans:** Weekly ₹29, Monthly ₹99, Yearly ₹499, Lifetime ₹999
 - **Gated features:** Gita library, Muhurtam Finder, Horoscope (జాతకం), Matchmaking, ad-free
 - **Storage:** AsyncStorage (native) / localStorage (web)
 - **Payment flow:** UPI deep link → QR fallback → Firestore sync → local activation

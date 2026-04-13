@@ -44,7 +44,7 @@ Major rewrite: tabbed navigation, centralized bilingual i18n, Firebase auth, and
 
 - **Architecture** — App.js reduced to a minimal provider shell; state split across three React Contexts (App, Auth, Language)
 - **Theme** — migrated to pure dark (`#0A0A0A`) with saffron/gold/silver accents (`DarkColors` + `DarkGradients`); legacy light theme retained for reference
-- **Pricing updated** — Weekly ₹9, Monthly ₹29, Yearly ₹199, Lifetime ₹499 (from previous ₹19/₹49/₹299/₹999)
+- **Pricing updated** — Weekly ₹29, Monthly ₹99, Yearly ₹499, Lifetime ₹999 (from previous ₹19/₹49/₹299/₹999)
 - **Home screen** — branded header with hamburger, flag, title, notifications, settings, avatar; feature-tile grid; quick action bar
 - **Calendar screen** — 8 sub-tabs (Panchang, Timings, Festivals, Ekadashi, Holidays, Darshan, Gold, Kids)
 - **Horoscope tile label** — "రాశి ఫలం" → "మీ జాతకం" for clarity (daily rashi is a separate tile)

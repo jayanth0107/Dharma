@@ -340,10 +340,10 @@ export async function deactivatePremium() {
  */
 export function getPricingInfo() {
   return {
-    weekly: { price: '₹9', priceUsd: '$0.29', period: 'వారం / week' },
-    monthly: { price: '₹29', priceUsd: '$0.49', period: 'నెల / month', savings: '54%' },
-    yearly: { price: '₹199', priceUsd: '$2.99', period: 'సంవత్సరం / year', savings: '86%' },
-    lifetime: { price: '₹499', priceUsd: '$6.99', period: 'జీవితకాలం / lifetime' },
+    weekly: { price: '₹29', priceUsd: '$0.49', period: 'వారం / week' },
+    monthly: { price: '₹99', priceUsd: '$1.49', period: 'నెల / month', savings: '21%' },
+    yearly: { price: '₹499', priceUsd: '$5.99', period: 'సంవత్సరం / year', savings: '58%' },
+    lifetime: { price: '₹999', priceUsd: '$11.99', period: 'జీవితకాలం / lifetime' },
     trialDays: TRIAL_DAYS,
   };
 }

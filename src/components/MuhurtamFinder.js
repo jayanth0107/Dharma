@@ -509,8 +509,8 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
               </Text>
               <View style={s.premiumPlans}>
                 {[
-                  { label: 'Monthly', telugu: 'నెలవారీ', price: '₹49', duration: '30 రోజులు' },
-                  { label: 'Yearly', telugu: 'వార్షిక', price: '₹299', duration: '365 రోజులు', badge: '49% ఆదా' },
+                  { label: 'Monthly', telugu: 'నెలవారీ', price: '₹99', duration: '30 రోజులు' },
+                  { label: 'Yearly', telugu: 'వార్షిక', price: '₹499', duration: '365 రోజులు', badge: '58% ఆదా' },
                   { label: 'Lifetime', telugu: 'లైఫ్‌టైమ్', price: '₹999', duration: 'శాశ్వతం', badge: 'Best Value' },
                 ].map((plan) => (
                   <View key={plan.label} style={s.premiumPlanCard}>
