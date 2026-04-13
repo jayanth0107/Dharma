@@ -522,6 +522,6 @@ const s = StyleSheet.create({
   gridContent: {
     paddingHorizontal: 12,
     paddingTop: 8,
-    paddingBottom: 16,
+    paddingBottom: 40,
   },
 });

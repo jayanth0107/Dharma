@@ -30,14 +30,20 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
     ? { width: gridCtx.tileWidth }
     : { width: getTileWidthPercent(columns) };
 
-  const height = tileHeight || Math.round(120 * 1.15);
+  // Use minHeight (not fixed height) when no explicit tileHeight was passed
+  // so long labels like జాతక పొందిక can grow to 2-3 lines without clipping
+  // the sublabel below. When a grid in rows-mode supplies tileHeight, use
+  // it as the exact height so rows stay aligned.
+  const heightStyle = tileHeight
+    ? { height: tileHeight }
+    : { minHeight: 148 };
 
   return (
     <TouchableOpacity
       style={[
         s.tile,
         widthStyle,
-        { height },
+        heightStyle,
         isPremium && s.tilePremium,
         disabled && s.tileDisabled,
       ]}
@@ -59,7 +65,7 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
       </View>
 
       {/* Label — primary affordance, larger and high-contrast */}
-      <Text style={s.label} numberOfLines={3}>{label}</Text>
+      <Text style={s.label} numberOfLines={2}>{label}</Text>
 
       {/* Sublabel */}
       {sublabel && <Text style={s.sublabel} numberOfLines={1}>{sublabel}</Text>}
