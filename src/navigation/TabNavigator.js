@@ -84,9 +84,11 @@ export function TabNavigator() {
           backgroundColor: DarkColors.tabBarBg,
           borderTopColor: DarkColors.tabBarBorder,
           borderTopWidth: 1,
-          height: 70 + insets.bottom,
-          paddingBottom: insets.bottom + 6,
-          paddingTop: 8,
+          // Enough vertical room for icon + two-line-capable Telugu label
+          // without clipping descenders (క్యాలెండర్, జ్యోతిష్యం are tall).
+          height: 84 + insets.bottom,
+          paddingBottom: insets.bottom + 10,
+          paddingTop: 10,
           elevation: 8,
         },
         tabBarActiveTintColor: DarkColors.saffron,
@@ -96,6 +98,8 @@ export function TabNavigator() {
           fontWeight: '800',
           marginTop: 4,
           letterSpacing: 0.2,
+          lineHeight: 18,
+          paddingBottom: 2,
         },
       }}
     >

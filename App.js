@@ -22,12 +22,11 @@ if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharm
   const style = document.createElement('style');
   style.id = 'dharma-hide-scrollbars';
   style.innerText = `
-    /* Ensure viewport has a definite height so flex:1 chains work down to
-       the tab bar and ScrollViews (without this, body can collapse and the
-       bottom tab bar gets pushed off-screen on some browsers). */
-    html, body, #root { height: 100%; min-height: 100%; }
+    /* Ensure viewport has a definite height so flex:1 chains work down
+       to the tab bar. RN-Web manages its own root flex — we only set
+       the height so the root doesn't collapse on some browsers. */
+    html, body, #root { height: 100%; min-height: 100vh; }
     body { margin: 0; overflow-x: hidden; background: #000; }
-    #root { display: flex; flex-direction: column; }
 
     /* Hide scrollbars so they don't reserve layout width */
     html, body, div { scrollbar-width: none; -ms-overflow-style: none; }
