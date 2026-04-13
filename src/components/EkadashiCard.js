@@ -31,19 +31,26 @@ export function TodayEkadashiBanner({ ekadashi }) {
 }
 
 export function UpcomingEkadashiItem({ ekadashi }) {
+  const d = new Date(ekadashi.date);
+  const isPast = ekadashi.isPast;
+  const daysLeft = ekadashi.daysLeft;
   return (
     <View style={styles.ekadashiItem}>
-      <View style={styles.ekadashiBadge}>
-        <Text style={styles.ekadashiDaysNum}>{ekadashi.daysLeft}</Text>
-        <Text style={styles.ekadashiDaysLabel}>రోజులు</Text>
+      {/* Prominent calendar date on the left, matching the festivals/holidays layout */}
+      <View style={styles.ekadashiDateCol}>
+        <Text style={styles.ekadashiDay}>{d.getDate()}</Text>
+        <Text style={styles.ekadashiMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
+        <Text style={styles.ekadashiWeekday}>{d.toLocaleDateString('en-IN', { weekday: 'short' })}</Text>
       </View>
+      <View style={styles.ekadashiDivider} />
+
       <View style={styles.ekadashiInfo}>
         <View style={styles.ekadashiNameRow}>
           <Text style={styles.ekadashiName}>{ekadashi.name}</Text>
           <View style={[styles.pakshaBadge, ekadashi.pakshaEnglish === 'Shukla' ? styles.shukla : styles.krishna]}>
             <MaterialCommunityIcons
               name={ekadashi.pakshaEnglish === 'Shukla' ? 'moon-waxing-crescent' : 'moon-waning-crescent'}
-              size={10}
+              size={12}
               color={DarkColors.textSecondary}
               style={{ marginRight: 3 }}
             />
@@ -51,10 +58,17 @@ export function UpcomingEkadashiItem({ ekadashi }) {
           </View>
         </View>
         <Text style={styles.ekadashiEnglish}>{ekadashi.nameEnglish}</Text>
-        <Text style={styles.ekadashiDate}>
-          {new Date(ekadashi.date).toLocaleDateString('te-IN', { month: 'long', day: 'numeric' })}
-        </Text>
       </View>
+
+      {/* Days-left badge on the right — absolute value + "ago/today/days" */}
+      {daysLeft !== undefined && (
+        <View style={styles.ekadashiBadge}>
+          <Text style={styles.ekadashiDaysNum}>{Math.abs(daysLeft)}</Text>
+          <Text style={styles.ekadashiDaysLabel}>
+            {daysLeft === 0 ? 'నేడు' : isPast ? 'గతం' : 'రోజులు'}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -220,24 +234,58 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: DarkColors.borderCard,
   },
-  ekadashiBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#4A1A6B',
+  // Prominent calendar date on the left (matches FestivalCard / holiday layout)
+  ekadashiDateCol: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
+    width: 56,
+  },
+  ekadashiDay: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#E0B0FF',
+    lineHeight: 28,
+  },
+  ekadashiMonth: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: DarkColors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  ekadashiWeekday: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: DarkColors.textMuted,
+    marginTop: 2,
+    letterSpacing: 0.3,
+  },
+  ekadashiDivider: {
+    width: 1.5,
+    height: 52,
+    backgroundColor: '#4A1A6B',
+    opacity: 0.4,
+    marginHorizontal: 12,
+    borderRadius: 1,
+  },
+  // Right-hand days-left badge
+  ekadashiBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,26,107,0.2)',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginLeft: 8,
   },
   ekadashiDaysNum: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: DarkColors.textPrimary,
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#E0B0FF',
   },
   ekadashiDaysLabel: {
-    fontSize: 8,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '600',
+    fontSize: 11,
+    color: '#E0B0FF',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   ekadashiInfo: { flex: 1 },
   ekadashiNameRow: {
@@ -247,18 +295,15 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   ekadashiName: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '800',
     color: DarkColors.textPrimary,
+    lineHeight: 24,
   },
   ekadashiEnglish: {
-    fontSize: 13,
+    fontSize: 15,
     color: DarkColors.textSecondary,
-    fontWeight: '500',
-  },
-  ekadashiDate: {
-    fontSize: 13,
-    color: DarkColors.textMuted,
+    fontWeight: '600',
     marginTop: 2,
   },
   pakshaBadge: {
