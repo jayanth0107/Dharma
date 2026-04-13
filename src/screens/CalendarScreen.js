@@ -9,6 +9,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage, T, TR } from '../context/LanguageContext';
+import { useWindow } from '../theme';
 
 import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { PageHeader } from '../components/PageHeader';
@@ -75,8 +76,15 @@ export function CalendarScreen({ route }) {
   } = useApp();
 
   const { t } = useLanguage();
+  const { height: winHeight } = useWindow();
   const [activeSubTab, setActiveSubTab] = useState(route?.params?.tab || 'panchang');
   const [festivalFilter, setFestivalFilter] = useState('all');
+
+  // Responsive inner-scroll height: fills the area between the sticky bars
+  // above and the bottom tab bar below. Clamped to a sane min/max so tiny
+  // landscape phones still show ~3 rows and big tablets don't show 15.
+  // 280 = header + sub-tabs + filter pills + card padding + bottom tab bar.
+  const innerMaxHeight = Math.max(280, Math.min(720, winHeight - 280));
 
   // Update tab when navigated with new params (use _ts to force re-trigger)
   useEffect(() => {
@@ -182,7 +190,7 @@ export function CalendarScreen({ route }) {
                 if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
                 return (
                   <ScrollView
-                    style={s.innerScroll}
+                    style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
                     nestedScrollEnabled
                     showsVerticalScrollIndicator={false}
                   >
@@ -206,7 +214,7 @@ export function CalendarScreen({ route }) {
                 // instead of having to scroll past Jan/Feb entries.
                 return (
                   <ScrollView
-                    style={s.innerScroll}
+                    style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
                     nestedScrollEnabled
                     showsVerticalScrollIndicator={false}
                   >
@@ -347,11 +355,13 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
   },
-  // Nested scroll container for observance lists (pournami / amavasya /
-  // pradosham / chaturthi). Shows ~5 rows, user scrolls within the box
-  // instead of scrolling the outer page.
+  // Nested scroll container for festival / observance lists.
+  // maxHeight is computed reactively from the window height (see the
+  // innerMaxHeight variable in the component) so the box fills the
+  // available space on any viewport. Base style has no maxHeight — the
+  // runtime style overrides it.
   innerScroll: {
-    maxHeight: 460, // ~5 observance rows (each ~86px with marginBottom)
+    // Override injected at render time via innerMaxHeight
   },
   card: {
     marginHorizontal: 16, marginBottom: 16,
