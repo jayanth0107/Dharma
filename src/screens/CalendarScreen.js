@@ -96,6 +96,14 @@ export function CalendarScreen({ route }) {
       <GlobalTopTabs activeTab="Calendar" />
       <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />
 
+      {/* Filter pills — fixed above the scroll on the festivals tab so users
+          don't lose access to them when scanning the yearly list. */}
+      {activeSubTab === 'festivals' && (
+        <View style={s.stickyFilterBar}>
+          <FilterPills activeFilter={festivalFilter} onFilterChange={setFestivalFilter} />
+        </View>
+      )}
+
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
 
         {/* ── Panchang Tab ── */}
@@ -164,10 +172,10 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Festivals Tab ── full 2026 year, scrollable ── */}
+        {/* ── Festivals Tab ── full 2026 year, scrollable (filter pills are
+            rendered as a sticky bar above the ScrollView) ── */}
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
-            <FilterPills activeFilter={festivalFilter} onFilterChange={setFestivalFilter} />
             {festivalFilter === 'all' ? (
               (() => {
                 const items = withDaysLeft(FESTIVALS_2026, selectedDate);
@@ -315,6 +323,11 @@ const s = StyleSheet.create({
   screenTitle: { fontSize: 24, fontWeight: '900', color: DarkColors.gold, letterSpacing: 0.5 },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 20 },
+  stickyFilterBar: {
+    backgroundColor: DarkColors.bg,
+    borderBottomWidth: 1,
+    borderBottomColor: DarkColors.borderCard,
+  },
   card: {
     marginHorizontal: 16, marginBottom: 16,
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16,
