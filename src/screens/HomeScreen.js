@@ -175,17 +175,17 @@ export function HomeScreen({ navigation }) {
         <View style={s.infoStrip}>
           <View style={s.infoPill}>
             <Text style={s.infoPillLabel}>{t(TR.tithi.te, TR.tithi.en)}</Text>
-            <Text style={s.infoPillValue} numberOfLines={1}>{tithi}</Text>
+            <Text style={s.infoPillValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{tithi}</Text>
           </View>
           <View style={s.infoDivider} />
           <View style={s.infoPill}>
             <Text style={s.infoPillLabel}>{t(TR.nakshatra.te, TR.nakshatra.en)}</Text>
-            <Text style={s.infoPillValue} numberOfLines={1}>{nakshatra}</Text>
+            <Text style={s.infoPillValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{nakshatra}</Text>
           </View>
           <View style={s.infoDivider} />
           <View style={s.infoPill}>
             <Text style={s.infoPillLabel}>{t(TR.vaaram.te, TR.vaaram.en)}</Text>
-            <Text style={s.infoPillValue} numberOfLines={1}>{vaaram}</Text>
+            <Text style={s.infoPillValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{vaaram}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -483,14 +483,20 @@ const s = StyleSheet.create({
   // Today's info strip
   infoStrip: {
     flexDirection: 'row', alignItems: 'center',
-    marginTop: 10, paddingVertical: 10, paddingHorizontal: 8,
+    marginTop: 10, paddingVertical: 14, paddingHorizontal: 8,
     backgroundColor: DarkColors.bgCard, borderRadius: 14,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  infoPill: { flex: 1, alignItems: 'center' },
-  infoPillLabel: { fontSize: 10, color: DarkColors.saffron, fontWeight: '700', letterSpacing: 0.5 },
-  infoPillValue: { fontSize: 14, color: DarkColors.goldLight, fontWeight: '800', marginTop: 2 },
-  infoDivider: { width: 1, height: 28, backgroundColor: DarkColors.borderGold, marginHorizontal: 4 },
+  infoPill: { flex: 1, alignItems: 'center', paddingHorizontal: 4 },
+  infoPillLabel: {
+    fontSize: 12, color: DarkColors.saffron, fontWeight: '800',
+    letterSpacing: 0.8, textTransform: 'uppercase',
+  },
+  infoPillValue: {
+    fontSize: 17, color: DarkColors.goldLight, fontWeight: '800',
+    marginTop: 5, lineHeight: 22, textAlign: 'center',
+  },
+  infoDivider: { width: 1, height: 38, backgroundColor: DarkColors.borderGold, marginHorizontal: 4 },
 
   // Quick action bar
   quickBar: {
