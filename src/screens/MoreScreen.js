@@ -9,7 +9,7 @@ import { useLanguage, T } from '../context/LanguageContext';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlobalTopTabs } from '../components/GlobalTopTabs';
-import { FeatureTile, FeatureTileGrid } from '../components/FeatureTile';
+import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 import { SectionShareRow } from '../components/SectionShareRow';
 
 export function MoreScreen({ navigation }) {
@@ -23,7 +23,7 @@ export function MoreScreen({ navigation }) {
       <GlobalTopTabs activeTab="More" />
 
       <View style={s.gridContainer}>
-        <FeatureTileGrid rows={4}>
+        <FeatureGrid gap={12} rows={4}>
           {/* Row 1 — Most important actions */}
           <FeatureTile icon="crown" label={t(T.premium.te, T.premium.en)} sublabel={t('Premium', 'ప్రీమియం')} onPress={() => navigation.navigate('Premium')} accentColor={DarkColors.gold} isPremium={!premiumActive} />
           <FeatureTile icon="account-circle" label={t(T.login.te, T.login.en)} sublabel={t('Profile', 'ప్రొఫైల్')} onPress={() => navigation.navigate('Login')} accentColor={DarkColors.saffron} />
@@ -40,7 +40,7 @@ export function MoreScreen({ navigation }) {
           <FeatureTile icon="shield-check" label={t(T.privacy.te, T.privacy.en)} sublabel={t('Privacy', 'గోప్యత')} onPress={() => navigation.navigate('InfoPage', { pageId: 'privacy' })} accentColor={DarkColors.textMuted} />
           <FeatureTile icon="file-document" label={t('నిబంధనలు', 'Terms')} sublabel={t('Terms', 'నిబంధనలు')} onPress={() => navigation.navigate('InfoPage', { pageId: 'terms' })} accentColor={DarkColors.textMuted} />
           <FeatureTile icon="information" label={t(T.about.te, T.about.en)} sublabel={t('About', 'గురించి')} onPress={() => navigation.navigate('InfoPage', { pageId: 'about' })} accentColor={DarkColors.textMuted} />
-        </FeatureTileGrid>
+        </FeatureGrid>
       </View>
 
       {/* Version footer */}
@@ -62,7 +62,7 @@ export function MoreScreen({ navigation }) {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
-  gridContainer: { flex: 1, paddingTop: 4, paddingBottom: 4 },
+  gridContainer: { flex: 1, paddingTop: 4, paddingBottom: 4, paddingHorizontal: 12 },
   footer: { alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
   footerText: { fontSize: 14, color: DarkColors.saffron, fontWeight: '700', fontStyle: 'italic' },
   versionText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4, fontWeight: '500' },

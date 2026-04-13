@@ -9,7 +9,7 @@ import { useLanguage, T } from '../context/LanguageContext';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlobalTopTabs } from '../components/GlobalTopTabs';
-import { FeatureTile, FeatureTileGrid } from '../components/FeatureTile';
+import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 
 export function AstroScreen({ navigation }) {
   const { premiumActive } = useApp();
@@ -21,7 +21,7 @@ export function AstroScreen({ navigation }) {
       <GlobalTopTabs activeTab="Astro" />
 
       <View style={s.gridContainer}>
-        <FeatureTileGrid rows={3}>
+        <FeatureGrid gap={12} rows={3}>
           <FeatureTile
             icon="zodiac-leo" label={t(T.horoscope.te, T.horoscope.en)} sublabel={t('Horoscope', 'రాశి ఫలం')}
             accentColor={DarkColors.saffron}
@@ -72,7 +72,7 @@ export function AstroScreen({ navigation }) {
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Muhurtam')}
           />
-        </FeatureTileGrid>
+        </FeatureGrid>
       </View>
 
       <View style={s.comingSoon}>
@@ -84,7 +84,7 @@ export function AstroScreen({ navigation }) {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
-  gridContainer: { flex: 1, paddingTop: 8, paddingBottom: 8 },
+  gridContainer: { flex: 1, paddingTop: 8, paddingBottom: 8, paddingHorizontal: 12 },
   comingSoon: {
     paddingVertical: 12, paddingHorizontal: 16,
     backgroundColor: DarkColors.bgCard,

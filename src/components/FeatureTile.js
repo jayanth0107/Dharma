@@ -75,17 +75,22 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
   );
 }
 
-// Measured grid wrapper — equal horizontal + vertical gaps between tiles.
-// Wraps tiles in a flex row that measures its own width, then computes an
-// exact pixel tile width so columnGap === rowGap regardless of container
-// padding, scrollbar presence, or safe areas.
+// Measured grid wrapper — one grid for the entire app.
+// Wraps tiles in a flex row that measures its own width (and optionally
+// height), then computes exact pixel tile dimensions so columnGap === rowGap
+// regardless of container padding, scrollbar presence, or safe areas.
 //
-//   <FeatureGrid gap={12}>
+// Usage:
+//   <FeatureGrid gap={12}>               // scrollable, natural tile height
 //     <FeatureTile ... />
-//     ...
 //   </FeatureGrid>
-export function FeatureGrid({ children, gap = TILE_GAP, columns: propColumns }) {
+//
+//   <FeatureGrid gap={12} rows={3}>      // fits container, tiles share height
+//     <FeatureTile ... />
+//   </FeatureGrid>
+export function FeatureGrid({ children, gap = TILE_GAP, columns: propColumns, rows }) {
   const [containerW, setContainerW] = useState(0);
+  const [containerH, setContainerH] = useState(0);
   const autoCols = useColumns();
   const cols = propColumns || autoCols;
 
@@ -93,47 +98,39 @@ export function FeatureGrid({ children, gap = TILE_GAP, columns: propColumns }) 
     ? Math.floor((containerW - gap * (cols - 1)) / cols)
     : null;
 
+  const tileHeight = rows && containerH > 0
+    ? Math.floor((containerH - gap * (rows - 1)) / rows)
+    : null;
+
+  // When `rows` is set, the grid fills its container vertically too (no scroll).
+  const wrapperStyle = rows
+    ? { flex: 1, flexDirection: 'row', flexWrap: 'wrap', columnGap: gap, rowGap: gap, alignContent: 'flex-start' }
+    : { flexDirection: 'row', flexWrap: 'wrap', columnGap: gap, rowGap: gap };
+
+  const validChildren = React.Children.toArray(children).filter(Boolean);
+
   return (
-    <FeatureGridContext.Provider value={{ tileWidth, gap, columns: cols }}>
+    <FeatureGridContext.Provider value={{ tileWidth, tileHeight, gap, columns: cols }}>
       <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          columnGap: gap,
-          rowGap: gap,
-        }}
+        style={wrapperStyle}
         onLayout={(e) => {
-          const w = e.nativeEvent.layout.width;
-          if (Math.abs(w - containerW) > 0.5) setContainerW(w);
+          const { width, height } = e.nativeEvent.layout;
+          if (Math.abs(width - containerW) > 0.5) setContainerW(width);
+          if (rows && Math.abs(height - containerH) > 0.5) setContainerH(height);
         }}
       >
-        {children}
+        {rows
+          ? validChildren.map((child, i) =>
+              React.cloneElement(child, { key: i, tileHeight })
+            )
+          : children}
       </View>
     </FeatureGridContext.Provider>
   );
 }
 
-// Grid container — measures itself and computes tile heights to fill space
-export function FeatureTileGrid({ children, rows }) {
-  const [containerH, setContainerH] = React.useState(0);
-  const numRows = rows || 4;
-  const validChildren = React.Children.toArray(children).filter(Boolean);
-
-  const tileH = containerH > 0
-    ? Math.floor((containerH - TILE_GAP * (numRows - 1)) / numRows)
-    : undefined;
-
-  return (
-    <View
-      style={s.grid}
-      onLayout={(e) => setContainerH(e.nativeEvent.layout.height)}
-    >
-      {validChildren.map((child, i) =>
-        React.cloneElement(child, { key: i, tileHeight: tileH })
-      )}
-    </View>
-  );
-}
+// Legacy alias — kept so existing imports don't break. Prefer <FeatureGrid>.
+export const FeatureTileGrid = FeatureGrid;
 
 // Layout constants (TILE_WIDTH and COLUMNS are reactive — use the hooks instead)
 export const GRID_METRICS = { GRID_PADDING, TILE_GAP };
