@@ -24,20 +24,34 @@ export const Breakpoints = {
 
 // ── Hooks ───────────────────────────────────────────────────────────
 
-/**
- * Reactive window size. Use anywhere a component needs current dimensions.
- *   const { width, height } = useWindow();
- */
-export function useWindow() {
-  return useWindowDimensions();
+// On web the app lives inside a centered max-width panel (see App.js).
+// Layout calculations must use the EFFECTIVE width (capped) — not the
+// raw browser width — otherwise tiles think they have 1920px to spread
+// across when the container is actually 600px.
+function getEffectiveWidth(rawWidth) {
+  if (Platform.OS === 'web' && rawWidth > WEB_MAX_WIDTH) return WEB_MAX_WIDTH;
+  return rawWidth;
 }
 
 /**
- * Number of feature-tile columns based on current width.
+ * Reactive window size. Use anywhere a component needs current dimensions.
+ *   const { width, height } = useWindow();
+ *
+ * Width is the effective layout width — clamped to WEB_MAX_WIDTH on web.
+ * For the raw browser viewport size, call `useWindowDimensions()` directly.
+ */
+export function useWindow() {
+  const { width, height } = useWindowDimensions();
+  return { width: getEffectiveWidth(width), height };
+}
+
+/**
+ * Number of feature-tile columns based on current effective width.
  * 3 cols on phones, 4 on small tablets, 5 on large tablets / desktop.
  */
 export function useColumns() {
-  const { width } = useWindowDimensions();
+  const { width: rawWidth } = useWindowDimensions();
+  const width = getEffectiveWidth(rawWidth);
   if (width >= Breakpoints.xxl) return 5;
   if (width >= Breakpoints.xl) return 4;
   return 3;
@@ -48,16 +62,17 @@ export function useColumns() {
  *   const isTablet = useIsAtLeast('xl');
  */
 export function useIsAtLeast(breakpoint) {
-  const { width } = useWindowDimensions();
-  return width >= Breakpoints[breakpoint];
+  const { width: rawWidth } = useWindowDimensions();
+  return getEffectiveWidth(rawWidth) >= Breakpoints[breakpoint];
 }
 
 /**
- * Picks one of several values based on current width.
+ * Picks one of several values based on current effective width.
  *   const padding = usePick({ default: 12, xl: 24, xxl: 40 });
  */
 export function usePick(values) {
-  const { width } = useWindowDimensions();
+  const { width: rawWidth } = useWindowDimensions();
+  const width = getEffectiveWidth(rawWidth);
   if (width >= Breakpoints.xxl && values.xxl !== undefined) return values.xxl;
   if (width >= Breakpoints.xl  && values.xl  !== undefined) return values.xl;
   if (width >= Breakpoints.lg  && values.lg  !== undefined) return values.lg;

@@ -2,16 +2,18 @@
 // Large, clear icons and labels — fills screen, no scroll needed
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors, Type, Spacing, Radius, useColumns } from '../theme';
+import { DarkColors, Type, Spacing, Radius, useColumns, useWindow } from '../theme';
 
 const GRID_PADDING = 12;
 const TILE_GAP = 8;
 
-// Reactive tile width — recomputed on every window resize / rotation
+// Reactive tile width — recomputed on every window resize / rotation.
+// Uses effective width (clamped to WEB_MAX_WIDTH on web) so tiles size
+// to the visible app panel, not the raw browser viewport.
 function useTileWidth() {
-  const { width } = useWindowDimensions();
+  const { width } = useWindow();
   const columns = useColumns();
   return Math.floor((width - GRID_PADDING * 2 - TILE_GAP * (columns - 1)) / columns);
 }
