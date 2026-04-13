@@ -47,13 +47,17 @@ export function useWindow() {
 
 /**
  * Number of feature-tile columns based on current effective width.
- * 3 cols on phones, 4 on small tablets, 5 on large tablets / desktop.
+ *   <320px           → 2 cols (tiny phones, iPhone SE 1st gen)
+ *   320-767          → 3 cols (standard phones)
+ *   768-1023 (xl)    → 4 cols (tablet, wide phone panel on web)
+ *   1024+ (xxl)      → 5 cols (large tablet / desktop browser)
  */
 export function useColumns() {
   const { width: rawWidth } = useWindowDimensions();
   const width = getEffectiveWidth(rawWidth);
   if (width >= Breakpoints.xxl) return 5;
   if (width >= Breakpoints.xl) return 4;
+  if (width < 320) return 2;
   return 3;
 }
 
@@ -83,7 +87,9 @@ export function usePick(values) {
 
 // ── Web-only constants ──────────────────────────────────────────────
 
-// Maximum width the app should occupy on web. Mobile-first PWAs cap around
-// 480-600 so the layout doesn't sprawl edge-to-edge on a desktop monitor.
-export const WEB_MAX_WIDTH = 600;
+// Maximum width the app panel occupies on web. Set to 840 so a desktop
+// browser crosses the xl (768) breakpoint and renders 4 columns, but
+// doesn't sprawl edge-to-edge on a 1920+ monitor.
+// Phone-sized browsers (< 840) get full-width panel.
+export const WEB_MAX_WIDTH = 840;
 export const IS_WEB = Platform.OS === 'web';
