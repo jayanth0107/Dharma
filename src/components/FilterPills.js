@@ -36,7 +36,8 @@ const FILTERS = [
 export function FilterPills({ activeFilter, onFilterChange }) {
   const scrollRef = useRef(null);
   const [showLeft, setShowLeft] = useState(false);
-  const [showRight, setShowRight] = useState(true);
+  const [showRight, setShowRight] = useState(false);
+  const [canScroll, setCanScroll] = useState(false);
 
   const handlePress = (filterId) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -47,29 +48,50 @@ export function FilterPills({ activeFilter, onFilterChange }) {
   const handleScroll = (e) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     scrollXRef.current = contentOffset.x;
-    setShowLeft(contentOffset.x > 10);
-    setShowRight(contentOffset.x < contentSize.width - layoutMeasurement.width - 10);
+    const overflows = contentSize.width > layoutMeasurement.width + 2;
+    setCanScroll(overflows);
+    setShowLeft(overflows && contentOffset.x > 4);
+    setShowRight(overflows && contentOffset.x < contentSize.width - layoutMeasurement.width - 4);
+  };
+
+  // Also measure on initial mount via onContentSizeChange so arrows show/hide
+  // even before the user touches the list.
+  const onContentSizeChange = (contentWidth, _h) => {
+    // Defer to the next frame so layoutMeasurement is populated.
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo?.({ x: 0, animated: false });
+    });
   };
 
   const scrollBy = (dir) => {
-    const step = 200; // scroll ~2 pills at a time
+    const step = 200;
     const newX = Math.max(0, scrollXRef.current + (dir * step));
     scrollRef.current?.scrollTo?.({ x: newX, animated: true });
   };
 
   return (
     <View style={styles.wrapper}>
-      {/* Left arrow — always visible */}
-      <TouchableOpacity style={styles.arrowLeft} onPress={() => scrollBy(-1)} activeOpacity={0.7}>
-        <PulsingChevron direction="left" />
-      </TouchableOpacity>
+      {/* Left arrow — only when there's content to scroll back to */}
+      {showLeft && (
+        <TouchableOpacity style={styles.arrowLeft} onPress={() => scrollBy(-1)} activeOpacity={0.7}>
+          <PulsingChevron direction="left" />
+        </TouchableOpacity>
+      )}
 
       <ScrollView
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[
+          styles.container,
+          { paddingLeft: showLeft ? 44 : 12, paddingRight: showRight ? 44 : 12 },
+        ]}
         onScroll={handleScroll}
+        onContentSizeChange={onContentSizeChange}
+        onLayout={() => {
+          // Force a scroll event so overflow state is detected even with no user scroll
+          requestAnimationFrame(() => scrollRef.current?.scrollTo?.({ x: scrollXRef.current, animated: false }));
+        }}
         scrollEventThrottle={16}
       >
         {FILTERS.map((filter) => {
@@ -97,10 +119,12 @@ export function FilterPills({ activeFilter, onFilterChange }) {
         })}
       </ScrollView>
 
-      {/* Right arrow — always visible */}
-      <TouchableOpacity style={styles.arrowRight} onPress={() => scrollBy(1)} activeOpacity={0.7}>
-        <PulsingChevron direction="right" />
-      </TouchableOpacity>
+      {/* Right arrow — only when there's more content to the right */}
+      {showRight && (
+        <TouchableOpacity style={styles.arrowRight} onPress={() => scrollBy(1)} activeOpacity={0.7}>
+          <PulsingChevron direction="right" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -111,9 +135,9 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   container: {
-    paddingHorizontal: 38,
     paddingVertical: 8,
     gap: 8,
+    // paddingLeft/Right set dynamically based on arrow visibility
   },
   pill: {
     flexDirection: 'row',
@@ -143,16 +167,22 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
+    width: 40,
     zIndex: 10,
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: DarkColors.bg,
   },
   arrowRight: {
     position: 'absolute',
     right: 0,
     top: 0,
     bottom: 0,
+    width: 40,
     zIndex: 10,
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: DarkColors.bg,
   },
   chevronCircle: {
     width: 28, height: 28, borderRadius: 14,
