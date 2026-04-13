@@ -4,30 +4,34 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors, Type, Spacing, Radius, useColumns, useWindow } from '../theme';
+import { DarkColors, Type, Spacing, Radius, useColumns } from '../theme';
 
 const GRID_PADDING = 12;
 const TILE_GAP = 8;
 
-// Reactive tile width — recomputed on every window resize / rotation.
-// Uses effective width (clamped to WEB_MAX_WIDTH on web) so tiles size
-// to the visible app panel, not the raw browser viewport.
-function useTileWidth() {
-  const { width } = useWindow();
-  const columns = useColumns();
-  return Math.floor((width - GRID_PADDING * 2 - TILE_GAP * (columns - 1)) / columns);
+// Percentage-based tile widths — flex layout figures out exact px from the
+// real container width, so no scrollbar / wrapper / web-vs-native math
+// needs to match. Slight safety margin (0.6%) per gap so 3 fit cleanly.
+function getTileWidthPercent(columns) {
+  // 3 cols: ~31.5% each + 2 gaps. Adds up to ~96-97% of container.
+  // 4 cols: ~23%. 5 cols: ~18%.
+  const safety = 1.5; // % shaved per row to absorb gap/border roundoff
+  return `${((100 - safety) / columns).toFixed(2)}%`;
 }
 
 export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, disabled, tileHeight }) {
   const color = accentColor || DarkColors.gold;
-  const tileWidth = useTileWidth();
-  const height = tileHeight || tileWidth * 1.15;
+  const columns = useColumns();
+  const widthPct = getTileWidthPercent(columns);
+  // Estimate height proportional to expected tile width (1.15:1 aspect).
+  // Used only when explicit tileHeight isn't provided.
+  const height = tileHeight || Math.round(120 * 1.15);
 
   return (
     <TouchableOpacity
       style={[
         s.tile,
-        { width: tileWidth, height },
+        { width: widthPct, height },
         isPremium && s.tilePremium,
         disabled && s.tileDisabled,
       ]}

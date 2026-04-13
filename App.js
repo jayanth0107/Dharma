@@ -16,6 +16,22 @@ import { OnboardingScreen } from './src/components/OnboardingScreen';
 import { TabNavigator } from './src/navigation/TabNavigator';
 import { DarkColors, WEB_MAX_WIDTH, IS_WEB } from './src/theme';
 
+// Web-only: hide all scrollbars so they don't reserve layout width.
+// Users still scroll via wheel / touch / keyboard. Runs once per page load.
+if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharma-hide-scrollbars')) {
+  const style = document.createElement('style');
+  style.id = 'dharma-hide-scrollbars';
+  style.innerText = `
+    html, body, div { scrollbar-width: none; -ms-overflow-style: none; }
+    html::-webkit-scrollbar, body::-webkit-scrollbar, div::-webkit-scrollbar {
+      width: 0; height: 0; display: none;
+    }
+    /* Keep page from accidentally showing horizontal scroll */
+    body { overflow-x: hidden; margin: 0; background: #000; }
+  `;
+  document.head.appendChild(style);
+}
+
 // --- Error Boundary (catches component crashes) ---
 class ErrorBoundary extends Component {
   state = { hasError: false, error: null };

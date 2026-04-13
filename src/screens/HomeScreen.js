@@ -514,13 +514,15 @@ const s = StyleSheet.create({
   },
   yearWarningText: { flex: 1, fontSize: 11, color: '#FFD700', fontWeight: '600' },
 
-  // Grid (scrollable)
+  // Grid (scrollable). space-between distributes the leftover pixels as
+  // inter-tile gap so the row has no gap on the right edge.
   gridScroll: { flex: 1 },
   gridContent: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     paddingHorizontal: 12,
-    gap: 8,
+    rowGap: 8,
     paddingTop: 8,
     paddingBottom: 16,
   },
