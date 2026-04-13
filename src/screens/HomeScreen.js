@@ -313,7 +313,7 @@ export function HomeScreen({ navigation }) {
 
           {/* Row 5 — Kids, Donate, Reminder */}
           <FeatureTile
-            icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t('Kids', 'పిల్లలు')}
+            icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t('Kids Stories', 'పిల్లల కథలు')}
             accentColor="#7B1FA2"
             onPress={() => navigation.navigate('Calendar', { tab: 'kids', _ts: Date.now() })}
           />
