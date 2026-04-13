@@ -32,18 +32,18 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
       {/* Premium glow border */}
       {isPremium && <View style={s.premiumBorder} />}
 
-      {/* Icon */}
+      {/* Icon — visual cue, smaller than the label */}
       <View style={[s.iconCircle, { backgroundColor: color + '20' }, isPremium && s.iconCirclePremium]}>
-        <MaterialCommunityIcons name={icon} size={34} color={color} />
+        <MaterialCommunityIcons name={icon} size={26} color={color} />
         {isPremium && (
           <View style={s.lockOverlay}>
-            <MaterialCommunityIcons name="lock" size={14} color="#FFD700" />
+            <MaterialCommunityIcons name="lock" size={12} color="#FFD700" />
           </View>
         )}
       </View>
 
-      {/* Label */}
-      <Text style={s.label} numberOfLines={2}>{label}</Text>
+      {/* Label — primary affordance, larger and high-contrast */}
+      <Text style={s.label} numberOfLines={3}>{label}</Text>
 
       {/* Sublabel */}
       {sublabel && <Text style={s.sublabel} numberOfLines={1}>{sublabel}</Text>}
@@ -114,12 +114,12 @@ const s = StyleSheet.create({
     opacity: 0.4,
   },
   iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   iconCirclePremium: {
     borderWidth: 1.5,
@@ -127,23 +127,26 @@ const s = StyleSheet.create({
   },
   lockOverlay: {
     position: 'absolute', bottom: -2, right: -2,
-    width: 20, height: 20, borderRadius: 10,
+    width: 18, height: 18, borderRadius: 9,
     backgroundColor: '#1A1608', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1.5, borderColor: 'rgba(255,215,0,0.4)',
   },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 21,
     color: '#FFFFFF',
+    letterSpacing: 0.2,
+    paddingHorizontal: 2,
   },
   sublabel: {
-    fontSize: 13,
-    color: DarkColors.silver,
+    fontSize: 11,
+    color: DarkColors.textMuted,
     textAlign: 'center',
-    marginTop: 3,
+    marginTop: 4,
     fontWeight: '600',
+    letterSpacing: 0.3,
   },
   crownBadge: {
     position: 'absolute',

@@ -2,10 +2,11 @@
 // Main entry point — minimal shell with ErrorBoundary + AppProvider + TabNavigator
 
 import React, { Component, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
 import { AppProvider } from './src/context/AppContext';
 import { LanguageProvider } from './src/context/LanguageContext';
 import { AuthProvider } from './src/context/AuthContext';
@@ -91,7 +92,21 @@ function useOnboarding() {
 export default function App() {
   const { showOnboarding, checked, dismiss } = useOnboarding();
 
-  if (!checked) return null;
+  // Preload icon font glyphs so they paint instantly on first render
+  // (avoids the brief "blank square" flash on cold start)
+  const [fontsLoaded] = useFonts({
+    ...MaterialCommunityIcons.font,
+    ...Ionicons.font,
+  });
+
+  if (!checked || !fontsLoaded) {
+    return (
+      <View style={styles.bootScreen}>
+        <Text style={styles.bootTitle}>ధర్మ</Text>
+        <ActivityIndicator color={DarkColors.saffron} style={{ marginTop: 16 }} />
+      </View>
+    );
+  }
   if (showOnboarding) return <OnboardingScreen onDone={dismiss} />;
 
   return (
@@ -155,6 +170,13 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  bootScreen: {
+    flex: 1, backgroundColor: DarkColors.bg,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  bootTitle: {
+    fontSize: 36, fontWeight: '900', color: DarkColors.gold, letterSpacing: 4,
+  },
   errorContainer: {
     flex: 1, backgroundColor: DarkColors.bg,
     justifyContent: 'center', alignItems: 'center', padding: 30,

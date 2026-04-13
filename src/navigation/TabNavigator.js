@@ -84,17 +84,18 @@ export function TabNavigator() {
           backgroundColor: DarkColors.tabBarBg,
           borderTopColor: DarkColors.tabBarBorder,
           borderTopWidth: 1,
-          height: 64 + insets.bottom,
-          paddingBottom: insets.bottom + 4,
-          paddingTop: 6,
+          height: 70 + insets.bottom,
+          paddingBottom: insets.bottom + 6,
+          paddingTop: 8,
           elevation: 8,
         },
         tabBarActiveTintColor: DarkColors.saffron,
         tabBarInactiveTintColor: DarkColors.tabInactive,
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: '800',
-          marginTop: 2,
+          marginTop: 4,
+          letterSpacing: 0.2,
         },
       }}
     >
@@ -107,7 +108,7 @@ export function TabNavigator() {
             tabBarLabel: t(tab.te, tab.en),
             tabBarItemStyle: { flex: 1 },
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons name={tab.icon} size={26} color={color} />
+              <MaterialCommunityIcons name={tab.icon} size={22} color={color} />
             ),
           }}
         />

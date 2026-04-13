@@ -251,16 +251,17 @@ const s = StyleSheet.create({
     paddingHorizontal: 20,
   },
   menuIcon: {
-    width: 30,
-    marginRight: 14,
+    width: 28,
+    marginRight: 16,
   },
   menuTextBlock: {
     flex: 1,
   },
   menuLabel: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: DarkColors.textPrimary,
+    letterSpacing: 0.2,
   },
   menuDivider: {
     height: 1,

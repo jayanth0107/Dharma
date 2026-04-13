@@ -69,18 +69,19 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 2.5,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderBottomWidth: 3,
     borderBottomColor: 'transparent',
   },
   tabActive: {
     borderBottomColor: DarkColors.saffron,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
-    color: DarkColors.textMuted,
+    color: DarkColors.textSecondary,
+    letterSpacing: 0.2,
   },
   tabTextActive: {
     color: '#FFFFFF',
