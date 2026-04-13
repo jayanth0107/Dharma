@@ -180,11 +180,19 @@ export function CalendarScreen({ route }) {
               (() => {
                 const items = withDaysLeft(FESTIVALS_2026, selectedDate);
                 if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
-                return items.map((festival, idx) => (
-                  <View key={festival.date + idx} style={festival.isPast ? s.pastItem : null}>
-                    <UpcomingFestivalItem festival={festival} daysLeft={festival.daysLeft} />
-                  </View>
-                ));
+                return (
+                  <ScrollView
+                    style={s.innerScroll}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {items.map((festival, idx) => (
+                      <View key={festival.date + idx} style={festival.isPast ? s.pastItem : null}>
+                        <UpcomingFestivalItem festival={festival} daysLeft={festival.daysLeft} />
+                      </View>
+                    ))}
+                  </ScrollView>
+                );
               })()
             ) : festivalFilter === 'ekadashi' ? (
               <EkadashiSection todayEkadashi={null} upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)} selectedDate={selectedDate} showAll />
