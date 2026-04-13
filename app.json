@@ -37,7 +37,7 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 3,
+      "versionCode": 4,
       "googleServicesFile": "./google-services.json"
     },
     "web": {
