@@ -298,7 +298,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile
             icon="gold" label={t(TR.goldPrice.te, TR.goldPrice.en)} sublabel={t('Gold Price', 'బంగారం')}
             accentColor="#B8860B"
-            onPress={() => navigation.navigate('Calendar', { tab: 'gold', _ts: Date.now() })}
+            onPress={() => navigation.navigate('Gold')}
           />
           <FeatureTile
             icon="temple-hindu" label={t('దేవాలయాలు', 'Temples')} sublabel={t('Nearby', 'సమీపంలో')}

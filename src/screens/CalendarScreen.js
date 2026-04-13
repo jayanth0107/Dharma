@@ -52,6 +52,8 @@ import {
   buildGoldShareText, buildSlokaShareText,
 } from '../utils/shareService';
 
+// Note: 'gold' has its own top-level tab (bottom bar + GlobalTopTabs) so it
+// is intentionally NOT duplicated here as a Calendar sub-tab.
 function getSubTabs(t) {
   return [
     { id: 'panchang', label: t(TR.panchang.te, TR.panchang.en) },
@@ -60,7 +62,6 @@ function getSubTabs(t) {
     { id: 'ekadashi', label: t(TR.ekadashi.te, TR.ekadashi.en) },
     { id: 'holidays', label: t(TR.holidays.te, TR.holidays.en) },
     { id: 'darshan', label: t(TR.darshan.te, TR.darshan.en) },
-    { id: 'gold', label: t(TR.goldPrice.te, TR.goldPrice.en) },
     { id: 'kids', label: t(TR.kidsStories.te, TR.kidsStories.en) },
   ];
 }
@@ -288,13 +289,7 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Gold Tab ── */}
-        {activeSubTab === 'gold' && (
-          <View style={s.card}>
-            <GoldSilverPriceCard prices={goldSilverPrices} loading={pricesLoading} />
-            <SectionShareRow section="gold" buildText={() => buildGoldShareText(goldSilverPrices)} />
-          </View>
-        )}
+        {/* Gold tab removed — exists as top-level screen (Gold tab / GlobalTopTabs) */}
 
         {/* ── Kids Tab ── */}
         {activeSubTab === 'kids' && (
