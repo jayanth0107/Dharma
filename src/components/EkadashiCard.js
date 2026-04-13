@@ -59,35 +59,39 @@ export function UpcomingEkadashiItem({ ekadashi }) {
   );
 }
 
-export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate }) {
-  const [showAll, setShowAll] = useState(false);
+export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate, showAll: showAllInline = false }) {
+  const [showAllModal, setShowAllModal] = useState(false);
 
   return (
     <View>
       {/* Today Ekadashi Banner */}
       {todayEkadashi && <TodayEkadashiBanner ekadashi={todayEkadashi} />}
 
-      {/* Upcoming Ekadashis */}
+      {/* Upcoming Ekadashis — render every item when showAllInline is true */}
       {upcomingEkadashis.length > 0 && (
         <View style={styles.upcomingContainer}>
           {upcomingEkadashis.map((ek, index) => (
-            <UpcomingEkadashiItem key={ek.date + index} ekadashi={ek} />
+            <View key={ek.date + index} style={ek.isPast ? { opacity: 0.45 } : null}>
+              <UpcomingEkadashiItem ekadashi={ek} />
+            </View>
           ))}
 
-          <TouchableOpacity style={styles.viewAllBtn} onPress={() => setShowAll(true)}>
-            <MaterialCommunityIcons name="calendar-month" size={16} color={DarkColors.goldLight} style={{ marginRight: 6 }} />
-            <Text style={styles.viewAllText}>అన్ని ఏకాదశులు చూడండి</Text>
-            <MaterialCommunityIcons name="chevron-right" size={16} color={DarkColors.goldLight} />
-          </TouchableOpacity>
+          {!showAllInline && (
+            <TouchableOpacity style={styles.viewAllBtn} onPress={() => setShowAllModal(true)}>
+              <MaterialCommunityIcons name="calendar-month" size={16} color={DarkColors.goldLight} style={{ marginRight: 6 }} />
+              <Text style={styles.viewAllText}>అన్ని ఏకాదశులు చూడండి</Text>
+              <MaterialCommunityIcons name="chevron-right" size={16} color={DarkColors.goldLight} />
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
       {/* All Ekadashis Modal */}
       <Modal
-        visible={showAll}
+        visible={showAllModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowAll(false)}
+        onRequestClose={() => setShowAllModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -97,7 +101,7 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
               <Text style={styles.modalSubtitle}>మొత్తం 24 ఏకాదశి దినాలు</Text>
               <TouchableOpacity
                 style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}
-                onPress={() => setShowAll(false)}
+                onPress={() => setShowAllModal(false)}
               >
                 <Ionicons name="close" size={24} color={DarkColors.textPrimary} />
               </TouchableOpacity>
@@ -135,7 +139,7 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
                 );
               }}
             />
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowAll(false)}>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowAllModal(false)}>
               <Text style={styles.modalCloseText}>మూసివేయండి</Text>
             </TouchableOpacity>
           </View>

@@ -27,6 +27,25 @@ import { getUpcomingObservances } from '../data/observances';
 import { FESTIVALS_2026 } from '../data/festivals';
 import { EKADASHI_2026 } from '../data/ekadashi';
 import { PUBLIC_HOLIDAYS_2026 } from '../data/holidays';
+import { CHATURTHI_2026, POURNAMI_2026, AMAVASYA_2026, PRADOSHAM_2026 } from '../data/observances';
+
+// Build a full-year list with daysLeft + isPast annotations, sorted chronologically.
+function withDaysLeft(items, selectedDate) {
+  const midnight = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+  return items.map((item) => {
+    const d = new Date(item.date);
+    d.setHours(0, 0, 0, 0);
+    const daysLeft = Math.round((d - midnight) / 86400000);
+    return { ...item, daysLeft, isPast: daysLeft < 0 };
+  });
+}
+
+const OBSERVANCE_DATA = {
+  chaturthi: CHATURTHI_2026,
+  pournami: POURNAMI_2026,
+  amavasya: AMAVASYA_2026,
+  pradosham: PRADOSHAM_2026,
+};
 import {
   buildPanchangamShareText, buildTimingsShareText,
   buildFestivalsShareText, buildEkadashiShareText, buildHolidaysShareText,
@@ -144,26 +163,32 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Festivals Tab ── */}
+        {/* ── Festivals Tab ── full 2026 year, scrollable ── */}
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
             <FilterPills activeFilter={festivalFilter} onFilterChange={setFestivalFilter} />
             {festivalFilter === 'all' ? (
-              upcomingFestivals.length > 0 ? upcomingFestivals.map((festival, idx) => (
-                <UpcomingFestivalItem key={festival.date + idx} festival={festival} daysLeft={festival.daysLeft} />
-              )) : <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>
+              (() => {
+                const items = withDaysLeft(FESTIVALS_2026, selectedDate);
+                if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
+                return items.map((festival, idx) => (
+                  <View key={festival.date + idx} style={festival.isPast ? s.pastItem : null}>
+                    <UpcomingFestivalItem festival={festival} daysLeft={festival.daysLeft} />
+                  </View>
+                ));
+              })()
             ) : festivalFilter === 'ekadashi' ? (
-              upcomingEkadashiList.length > 0 ? (
-                <EkadashiSection todayEkadashi={null} upcomingEkadashis={upcomingEkadashiList} selectedDate={selectedDate} />
-              ) : <Text style={s.emptyText}>రాబోయే ఏకాదశి దినాలు లేవు</Text>
+              <EkadashiSection todayEkadashi={null} upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)} selectedDate={selectedDate} showAll />
             ) : (
               (() => {
-                const items = getUpcomingObservances(festivalFilter, selectedDate, 5);
-                if (items.length === 0) return <Text style={s.emptyText}>రాబోయే తేదీలు లేవు</Text>;
+                const source = OBSERVANCE_DATA[festivalFilter];
+                if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
+                const items = withDaysLeft(source, selectedDate);
+                if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
                 return items.map((item, idx) => {
                   const d = new Date(item.date);
                   return (
-                    <View key={item.date + idx} style={s.observanceItem}>
+                    <View key={item.date + idx} style={[s.observanceItem, item.isPast && s.pastItem]}>
                       <View style={s.observanceDateCol}>
                         <Text style={s.observanceDay}>{d.getDate()}</Text>
                         <Text style={s.observanceMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
@@ -173,8 +198,10 @@ export function CalendarScreen({ route }) {
                         <Text style={s.observanceSub}>{d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
                       </View>
                       <View style={s.observanceBadge}>
-                        <Text style={s.observanceDays}>{item.daysLeft}</Text>
-                        <Text style={s.observanceDaysLabel}>{item.daysLeft === 0 ? 'నేడు' : 'రోజులు'}</Text>
+                        <Text style={s.observanceDays}>{Math.abs(item.daysLeft)}</Text>
+                        <Text style={s.observanceDaysLabel}>
+                          {item.daysLeft === 0 ? t('నేడు', 'Today') : item.isPast ? t('గతం', 'ago') : t('రోజులు', 'days')}
+                        </Text>
                       </View>
                     </View>
                   );
@@ -199,10 +226,15 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Ekadashi Tab ── */}
+        {/* ── Ekadashi Tab ── all 24 Ekadashis for 2026 ── */}
         {activeSubTab === 'ekadashi' && (
           <View style={s.card}>
-            <EkadashiSection todayEkadashi={todayEkadashi} upcomingEkadashis={upcomingEkadashiList} selectedDate={selectedDate} />
+            <EkadashiSection
+              todayEkadashi={todayEkadashi}
+              upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)}
+              selectedDate={selectedDate}
+              showAll
+            />
             <SectionShareRow section="ekadashi" buildText={() => buildEkadashiShareText(upcomingEkadashiList, EKADASHI_2026)} />
           </View>
         )}
@@ -214,27 +246,33 @@ export function CalendarScreen({ route }) {
               <MaterialCommunityIcons name="airplane" size={16} color="#4A90D9" />
               <Text style={[s.cardTitle, { color: '#4A90D9' }]}>{t(TR.govtHolidays.te, TR.govtHolidays.en)}</Text>
             </View>
-            {upcomingHolidays.length > 0 ? upcomingHolidays.map((holiday, idx) => {
-              const hDate = new Date(holiday.date);
-              return (
-                <View key={holiday.date + idx} style={s.holidayItem}>
-                  <View style={s.holidayDateCol}>
-                    <Text style={s.holidayDay}>{hDate.getDate()}</Text>
-                    <Text style={s.holidayMonth}>{hDate.toLocaleDateString('en-IN', { month: 'short' })}</Text>
-                    <Text style={s.holidayWeekday}>{hDate.toLocaleDateString('te-IN', { weekday: 'short' })}</Text>
+            {(() => {
+              const items = withDaysLeft(PUBLIC_HOLIDAYS_2026, selectedDate);
+              if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noHolidays.te, TR.noHolidays.en)}</Text>;
+              return items.map((holiday, idx) => {
+                const hDate = new Date(holiday.date);
+                return (
+                  <View key={holiday.date + idx} style={[s.holidayItem, holiday.isPast && s.pastItem]}>
+                    <View style={s.holidayDateCol}>
+                      <Text style={s.holidayDay}>{hDate.getDate()}</Text>
+                      <Text style={s.holidayMonth}>{hDate.toLocaleDateString('en-IN', { month: 'short' })}</Text>
+                      <Text style={s.holidayWeekday}>{hDate.toLocaleDateString('te-IN', { weekday: 'short' })}</Text>
+                    </View>
+                    <View style={s.holidayDivider} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.holidayName}>{t(holiday.telugu, holiday.english)}</Text>
+                      <Text style={s.holidayEnglish}>{t(holiday.english, holiday.telugu)}</Text>
+                    </View>
+                    <View style={s.holidayBadge}>
+                      <Text style={s.holidayDaysNum}>{Math.abs(holiday.daysLeft)}</Text>
+                      <Text style={s.holidayDaysLabel}>
+                        {holiday.daysLeft === 0 ? t('నేడు', 'Today') : holiday.isPast ? t('గతం', 'ago') : t('రోజులు', 'days')}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={s.holidayDivider} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.holidayName}>{t(holiday.telugu, holiday.english)}</Text>
-                    <Text style={s.holidayEnglish}>{t(holiday.english, holiday.telugu)}</Text>
-                  </View>
-                  <View style={s.holidayBadge}>
-                    <Text style={s.holidayDaysNum}>{holiday.daysLeft}</Text>
-                    <Text style={s.holidayDaysLabel}>{holiday.daysLeft === 0 ? 'నేడు' : 'రోజులు'}</Text>
-                  </View>
-                </View>
-              );
-            }) : <Text style={s.emptyText}>రాబోయే సెలవులు లేవు</Text>}
+                );
+              });
+            })()}
             <SectionShareRow section="holidays" buildText={() => buildHolidaysShareText(upcomingHolidays, PUBLIC_HOLIDAYS_2026)} />
           </View>
         )}
@@ -296,6 +334,7 @@ const s = StyleSheet.create({
   cardGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   separator: { height: 1, backgroundColor: DarkColors.borderGold, marginHorizontal: 16, marginVertical: 10 },
   emptyText: { fontSize: 15, color: DarkColors.textSecondary, textAlign: 'center', paddingVertical: 20, fontStyle: 'italic', fontWeight: '500' },
+  pastItem: { opacity: 0.45 },
   dateNav: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 10, paddingHorizontal: 16,
