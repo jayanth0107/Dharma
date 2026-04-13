@@ -11,12 +11,15 @@ const TILE_GAP = 8;
 
 // Percentage-based tile widths — flex layout figures out exact px from the
 // real container width, so no scrollbar / wrapper / web-vs-native math
-// needs to match. Slight safety margin (0.6%) per gap so 3 fit cleanly.
+// needs to match. The margin shaved from each row becomes inter-tile gap
+// when the parent uses justifyContent: 'space-between'.
 function getTileWidthPercent(columns) {
-  // 3 cols: ~31.5% each + 2 gaps. Adds up to ~96-97% of container.
-  // 4 cols: ~23%. 5 cols: ~18%.
-  const safety = 1.5; // % shaved per row to absorb gap/border roundoff
-  return `${((100 - safety) / columns).toFixed(2)}%`;
+  // 3 cols: 30.66% × 3 = 92%, leaves 8% split as 2 gaps = ~4% each
+  //         (≈ 14-16px visible gap on a 380-430px viewport)
+  // 4 cols: 22.75% × 4 = 91%, leaves 9% split as 3 gaps = 3% each
+  // 5 cols: 18.0% × 5 = 90%, leaves 10% split as 4 gaps = 2.5% each
+  const gapFraction = 8; // percent of row width used for all inter-tile gaps
+  return `${((100 - gapFraction) / columns).toFixed(2)}%`;
 }
 
 export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, disabled, tileHeight }) {
