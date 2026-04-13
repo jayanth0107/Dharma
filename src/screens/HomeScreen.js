@@ -13,6 +13,7 @@ import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
 import { FeatureTile } from '../components/FeatureTile';
+import { FlagWithPole } from '../components/FlagWithPole';
 import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { DrawerMenu } from '../components/DrawerMenu';
 import { LocationPickerModal } from '../components/LocationPickerModal';
@@ -61,7 +62,7 @@ export function HomeScreen({ navigation }) {
   if (!panchangam) {
     return (
       <View style={s.loading}>
-        <Image source={require('../../assets/flag.png')} style={{ width: 60, height: 75 }} resizeMode="contain" />
+        <FlagWithPole size={75} />
         <Text style={s.loadingTitle}>{t(TR.appName.te, TR.appName.en)}</Text>
         <Text style={s.loadingSub}>{t(TR.sanatana.te, TR.sanatana.en)}</Text>
         <MaterialCommunityIcons name="loading" size={24} color={DarkColors.saffron} style={{ marginTop: 20 }} />
@@ -94,11 +95,7 @@ export function HomeScreen({ navigation }) {
           <TouchableOpacity style={s.headerIconBtn} onPress={() => setShowDrawer(true)}>
             <MaterialCommunityIcons name="menu" size={26} color={DarkColors.silver} />
           </TouchableOpacity>
-          <Image
-            source={require('../../assets/flag.png')}
-            style={s.flagImage}
-            resizeMode="contain"
-          />
+          <FlagWithPole size={38} />
           <Text style={s.appTitleRow} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
             <Text style={s.appTitle}>{t(TR.appName.te, TR.appName.en)}</Text>
             <Text style={s.appHyphen}> | </Text>
