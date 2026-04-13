@@ -297,6 +297,19 @@ export const TR = {
   activating: { te: 'ఆక్టివేట్ చేస్తోంది...', en: 'Activating...' },
   trialCta: { te: '3 రోజులు ఉచితంగా ప్రయత్నించండి', en: 'Try 3 Days Free' },
 
+  // ── Claim code redemption ──
+  claimCodeTitle: { te: 'క్లెయిమ్ కోడ్ నమోదు చేయండి', en: 'Enter Claim Code' },
+  claimCodeSub: { te: 'చెల్లింపు ధృవీకరించబడిన తర్వాత మీకు క్లెయిమ్ కోడ్ అందుతుంది', en: 'You receive a claim code after payment verification' },
+  claimCodePlaceholder: { te: 'ఉదా. AB12CD34', en: 'e.g. AB12CD34' },
+  claimCodeRedeem: { te: 'Premium అన్‌లాక్ చేయండి', en: 'Unlock Premium' },
+  claimCodeLoginRequired: { te: 'క్లెయిమ్ చేయడానికి లాగిన్ అవసరం', en: 'Login required to claim' },
+  claimCodeNotFound: { te: 'కోడ్ చెల్లదు', en: 'Invalid code' },
+  claimCodeAlreadyUsed: { te: 'ఈ కోడ్ ఇప్పటికే వాడబడింది', en: 'This code has already been used' },
+  claimCodeExpired: { te: 'కోడ్ గడువు ముగిసింది', en: 'Code expired' },
+  claimCodeSuccess: { te: '🎉 Premium సక్రియం అయింది!', en: '🎉 Premium activated!' },
+  claimCodeError: { te: 'కోడ్ రిడీమ్ విఫలమైంది', en: 'Code redemption failed' },
+  haveClaimCode: { te: 'క్లెయిమ్ కోడ్ ఉందా?', en: 'Have a claim code?' },
+
   // ── Share message ──
   shareMessage: {
     te: '🙏 ధర్మ — తెలుగు పంచాంగం యాప్\n\nరోజువారీ తిథి, నక్షత్రం, ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!\n\n📥 Download:\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n\n🙏 సర్వే జనాః సుఖినో భవంతు',

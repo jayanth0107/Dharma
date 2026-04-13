@@ -62,20 +62,35 @@ Operational reference for the person running the app post-launch: how to know wh
 
 Three realistic options, ordered by effort:
 
-### Option A — Manual admin verification (lowest effort)
+### Option A — Manual admin verification (IMPLEMENTED ✅)
 
-**When to use:** Early users (<50/day), you can spend 15 min/day on verification.
+**Status:** Built and deployed. See `functions/index.js`.
 
-1. User initiates UPI payment as today → `payments` doc created with `verified: false`
-2. You (admin) receive bank SMS with UPI txn ID + amount
-3. In Firestore Console, find the matching payment doc and set `verified: true`
-4. A **Cloud Function** (trigger: `onUpdate` of `payments/{id}`) watches for `verified: true` and:
-   - Sets `users/{userId}.premium = { active: true, plan, expiresAt }` — if the user was logged in
-   - Stores a `claim_code` for anonymous devices; user enters it in the app to unlock
-5. Client reads `users/{uid}.premium` on login and every app start
+**When to use:** Early users (<50/day), you can spend 5–15 min/day on verification.
 
-**Pros:** No merchant account, no fees, cheap.
-**Cons:** Manual — doesn't scale beyond ~50 txns/day. Unverified users experience a delay.
+**Flow (current code):**
+1. User picks plan → client writes `payments/{id}` with `verified: false` (Cloud Function `onPaymentCreated` backstops this)
+2. User pays via their UPI app
+3. You receive bank SMS with UPI txn ID + amount
+4. You open Firestore Console → `payments` → find matching doc (by amount + timestamp + deviceId)
+5. **Set `verified: true`** in the doc
+6. Cloud Function `onPaymentVerified` fires automatically:
+   - If `userId` is present → writes `users/{userId}.premium = { active, plan, expiresAt, ... }`
+   - If anonymous (no userId) → generates an 8-char claim code in `claim_codes/{CODE}`, stamps `payments.claimCode = CODE`
+7. Client picks up premium:
+   - **Logged-in users:** `users/{uid}.premium` is synced on every login (`AuthContext` → `syncPremiumFromCloud`)
+   - **Anonymous users:** contact them out-of-band (WhatsApp/SMS) with their claim code → they log in in the app → tap "Have a claim code?" in Premium screen → paste code → redeemed + synced
+8. Cloud Function `onClaimRedemption` fires when a claim code is marked claimed → writes `users/{uid}.premium`
+
+**Admin workflow per payment (daily):**
+1. Open Firestore Console → `payments`, sort by `syncedAt desc`, filter `verified == false`
+2. Match each to your UPI bank SMS (amount + approximate time window)
+3. Tap doc → edit → set `verified: true` → Save
+4. If `processedMethod` becomes `claim_code`, copy `claimCode` and send to the customer
+5. If `processedMethod` becomes `user_linked`, the customer's premium unlocks on their next login / app refresh
+
+**Pros:** No merchant account, zero fees, zero monthly cost (Firestore + Cloud Functions free tier).
+**Cons:** Manual — doesn't scale beyond ~50 txns/day. Anonymous users need out-of-band claim code delivery. Unverified users experience hours of delay.
 
 ### Option B — Payment gateway with webhook (recommended at scale)
 
@@ -213,9 +228,38 @@ Debug: https://status.firebase.google.com — check Authentication status
 
 ### 5.1 Unlock premium for a specific user manually
 
-1. Find user in Firestore `users` collection
-2. Set field `premium = { active: true, plan: 'yearly', expiresAt: <ISO+365d>, reason: 'manual_unlock', by: 'admin' }`
-3. Ask user to force-quit and relaunch the app (or add a realtime listener — future work)
+**If the user has the `userId` visible on their payment doc (they were logged in):**
+- Firestore Console → `users/{userId}` → merge field:
+  ```json
+  "premium": {
+    "active": true,
+    "plan": "yearly",
+    "days": 365,
+    "source": "manual_unlock",
+    "amount": 499,
+    "activatedAt": <serverTimestamp>,
+    "expiresAt": <Timestamp 365d from now>
+  }
+  ```
+- User logs out + in (or reopens the app) → `AuthContext.syncPremiumFromCloud()` picks it up.
+
+**If the user has no account (anonymous):**
+- Instead, write a `claim_codes/{CODE}` doc (CODE = 8 uppercase alphanumeric):
+  ```json
+  {
+    "plan": "yearly",
+    "days": 365,
+    "amount": 499,
+    "source": "manual_grant",
+    "paymentId": "<matching payments doc id>",
+    "createdAt": <serverTimestamp>,
+    "expiresAt": <now + 30 days>,
+    "claimed": false
+  }
+  ```
+- Send the code to the user via WhatsApp / phone. Ask them to log in in the app and tap "Have a claim code?" in the Premium screen.
+
+**Fastest path (recommended):** use the built-in verification flow — set `verified: true` on the `payments` doc and let `onPaymentVerified` do both steps automatically.
 
 ### 5.2 Flag a fraudulent payment
 

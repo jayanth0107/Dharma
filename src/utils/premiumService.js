@@ -338,6 +338,110 @@ export async function deactivatePremium() {
 /**
  * Get premium pricing info (for display)
  */
+/**
+ * Sync premium state from Firestore users/{uid}.premium.
+ * This is the authoritative source — the cloud overrides local state
+ * when more generous (active + longer expiry), otherwise local wins
+ * (lets admin grant premium even if user hasn't claimed yet).
+ *
+ * Call this:
+ *   - After successful login
+ *   - On app start if already logged in
+ *   - On manual "Refresh premium" tap
+ */
+export async function syncPremiumFromCloud(uid) {
+  if (!uid) return { success: false, reason: 'no_uid' };
+  try {
+    const { db, isConfigured } = require('../config/firebase');
+    if (!isConfigured || !db) return { success: false, reason: 'firebase_unavailable' };
+
+    const { doc, getDoc } = await import('firebase/firestore');
+    const userSnap = await getDoc(doc(db, 'users', uid));
+    if (!userSnap.exists()) return { success: false, reason: 'no_user_doc' };
+
+    const data = userSnap.data();
+    const cloudPremium = data?.premium;
+    if (!cloudPremium || cloudPremium.active !== true) {
+      return { success: true, hasPremium: false };
+    }
+
+    // Adopt the cloud state — it is more authoritative than client memory
+    const state = await loadState();
+    state.tier = TIERS.PREMIUM;
+    state.activatedAt = cloudPremium.activatedAt?.toMillis ? cloudPremium.activatedAt.toMillis() : Date.now();
+    state.unlockSource = cloudPremium.source || 'cloud_sync';
+    const expiresMs = cloudPremium.expiresAt?.toMillis ? cloudPremium.expiresAt.toMillis() : null;
+    state.expiresAt = expiresMs && expiresMs < Date.parse('2099-01-01') ? expiresMs : null;
+
+    if (!state.payments) state.payments = [];
+    // Record the cloud sync in local ledger (for admin panel visibility)
+    state.payments.push({
+      source: cloudPremium.source || 'cloud_sync',
+      amount: cloudPremium.amount || 0,
+      planId: cloudPremium.plan || '',
+      planName: cloudPremium.planName || '',
+      days: cloudPremium.days || 0,
+      screen: 'cloud_sync',
+      platform: 'cloud',
+      timestamp: Date.now(),
+      date: new Date().toISOString(),
+    });
+    await saveState();
+    return {
+      success: true,
+      hasPremium: true,
+      plan: cloudPremium.plan,
+      expiresAt: state.expiresAt ? new Date(state.expiresAt) : null,
+    };
+  } catch (err) {
+    if (__DEV__) console.warn('syncPremiumFromCloud failed:', err?.message);
+    return { success: false, reason: 'error', error: err?.message };
+  }
+}
+
+/**
+ * Redeem a claim code (issued by admin after offline payment verification).
+ * Requires the user to be logged in. Marks the code as claimed in Firestore;
+ * Cloud Function then writes users/{uid}.premium which we re-sync.
+ */
+export async function redeemClaimCode(rawCode, uid) {
+  const code = (rawCode || '').trim().toUpperCase();
+  if (!code) return { success: false, reason: 'empty_code' };
+  if (!uid) return { success: false, reason: 'login_required' };
+
+  try {
+    const { db, isConfigured } = require('../config/firebase');
+    if (!isConfigured || !db) return { success: false, reason: 'firebase_unavailable' };
+
+    const { doc, getDoc, updateDoc, serverTimestamp } = await import('firebase/firestore');
+    const codeRef = doc(db, 'claim_codes', code);
+    const snap = await getDoc(codeRef);
+
+    if (!snap.exists()) return { success: false, reason: 'not_found' };
+    const data = snap.data();
+    if (data.claimed === true) return { success: false, reason: 'already_claimed' };
+    if (data.expiresAt?.toMillis && data.expiresAt.toMillis() < Date.now()) {
+      return { success: false, reason: 'expired' };
+    }
+
+    // Mark as claimed — this triggers the Cloud Function that writes users/{uid}.premium
+    await updateDoc(codeRef, {
+      claimed: true,
+      claimedBy: uid,
+      claimedAt: serverTimestamp(),
+    });
+
+    // Cloud Function runs async — wait briefly then pull the new premium state
+    await new Promise((r) => setTimeout(r, 2500));
+    const sync = await syncPremiumFromCloud(uid);
+
+    return { success: sync.success && sync.hasPremium, plan: sync.plan, expiresAt: sync.expiresAt };
+  } catch (err) {
+    if (__DEV__) console.warn('redeemClaimCode failed:', err?.message);
+    return { success: false, reason: 'error', error: err?.message };
+  }
+}
+
 export function getPricingInfo() {
   return {
     weekly: { price: '₹29', priceUsd: '$0.49', period: 'వారం / week' },

@@ -15,6 +15,9 @@ import { trackEvent } from '../utils/analytics';
 import { ModalOrView } from './ModalOrView';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
+import { TextInput } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { redeemClaimCode } from '../utils/premiumService';
 
 // ---- UPI Config (same as DonateSection) ----
 const UPI_ID = '9535251573@ibl';
@@ -164,8 +167,41 @@ export function PremiumBanner({ onUpgrade, trialAvailable }) {
 
 export function PremiumModal({ visible, onClose, onActivated, embedded = false }) {
   const { t } = useLanguage();
+  const { isLoggedIn, uid } = useAuth();
   const [activating, setActivating] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null); // null = perks view, plan object = payment view
+  const [claimExpanded, setClaimExpanded] = useState(false);
+  const [claimCode, setClaimCode] = useState('');
+  const [claiming, setClaiming] = useState(false);
+  const [claimMsg, setClaimMsg] = useState(null); // { type: 'success'|'error', text }
+
+  const handleRedeemClaim = async () => {
+    if (!isLoggedIn || !uid) {
+      setClaimMsg({ type: 'error', text: t(TR.claimCodeLoginRequired.te, TR.claimCodeLoginRequired.en) });
+      return;
+    }
+    setClaiming(true);
+    setClaimMsg(null);
+    const result = await redeemClaimCode(claimCode, uid);
+    setClaiming(false);
+    if (result.success) {
+      setClaimMsg({ type: 'success', text: t(TR.claimCodeSuccess.te, TR.claimCodeSuccess.en) });
+      trackEvent('claim_code_redeemed', { plan: result.plan });
+      setTimeout(() => {
+        onActivated?.();
+        onClose();
+      }, 1200);
+      return;
+    }
+    const reason = result.reason;
+    const msg =
+      reason === 'not_found' ? t(TR.claimCodeNotFound.te, TR.claimCodeNotFound.en) :
+      reason === 'already_claimed' ? t(TR.claimCodeAlreadyUsed.te, TR.claimCodeAlreadyUsed.en) :
+      reason === 'expired' ? t(TR.claimCodeExpired.te, TR.claimCodeExpired.en) :
+      reason === 'login_required' ? t(TR.claimCodeLoginRequired.te, TR.claimCodeLoginRequired.en) :
+      t(TR.claimCodeError.te, TR.claimCodeError.en);
+    setClaimMsg({ type: 'error', text: msg });
+  };
 
   const handleStartTrial = async () => {
     setActivating(true);
@@ -320,6 +356,51 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                       <Ionicons name="chevron-forward" size={18} color={plan.best ? '#9B6FCF' : DarkColors.textMuted} />
                     </TouchableOpacity>
                   ))}
+                </View>
+
+                {/* Claim code entry — for users who paid offline and admin issued a code */}
+                <View style={s.claimSection}>
+                  <TouchableOpacity
+                    style={s.claimToggle}
+                    onPress={() => setClaimExpanded(!claimExpanded)}
+                    activeOpacity={0.7}
+                  >
+                    <MaterialCommunityIcons
+                      name={claimExpanded ? 'chevron-up' : 'ticket-confirmation-outline'}
+                      size={18}
+                      color={DarkColors.saffron}
+                    />
+                    <Text style={s.claimToggleText}>{t(TR.haveClaimCode.te, TR.haveClaimCode.en)}</Text>
+                  </TouchableOpacity>
+                  {claimExpanded && (
+                    <View style={s.claimBox}>
+                      <Text style={s.claimSub}>{t(TR.claimCodeSub.te, TR.claimCodeSub.en)}</Text>
+                      <TextInput
+                        style={s.claimInput}
+                        value={claimCode}
+                        onChangeText={(v) => { setClaimCode(v.toUpperCase()); setClaimMsg(null); }}
+                        placeholder={t(TR.claimCodePlaceholder.te, TR.claimCodePlaceholder.en)}
+                        placeholderTextColor={DarkColors.textMuted}
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                        maxLength={12}
+                      />
+                      {claimMsg && (
+                        <Text style={[s.claimMsg, claimMsg.type === 'error' ? s.claimMsgErr : s.claimMsgOk]}>
+                          {claimMsg.text}
+                        </Text>
+                      )}
+                      <TouchableOpacity
+                        style={[s.claimBtn, (!claimCode || claiming) && s.claimBtnDisabled]}
+                        onPress={handleRedeemClaim}
+                        disabled={!claimCode || claiming}
+                      >
+                        <Text style={s.claimBtnText}>
+                          {claiming ? t(TR.activating.te, TR.activating.en) : t(TR.claimCodeRedeem.te, TR.claimCodeRedeem.en)}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
               </>
             ) : (
@@ -582,4 +663,32 @@ const s = StyleSheet.create({
 
   closeBtn: { alignItems: 'center', paddingVertical: 16, marginBottom: 20 },
   closeBtnText: { fontSize: 14, color: DarkColors.textMuted, fontWeight: '600' },
+
+  // Claim code
+  claimSection: { marginHorizontal: 20, marginTop: 16, marginBottom: 8 },
+  claimToggle: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 14,
+  },
+  claimToggleText: { fontSize: 13, color: DarkColors.saffron, fontWeight: '700' },
+  claimBox: {
+    backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard, gap: 10, marginTop: 4,
+  },
+  claimSub: { fontSize: 12, color: DarkColors.textMuted, lineHeight: 17 },
+  claimInput: {
+    backgroundColor: DarkColors.bgCard, borderRadius: 10, padding: 12,
+    fontSize: 16, color: DarkColors.textPrimary, letterSpacing: 2, fontWeight: '700',
+    borderWidth: 1, borderColor: DarkColors.borderCard, outlineStyle: 'none',
+    textAlign: 'center',
+  },
+  claimMsg: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
+  claimMsgErr: { color: '#C41E3A' },
+  claimMsgOk: { color: DarkColors.tulasiGreen },
+  claimBtn: {
+    backgroundColor: DarkColors.saffron, borderRadius: 10, paddingVertical: 12,
+    alignItems: 'center',
+  },
+  claimBtnDisabled: { opacity: 0.4 },
+  claimBtnText: { fontSize: 14, fontWeight: '800', color: '#fff' },
 });

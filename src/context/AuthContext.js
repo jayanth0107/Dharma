@@ -34,6 +34,12 @@ export function AuthProvider({ children }) {
       setUserProperties({ loggedIn: !!firebaseUser, userId: firebaseUser?.uid || null });
       if (firebaseUser) {
         trackEvent('login_success', { uid: firebaseUser.uid });
+        // Pull authoritative premium state from Cloud (admin may have granted it
+        // via claim code / verified payment since last login)
+        try {
+          const { syncPremiumFromCloud } = require('../utils/premiumService');
+          syncPremiumFromCloud(firebaseUser.uid).catch(() => {});
+        } catch {}
         try {
           const userRef = doc(db, 'users', firebaseUser.uid);
           const profileDoc = await getDoc(userRef);

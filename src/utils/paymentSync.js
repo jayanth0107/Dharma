@@ -82,6 +82,10 @@ export async function syncPaymentToCloud(paymentRecord) {
       userId, // null for anonymous, uid for logged-in users
       platform: Platform.OS,
       syncedAt: new Date().toISOString(),
+      // Admin-verified flag. Defaults false so client can't self-grant premium via cloud.
+      // Admin (or a PSP webhook in future) flips this to true, which triggers
+      // Cloud Function `onPaymentVerified` to write users/{uid}.premium or issue a claim code.
+      verified: false,
     };
 
     await addDocFn(collectionFn(db, 'payments'), doc);

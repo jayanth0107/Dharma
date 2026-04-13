@@ -253,6 +253,7 @@ eas submit --platform android                     # Submit to Play Store (intern
 - `ANALYTICS.md` — event catalog + backend tracking
 - `DATA-SOURCES.md` — feature-by-feature audit of every data source + fallback
 - `OPERATIONS.md` — how to run the app in production (payment verification, login troubleshooting, incident response)
+- `functions/` — Cloud Functions: `onPaymentVerified`, `onClaimRedemption`, `onPaymentCreated`
 - `docs/SECURITY-CHECKLIST.md` — security audit
 - `docs/release-notes-v2.md` — Play Store release notes
 - `docs/play-store-listing.md` — store copy, keywords
