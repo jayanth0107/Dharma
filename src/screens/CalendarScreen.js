@@ -56,12 +56,20 @@ import {
 
 // Note: 'gold' has its own top-level tab (bottom bar + GlobalTopTabs) so it
 // is intentionally NOT duplicated here as a Calendar sub-tab.
+// All calendar categories in one flat list — no nested filter pills.
+// Observance types (chaturthi, pournami, amavasya, pradosham) are promoted
+// from the old FilterPills bar to first-class sub-tabs so every category
+// is reachable in a single tap.
 function getSubTabs(t) {
   return [
     { id: 'panchang', label: t(TR.panchang.te, TR.panchang.en) },
     { id: 'timings', label: t(TR.timings.te, TR.timings.en) },
     { id: 'festivals', label: t(TR.festivals.te, TR.festivals.en) },
     { id: 'ekadashi', label: t(TR.ekadashi.te, TR.ekadashi.en) },
+    { id: 'chaturthi', label: t('చతుర్థి', 'Chaturthi') },
+    { id: 'pournami', label: t('పౌర్ణమి', 'Pournami') },
+    { id: 'amavasya', label: t('అమావాస్య', 'Amavasya') },
+    { id: 'pradosham', label: t('ప్రదోషం', 'Pradosham') },
     { id: 'holidays', label: t(TR.holidays.te, TR.holidays.en) },
     { id: 'darshan', label: t(TR.darshan.te, TR.darshan.en) },
     { id: 'kids', label: t(TR.kidsStories.te, TR.kidsStories.en) },
@@ -105,13 +113,7 @@ export function CalendarScreen({ route }) {
       <TopTabBar />
       <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />
 
-      {/* Filter pills — fixed above the scroll on the festivals tab so users
-          don't lose access to them when scanning the yearly list. */}
-      {activeSubTab === 'festivals' && (
-        <View style={s.stickyFilterBar}>
-          <FilterPills activeFilter={festivalFilter} onFilterChange={setFestivalFilter} />
-        </View>
-      )}
+      {/* FilterPills removed — observance types are now direct sub-tabs */}
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
 
@@ -181,84 +183,60 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Festivals Tab ── full 2026 year, scrollable (filter pills are
-            rendered as a sticky bar above the ScrollView) ── */}
+        {/* ── Festivals Tab ── all 2026 festivals ── */}
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
-            {festivalFilter === 'all' ? (
-              (() => {
-                const items = withDaysLeft(FESTIVALS_2026, selectedDate);
-                if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
-                return (
-                  <ScrollView
-                    style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {items.map((festival, idx) => (
-                      <View key={festival.date + idx} style={festival.isPast ? s.pastItem : null}>
-                        <UpcomingFestivalItem festival={festival} daysLeft={festival.daysLeft} />
-                      </View>
-                    ))}
-                  </ScrollView>
-                );
-              })()
-            ) : festivalFilter === 'ekadashi' ? (
-              <EkadashiSection todayEkadashi={null} upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)} selectedDate={selectedDate} showAll />
-            ) : (
-              (() => {
-                const source = OBSERVANCE_DATA[festivalFilter];
-                if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
-                const items = withDaysLeft(source, selectedDate);
-                if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
-                // Auto-scroll to the first non-past item so users land on "upcoming"
-                // instead of having to scroll past Jan/Feb entries.
-                return (
-                  <ScrollView
-                    style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {items.map((item, idx) => {
-                      const d = new Date(item.date);
-                      return (
-                        <View key={item.date + idx} style={[s.observanceItem, item.isPast && s.pastItem]}>
-                          <View style={s.observanceDateCol}>
-                            <Text style={s.observanceDay}>{d.getDate()}</Text>
-                            <Text style={s.observanceMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
-                          </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={s.observanceName}>{item.name}</Text>
-                            <Text style={s.observanceSub}>{d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
-                          </View>
-                          <View style={s.observanceBadge}>
-                            <Text style={s.observanceDays}>{Math.abs(item.daysLeft)}</Text>
-                            <Text style={s.observanceDaysLabel}>
-                              {item.daysLeft === 0 ? t('నేడు', 'Today') : item.isPast ? t('గతం', 'ago') : t('రోజులు', 'days')}
-                            </Text>
-                          </View>
+            {(() => {
+              const items = withDaysLeft(FESTIVALS_2026, selectedDate);
+              if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
+              return (
+                <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                  {items.map((festival, idx) => (
+                    <View key={festival.date + idx} style={festival.isPast ? s.pastItem : null}>
+                      <UpcomingFestivalItem festival={festival} daysLeft={festival.daysLeft} />
+                    </View>
+                  ))}
+                </ScrollView>
+              );
+            })()}
+            <SectionShareRow section="festivals" buildText={() => buildFestivalsShareText(upcomingFestivals, FESTIVALS_2026)} />
+          </View>
+        )}
+
+        {/* ── Observance sub-tabs (chaturthi / pournami / amavasya / pradosham) ── */}
+        {['chaturthi', 'pournami', 'amavasya', 'pradosham'].includes(activeSubTab) && (
+          <View style={s.card}>
+            {(() => {
+              const source = OBSERVANCE_DATA[activeSubTab];
+              if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
+              const items = withDaysLeft(source, selectedDate);
+              if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
+              return (
+                <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                  {items.map((item, idx) => {
+                    const d = new Date(item.date);
+                    return (
+                      <View key={item.date + idx} style={[s.observanceItem, item.isPast && s.pastItem]}>
+                        <View style={s.observanceDateCol}>
+                          <Text style={s.observanceDay}>{d.getDate()}</Text>
+                          <Text style={s.observanceMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
                         </View>
-                      );
-                    })}
-                  </ScrollView>
-                );
-              })()
-            )}
-            <SectionShareRow
-              section={festivalFilter === 'all' ? 'festivals' : festivalFilter}
-              buildText={() => {
-                if (festivalFilter === 'all') return buildFestivalsShareText(upcomingFestivals, FESTIVALS_2026);
-                if (festivalFilter === 'ekadashi') return buildEkadashiShareText(upcomingEkadashiList, EKADASHI_2026);
-                const items = getUpcomingObservances(festivalFilter, selectedDate, 10);
-                if (!items.length) return '';
-                const filterNames = { chaturthi: 'సంకష్టహర చతుర్థి', pournami: 'పౌర్ణమి', amavasya: 'అమావాస్య', pradosham: 'ప్రదోషం' };
-                const lines = items.map((item, i) => {
-                  const ds = new Date(item.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', weekday: 'short' });
-                  return `${i + 1}. ${item.name}\n   📅 ${ds} — ${item.daysLeft} రోజులు`;
-                }).join('\n');
-                return `🙏 ధర్మ — ${filterNames[festivalFilter] || festivalFilter}\n\n${lines}\n\n━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
-              }}
-            />
+                        <View style={{ flex: 1 }}>
+                          <Text style={s.observanceName}>{item.name}</Text>
+                          <Text style={s.observanceSub}>{d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+                        </View>
+                        <View style={s.observanceBadge}>
+                          <Text style={s.observanceDays}>{Math.abs(item.daysLeft)}</Text>
+                          <Text style={s.observanceDaysLabel}>
+                            {item.daysLeft === 0 ? t('నేడు', 'Today') : item.isPast ? t('గతం', 'ago') : t('రోజులు', 'days')}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              );
+            })()}
           </View>
         )}
 

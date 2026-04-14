@@ -71,21 +71,16 @@ export function FilterPills({ activeFilter, onFilterChange }) {
 
   return (
     <View style={styles.wrapper}>
-      {/* Left arrow — only when there's content to scroll back to */}
-      {showLeft && (
-        <TouchableOpacity style={styles.arrowLeft} onPress={() => scrollBy(-1)} activeOpacity={0.7}>
-          <PulsingChevron direction="left" />
-        </TouchableOpacity>
-      )}
+      {/* Left arrow — always visible as a navigation hint */}
+      <TouchableOpacity style={styles.arrowLeft} onPress={() => scrollBy(-1)} activeOpacity={0.7}>
+        <PulsingChevron direction="left" />
+      </TouchableOpacity>
 
       <ScrollView
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.container,
-          { paddingLeft: showLeft ? 44 : 12, paddingRight: showRight ? 44 : 12 },
-        ]}
+        contentContainerStyle={styles.container}
         onScroll={handleScroll}
         onContentSizeChange={onContentSizeChange}
         onLayout={() => {
@@ -119,12 +114,10 @@ export function FilterPills({ activeFilter, onFilterChange }) {
         })}
       </ScrollView>
 
-      {/* Right arrow — only when there's more content to the right */}
-      {showRight && (
-        <TouchableOpacity style={styles.arrowRight} onPress={() => scrollBy(1)} activeOpacity={0.7}>
-          <PulsingChevron direction="right" />
-        </TouchableOpacity>
-      )}
+      {/* Right arrow — always visible as a navigation hint */}
+      <TouchableOpacity style={styles.arrowRight} onPress={() => scrollBy(1)} activeOpacity={0.7}>
+        <PulsingChevron direction="right" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -136,8 +129,8 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingVertical: 8,
+    paddingHorizontal: 44,
     gap: 8,
-    // paddingLeft/Right set dynamically based on arrow visibility
   },
   pill: {
     flexDirection: 'row',
