@@ -48,8 +48,8 @@ export function TopTabBar() {
               key={section.name}
               style={[s.tab, isActive && s.tabActive]}
               onPress={() => {
-                if (section.name === 'Calendar') {
-                  navigation.navigate('Calendar', { tab: 'panchang', _ts: Date.now() });
+                if (section.params) {
+                  navigation.navigate(section.name, { ...section.params, _ts: Date.now() });
                 } else {
                   navigation.navigate(section.name);
                 }

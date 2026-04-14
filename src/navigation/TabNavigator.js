@@ -44,7 +44,9 @@ const Tab = createBottomTabNavigator();
 // screens, so Calendar is one entry here — those are sub-tabs inside it.
 export const MAIN_SECTIONS = [
   { name: 'Home',        component: withErrorBoundary(HomeScreen, 'Home'),             icon: 'home',                   te: 'హోమ్',         en: 'Home' },
-  { name: 'Calendar',    component: withErrorBoundary(CalendarScreen, 'Calendar'),     icon: 'calendar-month',         te: 'క్యాలెండర్',    en: 'Calendar' },
+  { name: 'Panchang',    component: withErrorBoundary(CalendarScreen, 'Panchang'),     icon: 'pot-mix',                te: 'నేటి దినం',     en: "Today", params: { tab: 'panchang' } },
+  { name: 'Festivals',   component: withErrorBoundary(CalendarScreen, 'Festivals'),    icon: 'party-popper',           te: 'పండుగలు',       en: 'Festivals', params: { tab: 'festivals' } },
+  { name: 'GoodTimes',   component: withErrorBoundary(CalendarScreen, 'GoodTimes'),    icon: 'clock-check',            te: 'శుభ సమయాలు',   en: 'Good Times', params: { tab: 'timings' } },
   { name: 'Gold',        component: withErrorBoundary(GoldScreen, 'Gold'),             icon: 'gold',                   te: 'బంగారం',        en: 'Gold' },
   { name: 'Market',      component: withErrorBoundary(MarketScreen, 'Market'),         icon: 'chart-line',             te: 'మార్కెట్',      en: 'Market' },
   { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'జ్యోతిష్యం',    en: 'Astro' },

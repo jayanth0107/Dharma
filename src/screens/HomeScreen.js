@@ -208,7 +208,7 @@ export function HomeScreen({ navigation }) {
           onSelect={(d) => {
             setShowDatePicker(false);
             setSelectedDate(d);
-            navigation.navigate('Calendar', { tab: 'panchang', _ts: Date.now() });
+            navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() });
           }}
           onClose={() => setShowDatePicker(false)}
         />
@@ -234,17 +234,17 @@ export function HomeScreen({ navigation }) {
           <FeatureTile
             icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t('Panchang', 'పంచాంగం')}
             accentColor={DarkColors.gold}
-            onPress={() => navigation.navigate('Calendar', { tab: 'panchang', _ts: Date.now() })}
+            onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })}
           />
           <FeatureTile
             icon="party-popper" label={t(TR.festivals.te, TR.festivals.en)} sublabel={t('Festivals', 'పండుగలు')}
             accentColor={DarkColors.tulasiGreen}
-            onPress={() => navigation.navigate('Calendar', { tab: 'festivals', _ts: Date.now() })}
+            onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })}
           />
           <FeatureTile
             icon="clock-check" label={t('శుభ సమయాలు', 'Good Times')} sublabel={t('Rahu Kalam & more', 'రాహు కాలం & ఇంకా')}
             accentColor="#C41E3A"
-            onPress={() => navigation.navigate('Calendar', { tab: 'timings', _ts: Date.now() })}
+            onPress={() => navigation.navigate('GoodTimes', { tab: 'timings', _ts: Date.now() })}
           />
 
           {/* Row 2 — Gold, Market (nav positions 3,4) + Astro (nav position 5) */}
