@@ -1,6 +1,7 @@
 // ధర్మ — More Screen (Grid Dashboard)
 // All tiles navigate to full screens, no external links
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -21,6 +22,7 @@ export function MoreScreen({ navigation }) {
     <SwipeWrapper screenName="More">
     <View style={s.screen}>
       <PageHeader title={t('మరిన్ని', 'More')} />
+      <TopTabBar />
 
       <View style={s.gridContainer}>
         <FeatureGrid gap={12} rows={4}>

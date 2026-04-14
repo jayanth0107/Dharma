@@ -1,6 +1,7 @@
 // ధర్మ — Gita Screen (Dark Theme)
 // Daily sloka + full library for premium users
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
@@ -20,6 +21,7 @@ export function GitaScreen() {
     <SwipeWrapper screenName="Gita">
     <View style={s.screen}>
       <PageHeader title={t('భగవద్గీత', 'Bhagavad Gita')} />
+      <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={s.card}>
           <GitaDailyCard date={selectedDate} isPremium={premiumActive} />

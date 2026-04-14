@@ -1,6 +1,7 @@
 // ధర్మ — Market Screen
 // NSE/BSE indices, Gold/Silver ETF, top stocks
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
@@ -61,6 +62,7 @@ export function MarketScreen() {
     <SwipeWrapper screenName="Market">
     <View style={s.screen}>
       <PageHeader title={t('మార్కెట్', 'Market')} />
+      <TopTabBar />
       <ScrollView
         style={s.scroll} contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}

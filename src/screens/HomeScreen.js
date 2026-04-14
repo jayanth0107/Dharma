@@ -1,6 +1,7 @@
 // ধর্ম — Home Screen (Dashboard Grid — No Scroll)
 // Branded header with flag + 3×4 feature tile grid
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState } from 'react';
 import {
@@ -167,7 +168,7 @@ export function HomeScreen({ navigation }) {
 
       </LinearGradient>
 
-      {/* ── Global Top Tabs ── */}
+      <TopTabBar />
       <OfflineBanner />
 
       {/* Quick action bar */}

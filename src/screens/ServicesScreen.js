@@ -1,6 +1,7 @@
 // ధర్మ — Services Screen
 // Astrologer consultation + Puja items + Yearly horoscope PDF
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform } from 'react-native';
@@ -59,6 +60,7 @@ export function ServicesScreen({ navigation }) {
     <SwipeWrapper screenName="Services">
     <View style={s.screen}>
       <PageHeader title={t('సేవలు & షాప్', 'Services & Shop')} />
+      <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Consultation Services */}

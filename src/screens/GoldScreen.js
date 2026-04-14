@@ -1,5 +1,6 @@
 // ధర్మ — Gold & Silver Prices Screen
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert } from 'react-native';
@@ -51,6 +52,7 @@ export function GoldScreen() {
     <SwipeWrapper screenName="Gold">
     <View style={s.screen}>
       <PageHeader title={t(TR.goldSilver.te, TR.goldSilver.en)} />
+      <TopTabBar />
       <ScrollView
         style={s.scroll} contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}

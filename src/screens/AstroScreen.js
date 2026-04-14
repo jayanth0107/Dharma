@@ -1,6 +1,7 @@
 // ధర్మ — Astro Screen (Grid Dashboard — No Scroll)
 // All tiles navigate to full screens, no modals
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -19,6 +20,7 @@ export function AstroScreen({ navigation }) {
     <SwipeWrapper screenName="Astro">
     <View style={s.screen}>
       <PageHeader title={t('జ్యోతిష్యం — Astro', 'Astrology')} />
+      <TopTabBar />
 
       <View style={s.gridContainer}>
         <FeatureGrid gap={12} rows={3}>

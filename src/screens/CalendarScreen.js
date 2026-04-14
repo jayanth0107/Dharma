@@ -1,6 +1,7 @@
 // ధర్మ — Content Screen (Dark Theme)
 // Sub-tabs: Panchang / Timings / Festivals / Ekadashi / Holidays / Darshan / Gold
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -101,6 +102,7 @@ export function CalendarScreen({ route }) {
     <SwipeWrapper screenName="Calendar">
     <View style={s.screen}>
       <PageHeader title={t('క్యాలెండర్', 'Calendar')} />
+      <TopTabBar />
       <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />
 
       {/* Filter pills — fixed above the scroll on the festivals tab so users

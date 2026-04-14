@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 import { HoroscopeModal } from '../components/HoroscopeFeature';
 
 export function HoroscopeScreen({ navigation }) {
@@ -16,6 +17,7 @@ export function HoroscopeScreen({ navigation }) {
     <SwipeWrapper screenName="Horoscope">
     <View style={s.screen}>
       <PageHeader title={t('మీ జాతకం', 'Your Jaatakam')} />
+      <TopTabBar />
       <HoroscopeModal
         visible={true}
         embedded={true}
