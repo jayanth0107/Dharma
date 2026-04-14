@@ -33,7 +33,6 @@ function PlaceResults({ results, onSelect }) {
         </TouchableOpacity>
       ))}
     </View>
-    </SwipeWrapper>
   );
 }
 
@@ -310,6 +309,7 @@ export function MatchmakingScreen({ navigation }) {
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
+    </SwipeWrapper>
   );
 }
 
