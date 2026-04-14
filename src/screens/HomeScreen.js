@@ -406,7 +406,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 5,
   },
   setNameText: {
-    fontSize: 12, fontWeight: '700', color: DarkColors.saffron,
+    fontSize: 13, fontWeight: '700', color: '#4A90D9',
   },
   premiumPill: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
@@ -419,7 +419,7 @@ const s = StyleSheet.create({
     marginTop: 6, paddingVertical: 5,
   },
   loginPromptText: {
-    fontSize: 12, fontWeight: '600', color: DarkColors.saffron,
+    fontSize: 13, fontWeight: '700', color: '#4A90D9',
   },
   headerDivider: {
     height: 1,
