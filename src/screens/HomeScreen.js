@@ -288,7 +288,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Gold')}
           />
           <FeatureTile
-            icon="temple-hindu" label={t('దేవాలయాలు', 'Temples')} sublabel={t('Nearby', 'సమీపంలో')}
+            icon="temple-hindu" label={t('దేవాలయాలు', 'Temples')} sublabel={t('Temples Nearby', 'సమీప దేవాలయాలు')}
             accentColor={DarkColors.saffron}
             onPress={() => navigation.navigate('TempleNearby')}
           />
