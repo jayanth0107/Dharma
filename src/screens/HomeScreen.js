@@ -77,10 +77,6 @@ export function HomeScreen({ navigation }) {
         `${location.area ? location.area + ', ' : ''}${location.name || 'Hyderabad'}`
       );
 
-  const tithi = t(panchangam.tithi?.telugu || '', panchangam.tithi?.english || panchangam.tithi?.telugu || '');
-  const nakshatra = t(panchangam.nakshatra?.telugu || '', panchangam.nakshatra?.english || panchangam.nakshatra?.telugu || '');
-  const vaaram = t(panchangam.vaaram?.telugu || '', panchangam.vaaram?.english || panchangam.vaaram?.telugu || '');
-
   return (
     <View style={s.screen}>
       <StatusBar style="light" />
@@ -168,23 +164,6 @@ export function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Today's info strip */}
-        <View style={s.infoStrip}>
-          <View style={s.infoPill}>
-            <Text style={s.infoPillLabel}>{t(TR.tithi.te, TR.tithi.en)}</Text>
-            <Text style={s.infoPillValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{tithi}</Text>
-          </View>
-          <View style={s.infoDivider} />
-          <View style={s.infoPill}>
-            <Text style={s.infoPillLabel}>{t(TR.nakshatra.te, TR.nakshatra.en)}</Text>
-            <Text style={s.infoPillValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{nakshatra}</Text>
-          </View>
-          <View style={s.infoDivider} />
-          <View style={s.infoPill}>
-            <Text style={s.infoPillLabel}>{t(TR.vaaram.te, TR.vaaram.en)}</Text>
-            <Text style={s.infoPillValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{vaaram}</Text>
-          </View>
-        </View>
       </LinearGradient>
 
       {/* ── Global Top Tabs ── */}
@@ -478,24 +457,6 @@ const s = StyleSheet.create({
     width: 14, height: 14, borderRadius: 7,
     backgroundColor: '#fff',
   },
-
-  // Today's info strip
-  infoStrip: {
-    flexDirection: 'row', alignItems: 'center',
-    marginTop: 10, paddingVertical: 14, paddingHorizontal: 8,
-    backgroundColor: DarkColors.bgCard, borderRadius: 14,
-    borderWidth: 1, borderColor: DarkColors.borderGold,
-  },
-  infoPill: { flex: 1, alignItems: 'center', paddingHorizontal: 4 },
-  infoPillLabel: {
-    fontSize: 12, color: DarkColors.saffron, fontWeight: '800',
-    letterSpacing: 0.8, textTransform: 'uppercase',
-  },
-  infoPillValue: {
-    fontSize: 17, color: DarkColors.goldLight, fontWeight: '800',
-    marginTop: 5, lineHeight: 22, textAlign: 'center',
-  },
-  infoDivider: { width: 1, height: 38, backgroundColor: DarkColors.borderGold, marginHorizontal: 4 },
 
   // Quick action bar
   quickBar: {

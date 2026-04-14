@@ -20,7 +20,7 @@ export const TR = {
   navGita: { te: 'గీత', en: 'Gita' },
 
   // ── Home Screen Tiles ──
-  panchang: { te: 'పంచాంగం', en: 'Panchang' },
+  panchang: { te: 'నేటి దినం', en: "Today's Date" },
   festivals: { te: 'పండుగలు', en: 'Festivals' },
   timings: { te: 'ముహూర్తాలు', en: 'Timings' },
   darshan: { te: 'దైనిక దర్శనం', en: 'Daily Darshan' },
