@@ -11,6 +11,8 @@ import { DarkColors } from '../theme/colors';
 import { TR } from '../data/translations';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
+import { SwipeWrapper } from '../components/SwipeWrapper';
+import { TopTabBar } from '../components/TopTabBar';
 import { CalendarPicker } from '../components/CalendarPicker';
 import { calculateMatchmaking, NAKSHATRAS, NAKSHATRAS_EN } from '../utils/matchmakingCalculator';
 import { calculateNakshatra } from '../utils/panchangamCalculator';
@@ -31,6 +33,7 @@ function PlaceResults({ results, onSelect }) {
         </TouchableOpacity>
       ))}
     </View>
+    </SwipeWrapper>
   );
 }
 
@@ -95,8 +98,10 @@ export function MatchmakingScreen({ navigation }) {
 
 
   return (
+    <SwipeWrapper screenName="Matchmaking">
     <View style={s.screen}>
       <PageHeader title={t(TR.matchmaking.te, TR.matchmaking.en)} />
+      <TopTabBar />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
