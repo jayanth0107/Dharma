@@ -5,7 +5,6 @@ import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { PremiumModal } from '../components/PremiumBanner';
 
 export function PremiumScreen({ navigation }) {
@@ -15,7 +14,6 @@ export function PremiumScreen({ navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={t('ప్రీమియం', 'Premium')} />
-      <GlobalTopTabs activeTab="" />
       <PremiumModal visible={true} embedded={true} onClose={() => navigation.navigate('Home')} onActivated={handlePremiumActivated} />
     </View>
   );

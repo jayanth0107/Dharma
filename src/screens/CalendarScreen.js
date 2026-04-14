@@ -1,5 +1,6 @@
 // ధర్మ — Content Screen (Dark Theme)
 // Sub-tabs: Panchang / Timings / Festivals / Ekadashi / Holidays / Darshan / Gold
+import { SwipeWrapper } from '../components/SwipeWrapper';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -11,7 +12,6 @@ import { useApp } from '../context/AppContext';
 import { useLanguage, T, TR } from '../context/LanguageContext';
 import { useWindow } from '../theme';
 
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { PageHeader } from '../components/PageHeader';
 import { SubTabBar } from '../components/SubTabBar';
 import { MiniCalendar } from '../components/MiniCalendar';
@@ -98,9 +98,9 @@ export function CalendarScreen({ route }) {
   if (!panchangam) return null;
 
   return (
+    <SwipeWrapper screenName="Calendar">
     <View style={s.screen}>
       <PageHeader title={t('క్యాలెండర్', 'Calendar')} />
-      <GlobalTopTabs activeTab="Calendar" />
       <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />
 
       {/* Filter pills — fixed above the scroll on the festivals tab so users
@@ -361,6 +361,7 @@ export function CalendarScreen({ route }) {
         <View style={{ height: 20 }} />
       </ScrollView>
     </View>
+    </SwipeWrapper>
   );
 }
 

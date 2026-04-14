@@ -10,7 +10,6 @@ import { DarkColors } from '../theme/colors';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '../utils/notificationService';
 import { useApp } from '../context/AppContext';
 
@@ -55,7 +54,6 @@ export function NotificationScreen({ navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={t('నోటిఫికేషన్లు', 'Notifications')} />
-      <GlobalTopTabs activeTab="" />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 

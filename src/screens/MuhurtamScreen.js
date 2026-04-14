@@ -5,7 +5,6 @@ import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { MuhurtamFinderModal } from '../components/MuhurtamFinder';
 
 export function MuhurtamScreen({ navigation }) {
@@ -15,7 +14,6 @@ export function MuhurtamScreen({ navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={t('ముహూర్తం ఫైండర్', 'Muhurtam Finder')} />
-      <GlobalTopTabs activeTab="Astro" />
       <MuhurtamFinderModal
         visible={true}
         embedded={true}

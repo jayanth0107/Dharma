@@ -11,7 +11,6 @@ import { DarkColors } from '../theme/colors';
 import { TR } from '../data/translations';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { CalendarPicker } from '../components/CalendarPicker';
 import { calculateMatchmaking, NAKSHATRAS, NAKSHATRAS_EN } from '../utils/matchmakingCalculator';
 import { calculateNakshatra } from '../utils/panchangamCalculator';
@@ -98,7 +97,6 @@ export function MatchmakingScreen({ navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={t(TR.matchmaking.te, TR.matchmaking.en)} />
-      <GlobalTopTabs activeTab="Astro" />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 

@@ -8,7 +8,6 @@ import { DarkColors } from '../theme/colors';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { googlePlacesNearby } from '../utils/placesProxy';
 
 function calcDistance(lat1, lon1, lat2, lon2) {
@@ -260,7 +259,6 @@ export function TempleNearbyScreen() {
   return (
     <View style={s.screen}>
       <PageHeader title={t('దేవాలయాలు', 'Temples')} />
-      <GlobalTopTabs activeTab="" />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Google Maps Quick Search */}

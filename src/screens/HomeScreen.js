@@ -1,5 +1,6 @@
 // ধর্ম — Home Screen (Dashboard Grid — No Scroll)
 // Branded header with flag + 3×4 feature tile grid
+import { SwipeWrapper } from '../components/SwipeWrapper';
 
 import React, { useState } from 'react';
 import {
@@ -14,7 +15,6 @@ import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 import { FlagWithPole } from '../components/FlagWithPole';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { DrawerMenu } from '../components/DrawerMenu';
 import { LocationPickerModal } from '../components/LocationPickerModal';
 import { SectionShareRow } from '../components/SectionShareRow';
@@ -78,6 +78,7 @@ export function HomeScreen({ navigation }) {
       );
 
   return (
+    <SwipeWrapper screenName="Home">
     <View style={s.screen}>
       <StatusBar style="light" />
 
@@ -167,7 +168,6 @@ export function HomeScreen({ navigation }) {
       </LinearGradient>
 
       {/* ── Global Top Tabs ── */}
-      <GlobalTopTabs activeTab="Home" />
       <OfflineBanner />
 
       {/* Quick action bar */}
@@ -321,6 +321,7 @@ export function HomeScreen({ navigation }) {
         />
       )}
     </View>
+    </SwipeWrapper>
   );
 }
 

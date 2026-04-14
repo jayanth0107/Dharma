@@ -1,4 +1,5 @@
 // ధర్మ — Gold & Silver Prices Screen
+import { SwipeWrapper } from '../components/SwipeWrapper';
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert } from 'react-native';
@@ -9,7 +10,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { GoldSilverPriceCard } from '../components/GoldPriceCard';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { AdBannerWidget } from '../components/AdBanner';
@@ -48,9 +48,9 @@ export function GoldScreen() {
   };
 
   return (
+    <SwipeWrapper screenName="Gold">
     <View style={s.screen}>
       <PageHeader title={t(TR.goldSilver.te, TR.goldSilver.en)} />
-      <GlobalTopTabs activeTab="Gold" />
       <ScrollView
         style={s.scroll} contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -107,6 +107,7 @@ export function GoldScreen() {
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
+    </SwipeWrapper>
   );
 }
 

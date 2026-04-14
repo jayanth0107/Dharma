@@ -5,7 +5,6 @@ import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { SettingsModal } from '../components/SettingsModal';
 
 export function SettingsScreen({ navigation }) {
@@ -15,7 +14,6 @@ export function SettingsScreen({ navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={t('సెట్టింగ్స్', 'Settings')} />
-      <GlobalTopTabs activeTab="More" />
       <SettingsModal visible={true} embedded={true} onClose={() => navigation.navigate('Home')} isPremium={premiumActive} onTogglePremium={handleTogglePremium} />
     </View>
   );

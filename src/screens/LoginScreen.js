@@ -9,7 +9,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { TR } from '../data/translations';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -135,7 +134,6 @@ export function LoginScreen({ navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={t('లాగిన్', 'Login')} />
-      <GlobalTopTabs activeTab="" />
 
       <View style={s.content}>
         {/* reCAPTCHA container for web */}

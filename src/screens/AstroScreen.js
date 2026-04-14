@@ -1,5 +1,6 @@
 // ధర్మ — Astro Screen (Grid Dashboard — No Scroll)
 // All tiles navigate to full screens, no modals
+import { SwipeWrapper } from '../components/SwipeWrapper';
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
@@ -8,7 +9,6 @@ import { useApp } from '../context/AppContext';
 import { useLanguage, T } from '../context/LanguageContext';
 
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 
 export function AstroScreen({ navigation }) {
@@ -16,9 +16,9 @@ export function AstroScreen({ navigation }) {
   const { t } = useLanguage();
 
   return (
+    <SwipeWrapper screenName="Astro">
     <View style={s.screen}>
       <PageHeader title={t('జ్యోతిష్యం — Astro', 'Astrology')} />
-      <GlobalTopTabs activeTab="Astro" />
 
       <View style={s.gridContainer}>
         <FeatureGrid gap={12} rows={3}>
@@ -79,6 +79,7 @@ export function AstroScreen({ navigation }) {
         <Text style={s.comingSoonText}>{t('🔮 రాహు కాలం, సంఖ్యాశాస్త్రం — త్వరలో', '🔮 Rahu Kaal, Numerology — Coming Soon')}</Text>
       </View>
     </View>
+    </SwipeWrapper>
   );
 }
 

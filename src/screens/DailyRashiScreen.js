@@ -1,5 +1,6 @@
 // ధర్మ — Daily Rashi Predictions Screen
 // "My Rashi" — enter birth date → auto-detect rashi → show personal prediction first
+import { SwipeWrapper } from '../components/SwipeWrapper';
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
@@ -7,7 +8,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { CalendarPicker } from '../components/CalendarPicker';
 import { getAllDailyRashi, RASHIS } from '../utils/dailyRashiService';
 
@@ -95,9 +95,9 @@ export function DailyRashiScreen() {
     : predictions;
 
   return (
+    <SwipeWrapper screenName="DailyRashi">
     <View style={s.screen}>
       <PageHeader title={t('నేటి రాశి ఫలాలు', 'Daily Horoscope')} />
-      <GlobalTopTabs activeTab="Astro" />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* My Rashi Section */}
@@ -214,6 +214,7 @@ export function DailyRashiScreen() {
         />
       )}
     </View>
+    </SwipeWrapper>
   );
 }
 

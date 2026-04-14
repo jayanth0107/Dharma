@@ -5,7 +5,7 @@ import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
+import { SwipeWrapper } from '../components/SwipeWrapper';
 import { HoroscopeModal } from '../components/HoroscopeFeature';
 
 export function HoroscopeScreen({ navigation }) {
@@ -13,9 +13,9 @@ export function HoroscopeScreen({ navigation }) {
   const { t } = useLanguage();
 
   return (
+    <SwipeWrapper screenName="Horoscope">
     <View style={s.screen}>
-      <PageHeader title={t('రాశి ఫలం', 'Horoscope')} />
-      <GlobalTopTabs activeTab="Astro" />
+      <PageHeader title={t('మీ జాతకం', 'Your Jaatakam')} />
       <HoroscopeModal
         visible={true}
         embedded={true}
@@ -24,6 +24,7 @@ export function HoroscopeScreen({ navigation }) {
         onOpenPremium={() => navigation.navigate('Premium')}
       />
     </View>
+    </SwipeWrapper>
   );
 }
 

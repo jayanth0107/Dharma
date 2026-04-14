@@ -1,5 +1,6 @@
 // ధర్మ — Market Screen
 // NSE/BSE indices, Gold/Silver ETF, top stocks
+import { SwipeWrapper } from '../components/SwipeWrapper';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
@@ -7,7 +8,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 import { fetchMarketData } from '../utils/marketService';
 
 function PriceCard({ item, t }) {
@@ -34,6 +34,7 @@ function PriceCard({ item, t }) {
         </View>
       </View>
     </View>
+    </SwipeWrapper>
   );
 }
 
@@ -58,9 +59,9 @@ export function MarketScreen() {
   }, []);
 
   return (
+    <SwipeWrapper screenName="Market">
     <View style={s.screen}>
       <PageHeader title={t('మార్కెట్', 'Market')} />
-      <GlobalTopTabs activeTab="Gold" />
       <ScrollView
         style={s.scroll} contentContainerStyle={s.content}
         showsVerticalScrollIndicator={false}

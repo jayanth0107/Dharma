@@ -7,7 +7,6 @@ import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity, Platform
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { PageHeader } from '../components/PageHeader';
-import { GlobalTopTabs } from '../components/GlobalTopTabs';
 
 const PAGES = {
   privacy: {
@@ -65,7 +64,6 @@ export function WebViewScreen({ route, navigation }) {
   return (
     <View style={s.screen}>
       <PageHeader title={page.title} />
-      <GlobalTopTabs activeTab="More" />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {page.sections.map((section, i) => (
           <View key={i} style={s.section}>
