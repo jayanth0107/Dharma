@@ -51,6 +51,9 @@ export function HomeScreen({ navigation }) {
     if (id === 'location') { navigation.navigate('Location'); return; }
     if (id === 'premium' || id === 'removeAds') { navigation.navigate('Premium'); return; }
     if (id === 'donate') { navigation.navigate('Donate'); return; }
+    if (id === 'reminder') { navigation.navigate('Reminder'); return; }
+    if (id === 'muhurtam') { navigation.navigate('Muhurtam'); return; }
+    if (id === 'matchmaking') { navigation.navigate('Matchmaking'); return; }
     if (id === 'share') { setShowShareApp(true); return; }
     if (id === 'rate') { navigation.navigate('InfoPage', { pageId: 'rate' }); return; }
     if (id === 'feedback') { navigation.navigate('InfoPage', { pageId: 'feedback' }); return; }
@@ -96,8 +99,12 @@ export function HomeScreen({ navigation }) {
           <FlagWithPole size={38} />
           <Text style={s.appTitleRow} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
             <Text style={s.appTitle}>{t(TR.appName.te, TR.appName.en)}</Text>
-            <Text style={s.appHyphen}> | </Text>
-            <Text style={s.appSubtitle}>{t(TR.sanatana.te, TR.sanatana.en)}</Text>
+            {lang === 'te' && (
+              <>
+                <Text style={s.appHyphen}> | </Text>
+                <Text style={s.appSubtitle}>{TR.sanatana.te}</Text>
+              </>
+            )}
           </Text>
           <View style={{ flex: 1 }} />
           <TouchableOpacity style={s.headerIconBtn} onPress={() => navigation.navigate('Notifications')}>

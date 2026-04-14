@@ -17,18 +17,24 @@ const MENU_ITEMS = [
   // Account & Premium (most important)
   { id: 'login', icon: 'account-circle-outline', label: 'ప్రొఫైల్ / లాగిన్', labelEn: 'Profile / Login' },
   { id: 'premium', icon: 'crown', label: 'ప్రీమియం అప్‌గ్రేడ్', labelEn: 'Upgrade to Premium', accent: DarkColors.gold },
+  { id: 'removeAds', icon: 'advertisements-off', label: 'ప్రకటనలు తొలగించు', labelEn: 'Remove Ads', accent: DarkColors.tulasiGreen },
   { id: 'divider1' },
+  // Quick features
+  { id: 'reminder', icon: 'bell-plus', label: 'రిమైండర్', labelEn: 'Reminders' },
+  { id: 'muhurtam', icon: 'calendar-star', label: 'ముహూర్తం ఫైండర్', labelEn: 'Muhurtam Finder' },
+  { id: 'matchmaking', icon: 'heart-multiple', label: 'జాతక పొందిక', labelEn: 'Matchmaking' },
+  { id: 'divider2' },
   // App settings
   { id: 'notifications', icon: 'bell-outline', label: 'నోటిఫికేషన్స్', labelEn: 'Notifications' },
   { id: 'settings', icon: 'cog-outline', label: 'సెట్టింగ్స్', labelEn: 'Settings' },
   { id: 'location', icon: 'map-marker-outline', label: 'ప్రదేశం మార్చు', labelEn: 'Change Location' },
-  { id: 'divider2' },
+  { id: 'divider3' },
   // Engagement & growth
   { id: 'share', icon: 'share-variant', label: 'యాప్ షేర్', labelEn: 'Share App' },
   { id: 'rate', icon: 'star-outline', label: 'యాప్ రేట్ చేయండి', labelEn: 'Rate Dharma' },
   { id: 'donate', icon: 'hand-heart', label: 'దానం', labelEn: 'Donate' },
   { id: 'feedback', icon: 'message-text-outline', label: 'అభిప్రాయం', labelEn: 'Feedback' },
-  { id: 'divider3' },
+  { id: 'divider4' },
   // Legal & info
   { id: 'privacy', icon: 'shield-check-outline', label: 'గోప్యతా విధానం', labelEn: 'Privacy Policy' },
   { id: 'terms', icon: 'file-document-outline', label: 'నిబంధనలు', labelEn: 'Terms & Conditions' },
