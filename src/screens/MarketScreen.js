@@ -34,7 +34,6 @@ function PriceCard({ item, t }) {
         </View>
       </View>
     </View>
-    </SwipeWrapper>
   );
 }
 
@@ -129,6 +128,7 @@ export function MarketScreen() {
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
+    </SwipeWrapper>
   );
 }
 
