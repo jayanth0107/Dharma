@@ -72,7 +72,6 @@ function getSubTabs(t) {
     { id: 'pradosham', label: t('ప్రదోషం', 'Pradosham') },
     { id: 'holidays', label: t(TR.holidays.te, TR.holidays.en) },
     { id: 'darshan', label: t(TR.darshan.te, TR.darshan.en) },
-    { id: 'kids', label: t(TR.kidsStories.te, TR.kidsStories.en) },
   ];
 }
 
