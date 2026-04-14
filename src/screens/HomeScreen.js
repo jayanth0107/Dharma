@@ -283,7 +283,7 @@ export function HomeScreen({ navigation }) {
 
           {/* Row 4 — Gold, Temples, Services */}
           <FeatureTile
-            icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Live Prices', 'ధరలు')}
+            icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Gold Price', 'బంగారం ధర')}
             accentColor="#B8860B"
             onPress={() => navigation.navigate('Gold')}
           />
