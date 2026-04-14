@@ -256,7 +256,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Gita')}
           />
           <FeatureTile
-            icon="clock-check" label={t(TR.timings.te, TR.timings.en)} sublabel={t('Timings', 'ముహూర్తాలు')}
+            icon="clock-check" label={t('శుభ సమయాలు', 'Good Times')} sublabel={t('Rahu Kalam & more', 'రాహు కాలం & ఇంకా')}
             accentColor="#C41E3A"
             onPress={() => navigation.navigate('Calendar', { tab: 'timings', _ts: Date.now() })}
           />
@@ -269,7 +269,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
-            icon="calendar-star" label={t(TR.muhurtam.te, TR.muhurtam.en)} sublabel={t('Best Dates', 'శుభ దినాలు')}
+            icon="calendar-star" label={t('శుభ దినాలు', 'Best Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
             accentColor={DarkColors.tulasiGreen}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Muhurtam')}
