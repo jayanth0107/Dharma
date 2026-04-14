@@ -226,7 +226,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Calendar', { tab: 'panchang', _ts: Date.now() })}
           />
           <FeatureTile
-            icon="star-circle" label={t('నేటి రాశి', 'Daily Rashi')} sublabel={t('Predictions', 'ఫలాలు')}
+            icon="star-circle" label={t('మీ రాశి', 'Your Rashi')} sublabel={t('Predictions', 'ఫలాలు')}
             accentColor="#7B1FA2"
             onPress={() => navigation.navigate('DailyRashi')}
           />
