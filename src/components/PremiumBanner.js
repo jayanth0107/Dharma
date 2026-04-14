@@ -289,7 +289,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
             )}
-            <MaterialCommunityIcons name="crown" size={selectedPlan ? 28 : 48} color="#FFD700" />
+            <MaterialCommunityIcons name="crown" size={selectedPlan ? 22 : 28} color="#FFD700" />
             <Text style={[s.title, selectedPlan && { fontSize: 18, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
             {!selectedPlan ? (
               <>
@@ -557,8 +557,8 @@ const q = StyleSheet.create({
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modal: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%', overflow: 'hidden' },
-  header: { alignItems: 'center', paddingVertical: 30, paddingHorizontal: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative' },
-  headerCompact: { paddingVertical: 14 },
+  header: { alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative' },
+  headerCompact: { paddingVertical: 10 },
   closeX: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   backX: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 26, fontWeight: '800', color: '#FFD700', marginTop: 12, letterSpacing: 1 },

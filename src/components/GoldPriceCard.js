@@ -267,7 +267,7 @@ const gs = StyleSheet.create({
   },
 
   // Banner
-  bannerWrap: { width: '100%', height: 140, position: 'relative' },
+  bannerWrap: { width: '100%', height: 100, position: 'relative' },
   bannerImage: { width: '100%', height: '100%' },
   bannerFallback: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' },
   bannerOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 60 },

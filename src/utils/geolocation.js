@@ -162,7 +162,7 @@ async function searchWithPhoton(query) {
   if (!response.ok) throw new Error(`Photon search HTTP ${response.status}`);
   const data = await response.json();
 
-  return (data.features || []).map((f) => {
+  const results = (data.features || []).map((f) => {
     const p = f.properties || {};
     const coords = f.geometry?.coordinates || [];
     const city = p.city || p.name || '';
@@ -182,6 +182,16 @@ async function searchWithPhoton(query) {
       isCustom: true,
     };
   }).filter(r => r.latitude && r.longitude && r.name);
+
+  // Prioritize Indian results — Indian villages/cities should appear first
+  // when a user searches for a local place name like "tenali".
+  results.sort((a, b) => {
+    const aIndia = (a.country || '').toLowerCase() === 'india' ? 0 : 1;
+    const bIndia = (b.country || '').toLowerCase() === 'india' ? 0 : 1;
+    return aIndia - bIndia;
+  });
+
+  return results;
 }
 
 // MapMyIndia (Mappls) — best India coverage, needs API key
@@ -228,7 +238,7 @@ async function searchWithNominatim(query) {
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&accept-language=te,en&addressdetails=1`,
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=8&accept-language=te,en&addressdetails=1&countrycodes=in&viewbox=68,6,98,38&bounded=0`,
     {
       headers: {
         'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)',

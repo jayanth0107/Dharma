@@ -255,7 +255,7 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Decorative icon + quote */}
             <View style={{ alignItems: 'center', backgroundColor: '#0D3B0F', paddingBottom: 16 }}>
-              <MaterialCommunityIcons name="hand-heart" size={48} color="#FFD700" style={{ marginTop: 8 }} />
+              <MaterialCommunityIcons name="hand-heart" size={28} color="#FFD700" style={{ marginTop: 4 }} />
               <Text style={styles.modalQuote}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
               <Text style={styles.modalQuoteEn}>{t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}</Text>
             </View>
@@ -473,11 +473,11 @@ const styles = StyleSheet.create({
   // ---- Modal ----
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modal: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' },
-  modalHeader: { paddingTop: 16, paddingBottom: 20, paddingHorizontal: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  modalHeader: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   modalHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   modalHeaderTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
-  modalQuote: { fontSize: 18, fontWeight: '700', color: '#FFD700', textAlign: 'center', marginTop: 12, fontStyle: 'italic' },
-  modalQuoteEn: { fontSize: 13, color: 'rgba(255,255,255,0.8)', textAlign: 'center', marginTop: 4 },
+  modalQuote: { fontSize: 15, fontWeight: '700', color: '#FFD700', textAlign: 'center', marginTop: 6, fontStyle: 'italic' },
+  modalQuoteEn: { fontSize: 12, color: 'rgba(255,255,255,0.8)', textAlign: 'center', marginTop: 2 },
   modalBody: { padding: 20 },
   modalMessage: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 8 },
 
@@ -534,6 +534,8 @@ const styles = StyleSheet.create({
   thankYouText: { flex: 1, fontSize: 13, color: DarkColors.textSecondary, lineHeight: 20, fontStyle: 'italic' },
 
   // Close
-  closeBtn: { alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20, backgroundColor: '#2E7D32', borderRadius: 14 },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  // De-emphasized close — subtle text link, not a dominant button.
+  // The primary CTA is the UPI pay buttons above; close is just an escape hatch.
+  closeBtn: { alignItems: 'center', paddingVertical: 10, marginHorizontal: 20, marginBottom: 30 },
+  closeBtnText: { fontSize: 13, fontWeight: '600', color: DarkColors.textMuted, textDecorationLine: 'underline' },
 });
