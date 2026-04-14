@@ -27,9 +27,12 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
   const scrollRef = useRef(null);
   const scrollXRef = useRef(0);
 
-  const scrollBy = (dir) => {
-    const newX = Math.max(0, scrollXRef.current + (dir * 180));
-    scrollRef.current?.scrollTo?.({ x: newX, animated: true });
+  const navigateTab = (dir) => {
+    const currentIdx = tabs.findIndex(t => t.id === activeTab);
+    const nextIdx = currentIdx + dir;
+    if (nextIdx >= 0 && nextIdx < tabs.length) {
+      onTabChange(tabs[nextIdx].id);
+    }
   };
 
   // Auto-scroll to active tab
@@ -44,7 +47,7 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
   return (
     <View style={s.wrapper}>
       {/* Left chevron — always visible */}
-      <TouchableOpacity style={s.arrowLeft} onPress={() => scrollBy(-1)} activeOpacity={0.7}>
+      <TouchableOpacity style={s.arrowLeft} onPress={() => navigateTab(-1)} activeOpacity={0.7}>
         <PulsingChevron direction="left" />
       </TouchableOpacity>
 
@@ -75,7 +78,7 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
       </ScrollView>
 
       {/* Right chevron — always visible */}
-      <TouchableOpacity style={s.arrowRight} onPress={() => scrollBy(1)} activeOpacity={0.7}>
+      <TouchableOpacity style={s.arrowRight} onPress={() => navigateTab(1)} activeOpacity={0.7}>
         <PulsingChevron direction="right" />
       </TouchableOpacity>
     </View>
