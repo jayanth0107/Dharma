@@ -227,7 +227,10 @@ export function HomeScreen({ navigation }) {
       {/* ── Feature Grid (scrollable) ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
         <FeatureGrid gap={12}>
-          {/* Row 1 — Daily essentials */}
+          {/* Tiles follow nav bar order: Calendar > Gold > Market > Astro > Horoscope > Rashi > Gita > Services > More */}
+          {/* నేటి దినం and పండుగలు are quick-access shortcuts into Calendar sub-tabs */}
+
+          {/* Row 1 — Calendar quick access (nav position 2) */}
           <FeatureTile
             icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t('Panchang', 'పంచాంగం')}
             accentColor={DarkColors.gold}
@@ -244,30 +247,42 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Calendar', { tab: 'timings', _ts: Date.now() })}
           />
 
-          {/* Row 2 — Spiritual & content */}
+          {/* Row 2 — Gold, Market (nav positions 3,4) + Astro (nav position 5) */}
           <FeatureTile
-            icon="hands-pray" label={t(TR.darshan.te, TR.darshan.en)} sublabel={t('Darshan', 'దర్శనం')}
-            accentColor={DarkColors.saffron}
-            onPress={() => navigation.navigate('Calendar', { tab: 'darshan', _ts: Date.now() })}
+            icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Gold Price', 'బంగారం ధర')}
+            accentColor="#B8860B"
+            onPress={() => navigation.navigate('Gold')}
           />
           <FeatureTile
-            icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t('Gita', 'గీత')}
-            accentColor="#7B1FA2"
-            onPress={() => navigation.navigate('Gita')}
+            icon="chart-line" label={t('మార్కెట్', 'Market')} sublabel={t('NSE/BSE', 'Stocks')}
+            accentColor="#4A90D9"
+            onPress={() => navigation.navigate('Market')}
+          />
+          <FeatureTile
+            icon="zodiac-leo" label={t('జ్యోతిష్యం', 'Astrology')} sublabel={t('Astro Features', 'జ్యోతిష్య సేవలు')}
+            accentColor={DarkColors.saffron}
+            onPress={() => navigation.navigate('Astro')}
+          />
+
+          {/* Row 3 — Horoscope, Rashi, Gita (nav positions 6,7,8) */}
+          <FeatureTile
+            icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Birth Chart', 'జన్మ కుండలి')}
+            accentColor={DarkColors.saffron}
+            isPremium={!premiumActive}
+            onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
             icon="star-circle" label={t('మీ రాశి', 'Your Rashi')} sublabel={t('Predictions', 'ఫలాలు')}
             accentColor="#7B1FA2"
             onPress={() => navigation.navigate('DailyRashi')}
           />
-
-          {/* Row 3 — Premium features (all show lock icon) */}
           <FeatureTile
-            icon="zodiac-leo" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Birth Chart', 'జన్మ కుండలి')}
-            accentColor={DarkColors.saffron}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Horoscope')}
+            icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t('Gita', 'గీత')}
+            accentColor="#7B1FA2"
+            onPress={() => navigation.navigate('Gita')}
           />
+
+          {/* Row 4 — Premium features (all show lock icon) */}
           <FeatureTile
             icon="calendar-star" label={t('శుభ దినాలు', 'Best Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
             accentColor={DarkColors.tulasiGreen}
@@ -280,39 +295,27 @@ export function HomeScreen({ navigation }) {
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Matchmaking')}
           />
-
-          {/* Row 4 — Utility */}
-          <FeatureTile
-            icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t('Kids Stories', 'పిల్లల కథలు')}
-            accentColor="#7B1FA2"
-            onPress={() => navigation.navigate('Calendar', { tab: 'kids', _ts: Date.now() })}
-          />
-          <FeatureTile
-            icon="temple-hindu" label={t('దేవాలయాలు', 'Temples')} sublabel={t('Temples Nearby', 'సమీప దేవాలయాలు')}
-            accentColor={DarkColors.saffron}
-            onPress={() => navigation.navigate('TempleNearby')}
-          />
           <FeatureTile
             icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t('Reminder', 'రిమైండర్')}
             accentColor={DarkColors.saffron}
             onPress={() => navigation.navigate('Reminder')}
           />
 
-          {/* Row 5 — Prices & payments */}
+          {/* Row 5 — Services & payments */}
           <FeatureTile
-            icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Gold Price', 'బంగారం ధర')}
-            accentColor="#B8860B"
-            onPress={() => navigation.navigate('Gold')}
-          />
-          <FeatureTile
-            icon="chart-line" label={t('మార్కెట్', 'Market')} sublabel={t('NSE/BSE', 'Stocks')}
-            accentColor="#4A90D9"
-            onPress={() => navigation.navigate('Market')}
+            icon="store" label={t('సేవలు', 'Services')} sublabel={t('Puja & Shop', 'పూజ & షాప్')}
+            accentColor={DarkColors.tulasiGreen}
+            onPress={() => navigation.navigate('Services')}
           />
           <FeatureTile
             icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t('Donate', 'దానం')}
             accentColor={DarkColors.tulasiGreen}
             onPress={() => navigation.navigate('Donate')}
+          />
+          <FeatureTile
+            icon="crown" label={t('ప్రీమియం', 'Premium')} sublabel={t('Upgrade', 'అప్‌గ్రేడ్')}
+            accentColor={DarkColors.gold}
+            onPress={() => navigation.navigate('Premium')}
           />
         </FeatureGrid>
         <View style={{ height: 16 }} />
