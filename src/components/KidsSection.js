@@ -30,7 +30,7 @@ const KIDS_STORIES = [
   {
     id: 3, title: 'ధ్రువుని తపస్సు', english: 'Dhruva\'s Penance',
     icon: 'star-four-points', color: '#4A90D9',
-    image: require('../../assets/deities/krishna.jpg'),
+    image: require('../../assets/deities/krishna.webp'),
     story: 'ధ్రువుడు ఐదేళ్ల బాలుడు. తన తండ్రి ఒడిలో కూర్చోవాలని వెళ్ళాడు. కానీ సవతి తల్లి అడ్డుకుని "నీకు అర్హత లేదు, దేవుని ప్రార్థించి అడుగు" అని అవమానించింది.\n\nధ్రువుడు అడవికి వెళ్ళి విష్ణువును ధ్యానించాడు. ఒక కాలిమీద నిలబడి, ఆహారం, నీరు లేకుండా తపస్సు చేశాడు.\n\nవిష్ణువు ప్రత్యక్షమై ధ్రువ నక్షత్ర స్థానం ఇచ్చాడు — ఎప్పటికీ చెరగని, ఆకాశంలో స్థిరంగా ఉండే స్థానం.',
     storyEn: 'Dhruva was a five-year-old boy. He went to sit on his father\'s lap, but his stepmother stopped him saying "You are not worthy. Go pray to God if you want that."\n\nDhruva went to the forest and meditated on Lord Vishnu. Standing on one foot, without food or water, he performed intense penance.\n\nLord Vishnu appeared and granted him the Pole Star position — an eternal, unshakable place in the sky.',
     moral: 'నేర్పు: చిన్నవాళ్ళు కూడా గొప్ప పనులు చేయగలరు. పట్టుదలతో ఏదైనా సాధించవచ్చు.',
