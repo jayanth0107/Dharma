@@ -269,7 +269,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
-            icon="calendar-star" label={t(TR.muhurtam.te, TR.muhurtam.en)} sublabel={t('Muhurtam', 'ముహూర్తం')}
+            icon="calendar-star" label={t(TR.muhurtam.te, TR.muhurtam.en)} sublabel={t('Best Dates', 'శుభ దినాలు')}
             accentColor={DarkColors.tulasiGreen}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Muhurtam')}
