@@ -11,11 +11,11 @@
 export const FontSizes = {
   micro:    11,   // badges, timestamp tags, watermark text
   caption:  12,   // footer text, tertiary labels, hint text
-  small:    13,   // sub-labels, secondary list info
-  body:     14,   // descriptions, body paragraphs, secondary buttons
-  bodyLg:   15,   // prominent body text, GlobalTopTabs labels
-  label:    16,   // primary tile labels, section sublabels, list item labels
-  title:    18,   // card titles, modal subtitles, daily greeting
+  small:    14,   // sub-labels, English subtitles, secondary list info
+  body:     15,   // descriptions, body paragraphs, secondary buttons
+  bodyLg:   16,   // prominent body text, top-tab labels
+  label:    17,   // primary tile labels, section sublabels, list item labels
+  title:    19,   // card titles, modal subtitles, daily greeting
   h3:       20,   // section headings, deity names, app-info section titles
   h2:       22,   // banner titles, screen titles
   h1:       24,   // hero numbers (festival day count), large modal titles

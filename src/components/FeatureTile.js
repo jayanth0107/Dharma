@@ -54,9 +54,9 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
       {/* Premium glow border */}
       {isPremium && <View style={s.premiumBorder} />}
 
-      {/* Icon — visual cue, smaller than the label */}
+      {/* Icon */}
       <View style={[s.iconCircle, { backgroundColor: color + '20' }, isPremium && s.iconCirclePremium]}>
-        <MaterialCommunityIcons name={icon} size={26} color={color} />
+        <MaterialCommunityIcons name={icon} size={30} color={color} />
         {isPremium && (
           <View style={s.lockOverlay}>
             <MaterialCommunityIcons name="lock" size={12} color="#FFD700" />
@@ -172,9 +172,9 @@ const s = StyleSheet.create({
     opacity: 0.4,
   },
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -196,7 +196,7 @@ const s = StyleSheet.create({
     paddingHorizontal: Spacing.xxs,
   },
   sublabel: {
-    ...Type.small,
+    ...Type.body,
     color: DarkColors.textSecondary,
     textAlign: 'center',
     marginTop: Spacing.xs,
