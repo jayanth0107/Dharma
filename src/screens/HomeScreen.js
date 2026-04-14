@@ -275,7 +275,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Muhurtam')}
           />
           <FeatureTile
-            icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Match', 'పొందిక')}
+            icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Love Match', 'ప్రేమ పొందిక')}
             accentColor="#C41E3A"
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Matchmaking')}
