@@ -24,53 +24,59 @@ export function AstroScreen({ navigation }) {
 
       <View style={s.gridContainer}>
         <FeatureGrid gap={12} rows={3}>
+          {/* Unique astrology services NOT in the main nav menu.
+              Horoscope / Muhurtam / Matchmaking are accessible from the
+              top + bottom bars directly, so they're not duplicated here. */}
           <FeatureTile
-            icon="zodiac-leo" label={t(T.horoscope.te, T.horoscope.en)} sublabel={t('Horoscope', 'రాశి ఫలం')}
+            icon="ab-testing" label={t('సంఖ్యాశాస్త్రం', 'Numerology')} sublabel={t('Lucky Numbers', 'అదృష్ట సంఖ్యలు')}
             accentColor={DarkColors.saffron}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Horoscope')}
+            isPremium={!premiumActive} disabled
           />
           <FeatureTile
-            icon="calendar-star" label={t('ముహూర్తం ఫైండర్', 'Muhurtam Finder')} sublabel={t('Muhurtam', 'ముహూర్తం')}
+            icon="home-variant" label={t('వాస్తు', 'Vastu Shastra')} sublabel={t('Home Energy', 'ఇంటి శక్తి')}
             accentColor={DarkColors.tulasiGreen}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Muhurtam')}
+            isPremium={!premiumActive} disabled
           />
           <FeatureTile
-            icon="heart-multiple" label={t(T.matchmaking.te, T.matchmaking.en)} sublabel={t('Matchmaking', 'పొందిక')}
-            accentColor="#C41E3A"
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Matchmaking')}
-          />
-          <FeatureTile
-            icon="chart-arc" label={t('జన్మ కుండలి', 'Birth Chart')} sublabel={t('Birth Chart', 'కుండలి')}
-            accentColor={DarkColors.gold}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Horoscope')}
-          />
-          <FeatureTile
-            icon="star-four-points" label={t('నక్షత్ర ఫలం', 'Nakshatra')} sublabel={t('Nakshatra', 'నక్షత్రం')}
+            icon="star-four-points" label={t('నక్షత్ర ఫైండర్', 'Nakshatra Finder')} sublabel={t('Find by DOB', 'పుట్టిన తేదీ')}
             accentColor="#7B1FA2"
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Horoscope')}
+            isPremium={!premiumActive} disabled
           />
           <FeatureTile
-            icon="sun-wireless" label={t('గ్రహ స్థితి', 'Planets')} sublabel={t('Planets', 'గ్రహాలు')}
+            icon="palette" label={t('అదృష్ట రంగు', 'Lucky Color')} sublabel={t('Today', 'నేటి')}
             accentColor="#4A90D9"
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Horoscope')}
+            isPremium={!premiumActive} disabled
           />
           <FeatureTile
-            icon="ring" label={t('వివాహ ముహూర్తం', 'Wedding Muhurtam')} sublabel={t('Wedding', 'వివాహం')}
+            icon="compass-rose" label={t('దిశ', 'Lucky Direction')} sublabel={t('Today', 'నేటి')}
+            accentColor="#B8860B"
+            isPremium={!premiumActive} disabled
+          />
+          <FeatureTile
+            icon="cards" label={t('తారతమ్యం', 'Name Compatibility')} sublabel={t('By Name', 'పేరు ద్వారా')}
+            accentColor="#C41E3A"
+            isPremium={!premiumActive} disabled
+          />
+          <FeatureTile
+            icon="om" label={t('మంత్రాలు', 'Mantras')} sublabel={t('Daily', 'రోజువారీ')}
             accentColor={DarkColors.saffron}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Muhurtam')}
+            isPremium={!premiumActive} disabled
+          />
+          <FeatureTile
+            icon="weather-sunny" label={t('గ్రహ యోగం', 'Planet Yoga')} sublabel={t('Today', 'నేటి')}
+            accentColor={DarkColors.gold}
+            isPremium={!premiumActive} disabled
+          />
+          <FeatureTile
+            icon="meditation" label={t('ధ్యానం', 'Meditation')} sublabel={t('Guides', 'మార్గదర్శి')}
+            accentColor="#7B1FA2"
+            isPremium={!premiumActive} disabled
           />
         </FeatureGrid>
       </View>
 
       <View style={s.comingSoon}>
-        <Text style={s.comingSoonText}>{t('🔮 7 జ్యోతిష్య సేవలు అందుబాటులో', '🔮 7 astrology services available')}</Text>
+        <Text style={s.comingSoonText}>{t('🔮 9 ప్రత్యేక సేవలు త్వరలో', '🔮 9 unique services coming soon')}</Text>
       </View>
     </View>
     </SwipeWrapper>
