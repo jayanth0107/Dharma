@@ -39,24 +39,28 @@ const Tab = createBottomTabNavigator();
 // Order determines the swipe sequence. Exported so ScrollableTabBar
 // and SwipeWrapper can reference the ordered list.
 // All sections visible in bottom bar + top tab bar + swipeable.
-// Order matches the Home screen tile grid top-to-bottom.
-// Calendar sub-features (Panchang/Festivals/Timings) are not separate
-// screens, so Calendar is one entry here — those are sub-tabs inside it.
+// Order matches the Home screen tile grid (12 tiles + utility extras).
+// Premium tiles (positions 4-6) appear together for visual emphasis.
 export const MAIN_SECTIONS = [
   { name: 'Home',        component: withErrorBoundary(HomeScreen, 'Home'),             icon: 'home',                   te: 'హోమ్',         en: 'Home' },
-  { name: 'Panchang',    component: withErrorBoundary(CalendarScreen, 'Panchang'),     icon: 'pot-mix',                te: 'నేటి దినం',     en: "Today", params: { tab: 'panchang' } },
+  // Row 1
+  { name: 'Panchang',    component: withErrorBoundary(CalendarScreen, 'Panchang'),     icon: 'pot-mix',                te: 'నేటి దినం',     en: 'Today', params: { tab: 'panchang' } },
   { name: 'Festivals',   component: withErrorBoundary(CalendarScreen, 'Festivals'),    icon: 'party-popper',           te: 'పండుగలు',       en: 'Festivals', params: { tab: 'festivals' } },
-  { name: 'GoodTimes',   component: withErrorBoundary(CalendarScreen, 'GoodTimes'),    icon: 'clock-check',            te: 'శుభ సమయాలు',   en: 'Good Times', params: { tab: 'timings' } },
-  { name: 'Gold',        component: withErrorBoundary(GoldScreen, 'Gold'),             icon: 'gold',                   te: 'బంగారం',        en: 'Gold' },
-  { name: 'Market',      component: withErrorBoundary(MarketScreen, 'Market'),         icon: 'chart-line',             te: 'మార్కెట్',      en: 'Market' },
-  { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'జ్యోతిష్యం',    en: 'Astro' },
-  { name: 'Horoscope',   component: withErrorBoundary(HoroscopeScreen, 'Horoscope'),   icon: 'account-star',           te: 'జాతకం',         en: 'Jaatakam' },
   { name: 'DailyRashi',  component: withErrorBoundary(DailyRashiScreen, 'DailyRashi'), icon: 'star-circle',            te: 'మీ రాశి',       en: 'Rashi' },
-  { name: 'Gita',        component: withErrorBoundary(GitaScreen, 'Gita'),             icon: 'book-open-page-variant', te: 'గీత',           en: 'Gita' },
+  // Row 2 — PREMIUM
+  { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Love Match' },
+  { name: 'Horoscope',   component: withErrorBoundary(HoroscopeScreen, 'Horoscope'),   icon: 'account-star',           te: 'జాతకం',         en: 'Jaatakam' },
   { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Best Dates' },
-  { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Match' },
-  { name: 'Services',    component: withErrorBoundary(ServicesScreen, 'Services'),     icon: 'store',                  te: 'సేవలు',         en: 'Services' },
+  // Row 3
+  { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'జ్యోతిష్యం',    en: 'Astro' },
+  { name: 'Gold',        component: withErrorBoundary(GoldScreen, 'Gold'),             icon: 'gold',                   te: 'బంగారం',        en: 'Gold' },
+  { name: 'Gita',        component: withErrorBoundary(GitaScreen, 'Gita'),             icon: 'book-open-page-variant', te: 'గీత',           en: 'Gita' },
+  // Row 4
+  { name: 'GoodTimes',   component: withErrorBoundary(CalendarScreen, 'GoodTimes'),    icon: 'clock-check',            te: 'శుభ సమయాలు',   en: 'Good Times', params: { tab: 'timings' } },
+  { name: 'Market',      component: withErrorBoundary(MarketScreen, 'Market'),         icon: 'chart-line',             te: 'మార్కెట్',      en: 'Market' },
   { name: 'Reminder',    component: ReminderScreen,                                    icon: 'bell-plus',              te: 'రిమైండర్',      en: 'Set Reminder' },
+  // Extras
+  { name: 'Services',    component: withErrorBoundary(ServicesScreen, 'Services'),     icon: 'store',                  te: 'సేవలు',         en: 'Services' },
   { name: 'Donate',      component: DonateScreen,                                     icon: 'hand-heart',             te: 'దానం',          en: 'Donate' },
   { name: 'Premium',     component: PremiumScreen,                                    icon: 'crown',                  te: 'ప్రీమియం',      en: 'Premium' },
   { name: 'More',        component: withErrorBoundary(MoreScreen, 'More'),             icon: 'dots-horizontal',        te: 'మరిన్ని',       en: 'More' },
