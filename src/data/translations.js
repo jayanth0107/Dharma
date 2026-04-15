@@ -32,7 +32,7 @@ export const TR = {
   muhurtam: { te: 'ముహూర్తం', en: 'Muhurtam' },
   matchmaking: { te: 'జాతక పొందిక', en: 'Matchmaking' },
   donate: { te: 'దానం', en: 'Donate' },
-  reminder: { te: 'రిమైండర్', en: 'Reminder' },
+  reminder: { te: 'రిమైండర్', en: 'Set Reminder' },
   shareApp: { te: 'షేర్ యాప్', en: 'Share App' },
   kids: { te: 'పిల్లల కథలు', en: 'Kids Stories' },
   settings: { te: 'సెట్టింగ్స్', en: 'Settings' },

@@ -56,7 +56,7 @@ export const MAIN_SECTIONS = [
   { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Best Dates' },
   { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Match' },
   { name: 'Services',    component: withErrorBoundary(ServicesScreen, 'Services'),     icon: 'store',                  te: 'సేవలు',         en: 'Services' },
-  { name: 'Reminder',    component: ReminderScreen,                                    icon: 'bell-plus',              te: 'రిమైండర్',      en: 'Reminder' },
+  { name: 'Reminder',    component: ReminderScreen,                                    icon: 'bell-plus',              te: 'రిమైండర్',      en: 'Set Reminder' },
   { name: 'Donate',      component: DonateScreen,                                     icon: 'hand-heart',             te: 'దానం',          en: 'Donate' },
   { name: 'Premium',     component: PremiumScreen,                                    icon: 'crown',                  te: 'ప్రీమియం',      en: 'Premium' },
   { name: 'More',        component: withErrorBoundary(MoreScreen, 'More'),             icon: 'dots-horizontal',        te: 'మరిన్ని',       en: 'More' },
