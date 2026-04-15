@@ -14,6 +14,7 @@ import { useLanguage, T, TR } from '../context/LanguageContext';
 import { useWindow } from '../theme';
 
 import { PageHeader } from '../components/PageHeader';
+import { ListSectionHeader } from '../components/ListSectionHeader';
 import { SubTabBar } from '../components/SubTabBar';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { PanchangaCard, TimingCard, MuhurthamCard, SlokaCard } from '../components/PanchangaCard';
@@ -197,6 +198,12 @@ export function CalendarScreen({ route }) {
         {/* ── Festivals Tab ── all 2026 festivals ── */}
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
+            <ListSectionHeader
+              title={t(TR.festivals.te, TR.festivals.en)}
+              subtitle={t('2026 పండుగలు — క్రింద చూడండి', '2026 festivals — scroll below')}
+              icon="party-popper"
+              iconColor={DarkColors.tulasiGreen}
+            />
             {(() => {
               const items = withRecentPast(withDaysLeft(FESTIVALS_2026, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
@@ -217,6 +224,27 @@ export function CalendarScreen({ route }) {
         {/* ── Observance sub-tabs (chaturthi / pournami / amavasya / pradosham) ── */}
         {['chaturthi', 'pournami', 'amavasya', 'pradosham'].includes(activeSubTab) && (
           <View style={s.card}>
+            <ListSectionHeader
+              title={
+                activeSubTab === 'chaturthi' ? t('సంకష్టహర చతుర్థి', 'Sankashti Chaturthi') :
+                activeSubTab === 'pournami'  ? t('పౌర్ణమి', 'Pournami') :
+                activeSubTab === 'amavasya'  ? t('అమావాస్య', 'Amavasya') :
+                                                t('ప్రదోషం', 'Pradosham')
+              }
+              subtitle={t('2026 తేదీలు — క్రింద చూడండి', '2026 dates — scroll below')}
+              icon={
+                activeSubTab === 'chaturthi' ? 'elephant' :
+                activeSubTab === 'pournami'  ? 'moon-full' :
+                activeSubTab === 'amavasya'  ? 'moon-new' :
+                                                'weather-night'
+              }
+              iconColor={
+                activeSubTab === 'chaturthi' ? '#C41E3A' :
+                activeSubTab === 'pournami'  ? '#B8860B' :
+                activeSubTab === 'amavasya'  ? '#9B6FCF' :
+                                                '#4A90D9'
+              }
+            />
             {(() => {
               const source = OBSERVANCE_DATA[activeSubTab];
               if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
@@ -254,6 +282,12 @@ export function CalendarScreen({ route }) {
         {/* ── Ekadashi Tab ── 5 visible, scroll for the rest ── */}
         {activeSubTab === 'ekadashi' && (
           <View style={s.card}>
+            <ListSectionHeader
+              title={t('ఏకాదశి', 'Ekadashi')}
+              subtitle={t('2026 — 24 ఏకాదశి దినాలు', '2026 — 24 Ekadashi days')}
+              icon="hands-pray"
+              iconColor="#9B6FCF"
+            />
             {todayEkadashi && (
               <EkadashiSection
                 todayEkadashi={todayEkadashi}
@@ -281,10 +315,12 @@ export function CalendarScreen({ route }) {
         {/* ── Holidays Tab ── */}
         {activeSubTab === 'holidays' && (
           <View style={s.card}>
-            <View style={s.cardHeader}>
-              <MaterialCommunityIcons name="airplane" size={16} color="#4A90D9" />
-              <Text style={[s.cardTitle, { color: '#4A90D9' }]}>{t(TR.govtHolidays.te, TR.govtHolidays.en)}</Text>
-            </View>
+            <ListSectionHeader
+              title={t(TR.govtHolidays.te, TR.govtHolidays.en)}
+              subtitle={t('2026 ప్రభుత్వ సెలవులు', '2026 government holidays')}
+              icon="airplane"
+              iconColor="#4A90D9"
+            />
             {(() => {
               const items = withRecentPast(withDaysLeft(PUBLIC_HOLIDAYS_2026, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noHolidays.te, TR.noHolidays.en)}</Text>;
