@@ -16,7 +16,7 @@ export function MuhurtamScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Muhurtam">
     <View style={s.screen}>
-      <PageHeader title={t('ముహూర్తం ఫైండర్', 'Muhurtam Finder')} />
+      <PageHeader title={t('శుభ దినాలు (ముహూర్తాలు తెలుసుకోండి)', 'Best Dates (Muhurtam Finder)')} />
       <TopTabBar />
       <MuhurtamFinderModal
         visible={true}
