@@ -69,15 +69,11 @@ import {
 
 // Note: 'gold' has its own top-level tab (bottom bar + GlobalTopTabs) so it
 // is intentionally NOT duplicated here as a Calendar sub-tab.
-// All calendar categories in one flat list — no nested filter pills.
-// Observance types (chaturthi, pournami, amavasya, pradosham) are promoted
-// from the old FilterPills bar to first-class sub-tabs so every category
-// is reachable in a single tap.
+// SubTabBar shows only categories NOT already in the top/bottom nav bars.
+// Panchang, Festivals, GoodTimes are top-level nav entries — accessing them
+// from sub-tabs would be a duplicate.
 function getSubTabs(t) {
   return [
-    { id: 'panchang', label: t(TR.panchang.te, TR.panchang.en) },
-    { id: 'timings', label: t(TR.timings.te, TR.timings.en) },
-    { id: 'festivals', label: t(TR.festivals.te, TR.festivals.en) },
     { id: 'ekadashi', label: t(TR.ekadashi.te, TR.ekadashi.en) },
     { id: 'chaturthi', label: t('చతుర్థి', 'Chaturthi') },
     { id: 'pournami', label: t('పౌర్ణమి', 'Pournami') },
