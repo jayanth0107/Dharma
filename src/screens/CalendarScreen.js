@@ -104,7 +104,9 @@ export function CalendarScreen({ route }) {
     routeName === 'Festivals' ? t('పండుగలు', 'Festivals') :
     routeName === 'GoodTimes' ? t('శుభ సమయాలు', 'Good Times') :
                                  t('క్యాలెండర్', 'Calendar');
-  const showSubTabs = routeName !== 'Panchang';
+  // Sub-tabs only appear on Festivals — that's the only route where users
+  // benefit from cross-jumping to Ekadashi/Chaturthi/etc. categories.
+  const showSubTabs = routeName === 'Festivals';
   const [festivalFilter, setFestivalFilter] = useState('all');
 
   // Fixed 5-row window for every list on every device. Users scroll within

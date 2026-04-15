@@ -61,12 +61,14 @@ export function AstroScreen({ navigation }) {
             onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
-            icon="moon-waning-crescent" label={t('రాహు కాలం', 'Rahu Kaal')} sublabel={t('Rahu Kaal', 'రాహు')}
-            accentColor="#C41E3A" disabled={true}
+            icon="moon-waning-crescent" label={t('రాహు కాలం', 'Rahu Kaal')} sublabel={t('Today timings', 'నేటి సమయాలు')}
+            accentColor="#C41E3A"
+            onPress={() => navigation.navigate('GoodTimes', { tab: 'timings', _ts: Date.now() })}
           />
           <FeatureTile
-            icon="ab-testing" label={t('సంఖ్యాశాస్త్రం', 'Numerology')} sublabel={t('Numerology', 'సంఖ్య')}
-            accentColor="#B8860B" disabled={true}
+            icon="star-circle" label={t('మీ రాశి', 'Your Rashi')} sublabel={t('Daily Predictions', 'రోజు వారీ ఫలాలు')}
+            accentColor="#B8860B"
+            onPress={() => navigation.navigate('DailyRashi')}
           />
           <FeatureTile
             icon="ring" label={t('వివాహ ముహూర్తం', 'Wedding Muhurtam')} sublabel={t('Wedding', 'వివాహం')}
@@ -78,7 +80,7 @@ export function AstroScreen({ navigation }) {
       </View>
 
       <View style={s.comingSoon}>
-        <Text style={s.comingSoonText}>{t('🔮 రాహు కాలం, సంఖ్యాశాస్త్రం — త్వరలో', '🔮 Rahu Kaal, Numerology — Coming Soon')}</Text>
+        <Text style={s.comingSoonText}>{t('🔮 9 జ్యోతిష్య సేవలు అందుబాటులో', '🔮 9 astrology services available')}</Text>
       </View>
     </View>
     </SwipeWrapper>
