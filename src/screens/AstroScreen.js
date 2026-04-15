@@ -19,6 +19,7 @@ import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
+import { SectionShareRow } from '../components/SectionShareRow';
 import {
   getTodayLucky, calculateNumerology, VASTU_TIPS, getTodayMantra,
   MEDITATION_GUIDES, calculateNameCompatibility,
@@ -88,6 +89,15 @@ export function AstroScreen() {
           <StatRow label={t('అదృష్ట రంగు', 'Lucky Color')} value={lang === 'te' ? lucky.color.te : lucky.color.en} />
           <StatRow label={t('అదృష్ట దిశ', 'Lucky Direction')} value={lang === 'te' ? lucky.direction.te : lucky.direction.en} />
           <StatRow label={t('అధిపతి దేవత', 'Ruling Deity')} value={lang === 'te' ? lucky.deity.te : lucky.deity.en} />
+          <SectionShareRow
+            section="today_lucky"
+            buildText={() => `🌟 ధర్మ — నేటి అదృష్టం / Today's Lucky\n\n` +
+              `📅 ${today.toDateString()}\n` +
+              `🎨 Color: ${lucky.color.te} / ${lucky.color.en}\n` +
+              `🧭 Direction: ${lucky.direction.te} / ${lucky.direction.en}\n` +
+              `🛕 Deity: ${lucky.deity.te} / ${lucky.deity.en}\n\n` +
+              `📥 ధర్మ App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+          />
         </SectionCard>
 
         {/* 2. Today's Mantra */}
@@ -99,6 +109,15 @@ export function AstroScreen() {
         >
           <Text style={s.mantraText}>{mantra.sanskrit}</Text>
           <Text style={s.mantraCount}>{t(`${mantra.count} సార్లు జపించండి`, `Chant ${mantra.count} times`)}</Text>
+          <SectionShareRow
+            section="today_mantra"
+            buildText={() => `🕉 ధర్మ — నేటి మంత్రం / Today's Mantra\n\n` +
+              `📅 ${today.toDateString()}\n\n` +
+              `${mantra.sanskrit}\n\n` +
+              `🎯 ${mantra.meaning.te} / ${mantra.meaning.en}\n` +
+              `🔢 Chant ${mantra.count} times\n\n` +
+              `📥 ధర్మ App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+          />
         </SectionCard>
 
         {/* 3. Today's Yoga from panchangam */}
@@ -137,6 +156,16 @@ export function AstroScreen() {
               <StatRow label={t('పుట్టిన నంబర్', 'Birth Number')} value={numResult.birthNumber} />
               <StatRow label={t('అదృష్ట సంఖ్యలు', 'Lucky Numbers')} value={numResult.luckyNumbers.join(', ')} />
               <Text style={s.meaningText}>{lang === 'te' ? numResult.meaning.te : numResult.meaning.en}</Text>
+              <SectionShareRow
+                section="numerology"
+                buildText={() => `🔢 ధర్మ — సంఖ్యాశాస్త్రం / Numerology\n\n` +
+                  `📅 DOB: ${numDob}\n` +
+                  `🎯 Life Path Number: ${numResult.lifePath}\n` +
+                  `🌟 Birth Number: ${numResult.birthNumber}\n` +
+                  `🍀 Lucky Numbers: ${numResult.luckyNumbers.join(', ')}\n\n` +
+                  `${numResult.meaning.te} / ${numResult.meaning.en}\n\n` +
+                  `📥 ధర్మ App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+              />
             </View>
           )}
         </SectionCard>
@@ -183,6 +212,17 @@ export function AstroScreen() {
               <Text style={s.compatVerdict}>{compat.verdict.emoji}  {lang === 'te' ? compat.verdict.te : compat.verdict.en}</Text>
               <Text style={s.compatNums}>{t(`సంఖ్యలు: ${compat.num1} + ${compat.num2}`, `Numbers: ${compat.num1} + ${compat.num2}`)}</Text>
             </View>
+          )}
+          {compat && (
+            <SectionShareRow
+              section="name_compatibility"
+              buildText={() => `💕 ధర్మ — పేరు అనుకూలత / Name Compatibility\n\n` +
+                `${n1} + ${n2}\n\n` +
+                `🎯 Score: ${compat.score}%\n` +
+                `${compat.verdict.emoji} ${compat.verdict.te} / ${compat.verdict.en}\n` +
+                `🔢 Numbers: ${compat.num1} + ${compat.num2}\n\n` +
+                `📥 ధర్మ App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+            />
           )}
         </SectionCard>
 
