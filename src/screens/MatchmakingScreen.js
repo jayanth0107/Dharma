@@ -51,7 +51,6 @@ export function MatchmakingScreen({ navigation }) {
   const [groomPlaceResults, setGroomPlaceResults] = useState([]);
   const [bridePlaceResults, setBridePlaceResults] = useState([]);
   const [result, setResult] = useState(null);
-  const [selectingFor, setSelectingFor] = useState(null); // 'groom' | 'bride'
   const [showDatePicker, setShowDatePicker] = useState(null); // 'groom' | 'bride'
   const searchTimer = useRef(null);
 
@@ -132,36 +131,6 @@ export function MatchmakingScreen({ navigation }) {
           />
         )}
 
-        {/* Nakshatra selector overlay */}
-        {selectingFor && (
-          <View style={s.selectorOverlay}>
-            <View style={s.selectorBox}>
-              <Text style={s.selectorTitle}>
-                {selectingFor === 'groom' ? t(TR.groomNakshatra.te, TR.groomNakshatra.en) : t(TR.brideNakshatra.te, TR.brideNakshatra.en)}
-              </Text>
-              <ScrollView style={s.selectorScroll}>
-                {NAKSHATRAS.map((nak, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    style={[s.selectorItem, (selectingFor === 'groom' ? groomNak : brideNak) === i && s.selectorItemActive]}
-                    onPress={() => {
-                      if (selectingFor === 'groom') setGroomNak(i);
-                      else setBrideNak(i);
-                      setSelectingFor(null);
-                    }}
-                  >
-                    <Text style={s.selectorItemText}>{nak}</Text>
-                    <Text style={s.selectorItemTextEn}>{NAKSHATRAS_EN[i]}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-              <TouchableOpacity style={s.selectorClose} onPress={() => setSelectingFor(null)}>
-                <Text style={s.selectorCloseText}>{t(TR.close.te, TR.close.en)}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
         {!result ? (
           <>
             {/* ── Groom Section ── */}
@@ -191,13 +160,14 @@ export function MatchmakingScreen({ navigation }) {
                 </View>
               )}
               <PlaceResults results={groomPlaceResults} onSelect={(p) => selectPlace(p, 'groom')} />
-              <TouchableOpacity style={s.nakSelector} onPress={() => setSelectingFor('groom')}>
-                <MaterialCommunityIcons name="star-four-points" size={18} color={DarkColors.gold} />
-                <Text style={s.nakSelectorText}>
-                  {groomNak !== null ? `${NAKSHATRAS[groomNak]} (${NAKSHATRAS_EN[groomNak]})` : t(TR.selectNakshatra.te, TR.selectNakshatra.en)}
-                </Text>
-                <MaterialCommunityIcons name="chevron-down" size={18} color={DarkColors.textMuted} />
-              </TouchableOpacity>
+              {/* Auto-detected nakshatra (read-only) — populated from DOB */}
+              {groomNak !== null && (
+                <View style={s.nakChip}>
+                  <MaterialCommunityIcons name="star-four-points" size={16} color={DarkColors.gold} />
+                  <Text style={s.nakChipLabel}>{t('నక్షత్రం', 'Nakshatra')}:</Text>
+                  <Text style={s.nakChipValue}>{NAKSHATRAS[groomNak]} · {NAKSHATRAS_EN[groomNak]}</Text>
+                </View>
+              )}
             </View>
 
             {/* ── Bride Section ── */}
@@ -227,13 +197,14 @@ export function MatchmakingScreen({ navigation }) {
                 </View>
               )}
               <PlaceResults results={bridePlaceResults} onSelect={(p) => selectPlace(p, 'bride')} />
-              <TouchableOpacity style={s.nakSelector} onPress={() => setSelectingFor('bride')}>
-                <MaterialCommunityIcons name="star-four-points" size={18} color={DarkColors.gold} />
-                <Text style={s.nakSelectorText}>
-                  {brideNak !== null ? `${NAKSHATRAS[brideNak]} (${NAKSHATRAS_EN[brideNak]})` : t(TR.selectNakshatra.te, TR.selectNakshatra.en)}
-                </Text>
-                <MaterialCommunityIcons name="chevron-down" size={18} color={DarkColors.textMuted} />
-              </TouchableOpacity>
+              {/* Auto-detected nakshatra (read-only) — populated from DOB */}
+              {brideNak !== null && (
+                <View style={s.nakChip}>
+                  <MaterialCommunityIcons name="star-four-points" size={16} color={DarkColors.gold} />
+                  <Text style={s.nakChipLabel}>{t('నక్షత్రం', 'Nakshatra')}:</Text>
+                  <Text style={s.nakChipValue}>{NAKSHATRAS[brideNak]} · {NAKSHATRAS_EN[brideNak]}</Text>
+                </View>
+              )}
             </View>
             <TouchableOpacity
               style={[s.calcBtn, (groomNak === null || brideNak === null) && s.calcBtnDisabled]}
@@ -323,8 +294,15 @@ const s = StyleSheet.create({
   input: { backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14, fontSize: 15, color: DarkColors.textPrimary, marginBottom: 10, borderWidth: 1, borderColor: DarkColors.borderCard, outlineStyle: 'none' },
   inputText: { fontSize: 15, color: DarkColors.textPrimary },
   inputPlaceholder: { fontSize: 15, color: DarkColors.textMuted },
-  nakSelector: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: DarkColors.borderGold },
-  nakSelectorText: { flex: 1, fontSize: 14, color: DarkColors.goldLight, fontWeight: '600' },
+  // Read-only nakshatra display chip (auto-detected from DOB)
+  nakChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(212,160,23,0.08)',
+    borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  nakChipLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '600' },
+  nakChipValue: { flex: 1, fontSize: 14, color: DarkColors.goldLight, fontWeight: '800' },
   // Place search
   selectedPlace: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10, paddingHorizontal: 4 },
   selectedPlaceText: { fontSize: 13, color: DarkColors.tulasiGreen, fontWeight: '600' },
