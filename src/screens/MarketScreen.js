@@ -75,18 +75,18 @@ export function MarketScreen() {
           </View>
         ) : (
           <>
-            {/* Unavailable on web */}
-            {data?.source === 'web-unavailable' && (
-              <View style={s.unavailableBox}>
-                <MaterialCommunityIcons name="cellphone-arrow-down" size={40} color={DarkColors.saffron} />
-                <Text style={s.unavailableTitle}>{t(data.unavailableMessageTe, data.unavailableMessage)}</Text>
-                <Text style={s.unavailableSub}>{t('Android/iOS యాప్‌లో లైవ్ మార్కెట్ డేటా చూడండి', 'View live market data in the Android/iOS app')}</Text>
+            {/* Stale / sample-data banner (when live fetch failed) */}
+            {data?.isStale && (
+              <View style={s.staleBanner}>
+                <MaterialCommunityIcons name="information-outline" size={16} color={DarkColors.gold} style={{ marginRight: 6 }} />
+                <Text style={s.staleText}>
+                  {t('లైవ్ డేటా అందుబాటులో లేదు — చివరి అందుబాటు ధరలు చూపబడుతున్నాయి', 'Live data unavailable — showing last known prices')}
+                </Text>
               </View>
             )}
 
-            {/* Market Status — hide on web-unavailable so user doesn't see
-                'Market Closed' when the issue is just CORS. */}
-            {data?.source !== 'web-unavailable' && (
+            {/* Market Status — only when we have fresh live data */}
+            {!data?.isStale && data?.indices?.length > 0 && (
               <View style={s.statusBar}>
                 <View style={[s.statusDot, { backgroundColor: data?.marketOpen ? DarkColors.tulasiGreen : '#C41E3A' }]} />
                 <Text style={s.statusText}>
@@ -182,4 +182,11 @@ const s = StyleSheet.create({
   },
   unavailableTitle: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary, textAlign: 'center' },
   unavailableSub: { fontSize: 12, color: DarkColors.textMuted, textAlign: 'center' },
+  staleBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(212,160,23,0.08)',
+    borderWidth: 1, borderColor: 'rgba(212,160,23,0.25)',
+    borderRadius: 10, padding: 10, marginBottom: 12,
+  },
+  staleText: { flex: 1, fontSize: 12, color: DarkColors.gold, fontWeight: '600' },
 });

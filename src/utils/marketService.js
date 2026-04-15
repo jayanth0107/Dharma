@@ -49,8 +49,8 @@ async function fetchYahooSymbol(sym) {
 // Yahoo v8 chart endpoint — one symbol per call, but no crumb required
 async function fetchFromYahoo(symbols) {
   try {
-    const results = await Promise.all(symbols.map(async (sym) => {
-      const data = await fetchYahooSymbol(sym);
+    const results = await Promise.all(symbols.map(async (ticker) => {
+      const data = await fetchYahooSymbol(ticker);
       if (!data) return null;
       const r = data?.chart?.result?.[0];
       if (!r) return null;
@@ -60,9 +60,9 @@ async function fetchFromYahoo(symbols) {
       const change = price - prev;
       const changePercent = prev ? (change / prev) * 100 : 0;
       return {
-        symbol: sym,
-        shortName: meta.shortName || sym,
-        longName: meta.longName || sym,
+        symbol: ticker,
+        shortName: meta.shortName || ticker,
+        longName: meta.longName || ticker,
         regularMarketPrice: price,
         regularMarketChange: change,
         regularMarketChangePercent: changePercent,
