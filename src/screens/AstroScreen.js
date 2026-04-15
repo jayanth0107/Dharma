@@ -61,16 +61,6 @@ export function AstroScreen({ navigation }) {
             onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
-            icon="moon-waning-crescent" label={t('రాహు కాలం', 'Rahu Kaal')} sublabel={t('Today timings', 'నేటి సమయాలు')}
-            accentColor="#C41E3A"
-            onPress={() => navigation.navigate('GoodTimes', { tab: 'timings', _ts: Date.now() })}
-          />
-          <FeatureTile
-            icon="star-circle" label={t('మీ రాశి', 'Your Rashi')} sublabel={t('Daily Predictions', 'రోజు వారీ ఫలాలు')}
-            accentColor="#B8860B"
-            onPress={() => navigation.navigate('DailyRashi')}
-          />
-          <FeatureTile
             icon="ring" label={t('వివాహ ముహూర్తం', 'Wedding Muhurtam')} sublabel={t('Wedding', 'వివాహం')}
             accentColor={DarkColors.saffron}
             isPremium={!premiumActive}
@@ -80,7 +70,7 @@ export function AstroScreen({ navigation }) {
       </View>
 
       <View style={s.comingSoon}>
-        <Text style={s.comingSoonText}>{t('🔮 9 జ్యోతిష్య సేవలు అందుబాటులో', '🔮 9 astrology services available')}</Text>
+        <Text style={s.comingSoonText}>{t('🔮 7 జ్యోతిష్య సేవలు అందుబాటులో', '🔮 7 astrology services available')}</Text>
       </View>
     </View>
     </SwipeWrapper>
