@@ -193,7 +193,8 @@ const styles = StyleSheet.create({
   },
   teluguValue: {
     ...Type.teluguDisplay,
-    fontSize: 26,
+    fontSize: 20,
+    lineHeight: 26,
     color: DarkColors.textPrimary,
     marginBottom: 3,
   },

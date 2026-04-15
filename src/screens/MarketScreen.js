@@ -84,14 +84,17 @@ export function MarketScreen() {
               </View>
             )}
 
-            {/* Market Status */}
-            <View style={s.statusBar}>
-              <View style={[s.statusDot, { backgroundColor: data?.marketOpen ? DarkColors.tulasiGreen : '#C41E3A' }]} />
-              <Text style={s.statusText}>
-                {data?.marketOpen ? t('మార్కెట్ తెరిచి ఉంది', 'Market Open') : t('మార్కెట్ మూసి ఉంది', 'Market Closed')}
-              </Text>
-              <Text style={s.statusTime}>{data?.lastUpdated || ''}</Text>
-            </View>
+            {/* Market Status — hide on web-unavailable so user doesn't see
+                'Market Closed' when the issue is just CORS. */}
+            {data?.source !== 'web-unavailable' && (
+              <View style={s.statusBar}>
+                <View style={[s.statusDot, { backgroundColor: data?.marketOpen ? DarkColors.tulasiGreen : '#C41E3A' }]} />
+                <Text style={s.statusText}>
+                  {data?.marketOpen ? t('మార్కెట్ తెరిచి ఉంది', 'Market Open') : t('మార్కెట్ మూసి ఉంది', 'Market Closed')}
+                </Text>
+                <Text style={s.statusTime}>{data?.lastUpdated || ''}</Text>
+              </View>
+            )}
 
             {/* Indices */}
             {data?.indices?.length > 0 && (

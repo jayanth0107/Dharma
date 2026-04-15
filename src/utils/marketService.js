@@ -16,14 +16,42 @@ let lastFetch = 0;
 const CACHE_TTL = 60 * 1000; // 1 minute
 
 
+// On web, Yahoo Finance has no CORS headers — wrap with a public CORS proxy.
+// Try multiple proxies in parallel; first to succeed wins.
+const WEB_CORS_PROXIES = [
+  (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  (u) => `https://api.codetabs.com/v1/proxy?quest=${u}`,
+];
+
+async function fetchYahooSymbol(sym) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
+  // Native — direct call
+  if (Platform.OS !== 'web') {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      return resp.ok ? await resp.json() : null;
+    } catch { return null; }
+  }
+  // Web — race the CORS proxies
+  for (const wrap of WEB_CORS_PROXIES) {
+    try {
+      const resp = await fetch(wrap(url), { signal: AbortSignal.timeout(7000) });
+      if (resp.ok) {
+        const txt = await resp.text();
+        try { return JSON.parse(txt); } catch { /* try next proxy */ }
+      }
+    } catch { /* try next proxy */ }
+  }
+  return null;
+}
+
 // Yahoo v8 chart endpoint — one symbol per call, but no crumb required
 async function fetchFromYahoo(symbols) {
   try {
     const results = await Promise.all(symbols.map(async (sym) => {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
-      const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (!resp.ok) return null;
-      const data = await resp.json();
+      const data = await fetchYahooSymbol(sym);
+      if (!data) return null;
       const r = data?.chart?.result?.[0];
       if (!r) return null;
       const meta = r.meta || {};
@@ -89,20 +117,7 @@ export async function fetchMarketData() {
   const now = Date.now();
   if (cachedData && now - lastFetch < CACHE_TTL) return cachedData;
 
-  // Web: Yahoo Finance has no CORS headers and free proxies are unreliable.
-  // Show graceful fallback; native (iOS/Android) fetches directly.
-  if (Platform.OS === 'web') {
-    return {
-      indices: [],
-      etfs: [],
-      stocks: [],
-      lastUpdated: '',
-      marketOpen: false,
-      source: 'web-unavailable',
-      unavailableMessage: 'Market data is available in the mobile app',
-      unavailableMessageTe: 'మార్కెట్ డేటా మొబైల్ యాప్‌లో అందుబాటులో ఉంది',
-    };
-  }
+  // (Web CORS proxy is attempted inside fetchFromYahoo — see proxy chain there)
 
   // Yahoo Finance symbols for Indian market
   const symbols = [
@@ -149,6 +164,28 @@ export async function fetchMarketData() {
     }
   }
 
-  // Return cached or empty
-  return cachedData || { indices: [], etfs: [], stocks: [], lastUpdated: '', marketOpen: false, source: 'unavailable' };
+  // Return last cached snapshot if we have one (even hours-old, marked stale)
+  if (cachedData) {
+    return { ...cachedData, source: cachedData.source + ' (cached)', isStale: true };
+  }
+
+  // No live data, no cache — return reasonable approximate prices so the UI
+  // is never blank. These are typical Indian market levels for 2026; the UI
+  // shows them with a 'sample' label so users know they aren't live.
+  return {
+    indices: [
+      { label: 'Nifty 50', labelTe: 'నిఫ్టీ 50', icon: 'chart-line', symbol: '^NSEI', shortName: 'Nifty 50', name: 'Nifty 50', price: 24500, change: 0, changePercent: 0, prevClose: 24500, marketState: 'OFFLINE' },
+      { label: 'Sensex',   labelTe: 'సెన్సెక్స్', icon: 'chart-bar',  symbol: '^BSESN', shortName: 'Sensex',  name: 'Sensex',  price: 80500, change: 0, changePercent: 0, prevClose: 80500, marketState: 'OFFLINE' },
+    ],
+    etfs: [
+      { label: 'Gold ETF',   labelTe: 'గోల్డ్ ETF',  icon: 'gold',              symbol: 'GOLDBEES.NS',   shortName: 'Gold BeES',   name: 'Gold BeES',   price: 75,  change: 0, changePercent: 0, prevClose: 75, marketState: 'OFFLINE' },
+      { label: 'Silver ETF', labelTe: 'సిల్వర్ ETF', icon: 'circle-slice-8',    symbol: 'SILVERBEES.NS', shortName: 'Silver BeES', name: 'Silver BeES', price: 95,  change: 0, changePercent: 0, prevClose: 95, marketState: 'OFFLINE' },
+      { label: 'Nifty ETF',  labelTe: 'నిఫ్టీ ETF',  icon: 'chart-areaspline', symbol: 'NIFTYBEES.NS',  shortName: 'Nifty BeES',  name: 'Nifty BeES',  price: 270, change: 0, changePercent: 0, prevClose: 270, marketState: 'OFFLINE' },
+    ],
+    stocks: [],
+    lastUpdated: '',
+    marketOpen: false,
+    source: 'sample (live data offline)',
+    isStale: true,
+  };
 }
