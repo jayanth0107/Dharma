@@ -42,6 +42,18 @@ function withDaysLeft(items, selectedDate) {
   });
 }
 
+// Re-arrange the chronological list so the user lands on "today + upcoming"
+// at the top, with just the 2 most-recent past items shown above as
+// context. Avoids the need to scroll past Jan-Apr to reach current items.
+function withRecentPast(annotated, pastCount = 2) {
+  const past = annotated.filter((it) => it.isPast);
+  const future = annotated.filter((it) => !it.isPast);
+  // Take the LAST `pastCount` past items (most recent) — they're already
+  // sorted chronologically because the source data is sorted.
+  const recentPast = past.slice(-pastCount);
+  return [...recentPast, ...future];
+}
+
 const OBSERVANCE_DATA = {
   chaturthi: CHATURTHI_2026,
   pournami: POURNAMI_2026,
@@ -186,7 +198,7 @@ export function CalendarScreen({ route }) {
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
             {(() => {
-              const items = withDaysLeft(FESTIVALS_2026, selectedDate);
+              const items = withRecentPast(withDaysLeft(FESTIVALS_2026, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
               return (
                 <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
@@ -208,7 +220,7 @@ export function CalendarScreen({ route }) {
             {(() => {
               const source = OBSERVANCE_DATA[activeSubTab];
               if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
-              const items = withDaysLeft(source, selectedDate);
+              const items = withRecentPast(withDaysLeft(source, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
               return (
                 <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
@@ -257,7 +269,7 @@ export function CalendarScreen({ route }) {
             >
               <EkadashiSection
                 todayEkadashi={null}
-                upcomingEkadashis={withDaysLeft(EKADASHI_2026, selectedDate)}
+                upcomingEkadashis={withRecentPast(withDaysLeft(EKADASHI_2026, selectedDate))}
                 selectedDate={selectedDate}
                 showAll
               />
@@ -274,7 +286,7 @@ export function CalendarScreen({ route }) {
               <Text style={[s.cardTitle, { color: '#4A90D9' }]}>{t(TR.govtHolidays.te, TR.govtHolidays.en)}</Text>
             </View>
             {(() => {
-              const items = withDaysLeft(PUBLIC_HOLIDAYS_2026, selectedDate);
+              const items = withRecentPast(withDaysLeft(PUBLIC_HOLIDAYS_2026, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noHolidays.te, TR.noHolidays.en)}</Text>;
               return (
                 <ScrollView
