@@ -244,7 +244,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('DailyRashi')}
           />
 
-          {/* Row 2 — PREMIUM ROW: 4.ప్రేమ పొందిక 5.మీ జాతకం 6.జ్యోతిష్యం */}
+          {/* Row 2 — PREMIUM ROW: 4.ప్రేమ పొందిక 5.మీ జాతకం 6.శుభ దినాలు */}
           <FeatureTile
             icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Love Match', 'ప్రేమ పొందిక')}
             accentColor="#C41E3A"
@@ -258,17 +258,17 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
-            icon="zodiac-leo" label={t('జ్యోతిష్యం', 'Astrology')} sublabel={t('Astro Features', 'జ్యోతిష్య సేవలు')}
-            accentColor={DarkColors.saffron}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Astro')}
-          />
-
-          {/* Row 3 — 7.శుభ దినాలు 8.బంగారం 9.భగవద్గీత */}
-          <FeatureTile
             icon="calendar-star" label={t('శుభ దినాలు', 'Best Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
             accentColor={DarkColors.tulasiGreen}
+            isPremium={!premiumActive}
             onPress={() => navigation.navigate('Muhurtam')}
+          />
+
+          {/* Row 3 — 7.జ్యోతిష్యం (free) 8.బంగారం 9.భగవద్గీత */}
+          <FeatureTile
+            icon="zodiac-leo" label={t('జ్యోతిష్యం', 'Astrology')} sublabel={t('Astro Features', 'జ్యోతిష్య సేవలు')}
+            accentColor={DarkColors.saffron}
+            onPress={() => navigation.navigate('Astro')}
           />
           <FeatureTile
             icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Gold Price', 'బంగారం ధర')}
