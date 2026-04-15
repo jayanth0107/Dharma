@@ -94,6 +94,17 @@ export function CalendarScreen({ route }) {
 
   const { t } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState(route?.params?.tab || 'panchang');
+
+  // Title + sub-tab visibility per route name (Panchang / Festivals / GoodTimes)
+  // Panchang: just panchangam — no sub-tabs needed
+  // Festivals + GoodTimes: show sub-tabs so user can jump to Ekadashi / etc.
+  const routeName = route?.name;
+  const screenTitle =
+    routeName === 'Panchang'  ? t('నేటి దినం', "Today") :
+    routeName === 'Festivals' ? t('పండుగలు', 'Festivals') :
+    routeName === 'GoodTimes' ? t('శుభ సమయాలు', 'Good Times') :
+                                 t('క్యాలెండర్', 'Calendar');
+  const showSubTabs = routeName !== 'Panchang';
   const [festivalFilter, setFestivalFilter] = useState('all');
 
   // Fixed 5-row window for every list on every device. Users scroll within
@@ -117,9 +128,11 @@ export function CalendarScreen({ route }) {
   return (
     <SwipeWrapper screenName="Calendar">
     <View style={s.screen}>
-      <PageHeader title={t('క్యాలెండర్', 'Calendar')} />
+      <PageHeader title={screenTitle} />
       <TopTabBar />
-      <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />
+      {showSubTabs && (
+        <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />
+      )}
 
       {/* FilterPills removed — observance types are now direct sub-tabs */}
 
