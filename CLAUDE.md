@@ -5,7 +5,7 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu Panchangam & Vedic Astrology mobile app. It provides astronomically accurate daily panchangam (Tithi, Nakshatra, Yoga, Karana), auspicious/inauspicious timings, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, Vedic horoscope (జాతకం), matchmaking, daily rashi predictions, live gold/silver prices, Indian market indices, and nearby temple finder — for Telugu-speaking users.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.0.0 (versionCode 4)
+**Version:** 2.1.0 (versionCode 5)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 
@@ -22,21 +22,25 @@
 - **expo-location** (coarse only), **expo-print**, **expo-sharing**, **expo-notifications**, **expo-font**
 - Targets iOS, Android, Web
 
-## Architecture (v2 — Tabbed + Context-driven)
+## Architecture (v2.1 — Swipeable + Responsive + Accessible)
 
 - **App.js** is a minimal shell: `ErrorBoundary → SafeAreaProvider → LanguageProvider → AuthProvider → AppProvider → NavigationContainer → TabNavigator`
-- **Navigation** uses `@react-navigation/bottom-tabs` with 5 visible tabs (Home, Calendar, Astro, Gold, More) and hidden screens accessible via tiles/buttons
+- **Navigation** uses `@react-navigation/bottom-tabs` with **17 main sections** registered in `MAIN_SECTIONS` (the source of truth used by both top + bottom bars and swipe). Utility screens (Settings, Login, etc.) are push-only and not surfaced in nav.
+- **Custom scrollable bottom tab bar** (`ScrollableTabBar`) replaces the default 5-icon bar. Auto-centers active pill via measured `onLayout` positions.
+- **Top tab bar** (`TopTabBar`) renders the same `MAIN_SECTIONS` so top + bottom always agree; same auto-center logic.
+- **SwipeWrapper** uses `PanResponder` on the main section screens — left/right swipes navigate prev/next section in `MAIN_SECTIONS` order.
 - **Three React Contexts**:
   - `AppContext` — date, location, panchangam, premium, gold prices, festivals, ekadashi, holidays, reminders
   - `AuthContext` — Firebase phone-OTP auth, user profile
   - `LanguageContext` — bilingual toggle (te/en), exposes `t(te, en)` and `tKey(TR.key)`; all user strings live in `src/data/translations.js`
-- **Dark theme** — pure dark `#0A0A0A` with saffron/gold/silver accents (`src/theme/colors.js` → `DarkColors` + `DarkGradients`)
-- **Grid dashboard** — Home/Astro/More screens use `FeatureTile` in multi-column grids
-- **Global top tabs** (`GlobalTopTabs`) on every screen
-- **PageHeader** — shared ← Back + 🏠 Home + bilingual title header
-- **DrawerMenu** — side drawer from hamburger on Home (settings, donate, share, privacy)
-- **ModalOrView** wrapper — components render either as embedded full-page screens OR legacy popup modals via `embedded={true}` prop
-- **Deprecated components** live in `src/components/_deprecated/`
+- **Dark theme** — pure dark `#0A0A0A` with saffron/gold/silver accents (`src/theme/colors.js` → `DarkColors`). Active states use **gold `#D4A017`** (8.4:1 AAA on dark bg). See "Accessibility" section below.
+- **Responsive layout system** — `src/theme/responsive.js` exports `useWindow`, `useColumns`, `useIsAtLeast`, `usePick({sm,md,lg,xl,xxl})`. Every horizontally laid-out element (header, tab bars, location pill, lang toggle, tile grid) consumes `usePick` to scale per phone class.
+- **Grid dashboard** — Home/Astro/More screens use `FeatureTile` + `FeatureGrid` (which itself uses `useColumns` → 2/3/4/5 columns by width).
+- **PageHeader** — shared ← Back + 🏠 Home + center-aligned title + EN/తెలు toggle (on every non-Home screen).
+- **DrawerMenu** — side drawer from hamburger on Home (settings, donate, share, privacy, login).
+- **ModalOrView** wrapper — components render either as embedded full-page screens OR legacy popup modals via `embedded={true}` prop.
+- **CalendarPicker** is wrapped in `<Modal transparent>` so it always overlays at the root and never gets trapped inside a parent ScrollView.
+- **Deprecated components** live in `src/components/_deprecated/`.
 
 ## Directory structure
 
@@ -48,8 +52,8 @@ src/
     AuthContext.js                  # Firebase phone-OTP auth
     LanguageContext.js              # te/en toggle + t(), tKey()
   navigation/
-    TabNavigator.js                 # 5 visible + 16 hidden screens
-  screens/                          # 21 screens
+    TabNavigator.js                 # 17 main sections (MAIN_SECTIONS) + utility screens
+  screens/                          # 22 screens
     HomeScreen.js                   # Dashboard grid + branded header + drawer
     CalendarScreen.js               # Sub-tabs: Panchang/Timings/Festivals/Ekadashi/Holidays/Darshan/Gold/Kids
     AstroScreen.js                  # Astrology features grid
@@ -72,11 +76,14 @@ src/
     LoginScreen.js                  # Phone OTP login + profile
     WebViewScreen.js                # Privacy/Terms/About/Rate/Feedback pages
   components/
-    PageHeader.js                   # ← Back + 🏠 Home + Title (on ALL screens)
-    GlobalTopTabs.js                # Horizontal top tabs
+    PageHeader.js                   # ← Back + 🏠 Home + Title (centered) + lang toggle
+    ScrollableTabBar.js             # Custom bottom tab bar (replaces default 5-icon bar)
+    TopTabBar.js                    # Horizontal top tab bar (mirrors bottom bar)
+    SwipeWrapper.js                 # PanResponder swipe nav between MAIN_SECTIONS
     DrawerMenu.js                   # Side drawer from hamburger
-    FeatureTile.js                  # Grid tile with icon + label + premium lock
-    SubTabBar.js                    # Scrollable sub-tab bar
+    FeatureTile.js                  # Grid tile + FeatureGrid (uses useColumns)
+    SubTabBar.js                    # Scrollable sub-tab bar (Calendar sub-tabs)
+    ListSectionHeader.js            # Big section title + animated chevron-down
     ModalOrView.js                  # Embedded (full page) or modal (popup) wrapper
     LocationPickerModal.js          # GPS + search location picker
     CalendarPicker.js               # Date picker overlay
@@ -138,9 +145,10 @@ src/
   config/
     firebase.js                     # Firebase app + Firestore + Auth config
   theme/
-    colors.js                       # DarkColors + DarkGradients (primary); Colors legacy
-    typography.js                   # FontSizes, FontWeights, LineHeights, LetterSpacing, Type
+    colors.js                       # DarkColors (annotated WCAG contrasts) + DarkGradients
+    typography.js                   # FontSizes (incl. nano badge size), FontWeights, LineHeights, Type
     spacing.js                      # Spacing, Radius, Shadow
+    responsive.js                   # useWindow, useColumns, usePick, useIsAtLeast, Breakpoints
     index.js                        # Barrel — single import for everything theme-related
 ```
 
@@ -150,28 +158,78 @@ src/
 - **Telugu name:** ధర్మ — సనాతనం
 - **Icon:** Custom saffron Bhagwa Dhwaj with ॐ symbol
 - **Home header:** ☰ Drawer + 🚩 Flag + "ధర్మ | సనాతనం" + 🔔 + ⚙ + 👤 avatar
-- **Theme:** Dark (`#0A0A0A`) + saffron (`#E8751A`) + gold (`#D4A017`) + silver (`#C0C0C0`) + tulasi green (`#2E7D32`)
-- **Page headers:** ← Back + 🏠 Home + bilingual title
+- **Theme:** Dark (`#0A0A0A`) + saffron (`#E8751A`) + gold (`#D4A017`) + silver (`#C0C0C0`) + tulasi green (`#4CAF50`)
+- **Page headers:** ← Back + 🏠 Home + center-aligned title + EN/తె toggle
+
+## Accessibility
+
+The whole app meets or exceeds WCAG 2.1 AA on the dark `#0A0A0A` background. Key rules:
+
+- **Active states** use **gold `#D4A017`** (8.4:1 contrast — AAA). Saffron is reserved for decoration / large headings (6.6:1, AA only).
+- **Failing colors** (`kumkum #C41E3A` 3.4:1, `tulasiGreen #2E7D32` 3.9:1, `tabInactive #777` 4.4:1) have been promoted in `DarkColors` to their accessible variants (`#E8495A`, `#4CAF50`, `#9A9A9A`). The original darker hex values are still available as `kumkumDark` / `tulasiDark` for fills/borders only.
+- **Inline icon colors** sweep — deep purple `#7B1FA2` (2.1:1, fail) was replaced with `#9B6FCF` (5.3:1, pass) across all active screens.
+- **Body text minimum 16px** (`FontSizes.body`), **micro 12px**, **`nano: 11px`** reserved for badges only. **Line-height** floor is 1.45 (close to WCAG SC 1.4.12's 1.5).
+- **Font weights** never go below 500 — sub-medium weights ghost out on dark backgrounds, especially with Telugu glyphs.
+- **Touch targets ≥ 44px** in the home header (icon slots) per WCAG/Apple HIG.
+- All icon buttons in the home header have an `accessibilityLabel`.
+
+See the inline contrast table at the top of `src/theme/colors.js` for per-token WCAG values.
+
+## Responsive design
+
+`src/theme/responsive.js` is the single source of truth. Components consume:
+
+- `useColumns()` — 2/3/4/5 tile-grid columns based on effective width
+- `useWindow()` — reactive `{width, height}` (clamped to `WEB_MAX_WIDTH=840`)
+- `useIsAtLeast('xl')` — boolean breakpoint check
+- `usePick({ default, sm, md, lg, xl, xxl })` — pick a value per breakpoint
+
+Breakpoints: `sm:360, md:414, lg:500, xl:768, xxl:1024`.
+
+Already responsive: home tile grid, branded header (icons, flag, title font, subtitle visibility), top tab bar (paddings + font), bottom scrollable tab bar (padding/min-width/icon/font), location pill, EN/తెలు switch, Calendar screen lists, DailyDarshan card.
 
 ## Navigation structure
 
-### Bottom tabs (5 visible)
-| Tab | Screen | Icon |
-|-----|--------|------|
-| హోమ్ | HomeScreen | home |
-| క్యాలెండర్ | CalendarScreen | calendar-month |
-| జ్యోతిష్యం | AstroScreen | zodiac-leo |
-| బంగారం | GoldScreen | gold |
-| మరిన్ని | MoreScreen | dots-horizontal |
+### MAIN_SECTIONS — 18 entries (source of truth for top bar, bottom bar, swipe order)
 
-### Hidden screens (16)
-Gita, Horoscope, Muhurtam, Matchmaking, DailyRashi, Market, TempleNearby, Services, Premium, Donate, Settings, Reminder, Notifications, Location, Login, InfoPage (WebView)
+| # | Route | Telugu | English | Notes |
+|---|-------|--------|---------|-------|
+| 0 | Home | హోమ్ | Home | dashboard |
+| 1 | Panchang | నేటి దినం | Today's Date | CalendarScreen, `tab: panchang` |
+| 2 | Festivals | పండుగలు | Festivals | CalendarScreen, `tab: festivals` |
+| 3 | DailyRashi | రాశి ఫలాలు | Rashi Predictions | per-sign predictions |
+| 4 | Horoscope | వేద జాతకం | Birth Chart | **premium** |
+| 5 | Matchmaking | పొందిక | Love Match | **premium** |
+| 6 | Muhurtam | శుభ దినాలు | Auspicious Dates | **premium** |
+| 7 | Astro | జ్యోతిష్యం | Astro | astrology features |
+| 8 | Gold | బంగారం | Gold | gold + silver prices |
+| 9 | Gita | గీత | Gita | Bhagavad Gita |
+| 10 | GoodTimes | శుభ సమయాలు | Auspicious Times | CalendarScreen, `tab: timings` |
+| 11 | Market | మార్కెట్ | Market | NSE/BSE (mobile only) |
+| 12 | Reminder | రిమైండర్ | Set Reminder | reminder CRUD |
+| 13 | Kids | పిల్లల కథలు | Kid's Stories | CalendarScreen, `tab: kids` |
+| 14 | TempleNearby | దేవాలయాలు | Nearby Temples | location-aware temple finder |
+| 15 | Donate | దానం | Donate | UPI donation |
+| 16 | Premium | ప్రీమియం | Premium | plans + payment |
+| 17 | More | మరిన్ని | More | settings, share, info |
 
-### CalendarScreen sub-tabs
-పంచాంగం | సమయాలు | పండుగలు | ఏకాదశి | సెలవులు | దర్శనం | బంగారం | పిల్లలు
+### UTILITY_SCREENS — push-only, not in nav bars
+Settings, InfoPage (WebView), Login, Location, Notifications, Services (placeholder — registered but not surfaced)
 
-### Home grid tiles (current order)
-పంచాంగం, నేటి రాశి, పండుగలు, దైనిక దర్శనం, భగవద్గీత, ముహూర్తాలు, **మీ జాతకం** (premium), ముహూర్తం (premium), జాతక పొందిక (premium), బంగారం ధర, దేవాలయాలు, మార్కెట్, పిల్లలు, దానం, రిమైండర్
+### CalendarScreen routes & sub-tabs
+- `Panchang` — no sub-tabs
+- `Festivals` — sub-tabs: Ekadashi, Chaturthi, Pournami, Amavasya, Pradosham, Holidays, Darshan
+- `GoodTimes` — no sub-tabs
+- `Kids` — no sub-tabs
+
+### Home grid tiles (current order, matches nav bar order)
+Row 1: నేటి దినం, పండుగలు, రాశి ఫలాలు
+Row 2 (PREMIUM): వేద జాతకం, జాతక పొందిక, శుభ దినాలు
+Row 3: జ్యోతిష్యం, బంగారం వెండి ధరలు, భగవద్గీత
+Row 4: శుభ సమయాలు, మార్కెట్, రిమైండర్
+Row 5: పిల్లల కథలు, దేవాలయాలు, దానం
+
+(Premium screen accessible via drawer / nav bar — not a Home tile.)
 
 ## Key conventions
 

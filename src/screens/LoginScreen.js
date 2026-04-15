@@ -316,7 +316,7 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14, marginBottom: 16,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  infoLabel: { fontSize: 10, color: DarkColors.textMuted, fontWeight: '600' },
+  infoLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600' },
   infoText: { fontSize: 17, fontWeight: '700', color: DarkColors.goldLight, marginTop: 2 },
   upgradeBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

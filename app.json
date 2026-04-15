@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dharma: Telugu Astro, Calendar & Gold",
     "slug": "DharmaDaily",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
@@ -37,7 +37,7 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 4,
+      "versionCode": 5,
       "googleServicesFile": "./google-services.json"
     },
     "web": {

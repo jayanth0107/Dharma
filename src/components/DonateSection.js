@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   qrNote: {
-    fontSize: 10,
+    fontSize: 12,
     color: DarkColors.textMuted,
     marginTop: 16,
     textAlign: 'center',
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   amountEmoji: { fontSize: 22, marginBottom: 6 },
   amountValue: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary },
   amountValueActive: { color: '#2E7D32' },
-  amountTelugu: { fontSize: 10, color: DarkColors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
+  amountTelugu: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
 
   // UPI box
   upiBox: {

@@ -21,8 +21,8 @@ const MENU_ITEMS = [
   { id: 'divider1' },
   // Quick features
   { id: 'reminder', icon: 'bell-plus', label: 'రిమైండర్', labelEn: 'Reminders' },
-  { id: 'muhurtam', icon: 'calendar-star', label: 'ముహూర్తం ఫైండర్', labelEn: 'Muhurtam Finder' },
-  { id: 'matchmaking', icon: 'heart-multiple', label: 'జాతక పొందిక', labelEn: 'Matchmaking' },
+  { id: 'muhurtam', icon: 'calendar-star', label: 'శుభ దినాలు', labelEn: 'Auspicious Dates' },
+  { id: 'matchmaking', icon: 'heart-multiple', label: 'జాతక పొందిక', labelEn: 'Love Match' },
   { id: 'divider2' },
   // App settings
   { id: 'notifications', icon: 'bell-outline', label: 'నోటిఫికేషన్స్', labelEn: 'Notifications' },

@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Pressable,
 } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
@@ -56,8 +56,9 @@ export function CalendarPicker({ selectedDate, onSelect, onClose, title }) {
   for (let y = currentYear; y >= 1920; y--) years.push(y);
 
   return (
-    <View style={s.overlay}>
-      <View style={s.container}>
+    <Modal visible transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+    <Pressable style={s.overlay} onPress={onClose}>
+      <Pressable style={s.container} onPress={(e) => e.stopPropagation()}>
         {/* Title */}
         <View style={s.titleRow}>
           <Text style={s.title}>{title || t(TR.selectDateTitle.te, TR.selectDateTitle.en)}</Text>
@@ -142,8 +143,9 @@ export function CalendarPicker({ selectedDate, onSelect, onClose, title }) {
             </TouchableOpacity>
           </>
         )}
-      </View>
-    </View>
+      </Pressable>
+    </Pressable>
+    </Modal>
   );
 }
 

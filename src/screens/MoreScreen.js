@@ -30,9 +30,8 @@ export function MoreScreen({ navigation }) {
           <FeatureTile icon="crown" label={t(T.premium.te, T.premium.en)} sublabel={t('Premium', 'ప్రీమియం')} onPress={() => navigation.navigate('Premium')} accentColor={DarkColors.gold} isPremium={!premiumActive} />
           <FeatureTile icon="account-circle" label={t(T.login.te, T.login.en)} sublabel={t('Profile', 'ప్రొఫైల్')} onPress={() => navigation.navigate('Login')} accentColor={DarkColors.saffron} />
           <FeatureTile icon="cog" label={t(T.settings.te, T.settings.en)} sublabel={t('Settings', 'సెట్టింగ్స్')} onPress={() => navigation.navigate('Settings')} accentColor={DarkColors.silver} />
-          {/* Row 2 — Engagement */}
+          {/* Row 2 — Engagement (Kids tile moved to Home) */}
           <FeatureTile icon="bell-plus" label={t(T.reminder.te, T.reminder.en)} sublabel={t('Reminder', 'రిమైండర్')} onPress={() => navigation.navigate('Reminder')} accentColor={DarkColors.saffron} />
-          <FeatureTile icon="baby-face-outline" label={t(T.kids.te, T.kids.en)} sublabel={t('Kids', 'పిల్లలు')} onPress={() => navigation.navigate('Calendar', { tab: 'kids', _ts: Date.now() })} accentColor="#7B1FA2" />
           <FeatureTile icon="hand-heart" label={t(T.donate.te, T.donate.en)} sublabel={t('Donate', 'దానం')} onPress={() => navigation.navigate('Donate')} accentColor={DarkColors.tulasiGreen} />
           {/* Row 3 — Growth */}
           <FeatureTile icon="share-variant" label={t(T.shareApp.te, T.shareApp.en)} sublabel={t('Share', 'షేర్')} onPress={() => setShowShareApp(true)} accentColor={DarkColors.saffron} />

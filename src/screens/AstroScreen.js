@@ -150,7 +150,7 @@ export function AstroScreen() {
         {/* 4. Numerology */}
         <SectionCard
           icon="numeric"
-          color="#7B1FA2"
+          color="#9B6FCF"
           title={t('సంఖ్యాశాస్త్రం', 'Numerology')}
           subtitle={t('మీ పుట్టిన తేదీ ఇవ్వండి', 'Enter your birth date')}
         >

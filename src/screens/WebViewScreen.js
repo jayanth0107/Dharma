@@ -34,7 +34,7 @@ const PAGES = {
     title: 'గురించి — About Dharma',
     sections: [
       { heading: 'ధర్మ — సనాతనం', text: 'Dharma is a Telugu Panchangam & Vedic Astrology app built with love for the Telugu-speaking Hindu community worldwide.' },
-      { heading: 'Features', text: '• Daily Panchangam (Tithi, Nakshatra, Yoga, Karana)\n• Auspicious & Inauspicious Timings\n• Festival & Ekadashi Calendar (2026)\n• Bhagavad Gita Daily Sloka\n• Vedic Horoscope & Birth Chart\n• Muhurtam Finder (90-day scan)\n• Kundali Matchmaking (Ashtakoot)\n• Live Gold & Silver Prices\n• Kids Stories & Slokas\n• WhatsApp & PDF Sharing' },
+      { heading: 'Features', text: '• Daily Panchangam (Tithi, Nakshatra, Yoga, Karana)\n• Auspicious & Inauspicious Timings\n• Festival & Ekadashi Calendar (2026)\n• Bhagavad Gita Daily Sloka\n• Vedic Horoscope & Birth Chart\n• Muhurtam Finder (90-day scan)\n• Kundali Matchmaking (Ashtakoot)\n• Live Gold & Silver Prices\n• Kid\'s Stories & Slokas\n• WhatsApp & PDF Sharing' },
       { heading: 'Developer', text: 'Built by Jayanth\nHyderabad, Telangana, India\nContact: jayanthkumar0107@zohomail.in' },
       { heading: 'Version', text: 'Dharma v1.1.0\nReact Native + Expo\nAstronomy Engine for calculations' },
       { heading: 'Open Source Credits', text: 'Astronomy Engine — astronomical calculations\nPhoton (Komoot) — location search\nOpenStreetMap — geocoding\nMaterialCommunityIcons — vector icons\nWikimedia Commons — deity images' },

@@ -7,12 +7,18 @@
 // vertical room so descenders + diacritics don't clip.
 
 // ── Font scale (px) ────────────────────────────────────────────────────
-// Conservative 1.125 ratio with rounding for crisp pixel grids.
+// Sized for readability per WCAG 2.1 + iOS HIG / Material Design:
+//   • Body text 16px — meets WCAG body baseline
+//   • Smallest USER-VISIBLE size 12px — minimum readable on mobile
+//   • 11px (`nano`) reserved for tiny pill-badges, admin-only data, watermark
+//
+// Larger sizes are unchanged to avoid breaking fixed-height tile / card layouts.
 export const FontSizes = {
-  micro:    11,   // badges, timestamp tags, watermark text
-  caption:  12,   // footer text, tertiary labels, hint text
+  nano:     11,   // pill badges only (PRO badge, day count) — NOT for body
+  micro:    12,   // timestamp tags, hint text (was 11 — failed mobile minimum)
+  caption:  12,   // footer text, tertiary labels
   small:    14,   // sub-labels, English subtitles, secondary list info
-  body:     15,   // descriptions, body paragraphs, secondary buttons
+  body:     16,   // descriptions, body paragraphs (was 15 — meets WCAG min)
   bodyLg:   16,   // prominent body text, top-tab labels
   label:    17,   // primary tile labels, section sublabels, list item labels
   title:    19,   // card titles, modal subtitles, daily greeting
@@ -25,8 +31,12 @@ export const FontSizes = {
 
 // ── Font weights ───────────────────────────────────────────────────────
 // React Native expects strings.
+//
+// Note: We don't use 300/400 anywhere — on dark backgrounds, sub-medium
+// weights ghost out, especially for Telugu glyphs. Minimum is 500 (regular).
+// All key body/label tokens use 600+ for accessible contrast-of-stroke.
 export const FontWeights = {
-  regular:  '500',
+  regular:  '500',  // body text floor — never go lighter on dark bg
   medium:   '600',
   semibold: '700',
   bold:     '800',
@@ -35,10 +45,14 @@ export const FontWeights = {
 
 // ── Line heights (multiplier of fontSize) ──────────────────────────────
 // Use as Math.round(FontSizes.X * LineHeights.normal) — exposed pre-computed below.
+//
+// `normal` raised from 1.35 → 1.45 to approach WCAG SC 1.4.12 guideline of
+// ≥1.5 for paragraph text without breaking single-line fixed-height layouts.
+// Use `relaxed` (1.5) explicitly for body paragraphs and Telugu glyphs.
 export const LineHeights = {
-  tight:   1.2,    // single-line buttons, badges
-  normal:  1.35,   // multi-line body text
-  relaxed: 1.5,    // long descriptions, sloka text
+  tight:   1.25,   // single-line buttons, badges (was 1.2 — slightly more breathing room)
+  normal:  1.45,   // multi-line body text (was 1.35)
+  relaxed: 1.5,    // long descriptions, sloka text (WCAG body min)
   loose:   1.7,    // poetry, mantras
 };
 

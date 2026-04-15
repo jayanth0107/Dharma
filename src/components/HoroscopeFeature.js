@@ -258,8 +258,8 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
               </TouchableOpacity>
             )}
             <MaterialCommunityIcons name="zodiac-leo" size={40} color="#FFD700" />
-            <Text style={s.title}>రాశి ఫలం — వేద జాతకం</Text>
-            <Text style={s.subtitle}>Vedic Horoscope Generator</Text>
+            <Text style={s.title}>వేద జాతకం</Text>
+            <Text style={s.subtitle}>Birth Chart</Text>
           </LinearGradient>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -333,41 +333,58 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   )}
                 </View>
 
-                {/* Birth Time — Hour/Minute Picker */}
+                {/* Birth Time — 12-hour AM/PM Picker */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
                     <MaterialCommunityIcons name="clock-outline" size={18} color="#9B6FCF" />
                     <Text style={s.fieldLabel}>జన్మ సమయం / Time of Birth</Text>
                   </View>
-                  <View style={s.timePickerRow}>
-                    <TouchableOpacity style={s.timeBtn} onPress={() => {
-                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
-                      setBirthTime(`${String(Math.max(0, h - 1)).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-                    }}>
-                      <Text style={s.timeBtnText}>−</Text>
-                    </TouchableOpacity>
-                    <Text style={s.timeDisplay}>{birthTime || '06:00'}</Text>
-                    <TouchableOpacity style={s.timeBtn} onPress={() => {
-                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
-                      setBirthTime(`${String(Math.min(23, h + 1)).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-                    }}>
-                      <Text style={s.timeBtnText}>+</Text>
-                    </TouchableOpacity>
-                    <Text style={s.timeSep}>:</Text>
-                    <TouchableOpacity style={s.timeBtn} onPress={() => {
-                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
-                      setBirthTime(`${String(h).padStart(2, '0')}:${String(Math.max(0, m - 5) % 60).padStart(2, '0')}`);
-                    }}>
-                      <Text style={s.timeBtnText}>−</Text>
-                    </TouchableOpacity>
-                    <Text style={s.timeMinText}>min</Text>
-                    <TouchableOpacity style={s.timeBtn} onPress={() => {
-                      const [h, m] = (birthTime || '06:00').split(':').map(Number);
-                      setBirthTime(`${String(h).padStart(2, '0')}:${String((m + 5) % 60).padStart(2, '0')}`);
-                    }}>
-                      <Text style={s.timeBtnText}>+</Text>
-                    </TouchableOpacity>
-                  </View>
+                  {(() => {
+                    const [h24, m] = (birthTime || '06:00').split(':').map(Number);
+                    const isPm = h24 >= 12;
+                    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+                    const setFrom = (newH12, newM, newPm) => {
+                      let newH24 = newH12 % 12;
+                      if (newPm) newH24 += 12;
+                      setBirthTime(`${String(newH24).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
+                    };
+                    return (
+                      <View style={s.timePickerRow}>
+                        {/* Hour */}
+                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12 === 1 ? 12 : h12 - 1, m, isPm)}>
+                          <Text style={s.timeBtnText}>−</Text>
+                        </TouchableOpacity>
+                        <Text style={s.timeDisplay}>{String(h12).padStart(2, '0')}:{String(m).padStart(2, '0')}</Text>
+                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12 === 12 ? 1 : h12 + 1, m, isPm)}>
+                          <Text style={s.timeBtnText}>+</Text>
+                        </TouchableOpacity>
+                        <Text style={s.timeSep}>:</Text>
+                        {/* Minute */}
+                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12, (m - 5 + 60) % 60, isPm)}>
+                          <Text style={s.timeBtnText}>−</Text>
+                        </TouchableOpacity>
+                        <Text style={s.timeMinText}>min</Text>
+                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12, (m + 5) % 60, isPm)}>
+                          <Text style={s.timeBtnText}>+</Text>
+                        </TouchableOpacity>
+                        {/* AM/PM Toggle */}
+                        <View style={s.ampmGroup}>
+                          <TouchableOpacity
+                            style={[s.ampmBtn, !isPm && s.ampmBtnActive]}
+                            onPress={() => setFrom(h12, m, false)}
+                          >
+                            <Text style={[s.ampmText, !isPm && s.ampmTextActive]}>AM</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[s.ampmBtn, isPm && s.ampmBtnActive]}
+                            onPress={() => setFrom(h12, m, true)}
+                          >
+                            <Text style={[s.ampmText, isPm && s.ampmTextActive]}>PM</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    );
+                  })()}
                   <Text style={s.fieldHint}>ఖచ్చితమైన సమయం తెలియకపోతే అంచనా సమయం నమోదు చేయండి</Text>
                 </View>
 
@@ -725,10 +742,13 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
             )}
           </ScrollView>
 
-          {/* Fixed close */}
-          <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
-            <Text style={s.closeBtnText}>మూసివేయండి</Text>
-          </TouchableOpacity>
+          {/* Fixed close — only in modal mode (embedded screens use PageHeader back) */}
+          {!embedded && (
+            <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
+              <Ionicons name="close" size={16} color="#C0C0C0" />
+              <Text style={s.closeBtnText}>మూసివేయండి</Text>
+            </TouchableOpacity>
+          )}
     </ModalOrView>
   );
 }
@@ -858,7 +878,12 @@ const s = StyleSheet.create({
   timeBtnText: { fontSize: 18, fontWeight: '800', color: '#fff' },
   timeDisplay: { fontSize: 28, fontWeight: '900', color: '#FFFFFF', minWidth: 70, textAlign: 'center' },
   timeSep: { fontSize: 16, color: '#999999', marginHorizontal: 2 },
-  timeMinText: { fontSize: 10, color: '#999999' },
+  timeMinText: { fontSize: 12, color: '#999999' },
+  ampmGroup: { flexDirection: 'row', marginLeft: 8, borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: '#9B6FCF' },
+  ampmBtn: { paddingHorizontal: 10, paddingVertical: 6, backgroundColor: 'transparent' },
+  ampmBtnActive: { backgroundColor: '#9B6FCF' },
+  ampmText: { fontSize: 12, fontWeight: '800', color: '#9B6FCF' },
+  ampmTextActive: { color: '#FFFFFF' },
   selectedPlace: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     marginTop: 8, paddingVertical: 6, paddingHorizontal: 10,
@@ -974,8 +999,10 @@ const s = StyleSheet.create({
   shareResultText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   closeBtn: {
-    alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20,
-    backgroundColor: '#4A1A6B', borderRadius: 14,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 12, marginHorizontal: 20, marginBottom: 20,
+    backgroundColor: 'transparent', borderRadius: 14,
+    borderWidth: 1, borderColor: 'rgba(192,192,192,0.35)',
   },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#FFD700' },
+  closeBtnText: { fontSize: 14, fontWeight: '600', color: '#C0C0C0' },
 });

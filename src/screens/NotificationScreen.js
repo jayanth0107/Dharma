@@ -98,7 +98,7 @@ export function NotificationScreen({ navigation }) {
                 onChange={(v) => updateSetting('dailyPanchangam', v)}
               />
               <NotifRow
-                icon="format-quote-open" color="#7B1FA2"
+                icon="format-quote-open" color="#9B6FCF"
                 title={t(TR.dailyQuote.te, TR.dailyQuote.en)}
                 subtitle={t('మధ్యాహ్నం 12 గంటలకు', 'At noon (12:00 PM)')}
                 value={settings.dailyQuote}

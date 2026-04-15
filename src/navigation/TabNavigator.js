@@ -46,24 +46,25 @@ export const MAIN_SECTIONS = [
   // Row 1
   { name: 'Panchang',    component: withErrorBoundary(CalendarScreen, 'Panchang'),     icon: 'pot-mix',                te: 'నేటి దినం',     en: 'Today', params: { tab: 'panchang' } },
   { name: 'Festivals',   component: withErrorBoundary(CalendarScreen, 'Festivals'),    icon: 'party-popper',           te: 'పండుగలు',       en: 'Festivals', params: { tab: 'festivals' } },
-  { name: 'DailyRashi',  component: withErrorBoundary(DailyRashiScreen, 'DailyRashi'), icon: 'star-circle',            te: 'మీ రాశి',       en: 'Rashi' },
+  { name: 'DailyRashi',  component: withErrorBoundary(DailyRashiScreen, 'DailyRashi'), icon: 'star-circle',            te: 'రాశి ఫలాలు',    en: 'Rashi Predictions' },
   // Row 2 — PREMIUM
-  { name: 'Horoscope',   component: withErrorBoundary(HoroscopeScreen, 'Horoscope'),   icon: 'account-star',           te: 'జాతకం',         en: 'Jaatakam' },
+  { name: 'Horoscope',   component: withErrorBoundary(HoroscopeScreen, 'Horoscope'),   icon: 'account-star',           te: 'వేద జాతకం',     en: 'Birth Chart' },
   { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Love Match' },
-  { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Best Dates' },
+  { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Auspicious Dates' },
   // Row 3 — Free
   { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'జ్యోతిష్యం',    en: 'Astro' },
   { name: 'Gold',        component: withErrorBoundary(GoldScreen, 'Gold'),             icon: 'gold',                   te: 'బంగారం',        en: 'Gold' },
   { name: 'Gita',        component: withErrorBoundary(GitaScreen, 'Gita'),             icon: 'book-open-page-variant', te: 'గీత',           en: 'Gita' },
   // Row 4
-  { name: 'GoodTimes',   component: withErrorBoundary(CalendarScreen, 'GoodTimes'),    icon: 'clock-check',            te: 'శుభ సమయాలు',   en: 'Good Times', params: { tab: 'timings' } },
+  { name: 'GoodTimes',   component: withErrorBoundary(CalendarScreen, 'GoodTimes'),    icon: 'clock-check',            te: 'శుభ సమయాలు',   en: 'Auspicious Times', params: { tab: 'timings' } },
   { name: 'Market',      component: withErrorBoundary(MarketScreen, 'Market'),         icon: 'chart-line',             te: 'మార్కెట్',      en: 'Market' },
   { name: 'Reminder',    component: ReminderScreen,                                    icon: 'bell-plus',              te: 'రిమైండర్',      en: 'Set Reminder' },
-  // Extras
-  { name: 'Services',    component: withErrorBoundary(ServicesScreen, 'Services'),     icon: 'store',                  te: 'సేవలు',         en: 'Services' },
-  { name: 'Donate',      component: DonateScreen,                                     icon: 'hand-heart',             te: 'దానం',          en: 'Donate' },
-  { name: 'Premium',     component: PremiumScreen,                                    icon: 'crown',                  te: 'ప్రీమియం',      en: 'Premium' },
-  { name: 'More',        component: withErrorBoundary(MoreScreen, 'More'),             icon: 'dots-horizontal',        te: 'మరిన్ని',       en: 'More' },
+  // Extras (Row 5 on Home)
+  { name: 'Kids',         component: withErrorBoundary(CalendarScreen, 'Kids'),         icon: 'baby-face-outline',      te: 'పిల్లల కథలు',   en: "Kid's Stories", params: { tab: 'kids' } },
+  { name: 'TempleNearby', component: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'), icon: 'temple-hindu',       te: 'దేవాలయాలు',     en: 'Nearby Temples' },
+  { name: 'Donate',       component: DonateScreen,                                      icon: 'hand-heart',             te: 'దానం',          en: 'Donate' },
+  { name: 'Premium',      component: PremiumScreen,                                     icon: 'crown',                  te: 'ప్రీమియం',      en: 'Premium' },
+  { name: 'More',         component: withErrorBoundary(MoreScreen, 'More'),             icon: 'dots-horizontal',        te: 'మరిన్ని',       en: 'More' },
 ];
 
 // ── Utility screens: push-navigable only (not in bars or swipe) ──
@@ -73,7 +74,9 @@ const UTILITY_SCREENS = [
   { name: 'Login',         component: LoginScreen },
   { name: 'Location',      component: LocationScreen },
   { name: 'Notifications', component: NotificationScreen },
-  { name: 'TempleNearby',  component: TempleNearbyScreen },
+  // Services screen kept registered (but hidden from nav) — placeholder content,
+  // not yet ready for surfacing on Home / nav bars.
+  { name: 'Services',      component: ServicesScreen },
 ];
 
 const HIDDEN_OPTIONS = {

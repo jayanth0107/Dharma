@@ -98,7 +98,7 @@ export function DailyRashiScreen() {
   return (
     <SwipeWrapper screenName="DailyRashi">
     <View style={s.screen}>
-      <PageHeader title={t('నేటి రాశి ఫలాలు', 'Daily Horoscope')} />
+      <PageHeader title={t('రాశి ఫలాలు', 'Rashi Predictions')} />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
@@ -180,7 +180,7 @@ export function DailyRashiScreen() {
                     <Text style={s.detailText}>{t(pred.health.te, pred.health.en)}</Text>
                   </View>
                   <View style={s.detailRow}>
-                    <MaterialCommunityIcons name="account-heart" size={16} color="#7B1FA2" />
+                    <MaterialCommunityIcons name="account-heart" size={16} color="#9B6FCF" />
                     <Text style={s.detailLabel}>{t('సంబంధాలు', 'Relations')}</Text>
                     <Text style={s.detailText}>{t(pred.relationship.te, pred.relationship.en)}</Text>
                   </View>
@@ -276,6 +276,6 @@ const s = StyleSheet.create({
   luckyItem: {
     flex: 1, alignItems: 'center', backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 10,
   },
-  luckyLabel: { fontSize: 10, color: DarkColors.textMuted, fontWeight: '600' },
+  luckyLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600' },
   luckyValue: { fontSize: 15, fontWeight: '800', color: DarkColors.gold, marginTop: 4 },
 });

@@ -251,9 +251,9 @@ const st = StyleSheet.create({
   },
   tileTitleWrap: { padding: 10 },
   tileTitle: { fontSize: 14, fontWeight: '800', lineHeight: 18 },
-  tileEnglish: { fontSize: 10, color: DarkColors.textMuted, marginTop: 2 },
+  tileEnglish: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   tileReadRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
-  tileRead: { fontSize: 11, fontWeight: '700' },
+  tileRead: { fontSize: 12, fontWeight: '700' },
 
   // Slokas
   slokaSectionLabel: {
@@ -267,7 +267,7 @@ const st = StyleSheet.create({
     width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 10,
   },
   slokaInfo: { flex: 1 },
-  slokaDeity: { fontSize: 10, fontWeight: '700', color: DarkColors.textMuted, letterSpacing: 0.5, marginBottom: 2 },
+  slokaDeity: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, letterSpacing: 0.5, marginBottom: 2 },
   slokaText: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
   slokaMeaning: { fontSize: 12, color: DarkColors.textSecondary, marginTop: 3, fontStyle: 'italic', lineHeight: 17 },
 

@@ -18,6 +18,11 @@ export function PageHeader({ title, onMenuPress }) {
   return (
     <View style={[s.container, { paddingTop: Math.max(insets.top, 10) + 4 }]}>
       <View style={s.row}>
+        {/* Centered title — absolutely positioned so icons don't shift it */}
+        <View style={s.titleAbs} pointerEvents="none">
+          <Text style={s.title} numberOfLines={1}>{title}</Text>
+        </View>
+
         {/* Back / Hamburger */}
         {onMenuPress ? (
           <TouchableOpacity style={s.iconBtn} onPress={onMenuPress}>
@@ -33,9 +38,6 @@ export function PageHeader({ title, onMenuPress }) {
         <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')}>
           <MaterialCommunityIcons name="home" size={22} color={DarkColors.silver} />
         </TouchableOpacity>
-
-        {/* Title */}
-        <Text style={s.title} numberOfLines={1}>{title}</Text>
 
         <View style={{ flex: 1 }} />
 
@@ -63,16 +65,27 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingBottom: 8,
+    position: 'relative',
   },
   iconBtn: {
     padding: 6,
     marginRight: 4,
   },
+  titleAbs: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 110,
+  },
   title: {
     ...Type.h3,
     fontWeight: '900',
     color: DarkColors.gold,
-    marginLeft: Spacing.xs,
+    textAlign: 'center',
   },
   divider: {
     height: 1,

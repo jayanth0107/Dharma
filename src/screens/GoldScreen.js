@@ -51,7 +51,7 @@ export function GoldScreen() {
   return (
     <SwipeWrapper screenName="Gold">
     <View style={s.screen}>
-      <PageHeader title={t(TR.goldSilver.te, TR.goldSilver.en)} />
+      <PageHeader title={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} />
       <TopTabBar />
       <ScrollView
         style={s.scroll} contentContainerStyle={s.scrollContent}

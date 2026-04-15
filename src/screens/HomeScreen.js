@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
@@ -39,6 +40,28 @@ export function HomeScreen({ navigation }) {
   const [showShareApp, setShowShareApp] = useState(false);
   const [showPanchangamShare, setShowPanchangamShare] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // ── Responsive header sizing — single-row header that fits any phone ──
+  // Tiny phones (<360) get smaller icons + flag + smaller subtitle so the
+  // full title still fits on one line. Larger phones get more breathing room.
+  const headerIconSize = usePick({ default: 22, sm: 22, md: 24, lg: 24, xl: 26 });
+  const headerMenuIconSize = usePick({ default: 24, sm: 24, md: 26, lg: 26, xl: 28 });
+  const headerFlagSize = usePick({ default: 26, sm: 26, md: 28, lg: 30, xl: 34 });
+  const headerSlotSize = usePick({ default: 32, sm: 32, md: 36, lg: 40, xl: 44 });
+  const headerSlotGap = usePick({ default: 2, sm: 2, md: 4, lg: 6, xl: 8 });
+  const headerTitleFont = usePick({ default: 22, sm: 22, md: 26, lg: 30, xl: 34 });
+  const headerHyphenFont = usePick({ default: 18, sm: 18, md: 22, lg: 26, xl: 30 });
+  const headerSubtitleFont = usePick({ default: 13, sm: 13, md: 16, lg: 18, xl: 20 });
+  // Hide subtitle ("సనాతనం") on the smallest phones so the main title fits.
+  const showSubtitle = usePick({ default: false, md: true });
+
+  // Responsive sizing for location pill + language toggle row.
+  const pillPadH      = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
+  const pillPadV      = usePick({ default: 5,  sm: 5,  md: 6,  lg: 7,  xl: 8 });
+  const pillIconSz    = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
+  const pillTextSize  = usePick({ default: 12, sm: 12, md: 13, lg: 14, xl: 15 });
+  const langDotSize   = usePick({ default: 12, sm: 12, md: 14, lg: 16, xl: 18 });
+  const langFontSize  = usePick({ default: 10, sm: 10, md: 11, lg: 12, xl: 13 });
 
   const openUrl = (url) => {
     if (Platform.OS === 'web') window.open(url, '_blank');
@@ -91,39 +114,66 @@ export function HomeScreen({ navigation }) {
         colors={['#1A1008', '#0F0A04', DarkColors.bg]}
         style={[s.header, { paddingTop: Math.max(insets.top, 10) + 6 }]}
       >
-        {/* Top row: ☰ Hamburger + Flag + Title ... Settings + Bell */}
-        <View style={s.headerTopRow}>
-          <TouchableOpacity style={s.headerIconBtn} onPress={() => setShowDrawer(true)}>
-            <MaterialCommunityIcons name="menu" size={26} color={DarkColors.silver} />
+        {/* Single-row header — fits on one line on EVERY phone via responsive
+            sizing (usePick). Title takes flex:1 so it claims all remaining
+            width and auto-shrinks for tiny screens. Subtitle hidden on <md. */}
+        <View style={[s.headerSingleRow, { gap: headerSlotGap }]}>
+          <TouchableOpacity
+            style={[s.headerSlot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={() => setShowDrawer(true)}
+            accessibilityLabel="Menu"
+          >
+            <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
-          <FlagWithPole size={38} />
-          <Text style={s.appTitleRow} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
-            <Text style={s.appTitle}>{t(TR.appName.te, TR.appName.en)}</Text>
-            {lang === 'te' && (
+          <View style={[s.headerSlot, { height: headerSlotSize, minWidth: headerSlotSize }]}>
+            <FlagWithPole size={headerFlagSize} />
+          </View>
+          <Text
+            style={s.appTitleRow}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.55}
+            allowFontScaling={false}
+          >
+            <Text style={[s.appTitle, { fontSize: headerTitleFont }]}>{t(TR.appName.te, TR.appName.en)}</Text>
+            {lang === 'te' && showSubtitle && (
               <>
-                <Text style={s.appHyphen}> | </Text>
-                <Text style={s.appSubtitle}>{TR.sanatana.te}</Text>
+                <Text style={[s.appHyphen, { fontSize: headerHyphenFont }]}> | </Text>
+                <Text style={[s.appSubtitle, { fontSize: headerSubtitleFont }]}>{TR.sanatana.te}</Text>
               </>
             )}
           </Text>
-          <View style={{ flex: 1 }} />
-          <TouchableOpacity style={s.headerIconBtn} onPress={() => navigation.navigate('Notifications')}>
-            <MaterialCommunityIcons name="bell-outline" size={22} color={DarkColors.silver} />
+          <TouchableOpacity
+            style={[s.headerSlot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={() => navigation.navigate('Notifications')}
+            accessibilityLabel="Notifications"
+          >
+            <MaterialCommunityIcons name="bell-outline" size={headerIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
-          <TouchableOpacity style={s.headerIconBtn} onPress={() => navigation.navigate('Settings')}>
-            <MaterialCommunityIcons name="cog-outline" size={22} color={DarkColors.silver} />
+          <TouchableOpacity
+            style={[s.headerSlot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={() => navigation.navigate('Settings')}
+            accessibilityLabel="Settings"
+          >
+            <MaterialCommunityIcons name="cog-outline" size={headerIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
-          <TouchableOpacity style={[s.userAvatar, isLoggedIn && s.userAvatarLoggedIn, premiumActive && s.userAvatarPremium]} onPress={() => navigation.navigate('Login')}>
-            <MaterialCommunityIcons
-              name={isLoggedIn ? 'account-check' : 'account-circle-outline'}
-              size={22}
-              color={premiumActive ? '#FFD700' : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
-            />
-            {premiumActive && (
-              <View style={s.userCrown}>
-                <MaterialCommunityIcons name="crown" size={8} color="#fff" />
-              </View>
-            )}
+          <TouchableOpacity
+            style={[s.headerSlot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={() => navigation.navigate('Login')}
+            accessibilityLabel="Profile"
+          >
+            <View style={[s.userAvatar, isLoggedIn && s.userAvatarLoggedIn, premiumActive && s.userAvatarPremium]}>
+              <MaterialCommunityIcons
+                name={isLoggedIn ? 'account-check' : 'account-circle-outline'}
+                size={20}
+                color={premiumActive ? '#FFD700' : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
+              />
+              {premiumActive && (
+                <View style={s.userCrown}>
+                  <MaterialCommunityIcons name="crown" size={8} color="#fff" />
+                </View>
+              )}
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -157,19 +207,27 @@ export function HomeScreen({ navigation }) {
           </TouchableOpacity>
         )}
 
-        {/* Location pill + Language toggle */}
+        {/* Location pill + Language toggle — responsive */}
         <View style={s.locationRow}>
-          <TouchableOpacity style={s.locationPill} onPress={() => navigation.navigate('Location')} activeOpacity={0.7}>
-            <Ionicons name="location" size={14} color={DarkColors.saffron} />
-            <Text style={s.locationText} numberOfLines={1}>{locationText}</Text>
-            <Ionicons name="chevron-down" size={13} color={DarkColors.textMuted} />
+          <TouchableOpacity
+            style={[s.locationPill, { paddingHorizontal: pillPadH, paddingVertical: pillPadV }]}
+            onPress={() => navigation.navigate('Location')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="location" size={pillIconSz} color={DarkColors.saffron} />
+            <Text style={[s.locationText, { fontSize: pillTextSize }]} numberOfLines={1}>{locationText}</Text>
+            <Ionicons name="chevron-down" size={pillIconSz - 1} color={DarkColors.textMuted} />
           </TouchableOpacity>
-          <TouchableOpacity style={s.langToggle} onPress={toggleLang} activeOpacity={0.7}>
-            <Text style={[s.langLabel, lang === 'en' && s.langLabelActive]}>ENG</Text>
-            <View style={[s.langSwitch, lang === 'en' && s.langSwitchEn]}>
-              <View style={s.langDot} />
+          <TouchableOpacity
+            style={[s.langToggle, { paddingHorizontal: pillPadH, paddingVertical: pillPadV }]}
+            onPress={toggleLang}
+            activeOpacity={0.7}
+          >
+            <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>ENG</Text>
+            <View style={[s.langSwitch, { width: langDotSize * 2.4, height: langDotSize + 4 }, lang === 'en' && s.langSwitchEn]}>
+              <View style={[s.langDot, { width: langDotSize, height: langDotSize, borderRadius: langDotSize / 2 }]} />
             </View>
-            <Text style={[s.langLabel, lang === 'te' && s.langLabelActive]}>తెలు</Text>
+            <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తెలు</Text>
           </TouchableOpacity>
         </View>
 
@@ -227,7 +285,7 @@ export function HomeScreen({ navigation }) {
       {/* ── Feature Grid (scrollable) ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
         <FeatureGrid gap={12}>
-          {/* Row 1 — Daily essentials: 1.నేటి దినం 2.పండుగలు 3.మీ రాశి */}
+          {/* Row 1 — Daily essentials: 1.నేటి దినం 2.పండుగలు 3.రాశి ఫలాలు */}
           <FeatureTile
             icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t('Panchang', 'పంచాంగం')}
             accentColor={DarkColors.gold}
@@ -239,14 +297,14 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })}
           />
           <FeatureTile
-            icon="star-circle" label={t('మీ రాశి', 'Your Rashi')} sublabel={t('Predictions', 'ఫలాలు')}
-            accentColor="#7B1FA2"
+            icon="star-circle" label={t('రాశి ఫలాలు', 'Rashi Predictions')} sublabel={t('Daily', 'రోజువారీ')}
+            accentColor="#9B6FCF"
             onPress={() => navigation.navigate('DailyRashi')}
           />
 
-          {/* Row 2 — PREMIUM ROW: 4.మీ జాతకం 5.ప్రేమ పొందిక 6.శుభ దినాలు */}
+          {/* Row 2 — PREMIUM ROW: 4.జాతకం 5.జాతక పొందిక 6.శుభ దినాలు */}
           <FeatureTile
-            icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Birth Chart', 'జన్మ కుండలి')}
+            icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Janma Kundali', 'జన్మ కుండలి')}
             accentColor={DarkColors.saffron}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Horoscope')}
@@ -258,7 +316,7 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Matchmaking')}
           />
           <FeatureTile
-            icon="calendar-star" label={t('శుభ దినాలు', 'Best Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
+            icon="calendar-star" label={t('శుభ దినాలు', 'Auspicious Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
             accentColor={DarkColors.tulasiGreen}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Muhurtam')}
@@ -277,13 +335,13 @@ export function HomeScreen({ navigation }) {
           />
           <FeatureTile
             icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t('Gita', 'గీత')}
-            accentColor="#7B1FA2"
+            accentColor="#9B6FCF"
             onPress={() => navigation.navigate('Gita')}
           />
 
           {/* Row 4 — 10.శుభ సమయాలు 11.మార్కెట్ 12.రిమైండర్ */}
           <FeatureTile
-            icon="clock-check" label={t('శుభ సమయాలు', 'Good Times')} sublabel={t('Rahu Kalam & more', 'రాహు కాలం & ఇంకా')}
+            icon="clock-check" label={t('శుభ సమయాలు', 'Auspicious Times')} sublabel={t('Rahu Kalam & more', 'రాహు కాలం & ఇంకా')}
             accentColor="#C41E3A"
             onPress={() => navigation.navigate('GoodTimes', { tab: 'timings', _ts: Date.now() })}
           />
@@ -298,21 +356,21 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Reminder')}
           />
 
-          {/* Row 5 — Services & payments */}
+          {/* Row 5 — Kids stories + Temple finder + Donate (last) */}
           <FeatureTile
-            icon="store" label={t('సేవలు', 'Services')} sublabel={t('Puja & Shop', 'పూజ & షాప్')}
-            accentColor={DarkColors.tulasiGreen}
-            onPress={() => navigation.navigate('Services')}
+            icon="baby-face-outline" label={t('పిల్లల కథలు', "Kid's Stories")} sublabel={t("Kid's Stories", 'పిల్లల కథలు')}
+            accentColor="#9B6FCF"
+            onPress={() => navigation.navigate('Kids')}
+          />
+          <FeatureTile
+            icon="temple-hindu" label={t('దేవాలయాలు', 'Nearby Temples')} sublabel={t('Find Temples', 'దగ్గరిలోని')}
+            accentColor={DarkColors.saffron}
+            onPress={() => navigation.navigate('TempleNearby')}
           />
           <FeatureTile
             icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t('Donate', 'దానం')}
             accentColor={DarkColors.tulasiGreen}
             onPress={() => navigation.navigate('Donate')}
-          />
-          <FeatureTile
-            icon="crown" label={t('ప్రీమియం', 'Premium')} sublabel={t('Upgrade', 'అప్‌గ్రేడ్')}
-            accentColor={DarkColors.gold}
-            onPress={() => navigation.navigate('Premium')}
           />
         </FeatureGrid>
         <View style={{ height: 16 }} />
@@ -344,37 +402,47 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
-  headerTopRow: {
+  // Single-row header: icons + flag + title + icons all on one line,
+  // baseline-aligned (every item sits in a 36px slot).
+  headerSingleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'nowrap',
-    gap: 8,
+    gap: 4,
+    paddingHorizontal: 2,
   },
-  flagImage: {
-    width: 30,
-    height: 38,
+  // Slot box for icon buttons. 36px keeps the row compact so the title
+  // gets enough width to render fully on small phones, but still
+  // provides a hittable target (combined with row vertical padding).
+  headerSlot: {
+    height: 36,
+    minWidth: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   appTitleRow: {
-    flexShrink: 1,
+    flex: 1,                       // claim ALL remaining width between flag and right icons
+    paddingHorizontal: 4,
+    includeFontPadding: false,
   },
   appTitle: {
-    fontSize: 28,
+    fontSize: 22,                  // base size — auto-shrinks via adjustsFontSizeToFit
     fontWeight: '900',
     color: DarkColors.gold,
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
+    includeFontPadding: false,
   },
   appHyphen: {
-    fontSize: 22,
+    fontSize: 18,
     color: DarkColors.textMuted,
+    includeFontPadding: false,
   },
   appSubtitle: {
     fontSize: 14,
     fontWeight: '700',
     color: DarkColors.saffron,
-    letterSpacing: 0.5,
-  },
-  headerIconBtn: {
-    padding: 6,
+    letterSpacing: 0.4,
+    includeFontPadding: false,
   },
   userAvatar: {
     width: 32, height: 32, borderRadius: 16, marginLeft: 2,

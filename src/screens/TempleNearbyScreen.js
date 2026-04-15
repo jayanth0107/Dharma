@@ -8,6 +8,8 @@ import { DarkColors } from '../theme/colors';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/PageHeader';
+import { TopTabBar } from '../components/TopTabBar';
+import { SwipeWrapper } from '../components/SwipeWrapper';
 import { googlePlacesNearby } from '../utils/placesProxy';
 
 function calcDistance(lat1, lon1, lat2, lon2) {
@@ -257,8 +259,10 @@ export function TempleNearbyScreen() {
   const filtered = temples.filter(tmp => tmp.distance <= selectedRange);
 
   return (
+    <SwipeWrapper screenName="TempleNearby">
     <View style={s.screen}>
-      <PageHeader title={t('దేవాలయాలు', 'Temples')} />
+      <PageHeader title={t('దేవాలయాలు', 'Nearby Temples')} />
+      <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* Google Maps Quick Search */}
@@ -324,7 +328,7 @@ export function TempleNearbyScreen() {
                     </View>
                   )}
                   {temple.open !== undefined && (
-                    <Text style={{ fontSize: 10, fontWeight: '700', color: temple.open ? DarkColors.tulasiGreen : '#C41E3A' }}>
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: temple.open ? DarkColors.tulasiGreen : DarkColors.kumkum }}>
                       {temple.open ? '● Open' : '● Closed'}
                     </Text>
                   )}
@@ -356,6 +360,7 @@ export function TempleNearbyScreen() {
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
+    </SwipeWrapper>
   );
 }
 
@@ -407,8 +412,8 @@ const s = StyleSheet.create({
   templeSub: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   templeMeta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 3 },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  ratingText: { fontSize: 11, fontWeight: '700', color: DarkColors.gold },
-  ratingCount: { fontSize: 10, color: DarkColors.textMuted },
+  ratingText: { fontSize: 12, fontWeight: '700', color: DarkColors.gold },
+  ratingCount: { fontSize: 12, color: DarkColors.textMuted },
   distBadge: { alignItems: 'center', gap: 2 },
   distText: { fontSize: 13, fontWeight: '800', color: DarkColors.saffron },
   // Empty

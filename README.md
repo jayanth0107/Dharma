@@ -4,7 +4,7 @@
 
 A comprehensive **React Native (Expo)** app delivering daily **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Indian market data, live gold/silver prices, nearby temple finder, and cultural content — built for Telugu-speaking Hindu communities worldwide.
 
-> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.0.0
+> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.1.0
 
 - **GitHub:** https://github.com/jayanth0107/Dharma
 - **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
@@ -54,9 +54,9 @@ A comprehensive **React Native (Expo)** app delivering daily **Telugu Panchangam
 
 ### Premium (3-day free trial)
 
-- **మీ జాతకం (Your Jaatakam)** — Vedic birth chart with Rashi, Lagna, Nakshatra, Navagraha positions
-- **Muhurtam Finder** — auspicious days for wedding, house warming, travel, business, vehicle, education (90-day scan, PDF export)
-- **Matchmaking** — 8-kuta Ashtakoot compatibility score
+- **వేద జాతకం (Birth Chart)** — Vedic birth chart with Rashi, Lagna, Nakshatra, Navagraha positions; 12-hour AM/PM birth-time picker
+- **శుభ దినాలు (Auspicious Dates / Muhurtam Finder)** — auspicious days for wedding, house warming, travel, business, vehicle, education (90-day scan, PDF export)
+- **పొందిక (Love Match / Matchmaking)** — 8-kuta Ashtakoot compatibility score; nakshatra auto-detected from DOB
 - **Bhagavad Gita library** — all 30 slokas with theme/chapter search
 - **Ad-free experience**
 
@@ -73,19 +73,41 @@ Payments via UPI (Google Pay, PhonePe, Paytm, BHIM). Payment records synced anon
 
 ---
 
-## Screens
+## Screens & navigation (v2.1)
 
-The app has 21 screens organized behind 5 bottom tabs:
+The app exposes **18 main sections** in a custom **scrollable bottom tab bar** — every section also appears in the matching **top tab bar** and supports **left/right swipe** to move between sections. Active state highlight is **gold** (`#D4A017` — WCAG AAA).
 
-| Tab | Screen | Purpose |
-|-----|--------|---------|
-| **Home** | HomeScreen | Branded header + feature-tile grid + quick actions |
-| **Calendar** | CalendarScreen | Sub-tabs: Panchang, Timings, Festivals, Ekadashi, Holidays, Darshan, Gold, Kids |
-| **Astro** | AstroScreen | Grid of astrology features |
-| **Gold** | GoldScreen | Gold + silver prices |
-| **More** | MoreScreen | Menu for settings, donate, premium, share |
+| # | Section | Telugu | English |
+|---|---------|--------|---------|
+| 0 | Home | హోమ్ | Home |
+| 1 | Panchang | నేటి దినం | Today's Date |
+| 2 | Festivals | పండుగలు | Festivals |
+| 3 | Daily Rashi | రాశి ఫలాలు | Rashi Predictions |
+| 4 | **Birth Chart** ⭐ | వేద జాతకం | Birth Chart |
+| 5 | **Love Match** ⭐ | పొందిక | Love Match |
+| 6 | **Auspicious Dates** ⭐ | శుభ దినాలు | Auspicious Dates |
+| 7 | Astrology | జ్యోతిష్యం | Astro |
+| 8 | Gold prices | బంగారం | Gold |
+| 9 | Bhagavad Gita | గీత | Gita |
+| 10 | Auspicious Times | శుభ సమయాలు | Auspicious Times |
+| 11 | Market | మార్కెట్ | Market |
+| 12 | Set Reminder | రిమైండర్ | Set Reminder |
+| 13 | Kid's Stories | పిల్లల కథలు | Kid's Stories |
+| 14 | Nearby Temples | దేవాలయాలు | Nearby Temples |
+| 15 | Donate | దానం | Donate |
+| 16 | Premium | ప్రీమియం | Premium |
+| 17 | More | మరిన్ని | More |
 
-**Hidden screens** (navigated via tiles/buttons): Gita, Horoscope (జాతకం), Muhurtam, Matchmaking, DailyRashi, Market, TempleNearby, Services, Premium, Donate, Settings, Reminder, Notifications, Location, Login, WebView (Privacy/Terms/About).
+⭐ = premium
+
+**Push-only utility screens:** Settings, Login, Location, Notifications, WebView (Privacy/Terms/About/Rate/Feedback), Services (placeholder).
+
+## Accessibility & responsive design
+
+- **Color palette** is single-source-of-truth (`src/theme/colors.js`) with WCAG contrast values annotated for each token. Active states use **gold** (`#D4A017`, 8.4:1 — AAA). Failing tokens (`kumkum`, `tulasiGreen`, `tabInactive`) were promoted to their accessible variants.
+- **Body text** ≥ 16 px, **micro** ≥ 12 px (`nano: 11 px` reserved for tiny pill badges only). Line-heights ≥ 1.45.
+- **Touch targets** ≥ 44 px in the home header (icons, avatar slots).
+- **Responsive layout** via `useColumns` / `usePick` (`src/theme/responsive.js`) — every horizontally laid-out element (header, top + bottom nav bars, location pill, language toggle, tile grid) re-renders live on rotation / resize / fold and scales per phone class (`sm <360 → md → lg → xl ≥768`).
 
 ---
 

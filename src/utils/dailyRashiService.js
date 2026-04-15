@@ -3,16 +3,16 @@
 // Not AI-generated — uses traditional Vedic astrology principles
 
 const RASHIS = [
-  { te: 'మేషం', en: 'Aries', icon: 'zodiac-aries', color: '#C41E3A', element: 'fire' },
-  { te: 'వృషభం', en: 'Taurus', icon: 'zodiac-taurus', color: '#2E7D32', element: 'earth' },
+  { te: 'మేషం', en: 'Aries', icon: 'zodiac-aries', color: '#E8495A', element: 'fire' },
+  { te: 'వృషభం', en: 'Taurus', icon: 'zodiac-taurus', color: '#4CAF50', element: 'earth' },
   { te: 'మిథునం', en: 'Gemini', icon: 'zodiac-gemini', color: '#4A90D9', element: 'air' },
   { te: 'కర్కాటకం', en: 'Cancer', icon: 'zodiac-cancer', color: '#C0C0C0', element: 'water' },
   { te: 'సింహం', en: 'Leo', icon: 'zodiac-leo', color: '#E8751A', element: 'fire' },
-  { te: 'కన్య', en: 'Virgo', icon: 'zodiac-virgo', color: '#2E7D32', element: 'earth' },
+  { te: 'కన్య', en: 'Virgo', icon: 'zodiac-virgo', color: '#4CAF50', element: 'earth' },
   { te: 'తుల', en: 'Libra', icon: 'zodiac-libra', color: '#4A90D9', element: 'air' },
-  { te: 'వృశ్చికం', en: 'Scorpio', icon: 'zodiac-scorpio', color: '#C41E3A', element: 'water' },
-  { te: 'ధనుస్సు', en: 'Sagittarius', icon: 'zodiac-sagittarius', color: '#7B1FA2', element: 'fire' },
-  { te: 'మకరం', en: 'Capricorn', icon: 'zodiac-capricorn', color: '#2E7D32', element: 'earth' },
+  { te: 'వృశ్చికం', en: 'Scorpio', icon: 'zodiac-scorpio', color: '#E8495A', element: 'water' },
+  { te: 'ధనుస్సు', en: 'Sagittarius', icon: 'zodiac-sagittarius', color: '#9B6FCF', element: 'fire' },
+  { te: 'మకరం', en: 'Capricorn', icon: 'zodiac-capricorn', color: '#4CAF50', element: 'earth' },
   { te: 'కుంభం', en: 'Aquarius', icon: 'zodiac-aquarius', color: '#4A90D9', element: 'air' },
   { te: 'మీనం', en: 'Pisces', icon: 'zodiac-pisces', color: '#C0C0C0', element: 'water' },
 ];

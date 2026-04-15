@@ -60,6 +60,23 @@ export const Gradients = {
 
 // ── Dark Theme (v2 Rewrite) ──
 // Dark background + saffron accents + gold/silver labels & icons
+//
+// WCAG contrast on bg #0A0A0A (calculated):
+//   gold #D4A017 = 8.4:1 (AAA)        ← active states, icons, interactive labels
+//   goldLight #F5D77A = 14:1 (AAA)
+//   goldShimmer #FFD700 = 14:1 (AAA)
+//   saffron #E8751A = 6.6:1 (AA)      ← decorative, large headings, gradients
+//   silver #C0C0C0 = 10.9:1 (AAA)
+//   white #FFFFFF = 21:1 (AAA)
+//   textMuted #999999 = 6.9:1 (AA)
+//   tabInactive #9A9A9A = 7.0:1 (AAA) ← bumped from #777 (was 4.4:1 — failed)
+//   kumkumLight #E8495A = 5.2:1 (AA)  ← primary red (kumkumDark fails: 3.4:1)
+//   tulasiLight #4CAF50 = 7.2:1 (AAA) ← primary green (tulasiDark fails: 3.9:1)
+//
+// Rule of thumb:
+//   • Body text / small icons / interactive labels → AAA (gold, white, silver, textMuted)
+//   • Large headings (≥18pt bold) → AA OK (saffron, kumkumLight)
+//   • Decoration / gradients / fills → any
 export const DarkColors = {
   // Backgrounds
   bg:           '#0A0A0A',
@@ -68,26 +85,29 @@ export const DarkColors = {
   bgSubtab:     '#141414',
   bgInput:      '#1E1E1E',
 
-  // Saffron accents (primary action color)
+  // Saffron accents (decorative — gradients, large CTA fills, brand identity)
+  // Use gold for small text/icons that need AAA contrast.
   saffron:      '#E8751A',
   saffronLight: '#F4A460',
   saffronDark:  '#C55A11',
   saffronDim:   'rgba(232,117,26,0.15)',
 
-  // Gold (labels, icons, active states)
+  // Gold — primary accent for accessible text, icons, active states (AAA on bg)
   gold:         '#D4A017',
   goldLight:    '#F5D77A',
   goldShimmer:  '#FFD700',
   goldDim:      'rgba(212,160,23,0.15)',
 
-  // Silver (secondary labels, icons, muted elements)
+  // Silver (secondary labels, icons, muted elements) — AAA on bg
   silver:       '#C0C0C0',
   silverLight:  '#D8D8D8',
   silverDim:    'rgba(192,192,192,0.15)',
 
-  // Sacred
-  kumkum:       '#C41E3A',
-  tulasiGreen:  '#2E7D32',
+  // Sacred — accessible variants are the default; *Dark kept for fills/borders only
+  kumkum:       '#E8495A',      // accessible red (was #C41E3A — failed AA)
+  kumkumDark:   '#C41E3A',      // decorative only
+  tulasiGreen:  '#4CAF50',      // accessible green (was #2E7D32 — failed AA)
+  tulasiDark:   '#2E7D32',      // decorative only
 
   // Text
   textPrimary:   '#FFFFFF',
@@ -102,17 +122,17 @@ export const DarkColors = {
   borderCard:    'rgba(255,255,255,0.06)',
   borderGold:    'rgba(212,160,23,0.25)',
 
-  // Tab bar
+  // Tab bar — accessible colors
   tabBarBg:      '#111111',
-  tabBarBorder:  'rgba(232,117,26,0.2)',
-  tabActive:     '#E8751A',     // saffron active
-  tabInactive:   '#777777',
+  tabBarBorder:  'rgba(212,160,23,0.20)',
+  tabActive:     '#D4A017',     // gold active (AAA, was saffron)
+  tabInactive:   '#9A9A9A',     // bumped from #777 (was 4.4:1 — failed AA)
 
-  // Functional
-  success:       '#2E7D32',
-  error:         '#C41E3A',
-  warning:       '#E8751A',
-  premium:       '#D4A017',
+  // Functional — match accessible variants
+  success:       '#4CAF50',     // tulasiLight
+  error:         '#E8495A',     // kumkumLight
+  warning:       '#E8751A',     // saffron (large/decorative use only)
+  premium:       '#D4A017',     // gold
 
   // Overlay
   overlay:       'rgba(10,10,10,0.85)',

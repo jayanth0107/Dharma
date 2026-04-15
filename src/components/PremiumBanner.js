@@ -572,7 +572,7 @@ const s = StyleSheet.create({
   perkText: { flex: 1, marginLeft: 12 },
   perkTelugu: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
   perkEnglish: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
-  perkDetail: { fontSize: 10, color: DarkColors.textMuted, marginTop: 4, lineHeight: 14, fontStyle: 'italic' },
+  perkDetail: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4, lineHeight: 18, fontStyle: 'italic' },
 
   trialSection: { paddingHorizontal: 20, paddingTop: 24 },
   trialBtn: { borderRadius: 16, overflow: 'hidden' },

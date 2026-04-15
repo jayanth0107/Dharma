@@ -6,6 +6,99 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.1.0] — 2026-04-15
+
+UX & accessibility refresh: WCAG-AAA color tokens, larger fonts, responsive
+layout, and a more polished navigation experience.
+
+### Added
+
+- **Single source-of-truth accessibility palette** (`src/theme/colors.js`) with
+  per-color WCAG contrast annotations. New / promoted tokens:
+  - `kumkumDark`, `tulasiDark` (decorative-only — fail AA, kept for fills)
+  - `tabActive` switched from saffron → **gold `#D4A017`** (8.4:1 AAA)
+  - `tabInactive` bumped #777 → **#9A9A9A** (4.4:1 ✗ → 7.0:1 ✓)
+  - `success`, `error`, `warning`, `premium` re-pointed to accessible variants
+- **Responsive design system** end-to-end. Every horizontally laid-out element
+  (top tab bar, bottom scrollable tab bar, location pill, language toggle,
+  branded header) now consumes the existing `usePick({ sm, md, lg, xl })` hook
+  and re-renders live on rotation / fold / browser-resize.
+- **Kid's Stories** is now a primary tile on Home and a top-level section in
+  the bottom + top nav bars (`Kids` route in `MAIN_SECTIONS`).
+- **Nearby Temples** promoted to a top-level section — appears as a Home Row 5
+  tile (between Kids Stories and Donate), as a pill in both the bottom + top
+  nav bars, and is reachable via swipe. Moved out of `UTILITY_SCREENS` into
+  `MAIN_SECTIONS` (now 18 sections total). Premium tile removed from Home —
+  Premium remains accessible via the bottom/top nav bar pill and the drawer.
+- **12-hour AM / PM picker** in the Vedic Jaatakam birth-time field
+  (internal storage stays 24-hour `HH:MM` so calculations are unchanged).
+- **CalendarPicker rendered through `<Modal>`** so it overlays at the root and
+  no longer gets trapped inside parent `ScrollView`s. Affects Vedic Jaatakam,
+  Matchmaking, and Astro/Numerology pickers.
+- `accessibilityLabel` on every header icon button (Menu, Notifications,
+  Settings, Profile) for screen-reader users.
+
+### Changed
+
+- **App label refresh** (English-only — Telugu unchanged):
+  - `మీ రాశి` → **రాశి ఫలాలు / Rashi Predictions**
+  - `మీ జాతకం` → **వేద జాతకం / Birth Chart** (`TR.jaatakam` updated)
+  - `Best Dates` → **Auspicious Dates**
+  - `Good Times` → **Auspicious Times**
+  - `Vedic Jaatakam` (modal header) → **Birth Chart**
+  - `Kids Stories` → **Kid's Stories**
+  - `Matchmaking` (drawer) → **Love Match**
+- **Home tile order** now matches the nav bars exactly (Services moved out;
+  Kids Stories moved in).
+- **Branded header restructured** — single row, baseline-aligned, fully
+  responsive. Every header item sits in a uniform slot so hamburger / flag /
+  title / bell / settings / avatar share one visual baseline. `usePick`
+  drives icon size, slot height, gap, title font, hyphen font, and subtitle
+  font per phone class. Tiny phones (<360 px) hide "| సనాతనం" so the main
+  title stays fully readable.
+- **Top + bottom tab bars** auto-center the active pill using each pill's
+  measured layout (`onLayout`) instead of a fixed `PILL_WIDTH=80` guess —
+  longer labels like "దానం", "సేవలు", "రిమైండర్" no longer get clipped
+  at the right edge. Trailing `paddingRight: 200` lets the last pill scroll
+  into the centered position.
+- **Page header title centered** absolutely (`PageHeader.js`) so the title
+  stays in the visual middle regardless of icon widths on either side.
+- **Typography tokens** (`src/theme/typography.js`):
+  - `body` 15 → **16 px** (WCAG body baseline)
+  - `micro` 11 → **12 px** (was below mobile readability minimum)
+  - `LineHeights.normal` 1.35 → **1.45**
+  - `LineHeights.tight` 1.2 → **1.25**
+  - New `nano: 11px` size, marked "pill badges only — NOT for body"
+  - Inline notes added documenting the WCAG/HIG rationale and the
+    "no weight below 500 on dark bg" rule (Telugu glyphs ghost out).
+- **Inaccessible inline icon colors** swept across the app:
+  - Deep purple `#7B1FA2` (2.1:1 ✗) → `#9B6FCF` (5.3:1 ✓) in 9 active files
+  - Zodiac scorpio `#C41E3A` → `#E8495A`; virgo/capricorn `#2E7D32` → `#4CAF50`
+- **HoroscopeFeature**: Generate vs Close button visually differentiated. The
+  redundant "మూసివేయండి" button is hidden when embedded in a full-page screen
+  (PageHeader's back arrow handles closing).
+
+### Fixed
+
+- **CalendarPicker overlay collision** with parent ScrollViews — now always
+  overlays the entire screen via root-level `Modal`. Selecting dates in the
+  Vedic Jaatakam form works correctly on all phones.
+- **Top-tab clipping** for sections with longer labels (Donate, Services,
+  Reminder) — fixed with measured layout positions.
+- **Vedic Jaatakam result-section** purple gradient header no longer shows the
+  obsolete "రాశి ఫలం — వేద జాతకం" string; matches the page title.
+- **MoreScreen** previously navigated to a non-existent `'Calendar'` route for
+  the Kids tile — fixed to navigate to the new `'Kids'` route.
+
+### Removed
+
+- `Services` removed from `MAIN_SECTIONS` (and from MoreScreen) — kept as a
+  push-only utility screen so existing references don't break, but no longer
+  surfaced in nav bars / Home / swipe sequence (placeholder content not yet
+  ready for users).
+
+---
+
 ## [2.0.0] — 2026-04-13
 
 Major rewrite: tabbed navigation, centralized bilingual i18n, Firebase auth, and several new astrology features.

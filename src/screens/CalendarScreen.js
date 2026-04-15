@@ -100,9 +100,10 @@ export function CalendarScreen({ route }) {
   // Festivals + GoodTimes: show sub-tabs so user can jump to Ekadashi / etc.
   const routeName = route?.name;
   const screenTitle =
-    routeName === 'Panchang'  ? t('నేటి దినం', "Today") :
+    routeName === 'Panchang'  ? t('నేటి దినం', "Today's Date") :
     routeName === 'Festivals' ? t('పండుగలు', 'Festivals') :
-    routeName === 'GoodTimes' ? t('శుభ సమయాలు', 'Good Times') :
+    routeName === 'GoodTimes' ? t('శుభ సమయాలు', 'Auspicious Times') :
+    routeName === 'Kids'      ? t('పిల్లల కథలు', "Kid's Stories") :
                                  t('క్యాలెండర్', 'Calendar');
   // Sub-tabs only appear on Festivals — that's the only route where users
   // benefit from cross-jumping to Ekadashi/Chaturthi/etc. categories.
@@ -388,8 +389,8 @@ export function CalendarScreen({ route }) {
         {activeSubTab === 'kids' && (
           <View style={s.card}>
             <View style={s.cardHeader}>
-              <MaterialCommunityIcons name="baby-face-outline" size={16} color="#7B1FA2" />
-              <Text style={[s.cardTitle, { color: '#7B1FA2' }]}>{t(TR.kidsStories.te, TR.kidsStories.en)}</Text>
+              <MaterialCommunityIcons name="baby-face-outline" size={16} color="#9B6FCF" />
+              <Text style={[s.cardTitle, { color: '#9B6FCF' }]}>{t(TR.kidsStories.te, TR.kidsStories.en)}</Text>
             </View>
             <KidsSection dayOfWeek={selectedDate.getDay()} />
           </View>

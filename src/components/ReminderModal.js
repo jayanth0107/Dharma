@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   timeBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
   timeDisplay: { fontSize: 20, fontWeight: '800', color: '#4A90D9', minWidth: 55, textAlign: 'center' },
   timeSep: { fontSize: 14, color: DarkColors.textMuted },
-  timeMinLabel: { fontSize: 10, color: DarkColors.textMuted },
+  timeMinLabel: { fontSize: 12, color: DarkColors.textMuted },
   fieldBlock: {
     backgroundColor: DarkColors.bgCard,
     borderRadius: 12,

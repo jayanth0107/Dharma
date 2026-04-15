@@ -16,7 +16,7 @@ export function ReminderScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Reminder">
     <View style={s.screen}>
-      <PageHeader title={t('రిమైండర్', 'Reminder')} />
+      <PageHeader title={t('రిమైండర్', 'Set Reminder')} />
       <TopTabBar />
       <ReminderModal visible={true} embedded={true} onClose={() => navigation.navigate('Home')} selectedDate={selectedDate} />
     </View>

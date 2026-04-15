@@ -1,4 +1,4 @@
-# TESTING.md — Dharma v2.0.0 Test Plan
+maki# TESTING.md — Dharma v2.0.0 Test Plan
 
 Comprehensive manual test cases for the ధర్మ app. Use this as a checklist before each release.
 
@@ -394,17 +394,31 @@ The Astro tab groups: Horoscope (జాతకం), Muhurtam, Matchmaking, Daily 
 
 ---
 
-## 21. Temple finder
+## 21. Temple finder (Nearby Temples / దేవాలయాలు)
+
+In v2.1, Temple finder is a top-level main section — appears in Home Row 5,
+both nav bars, and in the swipe sequence (Kids → TempleNearby → Donate).
 
 | # | Step | Platform | Expected | Result |
 |---|------|----------|----------|--------|
-| 21.1 | Temple Nearby screen loads | 🔁 | | |
-| 21.2 | Uses current location | 📱 | Lat/lng sent to Places API | |
-| 21.3 | Results show nearest 10 temples | 🔁 | Name + distance + address | |
-| 21.4 | Tap a temple → opens in maps | 📱 | Google Maps / Apple Maps intent | |
-| 21.5 | Web: opens Google Maps web | 🌐 | New tab | |
-| 21.6 | No results → friendly message | 🔁 | "No temples nearby" | |
-| 21.7 | `temple_search` event | 🔁 | Firestore event | |
+| 21.1 | Temple Nearby screen loads | 🔁 | Page renders without errors | |
+| 21.2 | Page header reads "దేవాలయాలు / Nearby Temples" | 🔁 | Matches Home tile + nav pill labels | |
+| 21.3 | TopTabBar visible below page header | 🔁 | Same tab strip as other main-section screens; "దేవాలయాలు" pill highlighted in **gold** (`#D4A017`) | |
+| 21.4 | Bottom ScrollableTabBar shows "దేవాలయాలు" pill highlighted | 🔁 | Same gold active state | |
+| 21.5 | Swipe left → previous section | 📱 | Lands on Kid's Stories | |
+| 21.6 | Swipe right → next section | 📱 | Lands on Donate | |
+| 21.7 | Uses current location | 📱 | Lat/lng sent to Places API | |
+| 21.8 | Results show nearest 10 temples | 🔁 | Name + distance + address | |
+| 21.9 | Distance range filter pills (5/10/25/50 km) | 🔁 | Filter narrows result list live | |
+| 21.10 | Deity quick filter row | 🔁 | Tapping a deity pill filters list | |
+| 21.11 | "Search in Google Maps" CTA | 🔁 | Opens maps with "Hindu temple near me" pre-filled | |
+| 21.12 | Tap a temple → opens in maps | 📱 | Google Maps / Apple Maps intent | |
+| 21.13 | Web: opens Google Maps web | 🌐 | New tab | |
+| 21.14 | Open/Closed badge on each temple | 🔁 | Uses accessible variants — open = `tulasiGreen` (#4CAF50), closed = `kumkum` (#E8495A); 12 px font (was 10) | |
+| 21.15 | Rating + rating count text | 🔁 | 12 px font (was 10/11) — readable on phone screens | |
+| 21.16 | No results → friendly message | 🔁 | "No temples nearby" | |
+| 21.17 | `temple_search` event | 🔁 | Firestore event recorded | |
+| 21.18 | Page header EN/తె toggle works | 🔁 | Title flips Telugu ↔ English live | |
 
 ---
 

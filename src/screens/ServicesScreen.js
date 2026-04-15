@@ -31,7 +31,7 @@ const CONSULTATION_SERVICES = [
     price: '₹399', duration: '20 min',
   },
   {
-    icon: 'crystal-ball', color: '#7B1FA2',
+    icon: 'crystal-ball', color: '#9B6FCF',
     te: 'వార్షిక ఫలం', en: 'Yearly Prediction',
     descTe: 'సంపూర్ణ సంవత్సర జ్యోతిష్య అంచనా PDF రిపోర్ట్', descEn: 'Complete yearly astrology prediction PDF report',
     price: '₹999', duration: 'PDF Report',
@@ -59,7 +59,7 @@ export function ServicesScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Services">
     <View style={s.screen}>
-      <PageHeader title={t('సేవలు & షాప్', 'Services & Shop')} />
+      <PageHeader title={t('సేవలు', 'Services')} />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 

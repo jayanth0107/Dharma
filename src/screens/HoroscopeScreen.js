@@ -3,7 +3,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage, TR } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
@@ -16,7 +16,7 @@ export function HoroscopeScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Horoscope">
     <View style={s.screen}>
-      <PageHeader title={t('మీ జాతకం', 'Your Jaatakam')} />
+      <PageHeader title={t(TR.jaatakam.te, TR.jaatakam.en)} />
       <TopTabBar />
       <HoroscopeModal
         visible={true}

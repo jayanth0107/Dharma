@@ -5,33 +5,41 @@
 // to keep the active tab visible.
 
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { DarkColors } from '../theme';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { MAIN_SECTIONS } from '../navigation/TabNavigator';
-
-const PILL_WIDTH = 80;
 
 export function TopTabBar() {
   const navigation = useNavigation();
   const { t } = useLanguage();
   const scrollRef = useRef(null);
 
+  // Responsive sizing — bigger on tablets, tighter on tiny phones.
+  const tabPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 18, xl: 22 });
+  const tabPadV      = usePick({ default: 8,  sm: 8,  md: 10, lg: 12, xl: 14 });
+  const tabFontSize  = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
+  // Per-tab measured layout: { x, width } keyed by section name
+  const tabLayouts = useRef({});
+
   // Get current route name from navigation state
   const activeRouteName = useNavigationState(
     (state) => state.routes[state.index]?.name
   );
 
-  const activeSectionIdx = MAIN_SECTIONS.findIndex((s) => s.name === activeRouteName);
-
-  // Auto-scroll to active tab
+  // Auto-center active tab using its REAL measured position (not a fixed
+  // PILL_WIDTH guess) so long labels like "దానం" / "సేవలు" don't end up
+  // clipped at the right edge.
   useEffect(() => {
-    if (activeSectionIdx >= 0 && scrollRef.current) {
-      const targetX = Math.max(0, activeSectionIdx * PILL_WIDTH - PILL_WIDTH * 1.5);
-      scrollRef.current.scrollTo({ x: targetX, animated: true });
-    }
-  }, [activeSectionIdx]);
+    if (!activeRouteName || !scrollRef.current) return;
+    const layout = tabLayouts.current[activeRouteName];
+    if (!layout) return;
+    const screenW = Dimensions.get('window').width;
+    const targetX = Math.max(0, layout.x - screenW / 2 + layout.width / 2);
+    scrollRef.current.scrollTo({ x: targetX, animated: true });
+  }, [activeRouteName]);
 
   return (
     <View style={s.bar}>
@@ -46,7 +54,18 @@ export function TopTabBar() {
           return (
             <TouchableOpacity
               key={section.name}
-              style={[s.tab, isActive && s.tabActive]}
+              style={[s.tab, { paddingHorizontal: tabPadH, paddingVertical: tabPadV }, isActive && s.tabActive]}
+              onLayout={(e) => {
+                const { x, width } = e.nativeEvent.layout;
+                tabLayouts.current[section.name] = { x, width };
+                // If this tab just became visible and is the active one,
+                // re-trigger centering once layout is known.
+                if (isActive && scrollRef.current) {
+                  const screenW = Dimensions.get('window').width;
+                  const targetX = Math.max(0, x - screenW / 2 + width / 2);
+                  scrollRef.current.scrollTo({ x: targetX, animated: false });
+                }
+              }}
               onPress={() => {
                 if (section.params) {
                   navigation.navigate(section.name, { ...section.params, _ts: Date.now() });
@@ -56,10 +75,7 @@ export function TopTabBar() {
               }}
               activeOpacity={0.7}
             >
-              <Text
-                style={[s.label, isActive && s.labelActive]}
-                numberOfLines={1}
-              >
+              <Text style={[s.label, { fontSize: tabFontSize }, isActive && s.labelActive]}>
                 {t(section.te, section.en)}
               </Text>
             </TouchableOpacity>
@@ -77,7 +93,10 @@ const s = StyleSheet.create({
     borderBottomColor: DarkColors.borderCard,
   },
   content: {
+    // Extra trailing padding so the last tabs (Donate / Premium / More)
+    // can scroll into the centered position without bumping the edge.
     paddingHorizontal: 8,
+    paddingRight: 200,
     alignItems: 'center',
   },
   tab: {
@@ -85,9 +104,10 @@ const s = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 3,
     borderBottomColor: 'transparent',
+    flexShrink: 0,
   },
   tabActive: {
-    borderBottomColor: DarkColors.saffron,
+    borderBottomColor: DarkColors.gold,
   },
   label: {
     fontSize: 14,
@@ -96,7 +116,7 @@ const s = StyleSheet.create({
     letterSpacing: 0.2,
   },
   labelActive: {
-    color: DarkColors.textPrimary,
+    color: DarkColors.gold,
     fontWeight: '800',
   },
 });

@@ -419,7 +419,7 @@ export function MuhurtamFinderCard({ onOpen, isPremium = false }) {
           <MaterialCommunityIcons name="calendar-star" size={28} color={DarkColors.tulasiGreen} />
         </View>
         <View style={mStyles.cardContent}>
-          <Text style={mStyles.cardTitle}>ముహూర్తం ఫైండర్</Text>
+          <Text style={mStyles.cardTitle}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
           <Text style={mStyles.cardDesc}>వివాహం, గృహ ప్రవేశం, ప్రయాణం... శుభ దినాలు తెలుసుకోండి</Text>
         </View>
         {isPremium ? (
@@ -492,7 +492,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
             style={s.modalHeader}
           >
             <MaterialCommunityIcons name="calendar-star" size={28} color="#F5D77A" />
-            <Text style={s.modalTitle}>ముహూర్తం ఫైండర్</Text>
+            <Text style={s.modalTitle}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
             <Text style={s.modalSub}>రాబోయే 90 రోజుల శుభ దినాలు</Text>
             <TouchableOpacity style={s.closeX} onPress={handleClose}>
               <Ionicons name="close" size={24} color="#FFF" />
@@ -505,7 +505,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
               <MaterialCommunityIcons name="lock" size={48} color={DarkColors.gold} />
               <Text style={s.premiumOverlayTitle}>Premium అవసరం</Text>
               <Text style={s.premiumOverlayDesc}>
-                ముహూర్తం ఫైండర్ ప్రీమియం ఫీచర్. శుభ దినాలు కనుగొనడానికి ప్రీమియం యాక్టివేట్ చేయండి.
+                శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి ప్రీమియం ఫీచర్. శుభ దినాలు కనుగొనడానికి ప్రీమియం యాక్టివేట్ చేయండి.
               </Text>
               <View style={s.premiumPlans}>
                 {[
@@ -743,8 +743,8 @@ const s = StyleSheet.create({
   resultRow: { flexDirection: 'row', alignItems: 'center' },
   resultDateCol: { width: 50, alignItems: 'center' },
   resultDay: { fontSize: 22, fontWeight: '800', color: DarkColors.tulasiGreen },
-  resultMonth: { fontSize: 10, fontWeight: '600', color: DarkColors.textMuted, textTransform: 'uppercase' },
-  resultWeekday: { fontSize: 10, color: DarkColors.textSecondary },
+  resultMonth: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, textTransform: 'uppercase' },
+  resultWeekday: { fontSize: 12, color: DarkColors.textSecondary },
   resultInfo: { flex: 1, marginLeft: 12 },
   resultDateFull: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
   resultBadges: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
