@@ -20,6 +20,7 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { SectionShareRow } from '../components/SectionShareRow';
+import { CalendarPicker } from '../components/CalendarPicker';
 import {
   getTodayLucky, calculateNumerology, VASTU_TIPS, getTodayMantra,
   MEDITATION_GUIDES, calculateNameCompatibility,
@@ -57,15 +58,16 @@ export function AstroScreen() {
   const lucky = useMemo(() => getTodayLucky(today), [today.toDateString()]);
   const mantra = useMemo(() => getTodayMantra(today), [today.toDateString()]);
 
-  // Numerology state
-  const [numDob, setNumDob] = useState('');
+  // Numerology state — date picker, not text input
+  const [numDob, setNumDob] = useState(null);   // Date object or null
+  const [showDobPicker, setShowDobPicker] = useState(false);
   const numResult = useMemo(() => {
-    const parts = numDob.split(/[-/]/);
-    if (parts.length !== 3) return null;
-    const [d, m, y] = parts.map(Number);
-    if (!d || !m || !y) return null;
-    return calculateNumerology(new Date(y, m - 1, d));
+    if (!numDob) return null;
+    return calculateNumerology(numDob);
   }, [numDob]);
+  const numDobLabel = numDob
+    ? numDob.toLocaleDateString(lang === 'te' ? 'te-IN' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
 
   // Name compat state
   const [n1, setN1] = useState('');
@@ -77,6 +79,17 @@ export function AstroScreen() {
     <View style={s.screen}>
       <PageHeader title={t('జ్యోతిష్యం', 'Astrology')} />
       <TopTabBar />
+
+      {/* Date picker overlay for numerology DOB */}
+      {showDobPicker && (
+        <CalendarPicker
+          selectedDate={numDob || new Date(2000, 0, 1)}
+          title={t('మీ పుట్టిన తేదీ', 'Your Birth Date')}
+          onSelect={(d) => { setNumDob(d); setShowDobPicker(false); }}
+          onClose={() => setShowDobPicker(false)}
+        />
+      )}
+
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* 1. Today's Lucky */}
@@ -141,15 +154,13 @@ export function AstroScreen() {
           title={t('సంఖ్యాశాస్త్రం', 'Numerology')}
           subtitle={t('మీ పుట్టిన తేదీ ఇవ్వండి', 'Enter your birth date')}
         >
-          <TextInput
-            style={s.input}
-            value={numDob}
-            onChangeText={setNumDob}
-            placeholder="DD/MM/YYYY"
-            placeholderTextColor={DarkColors.textMuted}
-            keyboardType="numbers-and-punctuation"
-            maxLength={10}
-          />
+          <TouchableOpacity style={s.dateBtn} onPress={() => setShowDobPicker(true)} activeOpacity={0.7}>
+            <MaterialCommunityIcons name="calendar" size={20} color={DarkColors.gold} />
+            <Text style={[s.dateBtnText, !numDob && { color: DarkColors.textMuted, fontWeight: '500' }]}>
+              {numDobLabel || t('మీ పుట్టిన తేదీ ఎంచుకోండి', 'Pick your birth date')}
+            </Text>
+            <MaterialCommunityIcons name="chevron-down" size={18} color={DarkColors.textMuted} />
+          </TouchableOpacity>
           {numResult && (
             <View style={{ marginTop: 12 }}>
               <StatRow label={t('లైఫ్ పాత్ నంబర్', 'Life Path Number')} value={numResult.lifePath} />
@@ -159,7 +170,7 @@ export function AstroScreen() {
               <SectionShareRow
                 section="numerology"
                 buildText={() => `🔢 ధర్మ — సంఖ్యాశాస్త్రం / Numerology\n\n` +
-                  `📅 DOB: ${numDob}\n` +
+                  `📅 DOB: ${numDobLabel}\n` +
                   `🎯 Life Path Number: ${numResult.lifePath}\n` +
                   `🌟 Birth Number: ${numResult.birthNumber}\n` +
                   `🍀 Lucky Numbers: ${numResult.luckyNumbers.join(', ')}\n\n` +
@@ -296,6 +307,16 @@ const s = StyleSheet.create({
     fontSize: 15, color: DarkColors.textPrimary,
     borderWidth: 1, borderColor: DarkColors.borderCard,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+  },
+  // Date picker button (used for DOB, etc.)
+  dateBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: DarkColors.bgElevated,
+    borderRadius: 10, paddingVertical: 14, paddingHorizontal: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  dateBtnText: {
+    flex: 1, fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary,
   },
   meaningText: {
     fontSize: 14, color: DarkColors.gold, textAlign: 'center',
