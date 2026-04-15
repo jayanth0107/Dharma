@@ -48,8 +48,8 @@ export const MAIN_SECTIONS = [
   { name: 'Festivals',   component: withErrorBoundary(CalendarScreen, 'Festivals'),    icon: 'party-popper',           te: 'పండుగలు',       en: 'Festivals', params: { tab: 'festivals' } },
   { name: 'DailyRashi',  component: withErrorBoundary(DailyRashiScreen, 'DailyRashi'), icon: 'star-circle',            te: 'మీ రాశి',       en: 'Rashi' },
   // Row 2 — PREMIUM
-  { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Love Match' },
   { name: 'Horoscope',   component: withErrorBoundary(HoroscopeScreen, 'Horoscope'),   icon: 'account-star',           te: 'జాతకం',         en: 'Jaatakam' },
+  { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Love Match' },
   { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Best Dates' },
   // Row 3 — Free
   { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'జ్యోతిష్యం',    en: 'Astro' },

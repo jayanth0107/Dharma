@@ -85,14 +85,15 @@ export function MarketScreen() {
               </View>
             )}
 
-            {/* Market Status — only when we have fresh live data */}
-            {!data?.isStale && data?.indices?.length > 0 && (
+            {/* Last-updated chip only — no 'Market Closed' label which
+                annoyed users when prices were still visible. */}
+            {!data?.isStale && data?.lastUpdated && (
               <View style={s.statusBar}>
-                <View style={[s.statusDot, { backgroundColor: data?.marketOpen ? DarkColors.tulasiGreen : '#C41E3A' }]} />
+                <View style={[s.statusDot, { backgroundColor: data?.marketOpen ? DarkColors.tulasiGreen : DarkColors.gold }]} />
                 <Text style={s.statusText}>
-                  {data?.marketOpen ? t('మార్కెట్ తెరిచి ఉంది', 'Market Open') : t('మార్కెట్ మూసి ఉంది', 'Market Closed')}
+                  {t('చివరి నవీకరణ', 'Last updated')}
                 </Text>
-                <Text style={s.statusTime}>{data?.lastUpdated || ''}</Text>
+                <Text style={s.statusTime}>{data.lastUpdated}</Text>
               </View>
             )}
 

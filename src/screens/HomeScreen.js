@@ -244,18 +244,18 @@ export function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('DailyRashi')}
           />
 
-          {/* Row 2 — PREMIUM ROW: 4.ప్రేమ పొందిక 5.మీ జాతకం 6.శుభ దినాలు */}
-          <FeatureTile
-            icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Love Match', 'ప్రేమ పొందిక')}
-            accentColor="#C41E3A"
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Matchmaking')}
-          />
+          {/* Row 2 — PREMIUM ROW: 4.మీ జాతకం 5.ప్రేమ పొందిక 6.శుభ దినాలు */}
           <FeatureTile
             icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Birth Chart', 'జన్మ కుండలి')}
             accentColor={DarkColors.saffron}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Horoscope')}
+          />
+          <FeatureTile
+            icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Love Match', 'ప్రేమ పొందిక')}
+            accentColor="#C41E3A"
+            isPremium={!premiumActive}
+            onPress={() => navigation.navigate('Matchmaking')}
           />
           <FeatureTile
             icon="calendar-star" label={t('శుభ దినాలు', 'Best Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
