@@ -29,9 +29,9 @@ export function AppProvider({ children }) {
   const [locationDetecting, setLocationDetecting] = useState(true);
   const [fontScale, setFontScale] = useState(1.0);
 
-  // Premium
-  const [premiumActive, setPremiumActive] = useState(false);
-  const [trialAvailable, setTrialAvailable] = useState(true);
+  // Premium — all features free for now (admin can toggle via Settings passcode)
+  const [premiumActive, setPremiumActive] = useState(true);
+  const [trialAvailable, setTrialAvailable] = useState(false);
 
   // Gold prices
   const [goldSilverPrices, setGoldSilverPrices] = useState(null);
@@ -129,10 +129,11 @@ export function AppProvider({ children }) {
     // Notifications scheduled in location effect below
 
     // Premium status
-    initPremium().then(() => {
-      checkIsPremium().then(p => setPremiumActive(p));
-      getTierInfo().then(info => setTrialAvailable(info.trialAvailable));
-    }).catch(e => console.warn('Premium init failed:', e));
+    // All features free — skip premium check (admin can toggle in Settings)
+    // initPremium().then(() => {
+    //   checkIsPremium().then(p => setPremiumActive(p));
+    //   getTierInfo().then(info => setTrialAvailable(info.trialAvailable));
+    // }).catch(e => console.warn('Premium init failed:', e));
 
     // Gold prices with auto-refresh
     const loadGoldPrices = () => {

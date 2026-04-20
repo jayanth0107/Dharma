@@ -50,7 +50,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
   const [settings, setSettings] = useState(null);
   const [tapCount, setTapCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminUnlocked, setAdminUnlocked] = useState(typeof __DEV__ !== 'undefined' ? __DEV__ : true);
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [adminInput, setAdminInput] = useState('');
   const [adminError, setAdminError] = useState(false);
   const [paymentRecords, setPaymentRecords] = useState([]);
@@ -63,11 +63,10 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
     if (visible) {
       loadNotifSettings().then(setSettings);
     } else {
-      // Reset admin state on close (preserve dev auto-unlock)
-      const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : true;
+      // Reset admin state on close
       setTapCount(0);
       setShowAdminLogin(false);
-      setAdminUnlocked(isDev);
+      setAdminUnlocked(false);
       setAdminInput('');
       setAdminError(false);
     }
