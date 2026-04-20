@@ -52,7 +52,7 @@ export const MAIN_SECTIONS = [
   { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Love Match' },
   { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Auspicious Dates' },
   // Row 3 — Free
-  { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'జ్యోతిష్యం',    en: 'Astro' },
+  { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'వేద విజ్ఞానం',   en: 'Vedic Wisdom' },
   { name: 'Gold',        component: withErrorBoundary(GoldScreen, 'Gold'),             icon: 'gold',                   te: 'బంగారం',        en: 'Gold' },
   { name: 'Gita',        component: withErrorBoundary(GitaScreen, 'Gita'),             icon: 'book-open-page-variant', te: 'గీత',           en: 'Gita' },
   // Row 4
@@ -89,7 +89,6 @@ export function TabNavigator() {
 
   return (
     <Tab.Navigator
-      key={lang}
       tabBar={(props) => <ScrollableTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >

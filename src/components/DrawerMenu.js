@@ -8,6 +8,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors, Type } from '../theme';
+import { usePick } from '../theme/responsive';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -46,6 +47,22 @@ export function DrawerMenu({ visible, onClose, onAction }) {
   const { isLoggedIn, profile } = useAuth();
   const { premiumActive } = useApp();
   const { t } = useLanguage();
+  const drawerWidth = usePick({ default: 270, md: 300, xl: 360 });
+  const profilePaddingH = usePick({ default: 16, md: 20, xl: 28 });
+  const avatarSize = usePick({ default: 50, md: 60, xl: 72 });
+  const avatarIconSize = usePick({ default: 44, md: 52, xl: 62 });
+  const profileNameSize = usePick({ default: 18, md: 22, xl: 26 });
+  const profileSubSize = usePick({ default: 13, md: 15, xl: 17 });
+  const menuItemPaddingV = usePick({ default: 12, md: 15, xl: 18 });
+  const menuItemPaddingH = usePick({ default: 16, md: 20, xl: 28 });
+  const menuIconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const menuIconWidth = usePick({ default: 24, md: 28, xl: 34 });
+  const menuLabelSize = usePick({ default: 15, md: 17, xl: 20 });
+  const chevronSize = usePick({ default: 20, md: 22, xl: 26 });
+  const badgeFontSize = usePick({ default: 9, md: 9, xl: 11 });
+  const guestBadgeFontSize = usePick({ default: 10, md: 11, xl: 13 });
+  const crownSize = usePick({ default: 10, md: 12, xl: 14 });
+  const crownCircle = usePick({ default: 18, md: 22, xl: 26 });
 
   const handlePress = (id) => {
     onClose();
@@ -65,18 +82,18 @@ export function DrawerMenu({ visible, onClose, onAction }) {
         <TouchableOpacity style={s.backdrop} activeOpacity={1} onPress={onClose} />
 
         {/* Drawer panel */}
-        <View style={[s.drawer, { paddingTop: Math.max(insets.top, 10) + 10 }]}>
+        <View style={[s.drawer, { width: drawerWidth, paddingTop: Math.max(insets.top, 10) + 10 }]}>
           {/* Profile header — Guest / Free / Premium */}
-          <TouchableOpacity style={s.profileSection} onPress={() => handlePress('login')} activeOpacity={0.7}>
-            <View style={[s.avatar, isLoggedIn && s.avatarLoggedIn, premiumActive && s.avatarPremium]}>
+          <TouchableOpacity style={[s.profileSection, { paddingHorizontal: profilePaddingH }]} onPress={() => handlePress('login')} activeOpacity={0.7}>
+            <View style={[s.avatar, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }, isLoggedIn && s.avatarLoggedIn, premiumActive && s.avatarPremium]}>
               <MaterialCommunityIcons
                 name={isLoggedIn ? 'account-check' : 'account-circle'}
-                size={52}
+                size={avatarIconSize}
                 color={premiumActive ? '#FFD700' : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
               />
               {premiumActive && (
-                <View style={s.premiumCrown}>
-                  <MaterialCommunityIcons name="crown" size={12} color="#fff" />
+                <View style={[s.premiumCrown, { width: crownCircle, height: crownCircle, borderRadius: crownCircle / 2 }]}>
+                  <MaterialCommunityIcons name="crown" size={crownSize} color="#fff" />
                 </View>
               )}
             </View>
@@ -84,32 +101,32 @@ export function DrawerMenu({ visible, onClose, onAction }) {
               {isLoggedIn ? (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={s.profileName}>{profile?.name || profile?.phone || 'User'}</Text>
+                    <Text style={[s.profileName, { fontSize: profileNameSize }]}>{profile?.name || profile?.phone || 'User'}</Text>
                     {premiumActive && (
                       <View style={s.premiumBadge}>
-                        <Text style={s.premiumBadgeText}>PREMIUM</Text>
+                        <Text style={[s.premiumBadgeText, { fontSize: badgeFontSize }]}>PREMIUM</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={s.profilePhone}>{profile?.phone || ''}</Text>
+                  <Text style={[s.profilePhone, { fontSize: profileSubSize }]}>{profile?.phone || ''}</Text>
                   {!premiumActive && (
                     <View style={s.freeBadge}>
-                      <Text style={s.freeBadgeText}>FREE</Text>
+                      <Text style={[s.freeBadgeText, { fontSize: badgeFontSize }]}>FREE</Text>
                     </View>
                   )}
                 </>
               ) : (
                 <>
-                  <Text style={s.profileName}>{t(TR.guest.te, TR.guest.en)}</Text>
-                  <Text style={s.profileSub}>{t(TR.loginPrompt.te, TR.loginPrompt.en)}</Text>
+                  <Text style={[s.profileName, { fontSize: profileNameSize }]}>{t(TR.guest.te, TR.guest.en)}</Text>
+                  <Text style={[s.profileSub, { fontSize: profileSubSize }]}>{t(TR.loginPrompt.te, TR.loginPrompt.en)}</Text>
                   <View style={s.guestBadge}>
-                    <MaterialCommunityIcons name="login" size={12} color={DarkColors.saffron} />
-                    <Text style={s.guestBadgeText}>{t(TR.loginWithPhoneBtn.te, TR.loginWithPhoneBtn.en)}</Text>
+                    <MaterialCommunityIcons name="login" size={crownSize} color={DarkColors.saffron} />
+                    <Text style={[s.guestBadgeText, { fontSize: guestBadgeFontSize }]}>{t(TR.loginWithPhoneBtn.te, TR.loginWithPhoneBtn.en)}</Text>
                   </View>
                 </>
               )}
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.textMuted} />
+            <MaterialCommunityIcons name="chevron-right" size={chevronSize} color={DarkColors.textMuted} />
           </TouchableOpacity>
 
           <View style={s.profileDivider} />
@@ -118,23 +135,23 @@ export function DrawerMenu({ visible, onClose, onAction }) {
           <ScrollView style={s.menuScroll} showsVerticalScrollIndicator={false}>
             {MENU_ITEMS.map((item) => {
               if (item.id.startsWith('divider')) {
-                return <View key={item.id} style={s.menuDivider} />;
+                return <View key={item.id} style={[s.menuDivider, { marginHorizontal: menuItemPaddingH }]} />;
               }
               return (
                 <TouchableOpacity
                   key={item.id}
-                  style={s.menuItem}
+                  style={[s.menuItem, { paddingVertical: menuItemPaddingV, paddingHorizontal: menuItemPaddingH }]}
                   onPress={() => handlePress(item.id)}
                   activeOpacity={0.6}
                 >
                   <MaterialCommunityIcons
                     name={item.icon}
-                    size={22}
+                    size={menuIconSize}
                     color={item.accent || DarkColors.silver}
-                    style={s.menuIcon}
+                    style={[s.menuIcon, { width: menuIconWidth }]}
                   />
                   <View style={s.menuTextBlock}>
-                    <Text style={[s.menuLabel, item.accent && { color: item.accent }]}>{t(item.label, item.labelEn)}</Text>
+                    <Text style={[s.menuLabel, { fontSize: menuLabelSize }, item.accent && { color: item.accent }]}>{t(item.label, item.labelEn)}</Text>
                   </View>
                 </TouchableOpacity>
               );

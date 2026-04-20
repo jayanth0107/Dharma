@@ -5,13 +5,13 @@ import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
 } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { useApp } from '../context/AppContext';
 import { useLanguage, T, TR } from '../context/LanguageContext';
-import { useWindow } from '../theme';
+import { usePick } from '../theme/responsive';
 
 import { PageHeader } from '../components/PageHeader';
 import { ListSectionHeader } from '../components/ListSectionHeader';
@@ -93,7 +93,27 @@ export function CalendarScreen({ route }) {
   } = useApp();
 
   const { t } = useLanguage();
+  const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
   const [activeSubTab, setActiveSubTab] = useState(route?.params?.tab || 'panchang');
+
+  // Inject visible scrollbar CSS on web — gold-themed thin scrollbars
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const style = document.createElement('style');
+      style.id = 'dharma-scrollbar-styles';
+      style.textContent = `
+        * ::-webkit-scrollbar { width: 6px; height: 6px; }
+        * ::-webkit-scrollbar-track { background: rgba(212,160,23,0.1); border-radius: 3px; }
+        * ::-webkit-scrollbar-thumb { background: rgba(212,160,23,0.45); border-radius: 3px; min-height: 30px; }
+        * ::-webkit-scrollbar-thumb:hover { background: rgba(212,160,23,0.7); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(212,160,23,0.45) rgba(212,160,23,0.1); }
+      `;
+      if (!document.getElementById('dharma-scrollbar-styles')) {
+        document.head.appendChild(style);
+      }
+      return () => { const el = document.getElementById('dharma-scrollbar-styles'); if (el) el.remove(); };
+    }
+  }, []);
 
   // Title + sub-tab visibility per route name (Panchang / Festivals / GoodTimes)
   // Panchang: just panchangam — no sub-tabs needed
@@ -139,7 +159,7 @@ export function CalendarScreen({ route }) {
 
       {/* FilterPills removed — observance types are now direct sub-tabs */}
 
-      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} contentContainerStyle={[s.scrollContent, { paddingHorizontal: contentPad }]} showsVerticalScrollIndicator={true}>
 
         {/* ── Panchang Tab ── */}
         {activeSubTab === 'panchang' && (
@@ -164,9 +184,32 @@ export function CalendarScreen({ route }) {
 
             <View style={s.separator} />
 
+            {/* Festival Banner for selected date */}
+            {(() => {
+              const selDateStr = selectedDate.toISOString().split('T')[0];
+              const dayFestivals = FESTIVALS_2026.filter(f => f.date === selDateStr);
+              if (dayFestivals.length === 0) return null;
+              return (
+                <View style={s.festivalBanner}>
+                  <MaterialCommunityIcons name="party-popper" size={22} color={DarkColors.gold} style={{ marginRight: 10 }} />
+                  <View style={{ flex: 1 }}>
+                    {dayFestivals.map((fest, i) => (
+                      <View key={i} style={i > 0 ? { marginTop: 8, borderTopWidth: 1, borderTopColor: 'rgba(212,160,23,0.2)', paddingTop: 8 } : null}>
+                        <Text style={s.festivalBannerTitle}>{t(fest.telugu, fest.english)}</Text>
+                        <Text style={s.festivalBannerDesc}>{fest.description}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              );
+            })()}
+
             {/* Panchangam Cards */}
             <View style={s.card}>
               <View style={s.cardGrid}>
+                <PanchangaCard label={t(TR.vaaram.te, TR.vaaram.en)} teluguValue={t(panchangam.vaaram.telugu, panchangam.vaaram.english)} sublabel={t(`${TR.deity.te}: ${panchangam.vaaram.deity}`, `${TR.deity.en}: ${panchangam.vaaram.deity}`)} accentColor={panchangam.vaaram.id === 6 ? '#8E8EAE' : panchangam.vaaram.color || DarkColors.silver} />
+                <PanchangaCard label={t(TR.maasam.te, TR.maasam.en)} teluguValue={t(panchangam.teluguMonth.telugu, panchangam.teluguMonth.english)} accentColor={'#9B6FCF'} />
+                <PanchangaCard label={t(TR.samvatsaram.te, TR.samvatsaram.en)} teluguValue={panchangam.teluguYear} accentColor={DarkColors.gold} />
                 <PanchangaCard label={t(TR.tithi.te, TR.tithi.en)} teluguValue={t(panchangam.tithi.telugu, panchangam.tithi.english || panchangam.tithi.telugu)} sublabel={t(panchangam.tithi.paksha + ' ' + TR.paksha.te, (panchangam.tithi.paksha === 'శుక్ల' ? 'Shukla' : 'Krishna') + ' ' + TR.paksha.en)} accentColor={DarkColors.saffron} />
                 <PanchangaCard label={t(TR.nakshatra.te, TR.nakshatra.en)} teluguValue={t(panchangam.nakshatra.telugu, panchangam.nakshatra.english || panchangam.nakshatra.telugu)} sublabel={t(`${TR.deity.te}: ${panchangam.nakshatra.deity}`, `${TR.deity.en}: ${panchangam.nakshatra.deity}`)} accentColor={DarkColors.gold} />
                 <PanchangaCard label={t(TR.yogam.te, TR.yogam.en)} teluguValue={t(panchangam.yoga.telugu, panchangam.yoga.english || panchangam.yoga.telugu)} accentColor={DarkColors.tulasiGreen} />
@@ -199,6 +242,9 @@ export function CalendarScreen({ route }) {
               <Text style={[s.cardTitle, { color: DarkColors.kumkum }]}>{t(TR.inauspiciousTimes.te, TR.inauspiciousTimes.en)}</Text>
             </View>
             <MuhurthamCard muhurtham={panchangam.durmuhurtam} isActive={isTimeInRange(panchangam.durmuhurtam.start, panchangam.durmuhurtam.end)} isAuspicious={false} />
+            {panchangam.durmuhurtam.start2 && (
+              <MuhurthamCard muhurtham={{ ...panchangam.durmuhurtam, start: panchangam.durmuhurtam.start2, end: panchangam.durmuhurtam.end2, telugu: 'దుర్ముహూర్తం (2)', english: 'Durmuhurtam (2)' }} isActive={isTimeInRange(panchangam.durmuhurtam.start2, panchangam.durmuhurtam.end2)} isAuspicious={false} />
+            )}
             <TimingCard iconName="cancel" label={panchangam.rahuKalam.telugu} startTime={panchangam.rahuKalam.startFormatted} endTime={panchangam.rahuKalam.endFormatted} isActive={isTimeInRange(panchangam.rahuKalam.start, panchangam.rahuKalam.end)} accentColor={DarkColors.kumkum} />
             <TimingCard iconName="alert-circle" label={panchangam.yamaGanda.telugu} startTime={panchangam.yamaGanda.startFormatted} endTime={panchangam.yamaGanda.endFormatted} isActive={isTimeInRange(panchangam.yamaGanda.start, panchangam.yamaGanda.end)} accentColor={DarkColors.saffronDark} />
             <TimingCard iconName="alert-rhombus" label={panchangam.gulikaKalam.telugu} startTime={panchangam.gulikaKalam.startFormatted} endTime={panchangam.gulikaKalam.endFormatted} isActive={isTimeInRange(panchangam.gulikaKalam.start, panchangam.gulikaKalam.end)} accentColor={DarkColors.saffron} />
@@ -220,7 +266,7 @@ export function CalendarScreen({ route }) {
               const items = withRecentPast(withDaysLeft(FESTIVALS_2026, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
               return (
-                <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={true}>
                   {items.map((festival, idx) => (
                     <View key={festival.date + idx} style={festival.isPast ? s.pastItem : null}>
                       <UpcomingFestivalItem festival={festival} daysLeft={festival.daysLeft} />
@@ -263,7 +309,7 @@ export function CalendarScreen({ route }) {
               const items = withRecentPast(withDaysLeft(source, selectedDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
               return (
-                <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={true}>
                   {items.map((item, idx) => {
                     const d = new Date(item.date);
                     return (
@@ -311,7 +357,7 @@ export function CalendarScreen({ route }) {
             <ScrollView
               style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
               nestedScrollEnabled
-              showsVerticalScrollIndicator={false}
+              showsVerticalScrollIndicator={true}
             >
               <EkadashiSection
                 todayEkadashi={null}
@@ -340,7 +386,7 @@ export function CalendarScreen({ route }) {
                 <ScrollView
                   style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
                   nestedScrollEnabled
-                  showsVerticalScrollIndicator={false}
+                  showsVerticalScrollIndicator={true}
                 >
                   {items.map((holiday, idx) => {
                 const hDate = new Date(holiday.date);
@@ -423,20 +469,30 @@ const s = StyleSheet.create({
   // runtime style overrides it.
   innerScroll: {
     // Override injected at render time via innerMaxHeight
+    paddingRight: 6,
   },
   card: {
-    marginHorizontal: 16, marginBottom: 16,
-    backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
+    marginHorizontal: 16, marginBottom: 16, paddingVertical: 8,
   },
   cardHeader: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginBottom: 14, paddingBottom: 10,
-    borderBottomWidth: 1, borderBottomColor: DarkColors.borderGold,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  cardTitle: { fontSize: 17, fontWeight: '800', color: DarkColors.gold, letterSpacing: 0.5 },
+  cardTitle: { fontSize: 17, fontWeight: '800', color: DarkColors.silver, letterSpacing: 0.5 },
   cardGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   separator: { height: 1, backgroundColor: DarkColors.borderGold, marginHorizontal: 16, marginVertical: 10 },
+  festivalBanner: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    marginHorizontal: 16, marginBottom: 12, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
+  },
+  festivalBannerTitle: {
+    fontSize: 17, fontWeight: '800', color: DarkColors.gold, marginBottom: 4, lineHeight: 22,
+  },
+  festivalBannerDesc: {
+    fontSize: 13, color: DarkColors.textSecondary, lineHeight: 19, fontWeight: '500',
+  },
   emptyText: { fontSize: 15, color: DarkColors.textSecondary, textAlign: 'center', paddingVertical: 20, fontStyle: 'italic', fontWeight: '500' },
   pastItem: { opacity: 0.45 },
   dateNav: {
@@ -452,30 +508,30 @@ const s = StyleSheet.create({
   todayBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   observanceItem: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
+    paddingVertical: 12, marginBottom: 4,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   observanceDateCol: { width: 52, alignItems: 'center', marginRight: 14 },
   observanceDay: { fontSize: 22, fontWeight: '900', color: DarkColors.gold },
   observanceMonth: { fontSize: 12, color: DarkColors.textSecondary, fontWeight: '800', letterSpacing: 0.5 },
-  observanceName: { fontSize: 17, fontWeight: '800', color: DarkColors.textPrimary },
-  observanceSub: { fontSize: 14, color: DarkColors.textSecondary, marginTop: 4, fontWeight: '500' },
-  observanceBadge: { alignItems: 'center', backgroundColor: DarkColors.goldDim, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  observanceName: { fontSize: 16, fontWeight: '700', color: DarkColors.silver },
+  observanceSub: { fontSize: 13, color: DarkColors.textMuted, marginTop: 4, fontWeight: '500' },
+  observanceBadge: { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6 },
   observanceDays: { fontSize: 18, fontWeight: '900', color: DarkColors.gold },
   observanceDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '800', letterSpacing: 0.5 },
   holidayItem: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(74,144,217,0.15)',
+    paddingVertical: 12, marginBottom: 4,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   holidayDateCol: { alignItems: 'center', width: 52 },
-  holidayDay: { fontSize: 26, fontWeight: '900', color: '#4A90D9', lineHeight: 28 },
-  holidayMonth: { fontSize: 13, fontWeight: '700', color: DarkColors.textMuted, textTransform: 'uppercase' },
-  holidayWeekday: { fontSize: 13, fontWeight: '600', color: DarkColors.textSecondary, marginTop: 2 },
-  holidayDivider: { width: 1.5, height: 48, backgroundColor: '#4A90D9', opacity: 0.3, marginHorizontal: 12, borderRadius: 1 },
-  holidayName: { fontSize: 17, fontWeight: '700', color: DarkColors.textPrimary },
-  holidayEnglish: { fontSize: 14, color: DarkColors.textSecondary, fontWeight: '500', marginTop: 1 },
-  holidayBadge: { alignItems: 'center', backgroundColor: 'rgba(74,144,217,0.15)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8 },
-  holidayDaysNum: { fontSize: 18, fontWeight: '900', color: '#4A90D9' },
-  holidayDaysLabel: { fontSize: 11, color: '#4A90D9', fontWeight: '800', letterSpacing: 0.5 },
+  holidayDay: { fontSize: 24, fontWeight: '900', color: DarkColors.gold, lineHeight: 26 },
+  holidayMonth: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, textTransform: 'uppercase' },
+  holidayWeekday: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, marginTop: 2 },
+  holidayDivider: { width: 1, height: 40, backgroundColor: DarkColors.borderCard, marginHorizontal: 12 },
+  holidayName: { fontSize: 16, fontWeight: '700', color: DarkColors.silver },
+  holidayEnglish: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '500', marginTop: 1 },
+  holidayBadge: { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8 },
+  holidayDaysNum: { fontSize: 18, fontWeight: '900', color: DarkColors.gold },
+  holidayDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '800', letterSpacing: 0.5 },
 });

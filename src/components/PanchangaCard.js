@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, DarkGradients, Type } from '../theme';
+import { usePick } from '../theme/responsive';
 
 // Icon mapping for panchangam elements
 const PANCHANGA_ICONS = {
@@ -10,6 +11,13 @@ const PANCHANGA_ICONS = {
   'నక్షత్రం': { name: 'star-four-points', family: 'MaterialCommunityIcons' },
   'యోగం': { name: 'infinity', family: 'MaterialCommunityIcons' },
   'కరణం': { name: 'flower-tulip', family: 'MaterialCommunityIcons' },
+  'వారం': { name: 'calendar-today', family: 'MaterialCommunityIcons' },
+  'మాసం': { name: 'calendar-month', family: 'MaterialCommunityIcons' },
+  'సంవత్సరం': { name: 'calendar-star', family: 'MaterialCommunityIcons' },
+  // English label fallbacks
+  'Day': { name: 'calendar-today', family: 'MaterialCommunityIcons' },
+  'Month': { name: 'calendar-month', family: 'MaterialCommunityIcons' },
+  'Year': { name: 'calendar-star', family: 'MaterialCommunityIcons' },
 };
 
 function PanchangaIcon({ label, size = 18, color }) {
@@ -19,26 +27,25 @@ function PanchangaIcon({ label, size = 18, color }) {
 }
 
 export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel, accentColor }) {
+  const cardWidth = usePick({ default: '48%', lg: '31%', xl: '23%' });
+  const labelSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const valueSize = usePick({ default: 20, lg: 22, xl: 24 });
+  const subSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const iconSize = usePick({ default: 16, lg: 18, xl: 20 });
+
   return (
-    <View style={styles.card}>
-      <LinearGradient
-        colors={DarkGradients.cardGold}
-        style={styles.cardGradient}
-      >
-        <View style={styles.cardHeader}>
-          <PanchangaIcon label={label} size={18} color={accentColor || DarkColors.gold} />
-          <Text style={[styles.cardLabel, { color: accentColor || DarkColors.gold }]}>
-            {' '}{label}
-          </Text>
-        </View>
-        <Text style={styles.teluguValue}>{teluguValue}</Text>
-        {englishValue && (
-          <Text style={styles.englishValue}>{englishValue}</Text>
-        )}
-        {sublabel && (
-          <Text style={styles.sublabel}>{sublabel}</Text>
-        )}
-      </LinearGradient>
+    <View style={[styles.card, { width: cardWidth }]}>
+      <View style={styles.cardHeader}>
+        <PanchangaIcon label={label} size={iconSize} color={DarkColors.gold} />
+        <Text style={[styles.cardLabel, { fontSize: labelSize }]}>{' '}{label}</Text>
+      </View>
+      <Text style={[styles.teluguValue, { fontSize: valueSize, lineHeight: valueSize + 6 }]}>{teluguValue}</Text>
+      {englishValue && (
+        <Text style={styles.englishValue}>{englishValue}</Text>
+      )}
+      {sublabel && (
+        <Text style={[styles.sublabel, { fontSize: subSize - 1 }]}>{sublabel}</Text>
+      )}
     </View>
   );
 }
@@ -52,6 +59,10 @@ const TIMING_DESCRIPTIONS = {
 export function TimingCard({ icon, label, startTime, endTime, isActive, accentColor, iconName, isAuspicious }) {
   const color = accentColor || DarkColors.kumkum;
   const info = TIMING_DESCRIPTIONS[label] || {};
+  const labelSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const timeSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const descSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const iconSz = usePick({ default: 20, lg: 22, xl: 24 });
 
   return (
     <View style={[
@@ -63,15 +74,14 @@ export function TimingCard({ icon, label, startTime, endTime, isActive, accentCo
         colors={[color + '08', color + '04']}
         style={styles.timingGradient}
       >
-        {/* Top row: icon + name + badge */}
         <View style={styles.timingTopRow}>
           {iconName ? (
-            <MaterialCommunityIcons name={iconName} size={20} color={color} style={{ marginRight: 10 }} />
+            <MaterialCommunityIcons name={iconName} size={iconSz} color={color} style={{ marginRight: 10 }} />
           ) : (
-            <Text style={{ fontSize: 18, marginRight: 10 }}>{icon}</Text>
+            <Text style={{ fontSize: iconSz - 2, marginRight: 10 }}>{icon}</Text>
           )}
           <View style={{ flex: 1 }}>
-            <Text style={[styles.timingLabel, { color }]}>{label}</Text>
+            <Text style={[styles.timingLabel, { color, fontSize: labelSize }]}>{label}</Text>
             {info.english ? <Text style={styles.timingEnglish}>{info.english}</Text> : null}
           </View>
           {isActive && (
@@ -80,15 +90,13 @@ export function TimingCard({ icon, label, startTime, endTime, isActive, accentCo
             </View>
           )}
         </View>
-        {/* Time row */}
         <View style={styles.timingTimeRow}>
           <MaterialCommunityIcons name="clock-alert-outline" size={15} color={color} style={{ marginRight: 6, opacity: 0.6 }} />
-          <Text style={[styles.timingValue, { color }]}>
+          <Text style={[styles.timingValue, { color, fontSize: timeSize }]}>
             {startTime}  —  {endTime}
           </Text>
         </View>
-        {/* Description */}
-        {info.desc ? <Text style={styles.timingDesc}>{info.desc}</Text> : null}
+        {info.desc ? <Text style={[styles.timingDesc, { fontSize: descSize }]}>{info.desc}</Text> : null}
       </LinearGradient>
     </View>
   );
@@ -101,15 +109,16 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
   const borderColor = isAuspicious ? 'rgba(46,125,50,0.2)' : 'rgba(196,30,58,0.15)';
   const iconColor = isAuspicious ? DarkColors.tulasiGreen : DarkColors.kumkum;
   const iconName = isAuspicious ? 'check-decagram' : 'close-octagon-outline';
+  const nameSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const timeSize = usePick({ default: 16, lg: 18, xl: 20 });
 
   return (
     <View style={[styles.muhurthamCard, { borderColor }, isActive && styles.muhurthamCardActive]}>
       <LinearGradient colors={bgColors} style={styles.muhurthamGradient}>
-        {/* Top row: icon + name + active badge */}
         <View style={styles.muhurthamTopRow}>
           <MaterialCommunityIcons name={iconName} size={20} color={iconColor} style={{ marginRight: 10 }} />
           <View style={{ flex: 1 }}>
-            <Text style={[styles.muhurthamName, { color: iconColor }]}>{muhurtham.telugu}</Text>
+            <Text style={[styles.muhurthamName, { color: iconColor, fontSize: nameSize }]}>{muhurtham.telugu}</Text>
             <Text style={styles.muhurthamEnglish}>{muhurtham.english}</Text>
           </View>
           {isActive && (
@@ -118,10 +127,9 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
             </View>
           )}
         </View>
-        {/* Bottom row: time — full width, larger font */}
         <View style={styles.muhurthamTimeRow}>
           <MaterialCommunityIcons name="clock-outline" size={15} color={iconColor} style={{ marginRight: 6, opacity: 0.6 }} />
-          <Text style={[styles.muhurthamTime, { color: iconColor }]}>
+          <Text style={[styles.muhurthamTime, { color: iconColor, fontSize: timeSize }]}>
             {muhurtham.startFormatted}  —  {muhurtham.endFormatted}
           </Text>
         </View>
@@ -133,21 +141,25 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
 
 export function SlokaCard({ sloka }) {
   if (!sloka) return null;
+  const slokaSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const meaningSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const padV = usePick({ default: 20, lg: 26, xl: 32 });
+
   return (
     <View style={styles.slokaContainer}>
       <LinearGradient
         colors={[DarkColors.bgCard, '#6B1C23', DarkColors.bgCard]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.slokaGradient}
+        style={[styles.slokaGradient, { paddingVertical: padV }]}
       >
         <View style={styles.slokaDecoTop}>
           <MaterialCommunityIcons name="fleur-de-lis" size={20} color={DarkColors.goldShimmer} />
         </View>
         <Text style={styles.slokaDeity}>{sloka.deity}</Text>
-        <Text style={styles.slokaText}>{sloka.sanskrit}</Text>
+        <Text style={[styles.slokaText, { fontSize: slokaSize, lineHeight: slokaSize + 12 }]}>{sloka.sanskrit}</Text>
         <View style={styles.slokaDivider} />
-        <Text style={styles.slokaMeaning}>{sloka.meaning}</Text>
+        <Text style={[styles.slokaMeaning, { fontSize: meaningSize, lineHeight: meaningSize + 9 }]}>{sloka.meaning}</Text>
         <View style={styles.slokaDecoBottom}>
           <MaterialCommunityIcons name="fleur-de-lis" size={20} color={DarkColors.goldShimmer} />
         </View>
@@ -157,39 +169,21 @@ export function SlokaCard({ sloka }) {
 }
 
 const styles = StyleSheet.create({
-  // Panchanga Info Card
+  // Panchanga Info Card — clean, no box
   card: {
-    width: '48%',
-    marginBottom: 12,
-    borderRadius: 16,
-    overflow: 'hidden',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-  },
-  cardGradient: {
-    padding: 16,
-    minHeight: 100,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: DarkColors.borderGold,
+    marginBottom: 16,
+    paddingVertical: 8,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  cardIcon: {
-    fontSize: 18,
-    marginRight: 6,
+    marginBottom: 6,
   },
   cardLabel: {
-    fontSize: 15,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    fontSize: 13,
+    fontWeight: '700',
+    color: DarkColors.textMuted,
+    letterSpacing: 0.5,
   },
   teluguValue: {
     ...Type.teluguDisplay,
@@ -210,16 +204,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
-  // Timing Card — matches MuhurthamCard layout
+  // Timing Card — clean layout
   timingCard: {
-    borderRadius: 14,
-    overflow: 'hidden',
     marginBottom: 10,
-    borderWidth: 1,
-    borderLeftWidth: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: DarkColors.borderCard,
   },
   timingGradient: {
-    padding: 14,
+    paddingVertical: 12,
   },
   timingTopRow: {
     flexDirection: 'row',
@@ -247,13 +239,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginLeft: 30,
   },
-  timingCardActive: {
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
+  timingCardActive: {},
   timingLabel: {
     fontSize: 16,
     fontWeight: '700',
@@ -264,22 +250,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Muhurtham Card
+  // Muhurtham Card — clean
   muhurthamCard: {
-    borderRadius: 14,
-    overflow: 'hidden',
     marginBottom: 10,
-    borderWidth: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: DarkColors.borderCard,
   },
-  muhurthamCardActive: {
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
+  muhurthamCardActive: {},
   muhurthamGradient: {
-    padding: 14,
+    paddingVertical: 12,
   },
   muhurthamTopRow: {
     flexDirection: 'row',
@@ -329,19 +308,12 @@ const styles = StyleSheet.create({
     color: DarkColors.textPrimary,
   },
 
-  // Sloka Card
+  // Sloka Card — clean
   slokaContainer: {
-    borderRadius: 20,
-    overflow: 'hidden',
     marginVertical: 16,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
   },
   slokaGradient: {
-    padding: 24,
+    paddingVertical: 20,
     alignItems: 'center',
   },
   slokaDecoTop: {

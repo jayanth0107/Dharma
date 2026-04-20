@@ -6,6 +6,7 @@ import { TopTabBar } from '../components/TopTabBar';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage, T } from '../context/LanguageContext';
 
@@ -18,14 +19,24 @@ export function MoreScreen({ navigation }) {
   const { t } = useLanguage();
   const [showShareApp, setShowShareApp] = useState(false);
 
+  // Responsive values
+  const gridGap = usePick({ default: 10, sm: 12, xl: 16, xxl: 20 });
+  const gridRows = usePick({ default: 4, xl: 3, xxl: 3 });
+  const gridPaddingH = usePick({ default: 10, sm: 12, xl: 20, xxl: 28 });
+  const gridPaddingV = usePick({ default: 4, xl: 8, xxl: 12 });
+  const footerPaddingV = usePick({ default: 8, xl: 12, xxl: 16 });
+  const footerFontSize = usePick({ default: 14, xl: 16, xxl: 18 });
+  const versionFontSize = usePick({ default: 12, xl: 14, xxl: 15 });
+  const versionMarginTop = usePick({ default: 4, xl: 6, xxl: 8 });
+
   return (
     <SwipeWrapper screenName="More">
     <View style={s.screen}>
       <PageHeader title={t('మరిన్ని', 'More')} />
       <TopTabBar />
 
-      <View style={s.gridContainer}>
-        <FeatureGrid gap={12} rows={4}>
+      <View style={[s.gridContainer, { paddingHorizontal: gridPaddingH, paddingTop: gridPaddingV, paddingBottom: gridPaddingV }]}>
+        <FeatureGrid gap={gridGap} rows={gridRows}>
           {/* Row 1 — Most important actions */}
           <FeatureTile icon="crown" label={t(T.premium.te, T.premium.en)} sublabel={t('Premium', 'ప్రీమియం')} onPress={() => navigation.navigate('Premium')} accentColor={DarkColors.gold} isPremium={!premiumActive} />
           <FeatureTile icon="account-circle" label={t(T.login.te, T.login.en)} sublabel={t('Profile', 'ప్రొఫైల్')} onPress={() => navigation.navigate('Login')} accentColor={DarkColors.saffron} />
@@ -45,9 +56,9 @@ export function MoreScreen({ navigation }) {
       </View>
 
       {/* Version footer */}
-      <View style={s.footer}>
-        <Text style={s.footerText}>{t(T.signoff.te, T.signoff.en)}</Text>
-        <Text style={s.versionText}>ధర్మ v1.1.0</Text>
+      <View style={[s.footer, { paddingVertical: footerPaddingV }]}>
+        <Text style={[s.footerText, { fontSize: footerFontSize }]}>{t(T.signoff.te, T.signoff.en)}</Text>
+        <Text style={[s.versionText, { fontSize: versionFontSize, marginTop: versionMarginTop }]}>ధర్మ v1.1.0</Text>
       </View>
 
       {showShareApp && (
@@ -64,8 +75,8 @@ export function MoreScreen({ navigation }) {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
-  gridContainer: { flex: 1, paddingTop: 4, paddingBottom: 4, paddingHorizontal: 12 },
-  footer: { alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
-  footerText: { fontSize: 14, color: DarkColors.saffron, fontWeight: '700', fontStyle: 'italic' },
-  versionText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4, fontWeight: '500' },
+  gridContainer: { flex: 1 },
+  footer: { alignItems: 'center', borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
+  footerText: { color: DarkColors.saffron, fontWeight: '700', fontStyle: 'italic' },
+  versionText: { color: DarkColors.textMuted, fontWeight: '500' },
 });

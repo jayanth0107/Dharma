@@ -8,6 +8,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { DarkColors, Type, Spacing } from '../theme';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 
 export function PageHeader({ title, onMenuPress }) {
@@ -15,37 +16,45 @@ export function PageHeader({ title, onMenuPress }) {
   const navigation = useNavigation();
   const { lang, toggleLang } = useLanguage();
 
+  const menuIconSize = usePick({ default: 24, lg: 26, xl: 28 });
+  const navIconSize = usePick({ default: 22, lg: 24, xl: 26 });
+  const padH = usePick({ default: 12, lg: 16, xl: 20 });
+  const langFontSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const langPadH = usePick({ default: 8, lg: 10, xl: 12 });
+  const langPadV = usePick({ default: 5, lg: 6, xl: 7 });
+  const titlePadH = usePick({ default: 110, lg: 120, xl: 140 });
+
   return (
-    <View style={[s.container, { paddingTop: Math.max(insets.top, 10) + 4 }]}>
+    <View style={[s.container, { paddingTop: Math.max(insets.top, 10) + 4, paddingHorizontal: padH }]}>
       <View style={s.row}>
         {/* Centered title — absolutely positioned so icons don't shift it */}
-        <View style={s.titleAbs} pointerEvents="none">
+        <View style={[s.titleAbs, { paddingHorizontal: titlePadH }]} pointerEvents="none">
           <Text style={s.title} numberOfLines={1}>{title}</Text>
         </View>
 
         {/* Back / Hamburger */}
         {onMenuPress ? (
           <TouchableOpacity style={s.iconBtn} onPress={onMenuPress}>
-            <MaterialCommunityIcons name="menu" size={24} color={DarkColors.silver} />
+            <MaterialCommunityIcons name="menu" size={menuIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')}>
-            <Ionicons name="arrow-back" size={22} color={DarkColors.silver} />
+            <Ionicons name="arrow-back" size={navIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         )}
 
         {/* Home */}
         <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')}>
-          <MaterialCommunityIcons name="home" size={22} color={DarkColors.silver} />
+          <MaterialCommunityIcons name="home" size={navIconSize} color={DarkColors.silver} />
         </TouchableOpacity>
 
         <View style={{ flex: 1 }} />
 
         {/* Language toggle — right-aligned */}
-        <TouchableOpacity style={s.langToggle} onPress={toggleLang} activeOpacity={0.7}>
-          <Text style={[s.langLabel, lang === 'en' && s.langLabelActive]}>EN</Text>
+        <TouchableOpacity style={[s.langToggle, { paddingHorizontal: langPadH, paddingVertical: langPadV }]} onPress={toggleLang} activeOpacity={0.7}>
+          <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>EN</Text>
           <View style={[s.langDot, lang === 'en' ? s.langDotEn : s.langDotTe]} />
-          <Text style={[s.langLabel, lang === 'te' && s.langLabelActive]}>తె</Text>
+          <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తె</Text>
         </TouchableOpacity>
       </View>
 
@@ -58,7 +67,6 @@ export function PageHeader({ title, onMenuPress }) {
 const s = StyleSheet.create({
   container: {
     backgroundColor: DarkColors.bg,
-    paddingHorizontal: 12,
     paddingBottom: 0,
   },
   row: {
@@ -79,7 +87,6 @@ const s = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 110,
   },
   title: {
     ...Type.h3,
@@ -98,13 +105,10 @@ const s = StyleSheet.create({
     gap: 5,
     backgroundColor: DarkColors.bgCard,
     borderRadius: 14,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
     borderWidth: 1,
     borderColor: DarkColors.borderCard,
   },
   langLabel: {
-    fontSize: 11,
     fontWeight: '700',
     color: DarkColors.textMuted,
   },

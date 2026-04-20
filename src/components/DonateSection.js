@@ -9,6 +9,7 @@ import { DarkColors } from '../theme/colors';
 import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
 import { useLanguage } from '../context/LanguageContext';
+import { usePick } from '../theme/responsive';
 import { TR } from '../data/translations';
 
 // ---- CONFIGURATION ----
@@ -125,31 +126,42 @@ function UpiQrCode({ amount }) {
   const { t } = useLanguage();
   const qrUrl = amount ? getQrCodeUrl(amount) : getGenericQrCodeUrl();
 
+  const qrPadV = usePick({ default: 16, lg: 20, xl: 24 });
+  const qrTitleSize = usePick({ default: 15, lg: 16, xl: 18 });
+  const qrSubSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const qrBoxSize = usePick({ default: 220, lg: 250, xl: 280 });
+  const qrImgSize = usePick({ default: 200, lg: 230, xl: 260 });
+  const qrFallbackIcon = usePick({ default: 48, lg: 56, xl: 64 });
+  const qrFallbackTextSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const qrAmtSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const qrAmtPadH = usePick({ default: 16, lg: 18, xl: 20 });
+  const qrNoteSize = usePick({ default: 12, lg: 13, xl: 14 });
+
   return (
-    <View style={styles.qrContainer}>
-      <Text style={styles.qrTitle}>{t(TR.qrScan.te, TR.qrScan.en)}</Text>
-      <Text style={styles.qrSubtitle}>{t(TR.qrScanSub.te, TR.qrScanSub.en)}</Text>
-      <View style={styles.qrBox}>
+    <View style={[styles.qrContainer, { paddingVertical: qrPadV }]}>
+      <Text style={[styles.qrTitle, { fontSize: qrTitleSize }]}>{t(TR.qrScan.te, TR.qrScan.en)}</Text>
+      <Text style={[styles.qrSubtitle, { fontSize: qrSubSize }]}>{t(TR.qrScanSub.te, TR.qrScanSub.en)}</Text>
+      <View style={[styles.qrBox, { width: qrBoxSize, height: qrBoxSize }]}>
         {!qrError ? (
           <Image
             source={{ uri: qrUrl }}
-            style={styles.qrImage}
+            style={{ width: qrImgSize, height: qrImgSize }}
             resizeMode="contain"
             onError={() => setQrError(true)}
           />
         ) : (
           <View style={styles.qrFallback}>
-            <MaterialCommunityIcons name="qrcode" size={48} color={DarkColors.silver} />
-            <Text style={styles.qrFallbackText}>{t(TR.qrLoadFailed.te, TR.qrLoadFailed.en)}</Text>
+            <MaterialCommunityIcons name="qrcode" size={qrFallbackIcon} color={DarkColors.silver} />
+            <Text style={[styles.qrFallbackText, { fontSize: qrFallbackTextSize }]}>{t(TR.qrLoadFailed.te, TR.qrLoadFailed.en)}</Text>
           </View>
         )}
         {amount && (
-          <View style={styles.qrAmountBadge}>
-            <Text style={styles.qrAmountText}>₹{amount}</Text>
+          <View style={[styles.qrAmountBadge, { paddingHorizontal: qrAmtPadH }]}>
+            <Text style={[styles.qrAmountText, { fontSize: qrAmtSize }]}>₹{amount}</Text>
           </View>
         )}
       </View>
-      <Text style={styles.qrNote}>{t(TR.qrAppsList.te, TR.qrAppsList.en)}</Text>
+      <Text style={[styles.qrNote, { fontSize: qrNoteSize }]}>{t(TR.qrAppsList.te, TR.qrAppsList.en)}</Text>
     </View>
   );
 }
@@ -157,6 +169,17 @@ function UpiQrCode({ amount }) {
 // ---- Inline Donate Card (shown in main scroll) ----
 export function DonateCard({ onExpand }) {
   const { t } = useLanguage();
+  const cardPad = usePick({ default: 16, lg: 20, xl: 24 });
+  const cardIconSize = usePick({ default: 28, lg: 32, xl: 36 });
+  const cardIconWrapSize = usePick({ default: 48, lg: 54, xl: 60 });
+  const cardTitleSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const cardSubSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const chevronSize = usePick({ default: 24, lg: 26, xl: 28 });
+  const quickPadV = usePick({ default: 10, lg: 12, xl: 14 });
+  const quickEmojiSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const quickAmtSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const cardNoteSize = usePick({ default: 9, lg: 10, xl: 11 });
+
   // On web, all buttons open the full modal with QR code
   const handleQuickDonate = (amount, label) => {
     if (Platform.OS === 'web') {
@@ -172,17 +195,17 @@ export function DonateCard({ onExpand }) {
         colors={['#2E7D32', '#1B5E20']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.cardGradient}
+        style={[styles.cardGradient, { padding: cardPad }]}
       >
         <View style={styles.cardRow}>
-          <View style={styles.cardIconWrap}>
-            <MaterialCommunityIcons name="hand-heart" size={28} color="#FFD700" />
+          <View style={[styles.cardIconWrap, { width: cardIconWrapSize, height: cardIconWrapSize, borderRadius: cardIconWrapSize / 2 }]}>
+            <MaterialCommunityIcons name="hand-heart" size={cardIconSize} color="#FFD700" />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{t(TR.donateTitleCard.te, TR.donateTitleCard.en)}</Text>
-            <Text style={styles.cardSubtitle}>{t(TR.donateSubtitleCard.te, TR.donateSubtitleCard.en)}</Text>
+            <Text style={[styles.cardTitle, { fontSize: cardTitleSize }]}>{t(TR.donateTitleCard.te, TR.donateTitleCard.en)}</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: cardSubSize }]}>{t(TR.donateSubtitleCard.te, TR.donateSubtitleCard.en)}</Text>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.6)" />
+          <MaterialCommunityIcons name="chevron-right" size={chevronSize} color="rgba(255,255,255,0.6)" />
         </View>
 
         {/* Quick donate buttons */}
@@ -190,21 +213,21 @@ export function DonateCard({ onExpand }) {
           {DONATION_AMOUNTS.slice(0, 3).map((item) => (
             <TouchableOpacity
               key={item.amount}
-              style={styles.quickBtn}
+              style={[styles.quickBtn, { paddingVertical: quickPadV }]}
               onPress={() => handleQuickDonate(item.amount, item.label)}
               activeOpacity={0.7}
             >
-              <Text style={styles.quickEmoji}>{item.emoji}</Text>
-              <Text style={styles.quickAmount}>{item.label}</Text>
+              <Text style={[styles.quickEmoji, { fontSize: quickEmojiSize }]}>{item.emoji}</Text>
+              <Text style={[styles.quickAmount, { fontSize: quickAmtSize }]}>{item.label}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity style={styles.quickBtn} onPress={() => onExpand(null)} activeOpacity={0.7}>
-            <Text style={styles.quickEmoji}>🙏</Text>
-            <Text style={styles.quickAmount}>{t(TR.donateMore.te, TR.donateMore.en)}</Text>
+          <TouchableOpacity style={[styles.quickBtn, { paddingVertical: quickPadV }]} onPress={() => onExpand(null)} activeOpacity={0.7}>
+            <Text style={[styles.quickEmoji, { fontSize: quickEmojiSize }]}>🙏</Text>
+            <Text style={[styles.quickAmount, { fontSize: quickAmtSize }]}>{t(TR.donateMore.te, TR.donateMore.en)}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.cardNote}>
+        <Text style={[styles.cardNote, { fontSize: cardNoteSize }]}>
           {t(TR.donateCardNote.te, TR.donateCardNote.en)}
         </Text>
       </LinearGradient>
@@ -216,6 +239,49 @@ export function DonateCard({ onExpand }) {
 export function DonateModal({ visible, onClose, initialAmount, embedded = false }) {
   const [selectedAmount, setSelectedAmount] = useState(initialAmount || 101);
   const { t } = useLanguage();
+
+  // Responsive values
+  const headerPadH = usePick({ default: 16, lg: 20, xl: 24 });
+  const headerPadTop = usePick({ default: 10, lg: 12, xl: 14 });
+  const headerPadBottom = usePick({ default: 12, lg: 14, xl: 16 });
+  const headerTitleSize = usePick({ default: 20, lg: 22, xl: 24 });
+  const headerBackIcon = usePick({ default: 24, lg: 26, xl: 28 });
+  const headerCopyIcon = usePick({ default: 16, lg: 18, xl: 20 });
+  const headerCopyPadH = usePick({ default: 10, lg: 12, xl: 14 });
+  const headerCopyPadV = usePick({ default: 5, lg: 6, xl: 7 });
+  const headerCopyTextSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const quoteIconSize = usePick({ default: 28, lg: 32, xl: 36 });
+  const quotePadBottom = usePick({ default: 16, lg: 20, xl: 24 });
+  const quoteSize = usePick({ default: 15, lg: 16, xl: 18 });
+  const quoteEnSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const bodyPad = usePick({ default: 20, lg: 24, xl: 28 });
+  const msgSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const msgLineH = usePick({ default: 22, lg: 24, xl: 26 });
+  const amtLabelSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const amtCardPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const amtEmojiSize = usePick({ default: 22, lg: 24, xl: 28 });
+  const amtValueSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const amtTeluguSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const appTitleSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const appBtnPad = usePick({ default: 12, lg: 14, xl: 16 });
+  const appLogoSize = usePick({ default: 32, lg: 36, xl: 40 });
+  const appLogoTextSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const appNameSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const upiBoxPad = usePick({ default: 16, lg: 20, xl: 24 });
+  const upiLabelSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const upiIdSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const copyIconSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const copyTextSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const copyPadH = usePick({ default: 12, lg: 14, xl: 16 });
+  const copyPadV = usePick({ default: 6, lg: 7, xl: 8 });
+  const upiNoteSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const thankIconSize = usePick({ default: 20, lg: 22, xl: 24 });
+  const thankPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const thankTextSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const thankLineH = usePick({ default: 20, lg: 22, xl: 24 });
+  const closePadV = usePick({ default: 10, lg: 12, xl: 14 });
+  const closePadH = usePick({ default: 20, lg: 24, xl: 28 });
+  const closeTextSize = usePick({ default: 13, lg: 14, xl: 15 });
 
   // Sync initialAmount when modal opens
   React.useEffect(() => {
@@ -238,62 +304,64 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
           {/* Fixed Header — stays visible while scrolling */}
           <LinearGradient
             colors={['#2E7D32', '#1B5E20', '#0D3B0F']}
-            style={styles.modalHeader}
+            style={[styles.modalHeader, { paddingHorizontal: headerPadH, paddingTop: headerPadTop, paddingBottom: headerPadBottom }]}
           >
             <View style={styles.modalHeaderRow}>
               <TouchableOpacity onPress={onClose} accessibilityLabel={t(TR.back.te, TR.back.en)} accessibilityRole="button">
-                <Ionicons name="arrow-back" size={24} color="#fff" />
+                <Ionicons name="arrow-back" size={headerBackIcon} color="#fff" />
               </TouchableOpacity>
-              <Text style={styles.modalHeaderTitle}>{t(TR.donateHeaderTitle.te, TR.donateHeaderTitle.en)}</Text>
-              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, gap: 4 }}>
-                <MaterialCommunityIcons name="content-copy" size={16} color="#FFD700" />
-                <Text style={{ fontSize: 11, fontWeight: '700', color: '#FFD700' }}>UPI ID</Text>
+              <Text style={[styles.modalHeaderTitle, { fontSize: headerTitleSize }]}>{t(TR.donateHeaderTitle.te, TR.donateHeaderTitle.en)}</Text>
+              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: headerCopyPadH, paddingVertical: headerCopyPadV, borderRadius: 12, gap: 4 }}>
+                <MaterialCommunityIcons name="content-copy" size={headerCopyIcon} color="#FFD700" />
+                <Text style={{ fontSize: headerCopyTextSize, fontWeight: '700', color: '#FFD700' }}>UPI ID</Text>
               </TouchableOpacity>
             </View>
           </LinearGradient>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Decorative icon + quote */}
-            <View style={{ alignItems: 'center', backgroundColor: '#0D3B0F', paddingBottom: 16 }}>
-              <MaterialCommunityIcons name="hand-heart" size={28} color="#FFD700" style={{ marginTop: 4 }} />
-              <Text style={styles.modalQuote}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
-              <Text style={styles.modalQuoteEn}>{t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}</Text>
+            <View style={{ alignItems: 'center', backgroundColor: '#0D3B0F', paddingBottom: quotePadBottom }}>
+              <MaterialCommunityIcons name="hand-heart" size={quoteIconSize} color="#FFD700" style={{ marginTop: 4 }} />
+              <Text style={[styles.modalQuote, { fontSize: quoteSize }]}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
+              <Text style={[styles.modalQuoteEn, { fontSize: quoteEnSize }]}>{t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}</Text>
             </View>
 
-            <View style={styles.modalBody}>
+            <View style={[styles.modalBody, { padding: bodyPad }]}>
               {/* Message */}
-              <Text style={styles.modalMessage}>
+              <Text style={[styles.modalMessage, { fontSize: msgSize, lineHeight: msgLineH }]}>
                 {t(TR.donateMessage.te, TR.donateMessage.en)}
               </Text>
 
               {/* Amount buttons — FIRST so user picks amount */}
-              <Text style={styles.amountLabel}>{t(TR.donateSelectAmount.te, TR.donateSelectAmount.en)}</Text>
+              <Text style={[styles.amountLabel, { fontSize: amtLabelSize }]}>{t(TR.donateSelectAmount.te, TR.donateSelectAmount.en)}</Text>
               <View style={styles.amountGrid}>
                 {DONATION_AMOUNTS.map((item) => (
                   <TouchableOpacity
                     key={item.amount}
                     style={[
                       styles.amountCard,
+                      { padding: amtCardPad },
                       selectedAmount === item.amount && styles.amountCardActive,
                     ]}
                     onPress={() => handleDonate(item.amount)}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.amountEmoji}>{item.emoji}</Text>
+                    <Text style={[styles.amountEmoji, { fontSize: amtEmojiSize }]}>{item.emoji}</Text>
                     <Text style={[
                       styles.amountValue,
+                      { fontSize: amtValueSize },
                       selectedAmount === item.amount && styles.amountValueActive,
                     ]}>
                       {item.label}
                     </Text>
-                    <Text style={styles.amountTelugu}>{item.telugu}</Text>
+                    <Text style={[styles.amountTelugu, { fontSize: amtTeluguSize }]}>{item.telugu}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
               {/* UPI app buttons — always visible */}
               <View style={styles.appBtnsSection}>
-                <Text style={styles.appBtnsTitle}>{t(TR.donateSelectUpiApp.te, TR.donateSelectUpiApp.en)}</Text>
+                <Text style={[styles.appBtnsTitle, { fontSize: appTitleSize }]}>{t(TR.donateSelectUpiApp.te, TR.donateSelectUpiApp.en)}</Text>
                 <View style={styles.appBtnsRow}>
                   {[
                     { name: 'Google Pay', letter: 'G', bg: '#4285F4', scheme: 'tez' },
@@ -303,7 +371,7 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
                   ].map((app) => (
                     <TouchableOpacity
                       key={app.scheme}
-                      style={[styles.appBtn, { borderColor: app.bg + '35' }]}
+                      style={[styles.appBtn, { borderColor: app.bg + '35', padding: appBtnPad }]}
                       onPress={async () => {
                         const amt = selectedAmount || 51;
                         if (Platform.OS === 'web') {
@@ -322,13 +390,13 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
                       activeOpacity={0.7}
                     >
                       {UPI_LOGOS[app.scheme] ? (
-                        <Image source={UPI_LOGOS[app.scheme]} style={styles.appLogoImg} resizeMode="contain" />
+                        <Image source={UPI_LOGOS[app.scheme]} style={[styles.appLogoImg, { width: appLogoSize, height: appLogoSize }]} resizeMode="contain" />
                       ) : (
-                        <View style={[styles.appLogo, { backgroundColor: app.bg }]}>
-                          <Text style={styles.appLogoText}>{app.letter}</Text>
+                        <View style={[styles.appLogo, { backgroundColor: app.bg, width: appLogoSize, height: appLogoSize }]}>
+                          <Text style={[styles.appLogoText, { fontSize: appLogoTextSize }]}>{app.letter}</Text>
                         </View>
                       )}
-                      <Text style={[styles.appBtnText, { color: app.bg }]}>{app.name}</Text>
+                      <Text style={[styles.appBtnText, { color: app.bg, fontSize: appNameSize }]}>{app.name}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -338,29 +406,29 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
               <UpiQrCode amount={selectedAmount} />
 
               {/* UPI ID display */}
-              <View style={styles.upiBox}>
-                <Text style={styles.upiLabel}>{t(TR.upiIdLabel.te, TR.upiIdLabel.en)}</Text>
+              <View style={[styles.upiBox, { padding: upiBoxPad }]}>
+                <Text style={[styles.upiLabel, { fontSize: upiLabelSize }]}>{t(TR.upiIdLabel.te, TR.upiIdLabel.en)}</Text>
                 <View style={styles.upiRow}>
-                  <Text style={styles.upiId}>{UPI_ID}</Text>
+                  <Text style={[styles.upiId, { fontSize: upiIdSize }]}>{UPI_ID}</Text>
                   <TouchableOpacity
                     onPress={() => copyToClipboard(UPI_ID, t)}
-                    style={styles.copyBtn}
+                    style={[styles.copyBtn, { paddingHorizontal: copyPadH, paddingVertical: copyPadV }]}
                     accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`}
                     accessibilityRole="button"
                   >
-                    <MaterialCommunityIcons name="content-copy" size={18} color={DarkColors.tulasiGreen} />
-                    <Text style={styles.copyText}>{t(TR.copy.te, TR.copy.en)}</Text>
+                    <MaterialCommunityIcons name="content-copy" size={copyIconSize} color={DarkColors.tulasiGreen} />
+                    <Text style={[styles.copyText, { fontSize: copyTextSize }]}>{t(TR.copy.te, TR.copy.en)}</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.upiNote}>
+                <Text style={[styles.upiNote, { fontSize: upiNoteSize }]}>
                   {t(TR.donateUpiNote.te, TR.donateUpiNote.en)}
                 </Text>
               </View>
 
               {/* Thank you note */}
-              <View style={styles.thankYouBox}>
-                <MaterialCommunityIcons name="flower-tulip" size={20} color={DarkColors.saffron} />
-                <Text style={styles.thankYouText}>
+              <View style={[styles.thankYouBox, { padding: thankPad }]}>
+                <MaterialCommunityIcons name="flower-tulip" size={thankIconSize} color={DarkColors.saffron} />
+                <Text style={[styles.thankYouText, { fontSize: thankTextSize, lineHeight: thankLineH }]}>
                   {t(TR.donateThankYou.te, TR.donateThankYou.en)}
                 </Text>
               </View>
@@ -368,8 +436,8 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
           </ScrollView>
 
           {/* Close button */}
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>{t(TR.close.te, TR.close.en)}</Text>
+          <TouchableOpacity style={[styles.closeBtn, { paddingVertical: closePadV, marginHorizontal: closePadH }]} onPress={onClose}>
+            <Text style={[styles.closeBtnText, { fontSize: closeTextSize }]}>{t(TR.close.te, TR.close.en)}</Text>
           </TouchableOpacity>
     </ModalOrView>
   );

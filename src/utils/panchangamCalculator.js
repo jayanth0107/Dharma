@@ -355,8 +355,21 @@ function calculateBrahmaMuhurtam(sunrise) {
   };
 }
 
-// Durmuhurtam — inauspicious muhurta (3rd and 10th muhurta of daytime)
-function calculateDurmuhurtam(sunrise, sunset) {
+// Durmuhurtam — inauspicious muhurta
+// Two Durmuhurtam periods per day: varies by weekday
+// Traditional weekday-based muhurta positions (1-indexed):
+// Sun=[11,5], Mon=[7,3], Tue=[3,11], Wed=[5,13], Thu=[13,7], Fri=[9,1], Sat=[1,9]
+function calculateDurmuhurtam(sunrise, sunset, dayOfWeek) {
+  const durmuhurtaMap = [
+    [11, 5],  // Sunday
+    [7, 3],   // Monday
+    [3, 11],  // Tuesday
+    [5, 13],  // Wednesday
+    [13, 7],  // Thursday
+    [9, 1],   // Friday
+    [1, 9],   // Saturday
+  ];
+
   const [srH, srM] = safeParseTime(sunrise, 6, 0);
   const [ssH, ssM] = safeParseTime(sunset, 18, 0);
   const sunriseMin = srH * 60 + srM;
@@ -364,12 +377,17 @@ function calculateDurmuhurtam(sunrise, sunset) {
   const dayDuration = sunsetMin - sunriseMin;
   const muhurtaDuration = dayDuration / 15;
 
-  const start1Min = sunriseMin + 2 * muhurtaDuration;
+  const positions = durmuhurtaMap[dayOfWeek !== undefined ? dayOfWeek : 0];
+  const start1Min = sunriseMin + (positions[0] - 1) * muhurtaDuration;
   const end1Min = start1Min + muhurtaDuration;
+  const start2Min = sunriseMin + (positions[1] - 1) * muhurtaDuration;
+  const end2Min = start2Min + muhurtaDuration;
 
   return {
     start: formatMinutesToTime(start1Min),
     end: formatMinutesToTime(end1Min),
+    start2: formatMinutesToTime(start2Min),
+    end2: formatMinutesToTime(end2Min),
     telugu: 'దుర్ముహూర్తం',
     english: 'Durmuhurtam',
     description: 'అశుభ సమయం — శుభ కార్యాలు ప్రారంభించకూడదు',
@@ -433,7 +451,7 @@ export function getDailyPanchangam(date = new Date(), location = DEFAULT_LOCATIO
   // Muhurtham calculations
   const abhijitMuhurtam = calculateAbhijitMuhurtam(sunTimes.sunrise, sunTimes.sunset);
   const brahmaMuhurtam = calculateBrahmaMuhurtam(sunTimes.sunrise);
-  const durmuhurtam = calculateDurmuhurtam(sunTimes.sunrise, sunTimes.sunset);
+  const durmuhurtam = calculateDurmuhurtam(sunTimes.sunrise, sunTimes.sunset, dayOfWeek);
   const amritKalam = calculateAmritKalam(dayOfWeek, sunTimes.sunrise, sunTimes.sunset);
 
   const dailySloka = DAILY_SLOKAS[dayOfWeek];

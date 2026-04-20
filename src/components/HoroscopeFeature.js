@@ -8,9 +8,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
-import { searchLocation } from '../utils/geolocation';
+import { googlePlacesAutocomplete, googlePlaceDetails } from '../utils/placesProxy';
 import { SectionShareRow } from './SectionShareRow';
 import { CalendarPicker } from './CalendarPicker';
 
@@ -85,8 +86,44 @@ function getHoroscopeQrUrl(amount) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiStr)}`;
 }
 
+// Storage key for persisting form entries
+const HORO_FORM_KEY = '@dharma_horoscope_form';
+
+async function loadSavedForm() {
+  try {
+    if (Platform.OS === 'web') {
+      const raw = localStorage.getItem(HORO_FORM_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }
+    const AS = require('@react-native-async-storage/async-storage').default;
+    const raw = await AS.getItem(HORO_FORM_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+async function saveFormData(data) {
+  try {
+    const json = JSON.stringify(data);
+    if (Platform.OS === 'web') localStorage.setItem(HORO_FORM_KEY, json);
+    else {
+      const AS = require('@react-native-async-storage/async-storage').default;
+      await AS.setItem(HORO_FORM_KEY, json);
+    }
+  } catch {}
+}
+
 // ── Horoscope Modal (form + payment + results) ──
 export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, embedded = false }) {
+  const { t, lang } = require('../context/LanguageContext').useLanguage();
+  // Responsive sizing
+  const formPad = usePick({ default: 20, lg: 28, xl: 36 });
+  const titleSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const inputSize = usePick({ default: 16, lg: 17, xl: 18 });
+  const timeDigitSize = usePick({ default: 24, lg: 28, xl: 32 });
+  const timeDisplaySize = usePick({ default: 32, lg: 38, xl: 44 });
+  const spinBtnSize = usePick({ default: 38, lg: 44, xl: 48 });
+  const resultNameSize = usePick({ default: 24, lg: 28, xl: 32 });
+  const keyValueSize = usePick({ default: 18, lg: 20, xl: 22 });
   const [step, setStep] = useState(isPremium ? 'form' : 'locked'); // 'locked' | 'form' | 'payment' | 'loading' | 'result'
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -101,7 +138,32 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
   const [usageInfo, setUsageInfo] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [qrFailed, setQrFailed] = useState(false);
+  const [formLoaded, setFormLoaded] = useState(false);
   const searchTimer = useRef(null);
+
+  // Load saved form on first open
+  React.useEffect(() => {
+    if (visible && !formLoaded) {
+      loadSavedForm().then(saved => {
+        if (saved) {
+          if (saved.name) setName(saved.name);
+          if (saved.birthDate) setBirthDate(saved.birthDate);
+          if (saved.birthDateObj) setBirthDateObj(new Date(saved.birthDateObj));
+          if (saved.birthTime) setBirthTime(saved.birthTime);
+          if (saved.placeQuery) setPlaceQuery(saved.placeQuery);
+          if (saved.birthPlace) setBirthPlace(saved.birthPlace);
+        }
+        setFormLoaded(true);
+      });
+    }
+  }, [visible, formLoaded]);
+
+  // Auto-save form entries when they change
+  React.useEffect(() => {
+    if (formLoaded && (name || birthDate || birthTime || birthPlace)) {
+      saveFormData({ name, birthDate, birthDateObj: birthDateObj?.toISOString(), birthTime, placeQuery, birthPlace });
+    }
+  }, [name, birthDate, birthTime, birthPlace, formLoaded]);
 
   // Reset step and load usage info on open
   React.useEffect(() => {
@@ -122,40 +184,39 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
     searchTimer.current = setTimeout(async () => {
       setSearching(true);
       try {
-        // Photon API is fast — search directly, biased to India
-        let results = await searchLocation(text);
-        // If no results, try appending "India" for small villages/towns
-        if (!results || results.length === 0) {
-          results = await searchLocation(text + ', India');
-        }
-        setPlaceResults((results || []).slice(0, 10));
+        const results = await googlePlacesAutocomplete(text, 'in');
+        setPlaceResults(results.slice(0, 8));
       } catch { setPlaceResults([]); }
       setSearching(false);
-    }, 250);
+    }, 300);
   };
 
-  const handleSelectPlace = (place) => {
-    const lat = place.latitude || parseFloat(place.lat) || 0;
-    const lon = place.longitude || parseFloat(place.lon) || 0;
-    setBirthPlace({
-      name: place.name || place.displayName?.split(',')[0] || 'Unknown',
-      fullName: place.displayName || place.display_name || place.name,
-      latitude: lat,
-      longitude: lon,
-      altitude: place.altitude || 0,
-    });
-    setPlaceQuery(place.displayName || place.display_name?.split(',').slice(0, 2).join(', ') || place.name);
+  const handleSelectPlace = async (place) => {
     setPlaceResults([]);
+    setPlaceQuery(place.displayName || place.name);
+    setSearching(true);
+    try {
+      const details = await googlePlaceDetails(place.placeId);
+      if (details && details.latitude) {
+        setBirthPlace(details);
+      } else {
+        setBirthPlace(null);
+        alert(t('స్థలం వివరాలు లోడ్ కాలేదు. మళ్ళీ ప్రయత్నించండి.', 'Could not load place details. Try again.'));
+      }
+    } catch {
+      setBirthPlace(null);
+    }
+    setSearching(false);
   };
 
   const handleGenerate = async () => {
     // Validate
-    if (!name.trim()) { alert('దయచేసి మీ పేరు నమోదు చేయండి'); return; }
+    if (!name.trim()) { alert(t('దయచేసి మీ పేరు నమోదు చేయండి', 'Please enter your name')); return; }
     // Accept DD-MM-YYYY or DD/MM/YYYY
     const dateClean = birthDate.trim().replace(/\//g, '-');
-    if (!dateClean.match(/^\d{2}-\d{2}-\d{4}$/)) { alert('తేదీ ఫార్మాట్: DD-MM-YYYY (ఉదా: 15-05-1990)'); return; }
-    if (!birthTime.match(/^\d{1,2}:\d{2}$/)) { alert('సమయం ఫార్మాట్: HH:MM (ఉదా: 06:30)'); return; }
-    if (!birthPlace || !birthPlace.latitude) { alert('దయచేసి జన్మ స్థలం ఎంచుకోండి'); return; }
+    if (!dateClean.match(/^\d{2}-\d{2}-\d{4}$/)) { alert(t('తేదీ ఫార్మాట్: DD-MM-YYYY (ఉదా: 15-05-1990)', 'Date format: DD-MM-YYYY (e.g. 15-05-1990)')); return; }
+    if (!birthTime.match(/^\d{1,2}:\d{2}$/)) { alert(t('సమయం ఫార్మాట్: HH:MM (ఉదా: 06:30)', 'Time format: HH:MM (e.g. 06:30)')); return; }
+    if (!birthPlace || !birthPlace.latitude) { alert(t('దయచేసి జన్మ స్థలం ఎంచుకోండి', 'Please select a birth place')); return; }
 
     // Check if premium — if not, show payment
     if (!isPremium) {
@@ -247,20 +308,16 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
-          {/* Header */}
-          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={s.header}>
-            <TouchableOpacity style={s.closeX} onPress={handleClose}>
-              <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
-            </TouchableOpacity>
+          {/* Minimal Header */}
+          <View style={s.header}>
             {step === 'result' && (
               <TouchableOpacity style={s.backX} onPress={() => setStep('form')}>
-                <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.7)" />
+                <Ionicons name="arrow-back" size={20} color={DarkColors.silver} />
               </TouchableOpacity>
             )}
-            <MaterialCommunityIcons name="zodiac-leo" size={40} color="#FFD700" />
-            <Text style={s.title}>వేద జాతకం</Text>
-            <Text style={s.subtitle}>Birth Chart</Text>
-          </LinearGradient>
+            <MaterialCommunityIcons name="zodiac-leo" size={24} color={DarkColors.gold} />
+            <Text style={s.title}>{t('వేద జాతకం', 'Vedic Birth Chart')}</Text>
+          </View>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {step === 'locked' && (
@@ -289,21 +346,41 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
               </View>
             )}
             {step === 'form' && (
-              <View style={s.form}>
-                <Text style={s.formTitle}>జన్మ వివరాలు నమోదు చేయండి</Text>
+              <View style={[s.form, { padding: formPad }]}>
+                <View style={s.formTitleRow}>
+                  <Text style={[s.formTitle, { fontSize: titleSize }]}>{t('జన్మ వివరాలు నమోదు చేయండి', 'Enter Birth Details')}</Text>
+                  <TouchableOpacity
+                    style={s.clearFormBtn}
+                    onPress={async () => {
+                      setName(''); setBirthDate(''); setBirthDateObj(null);
+                      setBirthTime('06:00'); setBirthPlace(null); setPlaceQuery('');
+                      setPlaceResults([]);
+                      try {
+                        if (Platform.OS === 'web') localStorage.removeItem(HORO_FORM_KEY);
+                        else {
+                          const AS = require('@react-native-async-storage/async-storage').default;
+                          await AS.removeItem(HORO_FORM_KEY);
+                        }
+                      } catch {}
+                    }}
+                  >
+                    <MaterialCommunityIcons name="eraser" size={16} color={DarkColors.textMuted} />
+                    <Text style={s.clearFormText}>{t('క్లియర్', 'Clear')}</Text>
+                  </TouchableOpacity>
+                </View>
 
                 {/* Name */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="account" size={18} color="#9B6FCF" />
-                    <Text style={s.fieldLabel}>పేరు / Name</Text>
+                    <MaterialCommunityIcons name="account" size={18} color={DarkColors.gold} />
+                    <Text style={s.fieldLabel}>{t('పేరు', 'Name')}</Text>
                   </View>
                   <TextInput
                     style={s.input}
                     value={name}
                     onChangeText={setName}
-                    placeholder="మీ పూర్తి పేరు"
-                    placeholderTextColor="#777777"
+                    placeholder={t('మీ పూర్తి పేరు', 'Your full name')}
+                    placeholderTextColor={DarkColors.textMuted}
                     maxLength={50}
                   />
                 </View>
@@ -311,12 +388,12 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 {/* Birth Date — Calendar Picker */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="calendar" size={18} color="#9B6FCF" />
-                    <Text style={s.fieldLabel}>జన్మ తేదీ / Date of Birth</Text>
+                    <MaterialCommunityIcons name="calendar" size={18} color={DarkColors.gold} />
+                    <Text style={s.fieldLabel}>{t('జన్మ తేదీ', 'Date of Birth')}</Text>
                   </View>
                   <TouchableOpacity style={s.input} onPress={() => setShowDatePicker(true)}>
-                    <Text style={birthDate ? { fontSize: 15, color: '#FFFFFF' } : { fontSize: 15, color: '#777777' }}>
-                      {birthDate || 'తేదీ ఎంచుకోండి / Select Date'}
+                    <Text style={birthDate ? { fontSize: 15, color: DarkColors.silver } : { fontSize: 15, color: DarkColors.textMuted }}>
+                      {birthDate || t('తేదీ ఎంచుకోండి', 'Select Date')}
                     </Text>
                   </TouchableOpacity>
                   {showDatePicker && (
@@ -336,8 +413,8 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 {/* Birth Time — 12-hour AM/PM Picker */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="clock-outline" size={18} color="#9B6FCF" />
-                    <Text style={s.fieldLabel}>జన్మ సమయం / Time of Birth</Text>
+                    <MaterialCommunityIcons name="clock-outline" size={18} color={DarkColors.gold} />
+                    <Text style={s.fieldLabel}>{t('జన్మ సమయం', 'Time of Birth')}</Text>
                   </View>
                   {(() => {
                     const [h24, m] = (birthTime || '06:00').split(':').map(Number);
@@ -349,50 +426,73 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       setBirthTime(`${String(newH24).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
                     };
                     return (
-                      <View style={s.timePickerRow}>
-                        {/* Hour */}
-                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12 === 1 ? 12 : h12 - 1, m, isPm)}>
-                          <Text style={s.timeBtnText}>−</Text>
-                        </TouchableOpacity>
-                        <Text style={s.timeDisplay}>{String(h12).padStart(2, '0')}:{String(m).padStart(2, '0')}</Text>
-                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12 === 12 ? 1 : h12 + 1, m, isPm)}>
-                          <Text style={s.timeBtnText}>+</Text>
-                        </TouchableOpacity>
-                        <Text style={s.timeSep}>:</Text>
-                        {/* Minute */}
-                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12, (m - 5 + 60) % 60, isPm)}>
-                          <Text style={s.timeBtnText}>−</Text>
-                        </TouchableOpacity>
-                        <Text style={s.timeMinText}>min</Text>
-                        <TouchableOpacity style={s.timeBtn} onPress={() => setFrom(h12, (m + 5) % 60, isPm)}>
-                          <Text style={s.timeBtnText}>+</Text>
-                        </TouchableOpacity>
-                        {/* AM/PM Toggle */}
-                        <View style={s.ampmGroup}>
-                          <TouchableOpacity
-                            style={[s.ampmBtn, !isPm && s.ampmBtnActive]}
-                            onPress={() => setFrom(h12, m, false)}
-                          >
-                            <Text style={[s.ampmText, !isPm && s.ampmTextActive]}>AM</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[s.ampmBtn, isPm && s.ampmBtnActive]}
-                            onPress={() => setFrom(h12, m, true)}
-                          >
-                            <Text style={[s.ampmText, isPm && s.ampmTextActive]}>PM</Text>
-                          </TouchableOpacity>
+                      <View style={s.timePickerWrap}>
+                        {/* Time display */}
+                        <Text style={[s.timeDisplayBig, { fontSize: timeDisplaySize }]}>
+                          {String(h12).padStart(2, '0')}:{String(m).padStart(2, '0')} {isPm ? 'PM' : 'AM'}
+                        </Text>
+
+                        <View style={s.timeControlsRow}>
+                          {/* Hour column */}
+                          <View style={s.timeColumn}>
+                            <Text style={s.timeColumnLabel}>{t('గంట', 'Hour')}</Text>
+                            <View style={s.timeSpinnerRow}>
+                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12 === 1 ? 12 : h12 - 1, m, isPm)}>
+                                <MaterialCommunityIcons name="minus" size={18} color={DarkColors.gold} />
+                              </TouchableOpacity>
+                              <Text style={[s.timeSpinValue, { fontSize: timeDigitSize }]}>{String(h12).padStart(2, '0')}</Text>
+                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12 === 12 ? 1 : h12 + 1, m, isPm)}>
+                                <MaterialCommunityIcons name="plus" size={18} color={DarkColors.gold} />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+
+                          <Text style={s.timeColonBig}>:</Text>
+
+                          {/* Minute column */}
+                          <View style={s.timeColumn}>
+                            <Text style={s.timeColumnLabel}>{t('నిమిషం', 'Minute')}</Text>
+                            <View style={s.timeSpinnerRow}>
+                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (m - 5 + 60) % 60, isPm)}>
+                                <MaterialCommunityIcons name="minus" size={18} color={DarkColors.gold} />
+                              </TouchableOpacity>
+                              <Text style={[s.timeSpinValue, { fontSize: timeDigitSize }]}>{String(m).padStart(2, '0')}</Text>
+                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (m + 5) % 60, isPm)}>
+                                <MaterialCommunityIcons name="plus" size={18} color={DarkColors.gold} />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+
+                          {/* AM/PM column */}
+                          <View style={s.timeColumn}>
+                            <Text style={s.timeColumnLabel}>{t('కాలం', 'Period')}</Text>
+                            <View style={s.ampmGroup}>
+                              <TouchableOpacity
+                                style={[s.ampmBtn, !isPm && s.ampmBtnActive]}
+                                onPress={() => setFrom(h12, m, false)}
+                              >
+                                <Text style={[s.ampmText, !isPm && s.ampmTextActive]}>AM</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[s.ampmBtn, isPm && s.ampmBtnActive]}
+                                onPress={() => setFrom(h12, m, true)}
+                              >
+                                <Text style={[s.ampmText, isPm && s.ampmTextActive]}>PM</Text>
+                              </TouchableOpacity>
+                            </View>
+                          </View>
                         </View>
                       </View>
                     );
                   })()}
-                  <Text style={s.fieldHint}>ఖచ్చితమైన సమయం తెలియకపోతే అంచనా సమయం నమోదు చేయండి</Text>
+                  <Text style={s.fieldHint}>{t('ఖచ్చితమైన సమయం తెలియకపోతే అంచనా సమయం నమోదు చేయండి', 'Enter approximate time if exact time is not known')}</Text>
                 </View>
 
                 {/* Birth Place — with search + GPS */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="map-marker" size={18} color="#9B6FCF" />
-                    <Text style={s.fieldLabel}>జన్మ స్థలం / Place of Birth</Text>
+                    <MaterialCommunityIcons name="map-marker" size={18} color={DarkColors.gold} />
+                    <Text style={s.fieldLabel}>{t('జన్మ స్థలం', 'Place of Birth')}</Text>
                     <TouchableOpacity
                       style={s.gpsBtn}
                       onPress={async () => {
@@ -413,18 +513,28 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                         } catch {} finally { setSearching(false); }
                       }}
                     >
-                      <MaterialCommunityIcons name="crosshairs-gps" size={14} color="#9B6FCF" />
+                      <MaterialCommunityIcons name="crosshairs-gps" size={14} color={DarkColors.gold} />
                       <Text style={s.gpsBtnText}>GPS</Text>
                     </TouchableOpacity>
                   </View>
-                  <TextInput
-                    style={s.input}
-                    value={placeQuery}
-                    onChangeText={handlePlaceSearch}
-                    placeholder="నగరం / గ్రామం / పట్టణం పేరు"
-                    placeholderTextColor="#777777"
-                  />
-                  {searching && <ActivityIndicator size="small" color="#9B6FCF" style={{ marginTop: 6 }} />}
+                  <View style={s.placeInputRow}>
+                    <TextInput
+                      style={s.placeInput}
+                      value={placeQuery}
+                      onChangeText={handlePlaceSearch}
+                      placeholder={t('నగరం / గ్రామం / పట్టణం పేరు', 'City / Village / Town name')}
+                      placeholderTextColor={DarkColors.textMuted}
+                    />
+                    {(placeQuery.length > 0 || birthPlace) && (
+                      <TouchableOpacity
+                        style={s.placeClearBtn}
+                        onPress={() => { setPlaceQuery(''); setBirthPlace(null); setPlaceResults([]); }}
+                      >
+                        <MaterialCommunityIcons name="close-circle" size={20} color={DarkColors.textMuted} />
+                      </TouchableOpacity>
+                    )}
+                    {searching && <ActivityIndicator size="small" color={DarkColors.gold} style={{ marginLeft: 8 }} />}
+                  </View>
                   {birthPlace && (
                     <View style={s.selectedPlace}>
                       <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
@@ -432,44 +542,53 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                     </View>
                   )}
                   {!searching && placeQuery.length >= 2 && placeResults.length === 0 && !birthPlace && (
-                    <Text style={{ fontSize: 12, color: '#999999', marginTop: 6, fontStyle: 'italic' }}>
-                      ఫలితాలు లేవు. ఆంగ్లంలో లేదా తెలుగులో ప్రయత్నించండి.
+                    <Text style={{ fontSize: 12, color: DarkColors.textMuted, marginTop: 6, fontStyle: 'italic' }}>
+                      {t('ఫలితాలు లేవు. ఆంగ్లంలో లేదా తెలుగులో ప్రయత్నించండి.', 'No results. Try in English or Telugu.')}
                     </Text>
                   )}
                   {placeResults.length > 0 && !birthPlace && (
                     <View style={s.placeList}>
-                      {placeResults.map((place, i) => (
-                        <TouchableOpacity
-                          key={i}
-                          style={s.placeItem}
-                          onPress={() => handleSelectPlace(place)}
-                        >
-                          <MaterialCommunityIcons name="map-marker-outline" size={16} color="#9B6FCF" />
-                          <Text style={s.placeItemText} numberOfLines={2}>{place.displayName || place.name}</Text>
-                        </TouchableOpacity>
-                      ))}
+                      <Text style={s.placeListHeader}>{t('స్థలం ఎంచుకోండి', 'Select a place')} ({placeResults.length})</Text>
+                      <ScrollView style={s.placeListScroll} nestedScrollEnabled keyboardShouldPersistTaps="handled">
+                        {placeResults.map((place, i) => (
+                          <TouchableOpacity
+                            key={place.placeId || i}
+                            style={s.placeItem}
+                            onPress={() => handleSelectPlace(place)}
+                          >
+                            <MaterialCommunityIcons name="map-marker-outline" size={18} color={DarkColors.gold} />
+                            <View style={{ flex: 1 }}>
+                              <Text style={s.placeItemName}>{place.name}</Text>
+                              {place.description ? <Text style={s.placeItemDesc}>{place.description}</Text> : null}
+                            </View>
+                            <MaterialCommunityIcons name="chevron-right" size={16} color={DarkColors.textMuted} />
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
                     </View>
                   )}
-                  <Text style={s.fieldHint}>గ్రామాలు, మండలాలు, జిల్లాలు — అన్ని ప్రదేశాలు అందుబాటులో</Text>
+                  <Text style={s.fieldHint}>{t('గ్రామాలు, మండలాలు, జిల్లాలు — అన్ని ప్రదేశాలు అందుబాటులో', 'Villages, towns, districts — all locations available')}</Text>
                 </View>
 
-                {/* Generate Button */}
-                <TouchableOpacity style={s.generateBtn} onPress={handleGenerate} activeOpacity={0.8}>
-                  <LinearGradient colors={['#4A1A6B', '#2D1B4E']} style={s.generateGradient}>
-                    <MaterialCommunityIcons name="zodiac-leo" size={22} color="#FFD700" />
-                    <Text style={s.generateText}>జాతకం రూపొందించండి</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+                {/* Generate Button — only show when suggestions list is not open */}
+                {(placeResults.length === 0 || birthPlace) && (
+                  <TouchableOpacity style={s.generateBtn} onPress={handleGenerate} activeOpacity={0.8}>
+                    <View style={s.generateGradient}>
+                      <MaterialCommunityIcons name="zodiac-leo" size={22} color={DarkColors.gold} />
+                      <Text style={s.generateText}>{t('జాతకం రూపొందించండి', 'Generate Birth Chart')}</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
 
                 <Text style={s.disclaimer}>
-                  ⚠️ ఈ జాతకం ఖగోళ శాస్త్ర గణనల ఆధారంగా రూపొందించబడింది. వేద జ్యోతిష్యంలో నిపుణుల సలహా కూడా తీసుకోండి.
+                  {t('⚠️ ఈ జాతకం ఖగోళ శాస్త్ర గణనల ఆధారంగా రూపొందించబడింది. వేద జ్యోతిష్యంలో నిపుణుల సలహా కూడా తీసుకోండి.', '⚠️ This chart is based on astronomical calculations. Please also consult a Vedic astrology expert.')}
                 </Text>
               </View>
             )}
 
             {step === 'payment' && (
-              <View style={s.form}>
-                <Text style={s.formTitle}>జాతకం రూపొందించడానికి ప్లాన్ ఎంచుకోండి</Text>
+              <View style={[s.form, { padding: formPad }]}>
+                <Text style={[s.formTitle, { fontSize: titleSize }]}>జాతకం రూపొందించడానికి ప్లాన్ ఎంచుకోండి</Text>
                 <Text style={{ fontSize: 12, color: '#999999', textAlign: 'center', marginBottom: 16 }}>
                   Premium ఫీచర్ — వేద జ్యోతిష్య ఆధారిత ఖచ్చితమైన జాతకం
                 </Text>
@@ -602,10 +721,10 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
             )}
 
             {step === 'result' && horoscope && (
-              <View style={s.result}>
+              <View style={[s.result, { padding: formPad }]}>
                 {/* Name + Birth details */}
                 <View style={s.resultHeader}>
-                  <Text style={s.resultName}>{horoscope.name}</Text>
+                  <Text style={[s.resultName, { fontSize: resultNameSize }]}>{horoscope.name}</Text>
                   <Text style={s.resultBirth}>
                     {birthDate} • {birthTime} • {birthPlace?.name}
                   </Text>
@@ -613,10 +732,10 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
                 {/* Rashi + Nakshatra + Lagna — key info */}
                 <View style={s.keyInfoGrid}>
-                  <KeyInfoCard label="రాశి" value={horoscope.rashi?.telugu} sub={horoscope.rashi?.english} icon="zodiac-leo" color="#9B6FCF" />
-                  <KeyInfoCard label="నక్షత్రం" value={horoscope.nakshatra?.telugu} sub={`పాద ${horoscope.nakshatra?.pada}`} icon="star-four-points" color={DarkColors.gold} />
-                  <KeyInfoCard label="లగ్నం" value={horoscope.lagna?.telugu} sub={horoscope.lagna?.english} icon="compass" color={DarkColors.saffron} />
-                  <KeyInfoCard label="సూర్య రాశి" value={horoscope.sunSign?.telugu} sub={horoscope.sunSign?.english} icon="white-balance-sunny" color="#E8751A" />
+                  <KeyInfoCard label="రాశి" value={horoscope.rashi?.telugu} sub={horoscope.rashi?.english} icon="zodiac-leo" color="#9B6FCF" valueSize={keyValueSize} />
+                  <KeyInfoCard label="నక్షత్రం" value={horoscope.nakshatra?.telugu} sub={`పాద ${horoscope.nakshatra?.pada}`} icon="star-four-points" color={DarkColors.gold} valueSize={keyValueSize} />
+                  <KeyInfoCard label="లగ్నం" value={horoscope.lagna?.telugu} sub={horoscope.lagna?.english} icon="compass" color={DarkColors.saffron} valueSize={keyValueSize} />
+                  <KeyInfoCard label="సూర్య రాశి" value={horoscope.sunSign?.telugu} sub={horoscope.sunSign?.english} icon="white-balance-sunny" color="#E8751A" valueSize={keyValueSize} />
                 </View>
 
                 {/* Birth Tithi, Yoga, Karana */}
@@ -669,6 +788,88 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   <View style={s.dailyBox}>
                     <Text style={s.dailyTitle}>📅 నేటి ఫలం</Text>
                     <Text style={s.dailyText}>{horoscope.dailyForecast}</Text>
+                  </View>
+                )}
+
+                {/* Vedic Remedies & Gemstones */}
+                {horoscope.vedic && (
+                  <View style={s.predictions}>
+                    <Text style={s.predTitle}>💎 రత్నాలు & ఉపాయాలు</Text>
+
+                    {/* Gemstone + Metal + Lucky info grid */}
+                    <View style={s.vedicGrid}>
+                      <View style={s.vedicItem}>
+                        <MaterialCommunityIcons name="diamond-stone" size={20} color="#9B6FCF" />
+                        <Text style={s.vedicLabel}>{t('ప్రధాన రత్నం', 'Gemstone')}</Text>
+                        <Text style={s.vedicValue}>{t(horoscope.vedic.gemstone.te, horoscope.vedic.gemstone.en)}</Text>
+                      </View>
+                      <View style={s.vedicItem}>
+                        <MaterialCommunityIcons name="diamond-outline" size={20} color={DarkColors.gold} />
+                        <Text style={s.vedicLabel}>{t('ప్రత్యామ్నాయ రత్నం', 'Alternate')}</Text>
+                        <Text style={s.vedicValue}>{t(horoscope.vedic.gemstoneAlt.te, horoscope.vedic.gemstoneAlt.en)}</Text>
+                      </View>
+                      <View style={s.vedicItem}>
+                        <MaterialCommunityIcons name="gold" size={20} color={DarkColors.saffron} />
+                        <Text style={s.vedicLabel}>{t('లోహం', 'Metal')}</Text>
+                        <Text style={s.vedicValue}>{t(horoscope.vedic.metal.te, horoscope.vedic.metal.en)}</Text>
+                      </View>
+                      <View style={s.vedicItem}>
+                        <MaterialCommunityIcons name="calendar-star" size={20} color={DarkColors.tulasiGreen} />
+                        <Text style={s.vedicLabel}>{t('శుభ వారం', 'Lucky Day')}</Text>
+                        <Text style={s.vedicValue}>{t(horoscope.vedic.luckyDay.te, horoscope.vedic.luckyDay.en)}</Text>
+                      </View>
+                      <View style={s.vedicItem}>
+                        <MaterialCommunityIcons name="palette" size={20} color={DarkColors.kumkum} />
+                        <Text style={s.vedicLabel}>{t('శుభ రంగు', 'Lucky Color')}</Text>
+                        <Text style={s.vedicValue}>{t(horoscope.vedic.luckyColor.te, horoscope.vedic.luckyColor.en)}</Text>
+                      </View>
+                      <View style={s.vedicItem}>
+                        <MaterialCommunityIcons name="compass-rose" size={20} color="#4A90D9" />
+                        <Text style={s.vedicLabel}>{t('శుభ దిక్కు', 'Direction')}</Text>
+                        <Text style={s.vedicValue}>{t(horoscope.vedic.direction.te, horoscope.vedic.direction.en)}</Text>
+                      </View>
+                    </View>
+
+                    {/* Deity & Mantra */}
+                    <View style={s.predRow}>
+                      <MaterialCommunityIcons name="hands-pray" size={18} color="#9B6FCF" style={{ marginRight: 10, marginTop: 2 }} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.predSectionTitle}>{t('ఆరాధ్య దేవత', 'Presiding Deity')}</Text>
+                        <Text style={s.predText}>{t(horoscope.vedic.deity.te, horoscope.vedic.deity.en)}</Text>
+                        <Text style={[s.predText, { color: DarkColors.gold, fontWeight: '700', marginTop: 4 }]}>{horoscope.vedic.mantra}</Text>
+                      </View>
+                    </View>
+
+                    {/* Body Part */}
+                    <View style={s.predRow}>
+                      <MaterialCommunityIcons name="human" size={18} color="#9B6FCF" style={{ marginRight: 10, marginTop: 2 }} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.predSectionTitle}>{t('శరీర భాగం (జాగ్రత్త)', 'Sensitive Body Part')}</Text>
+                        <Text style={s.predText}>{t(horoscope.vedic.bodyPart.te, horoscope.vedic.bodyPart.en)} — {t(horoscope.vedic.element.te, horoscope.vedic.element.en)} {t('తత్వం', 'Element')}</Text>
+                      </View>
+                    </View>
+
+                    {/* Remedy */}
+                    <View style={s.predRow}>
+                      <MaterialCommunityIcons name="shield-star" size={18} color={DarkColors.tulasiGreen} style={{ marginRight: 10, marginTop: 2 }} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.predSectionTitle}>{t('ఉపాయాలు & పరిహారాలు', 'Remedies')}</Text>
+                        <Text style={s.predText}>{horoscope.vedic.remedy}</Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+
+                {/* Future Outlook */}
+                {horoscope.predictions && (
+                  <View style={s.dailyBox}>
+                    <Text style={s.dailyTitle}>🔮 {t('భవిష్యత్ సూచనలు', 'Future Outlook')}</Text>
+                    <Text style={s.dailyText}>
+                      {t(
+                        `${horoscope.rashi?.telugu || ''} రాశి వారికి ముందున్న కాలంలో ${horoscope.vedic?.deity?.te || ''} ఆశీర్వాదం వల్ల వృత్తి రంగంలో అభివృద్ధి ఉంటుంది. ${horoscope.vedic?.luckyDay?.te || ''} నాడు ముఖ్యమైన నిర్ణయాలు తీసుకోవడం శుభకరం. ${horoscope.vedic?.gemstone?.te || ''} ధరించడం వల్ల గ్రహ దోషాలు తగ్గి, ఆరోగ్యం మెరుగుపడుతుంది. ఆర్థిక విషయాలలో జాగ్రత్తగా ఉండండి — పెట్టుబడులకు ముందు నిపుణుల సలహా తీసుకోండి. కుటుంబ సంబంధాలు బలపడతాయి. ${horoscope.vedic?.mantra || ''} నిత్యం జపించడం అన్ని రంగాల్లో అనుకూల ఫలితాలు ఇస్తుంది.`,
+                        `For ${horoscope.rashi?.english || ''} natives, the coming period brings career growth through the blessings of ${horoscope.vedic?.deity?.en || ''}. Important decisions are best made on ${horoscope.vedic?.luckyDay?.en || ''}. Wearing ${horoscope.vedic?.gemstone?.en || ''} can reduce planetary afflictions and improve health. Exercise caution in financial matters — seek expert advice before investments. Family relationships will strengthen. Regular chanting of the prescribed mantra will bring favorable results in all areas.`
+                      )}
+                    </Text>
                   </View>
                 )}
 
@@ -729,7 +930,21 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       text += `📅 నేటి ఫలం\n${h.dailyForecast}\n\n`;
                     }
 
-                    text += `━━━━━━━━━━━━━━━━\nధర్మ App — Telugu Panchangam\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+                    // Vedic remedies
+                    if (h.vedic) {
+                      text += `💎 రత్నాలు & ఉపాయాలు\n`;
+                      text += `రత్నం: ${h.vedic.gemstone.te}\n`;
+                      text += `ప్రత్యామ్నాయం: ${h.vedic.gemstoneAlt.te}\n`;
+                      text += `లోహం: ${h.vedic.metal.te}\n`;
+                      text += `శుభ వారం: ${h.vedic.luckyDay.te}\n`;
+                      text += `శుభ రంగు: ${h.vedic.luckyColor.te}\n`;
+                      text += `శుభ దిక్కు: ${h.vedic.direction.te}\n`;
+                      text += `ఆరాధ్య దేవత: ${h.vedic.deity.te}\n`;
+                      text += `మంత్రం: ${h.vedic.mantra}\n\n`;
+                      text += `🛡️ ఉపాయాలు:\n${h.vedic.remedy}\n\n`;
+                    }
+
+                    text += `━━━━━━━━━━━━━━━━\n📲 *Dharma App* — Telugu Panchangam\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n🙏 సర్వే జనాః సుఖినో భవంతు`;
                     return text;
                   }}
                 />
@@ -753,12 +968,12 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
   );
 }
 
-function KeyInfoCard({ label, value, sub, icon, color }) {
+function KeyInfoCard({ label, value, sub, icon, color, valueSize = 18 }) {
   return (
     <View style={[s.keyCard, { borderLeftColor: color }]}>
       <MaterialCommunityIcons name={icon} size={18} color={color} />
       <Text style={s.keyLabel}>{label}</Text>
-      <Text style={[s.keyValue, { color }]}>{value || '—'}</Text>
+      <Text style={[s.keyValue, { color, fontSize: valueSize }]}>{value || '—'}</Text>
       {sub && <Text style={s.keySub}>{sub}</Text>}
     </View>
   );
@@ -821,13 +1036,12 @@ const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modal: { backgroundColor: '#1A1A1A', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '94%' },
   header: {
-    alignItems: 'center', paddingVertical: 24, paddingHorizontal: 20,
-    borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 14, paddingHorizontal: 16, gap: 10,
+    position: 'relative',
   },
-  closeX: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  backX: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '800', color: '#FFD700', marginTop: 8 },
-  subtitle: { fontSize: 12, color: 'rgba(255,248,240,0.5)', marginTop: 2 },
+  backX: { position: 'absolute', left: 16 },
+  title: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
 
   // Locked / Premium gate
   lockedWrap: {
@@ -857,51 +1071,100 @@ const s = StyleSheet.create({
   },
 
   // Form
-  form: { padding: 20 },
-  formTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginBottom: 16, textAlign: 'center' },
+  form: {},
+  formTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 16, position: 'relative' },
+  formTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  clearFormBtn: {
+    position: 'absolute', right: 0, flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+  },
+  clearFormText: { fontSize: 11, fontWeight: '700', color: DarkColors.textMuted },
   field: { marginBottom: 16 },
   fieldHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 },
   fieldLabel: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', flex: 1 },
   gpsBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(155,111,207,0.15)', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 12,
+    backgroundColor: 'rgba(212,160,23,0.1)', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 12,
   },
-  gpsBtnText: { fontSize: 11, fontWeight: '700', color: '#9B6FCF' },
+  gpsBtnText: { fontSize: 11, fontWeight: '700', color: DarkColors.gold },
   input: {
     backgroundColor: '#1E1E1E', borderRadius: 14, padding: 14,
     borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
     fontSize: 16, fontWeight: '600', color: '#FFFFFF',
   },
   fieldHint: { fontSize: 11, color: '#999999', fontStyle: 'italic', marginTop: 4, marginLeft: 4 },
-  timePickerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10 },
-  timeBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#9B6FCF', alignItems: 'center', justifyContent: 'center' },
-  timeBtnText: { fontSize: 18, fontWeight: '800', color: '#fff' },
-  timeDisplay: { fontSize: 28, fontWeight: '900', color: '#FFFFFF', minWidth: 70, textAlign: 'center' },
-  timeSep: { fontSize: 16, color: '#999999', marginHorizontal: 2 },
-  timeMinText: { fontSize: 12, color: '#999999' },
-  ampmGroup: { flexDirection: 'row', marginLeft: 8, borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: '#9B6FCF' },
-  ampmBtn: { paddingHorizontal: 10, paddingVertical: 6, backgroundColor: 'transparent' },
-  ampmBtnActive: { backgroundColor: '#9B6FCF' },
-  ampmText: { fontSize: 12, fontWeight: '800', color: '#9B6FCF' },
-  ampmTextActive: { color: '#FFFFFF' },
+  // Time picker — structured layout
+  timePickerWrap: {
+    backgroundColor: '#1E1E1E', borderRadius: 14, padding: 16,
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
+  },
+  timeDisplayBig: {
+    fontSize: 32, fontWeight: '900', color: DarkColors.gold,
+    textAlign: 'center', marginBottom: 14, letterSpacing: 2,
+  },
+  timeControlsRow: {
+    flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', gap: 10,
+  },
+  timeColumn: { alignItems: 'center', gap: 6 },
+  timeColumnLabel: { fontSize: 11, fontWeight: '700', color: '#999999', textTransform: 'uppercase', letterSpacing: 1 },
+  timeSpinnerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  timeSpinBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(212,160,23,0.3)',
+  },
+  timeSpinValue: { fontSize: 24, fontWeight: '900', color: '#FFFFFF', minWidth: 36, textAlign: 'center' },
+  timeColonBig: { fontSize: 28, fontWeight: '900', color: '#999999', marginTop: 22 },
+  ampmGroup: { flexDirection: 'column', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: DarkColors.gold },
+  ampmBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'transparent' },
+  ampmBtnActive: { backgroundColor: 'rgba(212,160,23,0.25)' },
+  ampmText: { fontSize: 13, fontWeight: '800', color: 'rgba(212,160,23,0.5)', textAlign: 'center' },
+  ampmTextActive: { color: DarkColors.gold },
+  // Place input with clear button
+  placeInputRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#1E1E1E', borderRadius: 14,
+    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
+    paddingRight: 8,
+  },
+  placeInput: {
+    flex: 1, padding: 14,
+    fontSize: 16, fontWeight: '600', color: '#FFFFFF',
+  },
+  placeClearBtn: { padding: 6 },
   selectedPlace: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    marginTop: 8, paddingVertical: 6, paddingHorizontal: 10,
-    backgroundColor: 'rgba(46,125,50,0.08)', borderRadius: 10,
+    marginTop: 8, paddingVertical: 8, paddingHorizontal: 12,
+    backgroundColor: 'rgba(46,125,50,0.1)', borderRadius: 10,
+    borderWidth: 1, borderColor: 'rgba(46,125,50,0.2)',
   },
   selectedPlaceText: { fontSize: 12, color: DarkColors.tulasiGreen, fontWeight: '600', flex: 1 },
-  placeList: { marginTop: 6, backgroundColor: '#222222', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
-  placeItem: {
-    flexDirection: 'row', alignItems: 'flex-start', padding: 12, gap: 8,
+  // Place suggestions — scrollable, clearly visible
+  placeList: {
+    marginTop: 8, backgroundColor: '#1A1A1A', borderRadius: 14,
+    borderWidth: 1.5, borderColor: DarkColors.borderGold,
+    overflow: 'hidden',
+  },
+  placeListHeader: {
+    fontSize: 12, fontWeight: '700', color: DarkColors.gold,
+    paddingHorizontal: 14, paddingTop: 10, paddingBottom: 6,
     borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  placeItemText: { fontSize: 13, color: '#FFFFFF', flex: 1, lineHeight: 18 },
+  placeListScroll: { maxHeight: 240 },
+  placeItem: {
+    flexDirection: 'row', alignItems: 'center', padding: 14, gap: 10,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  placeItemName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  placeItemDesc: { fontSize: 12, color: '#999999', marginTop: 2 },
   generateBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 8 },
   generateGradient: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 16, borderRadius: 16, gap: 10,
+    backgroundColor: 'rgba(212,160,23,0.12)', borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  generateText: { fontSize: 17, fontWeight: '800', color: '#FFD700' },
+  generateText: { fontSize: 17, fontWeight: '800', color: DarkColors.gold },
   disclaimer: { fontSize: 11, color: '#999999', fontStyle: 'italic', textAlign: 'center', marginTop: 16, lineHeight: 18 },
 
   // Payment step
@@ -935,7 +1198,7 @@ const s = StyleSheet.create({
   loadingSubtext: { fontSize: 12, color: '#999999', marginTop: 4 },
 
   // Result
-  result: { padding: 20 },
+  result: {},
   resultHeader: { alignItems: 'center', marginBottom: 16 },
   resultName: { fontSize: 24, fontWeight: '900', color: '#FFFFFF' },
   resultBirth: { fontSize: 13, color: '#999999', marginTop: 4 },
@@ -969,6 +1232,14 @@ const s = StyleSheet.create({
 
   predictions: { marginBottom: 16 },
   predTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginBottom: 12 },
+  // Vedic info grid
+  vedicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
+  vedicItem: {
+    width: '47%', backgroundColor: '#222222', borderRadius: 12, padding: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 4,
+  },
+  vedicLabel: { fontSize: 11, color: '#999999', fontWeight: '600' },
+  vedicValue: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
   predRow: {
     flexDirection: 'row', alignItems: 'flex-start',
     backgroundColor: '#222222', borderRadius: 14, padding: 14, marginBottom: 10,

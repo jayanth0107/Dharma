@@ -7,29 +7,30 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { fetchMarketData } from '../utils/marketService';
 
-function PriceCard({ item, t }) {
+function PriceCard({ item, t, sizes }) {
   if (!item) return null;
   const isUp = item.change >= 0;
   const color = isUp ? DarkColors.tulasiGreen : '#C41E3A';
 
   return (
-    <View style={s.priceCard}>
+    <View style={[s.priceCard, { padding: sizes.cardPad, borderRadius: sizes.cardRadius }]}>
       <View style={s.priceLeft}>
-        <MaterialCommunityIcons name={item.icon || 'chart-line'} size={20} color={color} />
-        <View style={{ marginLeft: 10, flex: 1 }}>
-          <Text style={s.priceName}>{t(item.labelTe || item.name, item.label || item.name)}</Text>
-          <Text style={s.priceSymbol}>{item.symbol}</Text>
+        <MaterialCommunityIcons name={item.icon || 'chart-line'} size={sizes.iconSize} color={color} />
+        <View style={{ marginLeft: sizes.iconMargin, flex: 1 }}>
+          <Text style={[s.priceName, { fontSize: sizes.nameSize }]}>{t(item.labelTe || item.name, item.label || item.name)}</Text>
+          <Text style={[s.priceSymbol, { fontSize: sizes.symbolSize }]}>{item.symbol}</Text>
         </View>
       </View>
       <View style={s.priceRight}>
-        <Text style={s.priceValue}>₹{typeof item.price === 'number' ? item.price.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : item.price}</Text>
-        <View style={[s.changeBadge, { backgroundColor: color + '15' }]}>
-          <MaterialCommunityIcons name={isUp ? 'arrow-up' : 'arrow-down'} size={12} color={color} />
-          <Text style={[s.changeText, { color }]}>
+        <Text style={[s.priceValue, { fontSize: sizes.priceSize }]}>₹{typeof item.price === 'number' ? item.price.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : item.price}</Text>
+        <View style={[s.changeBadge, { backgroundColor: color + '15', paddingHorizontal: sizes.changePadH, paddingVertical: sizes.changePadV }]}>
+          <MaterialCommunityIcons name={isUp ? 'arrow-up' : 'arrow-down'} size={sizes.changeIcon} color={color} />
+          <Text style={[s.changeText, { color, fontSize: sizes.changeSize }]}>
             {isUp ? '+' : ''}{typeof item.change === 'number' ? item.change.toFixed(2) : item.change} ({typeof item.changePercent === 'number' ? item.changePercent.toFixed(2) : item.changePercent}%)
           </Text>
         </View>
@@ -43,6 +44,35 @@ export function MarketScreen() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Responsive sizes
+  const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
+  const sectionTitleSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const statusTextSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const statusTimeSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const statusPad = usePick({ default: 12, lg: 16, xl: 20 });
+  const loadingTextSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const staleTextSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const stalePad = usePick({ default: 10, lg: 14, xl: 18 });
+  const staleIconSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const sourceTextSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const goldLinkPad = usePick({ default: 14, lg: 18, xl: 22 });
+  const goldIconSize = usePick({ default: 20, lg: 24, xl: 28 });
+  const goldLinkTextSize = usePick({ default: 13, lg: 14, xl: 16 });
+
+  const cardSizes = {
+    cardPad: usePick({ default: 14, lg: 18, xl: 22 }),
+    cardRadius: usePick({ default: 14, lg: 16, xl: 18 }),
+    iconSize: usePick({ default: 20, lg: 24, xl: 28 }),
+    iconMargin: usePick({ default: 10, lg: 12, xl: 14 }),
+    nameSize: usePick({ default: 15, lg: 16, xl: 18 }),
+    symbolSize: usePick({ default: 11, lg: 12, xl: 13 }),
+    priceSize: usePick({ default: 17, lg: 19, xl: 22 }),
+    changeIcon: usePick({ default: 12, lg: 14, xl: 16 }),
+    changeSize: usePick({ default: 12, lg: 13, xl: 14 }),
+    changePadH: usePick({ default: 8, lg: 10, xl: 12 }),
+    changePadV: usePick({ default: 3, lg: 4, xl: 5 }),
+  };
 
   const loadData = useCallback(async () => {
     const result = await fetchMarketData();
@@ -64,22 +94,22 @@ export function MarketScreen() {
       <PageHeader title={t('మార్కెట్', 'Market')} />
       <TopTabBar />
       <ScrollView
-        style={s.scroll} contentContainerStyle={s.content}
+        style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DarkColors.saffron} />}
       >
         {loading ? (
           <View style={s.loadingBox}>
             <ActivityIndicator size="large" color={DarkColors.saffron} />
-            <Text style={s.loadingText}>{t('మార్కెట్ డేటా లోడ్ అవుతోంది...', 'Loading market data...')}</Text>
+            <Text style={[s.loadingText, { fontSize: loadingTextSize }]}>{t('మార్కెట్ డేటా లోడ్ అవుతోంది...', 'Loading market data...')}</Text>
           </View>
         ) : (
           <>
             {/* Stale / sample-data banner (when live fetch failed) */}
             {data?.isStale && (
-              <View style={s.staleBanner}>
-                <MaterialCommunityIcons name="information-outline" size={16} color={DarkColors.gold} style={{ marginRight: 6 }} />
-                <Text style={s.staleText}>
+              <View style={[s.staleBanner, { padding: stalePad }]}>
+                <MaterialCommunityIcons name="information-outline" size={staleIconSize} color={DarkColors.gold} style={{ marginRight: 6 }} />
+                <Text style={[s.staleText, { fontSize: staleTextSize }]}>
                   {t('లైవ్ డేటా అందుబాటులో లేదు — చివరి అందుబాటు ధరలు చూపబడుతున్నాయి', 'Live data unavailable — showing last known prices')}
                 </Text>
               </View>
@@ -88,46 +118,46 @@ export function MarketScreen() {
             {/* Last-updated chip only — no 'Market Closed' label which
                 annoyed users when prices were still visible. */}
             {!data?.isStale && data?.lastUpdated && (
-              <View style={s.statusBar}>
+              <View style={[s.statusBar, { padding: statusPad }]}>
                 <View style={[s.statusDot, { backgroundColor: data?.marketOpen ? DarkColors.tulasiGreen : DarkColors.gold }]} />
-                <Text style={s.statusText}>
+                <Text style={[s.statusText, { fontSize: statusTextSize }]}>
                   {t('చివరి నవీకరణ', 'Last updated')}
                 </Text>
-                <Text style={s.statusTime}>{data.lastUpdated}</Text>
+                <Text style={[s.statusTime, { fontSize: statusTimeSize }]}>{data.lastUpdated}</Text>
               </View>
             )}
 
             {/* Indices */}
             {data?.indices?.length > 0 && (
               <>
-                <Text style={s.sectionTitle}>{t('📊 సూచీలు', '📊 Indices')}</Text>
-                {data.indices.map((item, i) => <PriceCard key={i} item={item} t={t} />)}
+                <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t('📊 సూచీలు', '📊 Indices')}</Text>
+                {data.indices.map((item, i) => <PriceCard key={i} item={item} t={t} sizes={cardSizes} />)}
               </>
             )}
 
             {/* ETFs */}
             {data?.etfs?.length > 0 && (
               <>
-                <Text style={s.sectionTitle}>{t('🥇 ETFs', '🥇 ETFs')}</Text>
-                {data.etfs.map((item, i) => <PriceCard key={i} item={item} t={t} />)}
+                <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t('🥇 ETFs', '🥇 ETFs')}</Text>
+                {data.etfs.map((item, i) => <PriceCard key={i} item={item} t={t} sizes={cardSizes} />)}
               </>
             )}
 
             {/* Stocks */}
             {data?.stocks?.length > 0 && (
               <>
-                <Text style={s.sectionTitle}>{t('📈 స్టాక్స్', '📈 Stocks')}</Text>
-                {data.stocks.map((item, i) => <PriceCard key={i} item={item} t={t} />)}
+                <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t('📈 స్టాక్స్', '📈 Stocks')}</Text>
+                {data.stocks.map((item, i) => <PriceCard key={i} item={item} t={t} sizes={cardSizes} />)}
               </>
             )}
 
             {/* Source */}
-            <Text style={s.sourceText}>{data?.source || ''}</Text>
+            <Text style={[s.sourceText, { fontSize: sourceTextSize }]}>{data?.source || ''}</Text>
 
             {/* Navigate to Gold prices */}
-            <TouchableOpacity style={s.goldLink} onPress={() => {}}>
-              <MaterialCommunityIcons name="gold" size={20} color={DarkColors.gold} />
-              <Text style={s.goldLinkText}>{t('బంగారం & వెండి భౌతిక ధరలు చూడండి', 'View physical Gold & Silver prices')}</Text>
+            <TouchableOpacity style={[s.goldLink, { padding: goldLinkPad }]} onPress={() => {}}>
+              <MaterialCommunityIcons name="gold" size={goldIconSize} color={DarkColors.gold} />
+              <Text style={[s.goldLinkText, { fontSize: goldLinkTextSize }]}>{t('బంగారం & వెండి భౌతిక ధరలు చూడండి', 'View physical Gold & Silver prices')}</Text>
             </TouchableOpacity>
           </>
         )}

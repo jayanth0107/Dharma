@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
@@ -22,6 +23,38 @@ export function LocationPickerModal({ forceOpen, onDone }) {
   } = useApp();
 
   const isOpen = forceOpen || showLocationPicker;
+
+  // Responsive values
+  const titleSize = usePick({ default: 18, md: 20, xl: 24 });
+  const subtitleSize = usePick({ default: 11, md: 12, xl: 14 });
+  const gpsBtnTextSize = usePick({ default: 13, md: 14, xl: 16 });
+  const gpsBtnPadV = usePick({ default: 12, md: 14, xl: 18 });
+  const gpsIconSize = usePick({ default: 18, md: 20, xl: 24 });
+  const badgeTextSize = usePick({ default: 12, md: 13, xl: 15 });
+  const badgeIconSize = usePick({ default: 12, md: 14, xl: 16 });
+  const searchIconSize = usePick({ default: 16, md: 18, xl: 22 });
+  const searchInputSize = usePick({ default: 14, md: 15, xl: 17 });
+  const searchPadH = usePick({ default: 12, md: 14, xl: 18 });
+  const searchPadV = usePick({ default: 8, md: 10, xl: 14 });
+  const marginH = usePick({ default: 16, md: 20, xl: 28 });
+  const headerPadV = usePick({ default: 16, md: 20, xl: 24 });
+  const locationNameSize = usePick({ default: 15, md: 17, xl: 20 });
+  const locationSubSize = usePick({ default: 11, md: 12, xl: 14 });
+  const locationItemPadV = usePick({ default: 12, md: 14, xl: 18 });
+  const locationItemPadH = usePick({ default: 20, md: 24, xl: 32 });
+  const dividerTextSize = usePick({ default: 10, md: 11, xl: 13 });
+  const closeBtnTextSize = usePick({ default: 14, md: 15, xl: 17 });
+  const closeBtnPadV = usePick({ default: 12, md: 14, xl: 18 });
+  const closeBtnMarginH = usePick({ default: 20, md: 24, xl: 32 });
+  const closeXSize = usePick({ default: 22, md: 24, xl: 28 });
+  const closeXBtnSize = usePick({ default: 32, md: 36, xl: 44 });
+  const locationIconSize = usePick({ default: 18, md: 20, xl: 24 });
+  const checkIconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const noResultsSize = usePick({ default: 12, md: 13, xl: 15 });
+  const searchResultsMaxH = usePick({ default: 180, md: 200, xl: 280 });
+  const clearIconSize = usePick({ default: 16, md: 18, xl: 22 });
+  const spinnerSize = usePick({ default: 14, md: 16, xl: 20 });
+  const mapMarkerSize = usePick({ default: 16, md: 18, xl: 22 });
 
   const closeModal = () => {
     setShowLocationPicker(false);
@@ -48,45 +81,48 @@ export function LocationPickerModal({ forceOpen, onDone }) {
     >
       <View style={forceOpen ? { flex: 1 } : s.overlay}>
         <View style={forceOpen ? { flex: 1, backgroundColor: DarkColors.bgElevated } : s.content}>
-          <View style={s.header}>
-            <Ionicons name="location" size={20} color={DarkColors.saffron} />
-            <Text style={s.title}> {t(TR.chooseLocation.te, TR.chooseLocation.en)}</Text>
-            <Text style={s.subtitle}>{t(TR.gpsAutoDetect.te, TR.gpsAutoDetect.en)}</Text>
-            <TouchableOpacity style={s.closeX} onPress={closeModal}>
-              <Ionicons name="close" size={24} color={DarkColors.silver} />
+          <View style={[s.header, { paddingVertical: headerPadV }]}>
+            <Ionicons name="location" size={locationIconSize} color={DarkColors.saffron} />
+            <Text style={[s.title, { fontSize: titleSize }]}> {t(TR.chooseLocation.te, TR.chooseLocation.en)}</Text>
+            <Text style={[s.subtitle, { fontSize: subtitleSize }]}>{t(TR.gpsAutoDetect.te, TR.gpsAutoDetect.en)}</Text>
+            <TouchableOpacity
+              style={[s.closeX, { width: closeXBtnSize, height: closeXBtnSize, borderRadius: closeXBtnSize / 2 }]}
+              onPress={closeModal}
+            >
+              <Ionicons name="close" size={closeXSize} color={DarkColors.silver} />
             </TouchableOpacity>
           </View>
 
           {/* GPS Auto-detect */}
           <TouchableOpacity
-            style={s.gpsBtn}
+            style={[s.gpsBtn, { paddingVertical: gpsBtnPadV, marginHorizontal: marginH }]}
             onPress={handleRedetectLocation}
             disabled={locationDetecting}
           >
             <MaterialCommunityIcons
               name={locationDetecting ? 'loading' : 'crosshairs-gps'}
-              size={20} color="#fff" style={{ marginRight: 8 }}
+              size={gpsIconSize} color="#fff" style={{ marginRight: 8 }}
             />
-            <Text style={s.gpsBtnText}>
+            <Text style={[s.gpsBtnText, { fontSize: gpsBtnTextSize }]}>
               {locationDetecting ? t(TR.detectingLocation.te, TR.detectingLocation.en) : t(TR.detectMyLocation.te, TR.detectMyLocation.en)}
             </Text>
           </TouchableOpacity>
 
           {/* Current location badge */}
           {location.isAutoDetected && (
-            <View style={s.currentBadge}>
-              <Ionicons name="navigate" size={14} color={DarkColors.tulasiGreen} />
-              <Text style={s.currentText}>
+            <View style={[s.currentBadge, { marginHorizontal: marginH }]}>
+              <Ionicons name="navigate" size={badgeIconSize} color={DarkColors.tulasiGreen} />
+              <Text style={[s.currentText, { fontSize: badgeTextSize }]}>
                 {location.area ? `${location.area}, ` : ''}{location.name}{location.state ? `, ${location.state}` : ''}
               </Text>
             </View>
           )}
 
           {/* Search box */}
-          <View style={s.searchBox}>
-            <Ionicons name="search" size={18} color={DarkColors.textMuted} style={{ marginRight: 8 }} />
+          <View style={[s.searchBox, { marginHorizontal: marginH, paddingHorizontal: searchPadH, paddingVertical: searchPadV }]}>
+            <Ionicons name="search" size={searchIconSize} color={DarkColors.textMuted} style={{ marginRight: 8 }} />
             <TextInput
-              style={s.searchInput}
+              style={[s.searchInput, { fontSize: searchInputSize }]}
               value={locationSearchQuery}
               onChangeText={handleLocationSearch}
               placeholder={t(TR.searchCityCountry.te, TR.searchCityCountry.en)}
@@ -94,10 +130,10 @@ export function LocationPickerModal({ forceOpen, onDone }) {
               autoCorrect={false}
               selectionColor={DarkColors.saffron}
             />
-            {locationSearching && <MaterialCommunityIcons name="loading" size={16} color={DarkColors.saffron} />}
+            {locationSearching && <MaterialCommunityIcons name="loading" size={spinnerSize} color={DarkColors.saffron} />}
             {locationSearchQuery.length > 0 && !locationSearching && (
               <TouchableOpacity onPress={() => handleLocationSearch('')}>
-                <Ionicons name="close-circle" size={18} color={DarkColors.textMuted} />
+                <Ionicons name="close-circle" size={clearIconSize} color={DarkColors.textMuted} />
               </TouchableOpacity>
             )}
           </View>
@@ -108,26 +144,29 @@ export function LocationPickerModal({ forceOpen, onDone }) {
               data={locationSearchResults}
               keyExtractor={(item, i) => `search-${item.latitude}-${item.longitude}-${i}`}
               renderItem={({ item }) => (
-                <TouchableOpacity style={s.locationItem} onPress={() => handleSelectLocation(item)}>
+                <TouchableOpacity
+                  style={[s.locationItem, { paddingVertical: locationItemPadV, paddingHorizontal: locationItemPadH }]}
+                  onPress={() => handleSelectLocation(item)}
+                >
                   <View style={{ flex: 1 }}>
-                    <Text style={s.locationName}>{item.name}</Text>
-                    <Text style={s.locationSub}>{item.displayName}</Text>
+                    <Text style={[s.locationName, { fontSize: locationNameSize }]}>{item.name}</Text>
+                    <Text style={[s.locationSub, { fontSize: locationSubSize }]}>{item.displayName}</Text>
                   </View>
-                  <MaterialCommunityIcons name="map-marker-outline" size={18} color={DarkColors.textMuted} />
+                  <MaterialCommunityIcons name="map-marker-outline" size={mapMarkerSize} color={DarkColors.textMuted} />
                 </TouchableOpacity>
               )}
-              style={{ maxHeight: 200 }}
+              style={{ maxHeight: searchResultsMaxH }}
             />
           ) : locationSearchQuery.length >= 2 && !locationSearching ? (
-            <Text style={s.noResults}>{t(TR.noResults.te, TR.noResults.en)}</Text>
+            <Text style={[s.noResults, { fontSize: noResultsSize }]}>{t(TR.noResults.te, TR.noResults.en)}</Text>
           ) : null}
 
           {/* Divider + Preset cities */}
           {locationSearchResults.length === 0 && (
             <>
-              <View style={s.divider}>
+              <View style={[s.divider, { marginHorizontal: marginH }]}>
                 <View style={s.dividerLine} />
-                <Text style={s.dividerText}>{t(TR.popularCities.te, TR.popularCities.en)}</Text>
+                <Text style={[s.dividerText, { fontSize: dividerTextSize }]}>{t(TR.popularCities.te, TR.popularCities.en)}</Text>
                 <View style={s.dividerLine} />
               </View>
               <FlatList
@@ -135,17 +174,21 @@ export function LocationPickerModal({ forceOpen, onDone }) {
                 keyExtractor={(item) => item.name}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={[s.locationItem, item.name === location.name && !location.isAutoDetected && s.locationItemActive]}
+                    style={[
+                      s.locationItem,
+                      { paddingVertical: locationItemPadV, paddingHorizontal: locationItemPadH },
+                      item.name === location.name && !location.isAutoDetected && s.locationItemActive,
+                    ]}
                     onPress={() => handleSelectLocation(item)}
                   >
                     <View>
-                      <Text style={[s.locationName, item.name === location.name && !location.isAutoDetected && { color: DarkColors.saffron }]}>
+                      <Text style={[s.locationName, { fontSize: locationNameSize }, item.name === location.name && !location.isAutoDetected && { color: DarkColors.saffron }]}>
                         {t(item.telugu, item.name)}
                       </Text>
-                      <Text style={s.locationSub}>{t(item.name, item.telugu)}</Text>
+                      <Text style={[s.locationSub, { fontSize: locationSubSize }]}>{t(item.name, item.telugu)}</Text>
                     </View>
                     {item.name === location.name && !location.isAutoDetected && (
-                      <Ionicons name="checkmark-circle" size={22} color={DarkColors.saffron} />
+                      <Ionicons name="checkmark-circle" size={checkIconSize} color={DarkColors.saffron} />
                     )}
                   </TouchableOpacity>
                 )}
@@ -153,8 +196,8 @@ export function LocationPickerModal({ forceOpen, onDone }) {
             </>
           )}
 
-          <TouchableOpacity style={s.closeBtn} onPress={closeModal}>
-            <Text style={s.closeBtnText}>{t(TR.close.te, TR.close.en)}</Text>
+          <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMarginH }]} onPress={closeModal}>
+            <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>{t(TR.close.te, TR.close.en)}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -165,50 +208,47 @@ export function LocationPickerModal({ forceOpen, onDone }) {
 const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   content: { backgroundColor: DarkColors.bgElevated, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '70%', paddingBottom: 20 },
-  header: { alignItems: 'center', paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, position: 'relative' },
-  title: { fontSize: 20, fontWeight: '800', color: DarkColors.textPrimary },
-  subtitle: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4 },
+  header: { alignItems: 'center', borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, position: 'relative' },
+  title: { fontWeight: '800', color: DarkColors.textPrimary },
+  subtitle: { color: DarkColors.textMuted, marginTop: 4 },
   closeX: {
     position: 'absolute', top: 14, right: 16,
-    width: 36, height: 36, borderRadius: 18,
     backgroundColor: DarkColors.bgCard,
     alignItems: 'center', justifyContent: 'center',
   },
   gpsBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: DarkColors.tulasiGreen, borderRadius: 12, paddingVertical: 14,
-    marginHorizontal: 20, marginTop: 12,
+    backgroundColor: DarkColors.tulasiGreen, borderRadius: 12,
+    marginTop: 12,
   },
-  gpsBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  gpsBtnText: { fontWeight: '700', color: '#fff' },
   currentBadge: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    marginHorizontal: 20, marginTop: 8, paddingVertical: 8,
+    marginTop: 8, paddingVertical: 8,
     backgroundColor: 'rgba(46,125,50,0.15)', borderRadius: 8, gap: 6,
   },
-  currentText: { fontSize: 13, fontWeight: '600', color: DarkColors.tulasiGreen },
+  currentText: { fontWeight: '600', color: DarkColors.tulasiGreen },
   searchBox: {
     flexDirection: 'row', alignItems: 'center',
-    marginHorizontal: 20, marginTop: 12, marginBottom: 8,
+    marginTop: 12, marginBottom: 8,
     backgroundColor: DarkColors.bgInput, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 10,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  searchInput: { flex: 1, fontSize: 15, color: DarkColors.textPrimary, paddingVertical: 4, minHeight: 36 },
-  noResults: { textAlign: 'center', fontSize: 13, color: DarkColors.textMuted, paddingVertical: 16, fontStyle: 'italic' },
-  divider: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginVertical: 8 },
+  searchInput: { flex: 1, color: DarkColors.textPrimary, paddingVertical: 4, minHeight: 36 },
+  noResults: { textAlign: 'center', color: DarkColors.textMuted, paddingVertical: 16, fontStyle: 'italic' },
+  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
   dividerLine: { flex: 1, height: 1, backgroundColor: DarkColors.borderCard },
-  dividerText: { fontSize: 11, color: DarkColors.textMuted, fontWeight: '600', marginHorizontal: 10 },
+  dividerText: { color: DarkColors.textMuted, fontWeight: '600', marginHorizontal: 10 },
   locationItem: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 14, paddingHorizontal: 24,
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   locationItemActive: { backgroundColor: DarkColors.saffronDim },
-  locationName: { fontSize: 17, fontWeight: '600', color: DarkColors.textPrimary },
-  locationSub: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
+  locationName: { fontWeight: '600', color: DarkColors.textPrimary },
+  locationSub: { color: DarkColors.textMuted, marginTop: 2 },
   closeBtn: {
-    alignItems: 'center', paddingVertical: 14, marginHorizontal: 24, marginTop: 10,
+    alignItems: 'center', marginTop: 10,
     backgroundColor: DarkColors.saffron, borderRadius: 12,
   },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  closeBtnText: { fontWeight: '700', color: '#fff' },
 });

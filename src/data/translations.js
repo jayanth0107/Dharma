@@ -52,6 +52,8 @@ export const TR = {
   yogam: { te: 'యోగం', en: 'Yoga' },
   karanam: { te: 'కరణం', en: 'Karana' },
   vaaram: { te: 'వారం', en: 'Day' },
+  maasam: { te: 'మాసం', en: 'Month' },
+  samvatsaram: { te: 'సంవత్సరం', en: 'Year' },
   paksha: { te: 'పక్షం', en: 'Paksha' },
   deity: { te: 'దేవత', en: 'Deity' },
 

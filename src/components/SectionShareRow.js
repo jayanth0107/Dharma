@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { trackEvent } from '../utils/analytics';
 
 const PLATFORMS = [
@@ -80,6 +81,22 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
   const [shareText, setShareText] = useState('');
   const [copied, setCopied] = useState(false);
   const autoOpenedRef = useRef(false);
+
+  // Responsive sizes
+  const btnIconSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const pdfFontSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const shareFontSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const sharePadH = usePick({ default: 20, lg: 24, xl: 28 });
+  const modalPadH = usePick({ default: 16, lg: 20, xl: 24 });
+  const modalTitleSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const modalSubtitleSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const closeIconSize = usePick({ default: 22, lg: 24, xl: 26 });
+  const platformIconSize = usePick({ default: 22, lg: 24, xl: 26 });
+  const platformNameSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const platformBtnPad = usePick({ default: 12, lg: 14, xl: 16 });
+  const platformIconWrap = usePick({ default: 42, lg: 46, xl: 50 });
+  const previewFontSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const cancelFontSize = usePick({ default: 14, lg: 15, xl: 16 });
 
   // Auto-open on mount if requested
   useEffect(() => {
@@ -159,12 +176,12 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
       {!hideButton && (
         <View style={s.row}>
           <TouchableOpacity style={s.pdfBtn} onPress={handlePdf} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="file-pdf-box" size={16} color="#C41E3A" />
-            <Text style={s.pdfBtnText}>PDF</Text>
+            <MaterialCommunityIcons name="file-pdf-box" size={btnIconSize} color="#C41E3A" />
+            <Text style={[s.pdfBtnText, { fontSize: pdfFontSize }]}>PDF</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={s.shareBtn} onPress={handleOpen} activeOpacity={0.7}>
-            <Ionicons name="share-social" size={16} color="#fff" />
-            <Text style={s.shareBtnText}>పంచుకోండి / Share</Text>
+          <TouchableOpacity style={[s.shareBtn, { paddingHorizontal: sharePadH }]} onPress={handleOpen} activeOpacity={0.7}>
+            <Ionicons name="share-social" size={btnIconSize} color="#fff" />
+            <Text style={[s.shareBtnText, { fontSize: shareFontSize }]}>పంచుకోండి / Share</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -173,49 +190,49 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
         <View style={s.overlay}>
           <View style={s.modal}>
             {/* Header */}
-            <View style={s.header}>
+            <View style={[s.header, { paddingHorizontal: modalPadH }]}>
               <View style={s.handleBar} />
-              <Text style={s.title}>📤 Share Preview</Text>
-              <Text style={s.subtitle}>ఈ సమాచారం షేర్ చేయబడుతుంది</Text>
+              <Text style={[s.title, { fontSize: modalTitleSize }]}>📤 Share Preview</Text>
+              <Text style={[s.subtitle, { fontSize: modalSubtitleSize }]}>ఈ సమాచారం షేర్ చేయబడుతుంది</Text>
               <TouchableOpacity style={s.closeBtn} onPress={() => setVisible(false)}>
-                <Ionicons name="close" size={22} color={DarkColors.textSecondary} />
+                <Ionicons name="close" size={closeIconSize} color={DarkColors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             {/* Preview of what will be shared */}
-            <View style={s.previewWrap}>
+            <View style={[s.previewWrap, { marginHorizontal: modalPadH }]}>
               <Text style={s.previewLabel}>What will be shared:</Text>
               <ScrollView style={s.previewScroll} nestedScrollEnabled>
-                <Text style={s.previewText} selectable>{shareText}</Text>
+                <Text style={[s.previewText, { fontSize: previewFontSize }]} selectable>{shareText}</Text>
               </ScrollView>
             </View>
 
             {/* Consent note */}
-            <View style={s.consentRow}>
-              <MaterialCommunityIcons name="shield-check" size={16} color={DarkColors.tulasiGreen} />
+            <View style={[s.consentRow, { marginHorizontal: modalPadH }]}>
+              <MaterialCommunityIcons name="shield-check" size={btnIconSize} color={DarkColors.tulasiGreen} />
               <Text style={s.consentText}>
                 మీ వ్యక్తిగత డేటా ఏదీ షేర్ చేయబడదు. పైన చూపిన టెక్స్ట్ మాత్రమే పంపబడుతుంది.
               </Text>
             </View>
 
             {/* Platform buttons */}
-            <Text style={s.platformLabel}>Share to:</Text>
-            <ScrollView style={s.platformList} showsVerticalScrollIndicator={false}>
+            <Text style={[s.platformLabel, { marginHorizontal: modalPadH }]}>Share to:</Text>
+            <ScrollView style={[s.platformList, { paddingHorizontal: modalPadH }]} showsVerticalScrollIndicator={false}>
               {PLATFORMS.map((p) => (
                 <TouchableOpacity
                   key={p.id}
-                  style={[s.platformBtn, p.id === 'copy' && copied && s.platformBtnCopied]}
+                  style={[s.platformBtn, { padding: platformBtnPad }, p.id === 'copy' && copied && s.platformBtnCopied]}
                   onPress={() => handlePlatform(p.id)}
                   activeOpacity={0.7}
                 >
-                  <View style={[s.platformIcon, { backgroundColor: p.color + '18' }]}>
+                  <View style={[s.platformIcon, { width: platformIconWrap, height: platformIconWrap, backgroundColor: p.color + '18' }]}>
                     {p.family === 'ion'
-                      ? <Ionicons name={p.icon} size={22} color={p.color} />
-                      : <MaterialCommunityIcons name={p.icon} size={22} color={p.color} />
+                      ? <Ionicons name={p.icon} size={platformIconSize} color={p.color} />
+                      : <MaterialCommunityIcons name={p.icon} size={platformIconSize} color={p.color} />
                     }
                   </View>
                   <View style={s.platformInfo}>
-                    <Text style={s.platformName}>{p.name}</Text>
+                    <Text style={[s.platformName, { fontSize: platformNameSize }]}>{p.name}</Text>
                     <Text style={s.platformTelugu}>{p.telugu}</Text>
                   </View>
                   {p.id === 'copy' ? (
@@ -233,8 +250,8 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
             </ScrollView>
 
             {/* Cancel */}
-            <TouchableOpacity style={s.cancelBtn} onPress={() => setVisible(false)}>
-              <Text style={s.cancelText}>రద్దు / Cancel</Text>
+            <TouchableOpacity style={[s.cancelBtn, { marginHorizontal: modalPadH }]} onPress={() => setVisible(false)}>
+              <Text style={[s.cancelText, { fontSize: cancelFontSize }]}>రద్దు / Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -253,16 +270,16 @@ const s = StyleSheet.create({
     paddingVertical: 9, paddingHorizontal: 16, borderRadius: 22,
     backgroundColor: DarkColors.bgElevated, borderWidth: 1.5, borderColor: 'rgba(196,30,58,0.2)',
   },
-  pdfBtnText: { fontSize: 13, fontWeight: '700', color: '#C41E3A' },
+  pdfBtnText: { fontWeight: '700', color: '#C41E3A' },
   shareBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 9, paddingHorizontal: 20, borderRadius: 22,
+    paddingVertical: 9, borderRadius: 22,
     backgroundColor: DarkColors.saffron,
     elevation: 2,
     shadowColor: DarkColors.saffron, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3, shadowRadius: 4,
   },
-  shareBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  shareBtnText: { fontWeight: '700', color: '#fff' },
 
   // Modal
   overlay: { flex: 1, backgroundColor: DarkColors.overlay, justifyContent: 'flex-end' },
@@ -270,10 +287,10 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '85%', paddingBottom: Platform.OS === 'web' ? 20 : 30,
   },
-  header: { alignItems: 'center', paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16, position: 'relative' },
+  header: { alignItems: 'center', paddingTop: 10, paddingBottom: 12, position: 'relative' },
   handleBar: { width: 40, height: 4, borderRadius: 2, backgroundColor: DarkColors.textMuted, marginBottom: 12 },
-  title: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary },
-  subtitle: { fontSize: 12, color: DarkColors.textMuted, marginTop: 3 },
+  title: { fontWeight: '800', color: DarkColors.textPrimary },
+  subtitle: { color: DarkColors.textMuted, marginTop: 3 },
   closeBtn: {
     position: 'absolute', top: 12, right: 16,
     width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.1)',
@@ -281,45 +298,45 @@ const s = StyleSheet.create({
   },
 
   // Preview
-  previewWrap: { marginHorizontal: 16, marginBottom: 10 },
+  previewWrap: { marginBottom: 10 },
   previewLabel: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, marginBottom: 6 },
   previewScroll: {
     maxHeight: 160, backgroundColor: DarkColors.bgElevated, borderRadius: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard, padding: 12,
   },
-  previewText: { fontSize: 13, color: DarkColors.textSecondary, lineHeight: 20 },
+  previewText: { color: DarkColors.textSecondary, lineHeight: 20 },
 
   // Consent
   consentRow: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
-    marginHorizontal: 16, marginBottom: 12,
+    marginBottom: 12,
     backgroundColor: 'rgba(46,125,50,0.12)', borderRadius: 10, padding: 10,
   },
   consentText: { flex: 1, fontSize: 11, color: '#4CAF50', lineHeight: 16 },
 
   // Platforms
-  platformLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary, marginHorizontal: 16, marginBottom: 8 },
-  platformList: { paddingHorizontal: 16 },
+  platformLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 8 },
+  platformList: {},
   platformBtn: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 12, marginBottom: 8,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, marginBottom: 8,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   platformBtnCopied: { borderColor: DarkColors.tulasiGreen, backgroundColor: 'rgba(46,125,50,0.12)' },
   platformIcon: {
-    width: 42, height: 42, borderRadius: 12,
+    borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
   platformInfo: { flex: 1 },
-  platformName: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
+  platformName: { fontWeight: '700', color: DarkColors.textPrimary },
   platformTelugu: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
   platformHint: { fontSize: 11, color: DarkColors.textMuted, marginRight: 4 },
 
   // Cancel
   cancelBtn: {
-    alignItems: 'center', marginHorizontal: 16, marginTop: 8,
+    alignItems: 'center', marginTop: 8,
     paddingVertical: 12, borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.06)',
   },
-  cancelText: { fontSize: 14, fontWeight: '600', color: DarkColors.textSecondary },
+  cancelText: { fontWeight: '600', color: DarkColors.textSecondary },
 });

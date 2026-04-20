@@ -69,6 +69,29 @@ export function AppProvider({ children }) {
     setUpcomingHolidays(getUpcomingHolidays(selectedDate, 5));
   }, [selectedDate, location]);
 
+  // Schedule notifications with real panchangam data after location is available
+  useEffect(() => {
+    if (!location?.latitude) return;
+    const loc = { latitude: location.latitude, longitude: location.longitude, altitude: location.altitude || 0 };
+    // Load user's saved rashi for personalized notification
+    const loadRashi = async () => {
+      try {
+        let raw;
+        if (Platform.OS === 'web') {
+          raw = localStorage.getItem('@dharma_my_rashi');
+        } else {
+          const AS = require('@react-native-async-storage/async-storage').default;
+          raw = await AS.getItem('@dharma_my_rashi');
+        }
+        return raw ? JSON.parse(raw).rashiIndex : null;
+      } catch { return null; }
+    };
+    loadNotifSettings().then(async (s) => {
+      const rashiIndex = await loadRashi();
+      setupDailyNotifications(s, loc, rashiIndex);
+    }).catch(() => {});
+  }, [location?.latitude]);
+
   // Ad config sync + analytics user property
   useEffect(() => {
     setAdConfig({ isPremium: premiumActive });
@@ -103,7 +126,7 @@ export function AppProvider({ children }) {
     initAnalytics().catch(e => console.warn('Analytics init failed:', e));
     checkRatePrompt().catch(e => console.warn('Rate prompt check failed:', e));
     loadInterstitialAd();
-    loadNotifSettings().then(s => setupDailyNotifications(s)).catch(() => {});
+    // Notifications scheduled in location effect below
 
     // Premium status
     initPremium().then(() => {

@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { startTrial, activatePremium } from '../utils/premiumService';
 import { trackEvent } from '../utils/analytics';
 import { ModalOrView } from './ModalOrView';
@@ -119,21 +120,29 @@ function UpiQrCode({ amount }) {
   const [qrError, setQrError] = useState(false);
   const qrUrl = getQrCodeUrl(amount);
 
+  const qrBoxSize = usePick({ default: 220, lg: 250, xl: 280 });
+  const qrImgSize = usePick({ default: 200, lg: 230, xl: 260 });
+  const qrTitleSize = usePick({ default: 15, lg: 17, xl: 19 });
+  const qrSubSize = usePick({ default: 11, lg: 13, xl: 14 });
+  const qrPad = usePick({ default: 16, lg: 20, xl: 24 });
+  const qrBadgeFont = usePick({ default: 14, lg: 16, xl: 18 });
+  const qrFallbackIcon = usePick({ default: 48, lg: 56, xl: 64 });
+
   return (
-    <View style={q.container}>
-      <Text style={q.title}>📱 QR కోడ్ స్కాన్ చేయండి</Text>
-      <Text style={q.subtitle}>Google Pay / PhonePe / Paytm / ఏదైనా UPI యాప్</Text>
-      <View style={q.box}>
+    <View style={[q.container, { paddingVertical: qrPad }]}>
+      <Text style={[q.title, { fontSize: qrTitleSize }]}>📱 QR కోడ్ స్కాన్ చేయండి</Text>
+      <Text style={[q.subtitle, { fontSize: qrSubSize }]}>Google Pay / PhonePe / Paytm / ఏదైనా UPI యాప్</Text>
+      <View style={[q.box, { width: qrBoxSize, height: qrBoxSize }]}>
         {!qrError ? (
-          <Image source={{ uri: qrUrl }} style={q.image} resizeMode="contain" onError={() => setQrError(true)} />
+          <Image source={{ uri: qrUrl }} style={{ width: qrImgSize, height: qrImgSize }} resizeMode="contain" onError={() => setQrError(true)} />
         ) : (
           <View style={q.fallback}>
-            <MaterialCommunityIcons name="qrcode" size={48} color="#aaa" />
+            <MaterialCommunityIcons name="qrcode" size={qrFallbackIcon} color="#aaa" />
             <Text style={q.fallbackText}>QR లోడ్ కాలేదు</Text>
           </View>
         )}
         <View style={q.badge}>
-          <Text style={q.badgeText}>₹{amount}</Text>
+          <Text style={[q.badgeText, { fontSize: qrBadgeFont }]}>₹{amount}</Text>
         </View>
       </View>
     </View>
@@ -144,20 +153,28 @@ function UpiQrCode({ amount }) {
 
 export function PremiumBanner({ onUpgrade, trialAvailable }) {
   const { t } = useLanguage();
+  const bIconSize = usePick({ default: 24, lg: 28, xl: 32 });
+  const bIconWrap = usePick({ default: 40, lg: 46, xl: 52 });
+  const bTitleSize = usePick({ default: 15, lg: 17, xl: 19 });
+  const bSubSize = usePick({ default: 11, lg: 13, xl: 14 });
+  const bBadgeFont = usePick({ default: 10, lg: 12, xl: 13 });
+  const bPadH = usePick({ default: 16, lg: 20, xl: 24 });
+  const bPadV = usePick({ default: 14, lg: 16, xl: 18 });
+
   return (
     <TouchableOpacity style={b.container} onPress={() => { onUpgrade(); trackEvent('premium_banner_tap'); }} activeOpacity={0.85}>
-      <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.5 }} style={b.gradient}>
-        <View style={b.iconWrap}>
-          <MaterialCommunityIcons name="crown" size={24} color="#FFD700" />
+      <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.5 }} style={[b.gradient, { paddingHorizontal: bPadH, paddingVertical: bPadV }]}>
+        <View style={[b.iconWrap, { width: bIconWrap, height: bIconWrap, borderRadius: bIconWrap / 2 }]}>
+          <MaterialCommunityIcons name="crown" size={bIconSize} color="#FFD700" />
         </View>
         <View style={b.textWrap}>
-          <Text style={b.title}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
-          <Text style={b.subtitle}>
+          <Text style={[b.title, { fontSize: bTitleSize }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
+          <Text style={[b.subtitle, { fontSize: bSubSize }]}>
             {trialAvailable ? t(TR.premiumSubtitleTrial.te, TR.premiumSubtitleTrial.en) : t(TR.premiumSubtitleStd.te, TR.premiumSubtitleStd.en)}
           </Text>
         </View>
         <View style={b.badge}>
-          <Text style={b.badgeText}>{trialAvailable ? 'TRY FREE' : 'UPGRADE'}</Text>
+          <Text style={[b.badgeText, { fontSize: bBadgeFont }]}>{trialAvailable ? 'TRY FREE' : 'UPGRADE'}</Text>
         </View>
       </LinearGradient>
     </TouchableOpacity>
@@ -175,6 +192,82 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
   const [claimCode, setClaimCode] = useState('');
   const [claiming, setClaiming] = useState(false);
   const [claimMsg, setClaimMsg] = useState(null); // { type: 'success'|'error', text }
+
+  // ── Responsive values ──
+  const sectionPad = usePick({ default: 20, lg: 28, xl: 36 });
+  const headerPadV = usePick({ default: 14, lg: 18, xl: 22 });
+  const crownSize = usePick({ default: 28, lg: 34, xl: 40 });
+  const crownSizeCompact = usePick({ default: 22, lg: 26, xl: 30 });
+  const titleFont = usePick({ default: 26, lg: 30, xl: 34 });
+  const titleFontCompact = usePick({ default: 18, lg: 20, xl: 22 });
+  const subtitleFont = usePick({ default: 14, lg: 16, xl: 18 });
+  const subtitleEnFont = usePick({ default: 12, lg: 14, xl: 15 });
+  const closeXSize = usePick({ default: 36, lg: 40, xl: 44 });
+  const closeIconSize = usePick({ default: 24, lg: 28, xl: 30 });
+  const backIconSize = usePick({ default: 22, lg: 26, xl: 28 });
+
+  const perksTitle = usePick({ default: 18, lg: 20, xl: 24 });
+  const perkIconWrap = usePick({ default: 40, lg: 46, xl: 52 });
+  const perkIconSize = usePick({ default: 22, lg: 26, xl: 30 });
+  const perkCheckSize = usePick({ default: 20, lg: 24, xl: 26 });
+  const perkTeluguFont = usePick({ default: 14, lg: 16, xl: 18 });
+  const perkEnFont = usePick({ default: 11, lg: 13, xl: 14 });
+  const perkDetailFont = usePick({ default: 12, lg: 13, xl: 14 });
+  const perkPadV = usePick({ default: 10, lg: 12, xl: 14 });
+
+  const trialIconSize = usePick({ default: 22, lg: 26, xl: 28 });
+  const trialBtnFont = usePick({ default: 16, lg: 18, xl: 20 });
+  const trialBtnPadV = usePick({ default: 16, lg: 18, xl: 20 });
+  const trialNoteFont = usePick({ default: 11, lg: 13, xl: 14 });
+
+  const pricingTitleFont = usePick({ default: 16, lg: 18, xl: 20 });
+  const planCardPad = usePick({ default: 16, lg: 20, xl: 24 });
+  const planEmojiFont = usePick({ default: 24, lg: 28, xl: 32 });
+  const planNameFont = usePick({ default: 15, lg: 17, xl: 19 });
+  const planSavingsFont = usePick({ default: 11, lg: 13, xl: 14 });
+  const planPriceFont = usePick({ default: 20, lg: 24, xl: 28 });
+  const planChevronSize = usePick({ default: 18, lg: 22, xl: 24 });
+  const bestBadgeFont = usePick({ default: 9, lg: 11, xl: 12 });
+
+  const paySummaryEmojiFont = usePick({ default: 36, lg: 42, xl: 48 });
+  const paySummaryPlanFont = usePick({ default: 16, lg: 18, xl: 20 });
+  const paySummaryPriceFont = usePick({ default: 32, lg: 38, xl: 44 });
+  const paySummaryDurFont = usePick({ default: 12, lg: 14, xl: 15 });
+  const paySummaryPadV = usePick({ default: 16, lg: 20, xl: 24 });
+
+  const appBtnsTitleFont = usePick({ default: 15, lg: 17, xl: 19 });
+  const appGridPad = usePick({ default: 14, lg: 18, xl: 22 });
+  const appLogoSize = usePick({ default: 40, lg: 48, xl: 56 });
+  const appTextFont = usePick({ default: 13, lg: 15, xl: 16 });
+  const appAmountFont = usePick({ default: 11, lg: 13, xl: 14 });
+  const appLogoLetterFont = usePick({ default: 18, lg: 22, xl: 24 });
+
+  const upiLabelFont = usePick({ default: 12, lg: 14, xl: 15 });
+  const upiIdFont = usePick({ default: 16, lg: 18, xl: 20 });
+  const upiBoxPad = usePick({ default: 14, lg: 18, xl: 22 });
+  const copyTextFont = usePick({ default: 12, lg: 14, xl: 15 });
+
+  const activateBtnFont = usePick({ default: 15, lg: 17, xl: 19 });
+  const activateBtnPadV = usePick({ default: 16, lg: 18, xl: 20 });
+  const activateBtnIcon = usePick({ default: 22, lg: 26, xl: 28 });
+  const activateNoteFont = usePick({ default: 11, lg: 13, xl: 14 });
+
+  const verifyingFont = usePick({ default: 16, lg: 18, xl: 20 });
+  const confirmIconSize = usePick({ default: 32, lg: 38, xl: 44 });
+  const confirmTitleFont = usePick({ default: 18, lg: 20, xl: 24 });
+  const confirmSubFont = usePick({ default: 13, lg: 15, xl: 16 });
+  const confirmPad = usePick({ default: 16, lg: 20, xl: 24 });
+
+  const closeBtnFont = usePick({ default: 14, lg: 16, xl: 18 });
+  const closeBtnPadV = usePick({ default: 16, lg: 20, xl: 24 });
+
+  const claimToggleFont = usePick({ default: 13, lg: 15, xl: 16 });
+  const claimToggleIcon = usePick({ default: 18, lg: 22, xl: 24 });
+  const claimSubFont = usePick({ default: 12, lg: 14, xl: 15 });
+  const claimInputFont = usePick({ default: 16, lg: 18, xl: 20 });
+  const claimInputPad = usePick({ default: 12, lg: 14, xl: 16 });
+  const claimBtnFont = usePick({ default: 14, lg: 16, xl: 18 });
+  const claimBtnPadV = usePick({ default: 12, lg: 14, xl: 16 });
 
   const handleRedeemClaim = async () => {
     if (!isLoggedIn || !uid) {
@@ -280,24 +373,24 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
           {/* Sticky Header — stays visible while scrolling */}
-          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={[s.header, selectedPlan && s.headerCompact]}>
-            <TouchableOpacity style={s.closeX} onPress={handleClose}>
-              <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
+          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={[s.header, { paddingVertical: headerPadV }, selectedPlan && { paddingVertical: headerPadV * 0.7 }]}>
+            <TouchableOpacity style={[s.closeX, { width: closeXSize, height: closeXSize, borderRadius: closeXSize / 2 }]} onPress={handleClose}>
+              <Ionicons name="close" size={closeIconSize} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
             {selectedPlan && (
-              <TouchableOpacity style={s.backX} onPress={handleBack}>
-                <Ionicons name="arrow-back" size={22} color="rgba(255,255,255,0.7)" />
+              <TouchableOpacity style={[s.backX, { width: closeXSize, height: closeXSize, borderRadius: closeXSize / 2 }]} onPress={handleBack}>
+                <Ionicons name="arrow-back" size={backIconSize} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
             )}
-            <MaterialCommunityIcons name="crown" size={selectedPlan ? 22 : 28} color="#FFD700" />
-            <Text style={[s.title, selectedPlan && { fontSize: 18, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
+            <MaterialCommunityIcons name="crown" size={selectedPlan ? crownSizeCompact : crownSize} color="#FFD700" />
+            <Text style={[s.title, { fontSize: titleFont }, selectedPlan && { fontSize: titleFontCompact, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
             {!selectedPlan ? (
               <>
-                <Text style={s.subtitle}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>
-                <Text style={s.subtitleEn}>Enhance your spiritual journey</Text>
+                <Text style={[s.subtitle, { fontSize: subtitleFont }]}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>
+                <Text style={[s.subtitleEn, { fontSize: subtitleEnFont }]}>Enhance your spiritual journey</Text>
               </>
             ) : (
-              <Text style={s.subtitle}>{selectedPlan.telugu} — {selectedPlan.label}</Text>
+              <Text style={[s.subtitle, { fontSize: subtitleFont }]}>{selectedPlan.telugu} — {selectedPlan.label}</Text>
             )}
           </LinearGradient>
 
@@ -305,62 +398,62 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
             {!selectedPlan ? (
               <>
                 {/* Perks */}
-                <View style={s.perksSection}>
-                  <Text style={s.perksTitle}>Premium లో ఏముంది?</Text>
+                <View style={[s.perksSection, { paddingHorizontal: sectionPad, paddingTop: sectionPad }]}>
+                  <Text style={[s.perksTitle, { fontSize: perksTitle }]}>Premium లో ఏముంది?</Text>
                   {PREMIUM_PERKS.map((perk, i) => (
-                    <View key={i} style={s.perkRow}>
-                      <View style={s.perkIcon}>
-                        <MaterialCommunityIcons name={perk.icon} size={22} color="#9B6FCF" />
+                    <View key={i} style={[s.perkRow, { paddingVertical: perkPadV }]}>
+                      <View style={[s.perkIcon, { width: perkIconWrap, height: perkIconWrap, borderRadius: perkIconWrap / 2 }]}>
+                        <MaterialCommunityIcons name={perk.icon} size={perkIconSize} color="#9B6FCF" />
                       </View>
                       <View style={s.perkText}>
-                        <Text style={s.perkTelugu}>{perk.text}</Text>
-                        <Text style={s.perkEnglish}>{perk.textEn}</Text>
-                        {perk.detail && <Text style={s.perkDetail}>{perk.detail}</Text>}
+                        <Text style={[s.perkTelugu, { fontSize: perkTeluguFont }]}>{perk.text}</Text>
+                        <Text style={[s.perkEnglish, { fontSize: perkEnFont }]}>{perk.textEn}</Text>
+                        {perk.detail && <Text style={[s.perkDetail, { fontSize: perkDetailFont }]}>{perk.detail}</Text>}
                       </View>
-                      <Ionicons name="checkmark-circle" size={20} color={DarkColors.tulasiGreen} />
+                      <Ionicons name="checkmark-circle" size={perkCheckSize} color={DarkColors.tulasiGreen} />
                     </View>
                   ))}
                 </View>
 
                 {/* Free Trial */}
-                <View style={s.trialSection}>
+                <View style={[s.trialSection, { paddingHorizontal: sectionPad }]}>
                   <TouchableOpacity style={s.trialBtn} onPress={handleStartTrial} disabled={activating}>
-                    <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.trialGradient}>
-                      <MaterialCommunityIcons name="gift" size={22} color="#FFF" />
-                      <Text style={s.trialBtnText}>
+                    <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={[s.trialGradient, { paddingVertical: trialBtnPadV }]}>
+                      <MaterialCommunityIcons name="gift" size={trialIconSize} color="#FFF" />
+                      <Text style={[s.trialBtnText, { fontSize: trialBtnFont }]}>
                         {activating ? t(TR.activating.te, TR.activating.en) : t(TR.trialCta.te, TR.trialCta.en)}
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
-                  <Text style={s.trialNote}>పేమెంట్ అవసరం లేదు • ఏ సమయంలోనైనా రద్దు చేయవచ్చు</Text>
+                  <Text style={[s.trialNote, { fontSize: trialNoteFont }]}>పేమెంట్ అవసరం లేదు • ఏ సమయంలోనైనా రద్దు చేయవచ్చు</Text>
                 </View>
 
                 {/* Plan Selection */}
-                <View style={s.pricingSection}>
-                  <Text style={s.pricingTitle}>ప్లాన్ ఎంచుకోండి</Text>
+                <View style={[s.pricingSection, { paddingHorizontal: sectionPad }]}>
+                  <Text style={[s.pricingTitle, { fontSize: pricingTitleFont }]}>ప్లాన్ ఎంచుకోండి</Text>
                   {PREMIUM_PLANS.map((plan) => (
                     <TouchableOpacity
                       key={plan.id}
-                      style={[s.planCard, plan.best && s.planCardBest]}
+                      style={[s.planCard, { padding: planCardPad }, plan.best && s.planCardBest]}
                       onPress={() => handleSelectPlan(plan)}
                       activeOpacity={0.7}
                     >
                       {plan.best && (
-                        <View style={s.bestBadge}><Text style={s.bestBadgeText}>BEST VALUE</Text></View>
+                        <View style={s.bestBadge}><Text style={[s.bestBadgeText, { fontSize: bestBadgeFont }]}>BEST VALUE</Text></View>
                       )}
-                      <Text style={s.planEmoji}>{plan.emoji}</Text>
+                      <Text style={[s.planEmoji, { fontSize: planEmojiFont }]}>{plan.emoji}</Text>
                       <View style={s.planInfo}>
-                        <Text style={[s.planName, plan.best && { color: '#9B6FCF' }]}>{plan.telugu} / {plan.english}</Text>
-                        {plan.savings && <Text style={s.planSavings}>{plan.savings} savings</Text>}
+                        <Text style={[s.planName, { fontSize: planNameFont }, plan.best && { color: '#9B6FCF' }]}>{plan.telugu} / {plan.english}</Text>
+                        {plan.savings && <Text style={[s.planSavings, { fontSize: planSavingsFont }]}>{plan.savings} savings</Text>}
                       </View>
-                      <Text style={[s.planPrice, plan.best && { color: '#9B6FCF' }]}>{plan.label}</Text>
-                      <Ionicons name="chevron-forward" size={18} color={plan.best ? '#9B6FCF' : DarkColors.textMuted} />
+                      <Text style={[s.planPrice, { fontSize: planPriceFont }, plan.best && { color: '#9B6FCF' }]}>{plan.label}</Text>
+                      <Ionicons name="chevron-forward" size={planChevronSize} color={plan.best ? '#9B6FCF' : DarkColors.textMuted} />
                     </TouchableOpacity>
                   ))}
                 </View>
 
                 {/* Claim code entry — only shown when Cloud Functions are deployed */}
-                {FEATURES.CLAIM_CODES_UI && <View style={s.claimSection}>
+                {FEATURES.CLAIM_CODES_UI && <View style={[s.claimSection, { marginHorizontal: sectionPad }]}>
                   <TouchableOpacity
                     style={s.claimToggle}
                     onPress={() => setClaimExpanded(!claimExpanded)}
@@ -368,16 +461,16 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                   >
                     <MaterialCommunityIcons
                       name={claimExpanded ? 'chevron-up' : 'ticket-confirmation-outline'}
-                      size={18}
+                      size={claimToggleIcon}
                       color={DarkColors.saffron}
                     />
-                    <Text style={s.claimToggleText}>{t(TR.haveClaimCode.te, TR.haveClaimCode.en)}</Text>
+                    <Text style={[s.claimToggleText, { fontSize: claimToggleFont }]}>{t(TR.haveClaimCode.te, TR.haveClaimCode.en)}</Text>
                   </TouchableOpacity>
                   {claimExpanded && (
                     <View style={s.claimBox}>
-                      <Text style={s.claimSub}>{t(TR.claimCodeSub.te, TR.claimCodeSub.en)}</Text>
+                      <Text style={[s.claimSub, { fontSize: claimSubFont }]}>{t(TR.claimCodeSub.te, TR.claimCodeSub.en)}</Text>
                       <TextInput
-                        style={s.claimInput}
+                        style={[s.claimInput, { fontSize: claimInputFont, padding: claimInputPad }]}
                         value={claimCode}
                         onChangeText={(v) => { setClaimCode(v.toUpperCase()); setClaimMsg(null); }}
                         placeholder={t(TR.claimCodePlaceholder.te, TR.claimCodePlaceholder.en)}
@@ -392,11 +485,11 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                         </Text>
                       )}
                       <TouchableOpacity
-                        style={[s.claimBtn, (!claimCode || claiming) && s.claimBtnDisabled]}
+                        style={[s.claimBtn, { paddingVertical: claimBtnPadV }, (!claimCode || claiming) && s.claimBtnDisabled]}
                         onPress={handleRedeemClaim}
                         disabled={!claimCode || claiming}
                       >
-                        <Text style={s.claimBtnText}>
+                        <Text style={[s.claimBtnText, { fontSize: claimBtnFont }]}>
                           {claiming ? t(TR.activating.te, TR.activating.en) : t(TR.claimCodeRedeem.te, TR.claimCodeRedeem.en)}
                         </Text>
                       </TouchableOpacity>
@@ -406,13 +499,13 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
               </>
             ) : (
               /* ─── Payment Screen ─── */
-              <View style={s.paySection}>
+              <View style={[s.paySection, { paddingHorizontal: sectionPad }]}>
                 {/* Plan summary */}
-                <View style={s.paySummary}>
-                  <Text style={s.paySummaryEmoji}>{selectedPlan.emoji}</Text>
-                  <Text style={s.paySummaryPlan}>{selectedPlan.telugu} / {selectedPlan.english}</Text>
-                  <Text style={s.paySummaryPrice}>{selectedPlan.label}</Text>
-                  <Text style={s.paySummaryDuration}>
+                <View style={[s.paySummary, { paddingVertical: paySummaryPadV }]}>
+                  <Text style={[s.paySummaryEmoji, { fontSize: paySummaryEmojiFont }]}>{selectedPlan.emoji}</Text>
+                  <Text style={[s.paySummaryPlan, { fontSize: paySummaryPlanFont }]}>{selectedPlan.telugu} / {selectedPlan.english}</Text>
+                  <Text style={[s.paySummaryPrice, { fontSize: paySummaryPriceFont }]}>{selectedPlan.label}</Text>
+                  <Text style={[s.paySummaryDuration, { fontSize: paySummaryDurFont }]}>
                     {selectedPlan.days === 0 ? 'జీవితకాలం / Lifetime access' : `${selectedPlan.days} రోజులు / ${selectedPlan.days} days`}
                   </Text>
                 </View>
@@ -422,7 +515,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
 
                 {/* Pay with specific UPI apps — 2x2 grid below QR */}
                 <View style={s.appBtnsSection}>
-                  <Text style={s.appBtnsTitle}>UPI యాప్ ద్వారా ₹{selectedPlan.price} చెల్లించండి</Text>
+                  <Text style={[s.appBtnsTitle, { fontSize: appBtnsTitleFont }]}>UPI యాప్ ద్వారా ₹{selectedPlan.price} చెల్లించండి</Text>
                   <View style={s.appBtnsGrid}>
                     {[
                       { name: 'Google Pay', letter: 'G', bg: '#4285F4', scheme: 'gpay', logo: 'tez' },
@@ -432,7 +525,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                     ].map((app) => (
                       <TouchableOpacity
                         key={app.scheme}
-                        style={[s.appGridBtn, { borderColor: app.bg + '30' }]}
+                        style={[s.appGridBtn, { borderColor: app.bg + '30', padding: appGridPad }]}
                         onPress={async () => {
                           trackEvent('premium_upi_tap', { app: app.name, amount: selectedPlan.price });
                           if (Platform.OS === 'web') {
@@ -448,27 +541,27 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                         activeOpacity={0.7}
                       >
                         {UPI_LOGOS[app.logo] ? (
-                          <Image source={UPI_LOGOS[app.logo]} style={s.appGridLogo} resizeMode="contain" />
+                          <Image source={UPI_LOGOS[app.logo]} style={[s.appGridLogo, { width: appLogoSize, height: appLogoSize }]} resizeMode="contain" />
                         ) : (
-                          <View style={[s.appLogo, { backgroundColor: app.bg }]}>
-                            <Text style={s.appLogoText}>{app.letter}</Text>
+                          <View style={[s.appLogo, { backgroundColor: app.bg, width: appLogoSize, height: appLogoSize }]}>
+                            <Text style={[s.appLogoText, { fontSize: appLogoLetterFont }]}>{app.letter}</Text>
                           </View>
                         )}
-                        <Text style={[s.appGridText, { color: app.bg }]}>{app.name}</Text>
-                        <Text style={s.appGridAmount}>₹{selectedPlan.price}</Text>
+                        <Text style={[s.appGridText, { color: app.bg, fontSize: appTextFont }]}>{app.name}</Text>
+                        <Text style={[s.appGridAmount, { fontSize: appAmountFont }]}>₹{selectedPlan.price}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 </View>
 
                 {/* UPI ID + Copy */}
-                <View style={s.upiBox}>
-                  <Text style={s.upiLabel}>UPI ID (మాన్యువల్‌గా పంపండి)</Text>
+                <View style={[s.upiBox, { padding: upiBoxPad }]}>
+                  <Text style={[s.upiLabel, { fontSize: upiLabelFont }]}>UPI ID (మాన్యువల్‌గా పంపండి)</Text>
                   <View style={s.upiRow}>
-                    <Text style={s.upiId}>{UPI_ID}</Text>
+                    <Text style={[s.upiId, { fontSize: upiIdFont }]}>{UPI_ID}</Text>
                     <TouchableOpacity style={s.copyBtn} onPress={() => { copyUpiId(); if (Platform.OS === 'web') alert(t(TR.upiCopied.te, TR.upiCopied.en)); else Alert.alert(t(TR.upiCopied.te, TR.upiCopied.en), UPI_ID); }}>
                       <MaterialCommunityIcons name="content-copy" size={16} color={DarkColors.tulasiGreen} />
-                      <Text style={s.copyText}>కాపీ</Text>
+                      <Text style={[s.copyText, { fontSize: copyTextFont }]}>కాపీ</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -477,12 +570,12 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 {paymentStep === 'idle' && (
                   <>
                     <TouchableOpacity style={s.activateBtn} onPress={handlePay} activeOpacity={0.8}>
-                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
-                        <MaterialCommunityIcons name="bank-transfer" size={22} color="#FFF" />
-                        <Text style={s.activateBtnText}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
+                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={[s.activateGradient, { paddingVertical: activateBtnPadV }]}>
+                        <MaterialCommunityIcons name="bank-transfer" size={activateBtnIcon} color="#FFF" />
+                        <Text style={[s.activateBtnText, { fontSize: activateBtnFont }]}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
                       </LinearGradient>
                     </TouchableOpacity>
-                    <Text style={s.activateNote}>
+                    <Text style={[s.activateNote, { fontSize: activateNoteFont }]}>
                       UPI యాప్ ద్వారా సురక్షిత చెల్లింపు. Google Pay, PhonePe, Paytm అన్నీ పని చేస్తాయి.
                     </Text>
                   </>
@@ -492,28 +585,28 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 {paymentStep === 'paying' && (
                   <View style={s.verifyingBox}>
                     <ActivityIndicator size="large" color={DarkColors.tulasiGreen} />
-                    <Text style={s.verifyingText}>ప్రాసెస్ అవుతోంది...</Text>
+                    <Text style={[s.verifyingText, { fontSize: verifyingFont }]}>ప్రాసెస్ అవుతోంది...</Text>
                   </View>
                 )}
 
                 {/* Step 2: Confirm payment was made */}
                 {paymentStep === 'confirm' && (
                   <>
-                    <View style={s.confirmBox}>
-                      <MaterialCommunityIcons name="check-circle-outline" size={32} color={DarkColors.tulasiGreen} />
-                      <Text style={s.confirmTitle}>పేమెంట్ పూర్తయిందా?</Text>
-                      <Text style={s.confirmSubtext}>
+                    <View style={[s.confirmBox, { padding: confirmPad }]}>
+                      <MaterialCommunityIcons name="check-circle-outline" size={confirmIconSize} color={DarkColors.tulasiGreen} />
+                      <Text style={[s.confirmTitle, { fontSize: confirmTitleFont }]}>పేమెంట్ పూర్తయిందా?</Text>
+                      <Text style={[s.confirmSubtext, { fontSize: confirmSubFont }]}>
                         UPI యాప్‌లో ₹{selectedPlan?.price} పంపిన తర్వాత క్రింది బటన్ నొక్కండి
                       </Text>
                     </View>
                     <TouchableOpacity style={s.activateBtn} onPress={handleConfirmPayment} activeOpacity={0.8}>
-                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activateGradient}>
-                        <MaterialCommunityIcons name="check-circle" size={22} color="#FFF" />
-                        <Text style={s.activateBtnText}>అవును, పేమెంట్ చేశాను ✓</Text>
+                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={[s.activateGradient, { paddingVertical: activateBtnPadV }]}>
+                        <MaterialCommunityIcons name="check-circle" size={activateBtnIcon} color="#FFF" />
+                        <Text style={[s.activateBtnText, { fontSize: activateBtnFont }]}>అవును, పేమెంట్ చేశాను ✓</Text>
                       </LinearGradient>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setPaymentStep('idle')} style={{ marginTop: 10, alignItems: 'center' }}>
-                      <Text style={{ fontSize: 13, color: DarkColors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
+                      <Text style={{ fontSize: confirmSubFont, color: DarkColors.textMuted }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
                     </TouchableOpacity>
                   </>
                 )}
@@ -521,8 +614,8 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
             )}
 
             {/* Close */}
-            <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
-              <Text style={s.closeBtnText}>తర్వాత / Maybe Later</Text>
+            <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV }]} onPress={handleClose}>
+              <Text style={[s.closeBtnText, { fontSize: closeBtnFont }]}>తర్వాత / Maybe Later</Text>
             </TouchableOpacity>
           </ScrollView>
     </ModalOrView>

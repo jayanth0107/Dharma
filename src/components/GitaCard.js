@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { getTodayGitaSloka, GITA_SLOKAS } from '../data/bhagavadGita';
 import { trackEvent } from '../utils/analytics';
@@ -24,45 +25,46 @@ export function GitaDailyCard({ date, isPremium = false }) {
   const [showLibrary, setShowLibrary] = useState(false);
   const { lang, t } = useLanguage();
   const sloka = getTodayGitaSloka(date);
+  const rs = useResponsive();
 
   if (!sloka) return null;
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { borderRadius: rs.cardRadius }]}>
       {/* Header */}
       <LinearGradient
         colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']}
         start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-        style={s.header}
+        style={[s.header, { paddingHorizontal: rs.hPad, paddingVertical: rs.headerVPad }]}
       >
         <View style={s.headerRow}>
-          <MaterialCommunityIcons name="book-open-page-variant" size={22} color="#F5D77A" />
+          <MaterialCommunityIcons name="book-open-page-variant" size={rs.headerIcon} color="#F5D77A" />
           <View style={s.headerText}>
-            <Text style={s.headerTitle}>{t('భగవద్గీత', 'Bhagavad Gita')}</Text>
-            <Text style={s.headerSub}>
+            <Text style={[s.headerTitle, { fontSize: rs.headerTitleSize }]}>{t('భగవద్గీత', 'Bhagavad Gita')}</Text>
+            <Text style={[s.headerSub, { fontSize: rs.headerSubSize }]}>
               {t(`అధ్యాయం ${sloka.chapter}, శ్లోకం ${sloka.verse}`, `Chapter ${sloka.chapter}, Verse ${sloka.verse}`)}
             </Text>
           </View>
-          <View style={s.themeBadge}>
-            <Text style={s.themeText}>{sloka.theme.split('/')[0].trim()}</Text>
+          <View style={[s.themeBadge, { paddingHorizontal: rs.badgeHPad, paddingVertical: rs.badgeVPad, borderRadius: rs.badgeRadius }]}>
+            <Text style={[s.themeText, { fontSize: rs.themeSize }]}>{sloka.theme.split('/')[0].trim()}</Text>
           </View>
         </View>
       </LinearGradient>
 
       {/* Sanskrit */}
-      <View style={s.sanskritBox}>
-        <Text style={s.sanskritText}>{sloka.sanskrit}</Text>
+      <View style={[s.sanskritBox, { paddingHorizontal: rs.contentHPad, paddingVertical: rs.contentHPad }]}>
+        <Text style={[s.sanskritText, { fontSize: rs.sanskritSize, lineHeight: rs.sanskritLineHeight }]}>{sloka.sanskrit}</Text>
       </View>
 
       {/* Primary Translation — based on language */}
-      <View style={s.teluguBox}>
-        <Text style={s.teluguLabel}>{t('తెలుగు అర్థం', 'Meaning')}</Text>
-        <Text style={s.teluguText}>{t(sloka.telugu, sloka.english)}</Text>
+      <View style={[s.teluguBox, { paddingHorizontal: rs.contentHPad, paddingVertical: rs.teluguVPad }]}>
+        <Text style={[s.teluguLabel, { fontSize: rs.labelSize }]}>{t('తెలుగు అర్థం', 'Meaning')}</Text>
+        <Text style={[s.teluguText, { fontSize: rs.teluguSize, lineHeight: rs.teluguLineHeight }]}>{t(sloka.telugu, sloka.english)}</Text>
       </View>
 
       {/* Secondary translation — expandable */}
       <TouchableOpacity
-        style={s.englishToggle}
+        style={[s.englishToggle, { paddingVertical: rs.toggleVPad }]}
         onPress={() => {
           setExpanded(!expanded);
           trackEvent('gita_expand', { expanded: !expanded });
@@ -70,24 +72,24 @@ export function GitaDailyCard({ date, isPremium = false }) {
       >
         <Ionicons
           name={expanded ? 'chevron-up' : 'chevron-down'}
-          size={16}
+          size={rs.chevronSize}
           color={DarkColors.textMuted}
         />
-        <Text style={s.englishToggleText}>
+        <Text style={[s.englishToggleText, { fontSize: rs.toggleTextSize }]}>
           {expanded ? t('దాచు', 'Hide') : t('English అర్థం చూడండి', 'తెలుగు అర్థం చూడండి')}
         </Text>
       </TouchableOpacity>
 
       {expanded && (
-        <View style={s.englishBox}>
-          <Text style={s.englishText}>{t(sloka.english, sloka.telugu)}</Text>
+        <View style={[s.englishBox, { paddingHorizontal: rs.contentHPad, paddingBottom: rs.teluguVPad }]}>
+          <Text style={[s.englishText, { fontSize: rs.englishSize, lineHeight: rs.englishLineHeight }]}>{t(sloka.english, sloka.telugu)}</Text>
         </View>
       )}
 
       {/* Library button — always visible */}
-      <View style={s.actions}>
+      <View style={[s.actions, { paddingHorizontal: rs.hPad, paddingVertical: rs.actionVPad }]}>
         <TouchableOpacity
-          style={s.libraryBtn}
+          style={[s.libraryBtn, { paddingVertical: rs.libBtnVPad, paddingHorizontal: rs.libBtnHPad, borderRadius: rs.libBtnRadius }]}
           onPress={() => {
             if (isPremium) {
               setShowLibrary(true);
@@ -97,9 +99,9 @@ export function GitaDailyCard({ date, isPremium = false }) {
             }
           }}
         >
-          <MaterialCommunityIcons name="bookshelf" size={18} color={DarkColors.goldLight} />
-          <Text style={s.libraryBtnText}>{t('30 శ్లోకాలు చూడండి', 'Browse all 30 Slokas')}</Text>
-          {!isPremium && <MaterialCommunityIcons name="crown" size={14} color={DarkColors.gold} style={{ marginLeft: 4 }} />}
+          <MaterialCommunityIcons name="bookshelf" size={rs.libIcon} color={DarkColors.goldLight} />
+          <Text style={[s.libraryBtnText, { fontSize: rs.libBtnTextSize }]}>{t('30 శ్లోకాలు చూడండి', 'Browse all 30 Slokas')}</Text>
+          {!isPremium && <MaterialCommunityIcons name="crown" size={rs.crownIcon} color={DarkColors.gold} style={{ marginLeft: 4 }} />}
         </TouchableOpacity>
       </View>
 
@@ -137,20 +139,21 @@ export function GitaDailyCard({ date, isPremium = false }) {
  */
 function GitaLibraryModal({ visible, onClose, currentSloka }) {
   const [selectedSloka, setSelectedSloka] = useState(null);
+  const rs = useResponsive();
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={s.modalOverlay}>
-        <View style={s.modalContent}>
+        <View style={[s.modalContent, { borderTopLeftRadius: rs.modalRadius, borderTopRightRadius: rs.modalRadius }]}>
           {/* Modal Header */}
           <LinearGradient
             colors={['#1A0A2E', '#4A1A6B']}
-            style={s.modalHeader}
+            style={[s.modalHeader, { paddingVertical: rs.modalHeaderVPad, paddingHorizontal: rs.modalHeaderHPad, borderTopLeftRadius: rs.modalRadius, borderTopRightRadius: rs.modalRadius }]}
           >
-            <Text style={s.modalTitle}>భగవద్గీత శ్లోకాలు</Text>
-            <Text style={s.modalSubtitle}>30 Sacred Verses</Text>
-            <TouchableOpacity style={s.modalCloseX} onPress={onClose}>
-              <Ionicons name="close" size={24} color="#FFF" />
+            <Text style={[s.modalTitle, { fontSize: rs.modalTitleSize }]}>భగవద్గీత శ్లోకాలు</Text>
+            <Text style={[s.modalSubtitle, { fontSize: rs.modalSubSize }]}>30 Sacred Verses</Text>
+            <TouchableOpacity style={[s.modalCloseX, { width: rs.closeXSize, height: rs.closeXSize, borderRadius: rs.closeXSize / 2, top: rs.closeXTop, right: rs.closeXRight }]} onPress={onClose}>
+              <Ionicons name="close" size={rs.closeIcon} color="#FFF" />
             </TouchableOpacity>
           </LinearGradient>
 
@@ -166,46 +169,47 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
                 <TouchableOpacity
                   style={[
                     s.listItem,
+                    { paddingHorizontal: rs.hPad, paddingVertical: rs.listItemVPad },
                     isToday && s.listItemToday,
                     isSelected && s.listItemSelected,
                   ]}
                   onPress={() => setSelectedSloka(isSelected ? null : item)}
                 >
                   <View style={s.listItemHeader}>
-                    <View style={s.listChapterBadge}>
-                      <Text style={s.listChapterText}>{item.chapter}.{item.verse}</Text>
+                    <View style={[s.listChapterBadge, { paddingHorizontal: rs.chapterBadgeHPad, paddingVertical: rs.chapterBadgeVPad, borderRadius: rs.chapterBadgeRadius }]}>
+                      <Text style={[s.listChapterText, { fontSize: rs.chapterTextSize }]}>{item.chapter}.{item.verse}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={s.listTheme}>{item.theme}</Text>
+                      <Text style={[s.listTheme, { fontSize: rs.listThemeSize }]}>{item.theme}</Text>
                     </View>
                     {isToday && (
-                      <View style={s.todayBadge}>
-                        <Text style={s.todayBadgeText}>నేడు</Text>
+                      <View style={[s.todayBadge, { paddingHorizontal: rs.todayBadgeHPad, paddingVertical: rs.todayBadgeVPad, borderRadius: rs.chapterBadgeRadius }]}>
+                        <Text style={[s.todayBadgeText, { fontSize: rs.todayBadgeTextSize }]}>నేడు</Text>
                       </View>
                     )}
                     <Ionicons
                       name={isSelected ? 'chevron-up' : 'chevron-down'}
-                      size={16}
+                      size={rs.chevronSize}
                       color={DarkColors.textMuted}
                     />
                   </View>
 
                   {isSelected && (
                     <View style={s.listItemExpanded}>
-                      <Text style={s.listSanskrit}>{item.sanskrit}</Text>
-                      <Text style={s.listTelugu}>{item.telugu}</Text>
-                      <Text style={s.listEnglish}>{item.english}</Text>
+                      <Text style={[s.listSanskrit, { fontSize: rs.listSanskritSize, lineHeight: rs.listSanskritLineHeight }]}>{item.sanskrit}</Text>
+                      <Text style={[s.listTelugu, { fontSize: rs.listTeluguSize, lineHeight: rs.listTeluguLineHeight }]}>{item.telugu}</Text>
+                      <Text style={[s.listEnglish, { fontSize: rs.listEnglishSize, lineHeight: rs.listEnglishLineHeight }]}>{item.english}</Text>
                     </View>
                   )}
                 </TouchableOpacity>
               );
             }}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: rs.modalBottomPad }}
           />
 
           {/* PDF button */}
-          <View style={s.modalActions}>
-            <TouchableOpacity style={s.modalPdfBtn} onPress={() => {
+          <View style={[s.modalActions, { paddingHorizontal: rs.modalHeaderHPad, paddingTop: rs.actionVPad }]}>
+            <TouchableOpacity style={[s.modalPdfBtn, { paddingVertical: rs.pdfBtnVPad, paddingHorizontal: rs.pdfBtnHPad, borderRadius: rs.pdfBtnRadius }]} onPress={() => {
               const html = buildAll30Html();
               if (Platform.OS === 'web') {
                 const win = window.open('', '_blank');
@@ -217,8 +221,8 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
                 } catch {}
               }
             }}>
-              <MaterialCommunityIcons name="file-pdf-box" size={18} color="#E8495A" />
-              <Text style={s.modalPdfText}>30 శ్లోకాలు PDF</Text>
+              <MaterialCommunityIcons name="file-pdf-box" size={rs.libIcon} color="#E8495A" />
+              <Text style={[s.modalPdfText, { fontSize: rs.modalPdfTextSize }]}>30 శ్లోకాలు PDF</Text>
             </TouchableOpacity>
           </View>
 
@@ -238,13 +242,127 @@ function GitaLibraryModal({ visible, onClose, currentSloka }) {
             }}
           />
 
-          <TouchableOpacity style={s.modalCloseBtn} onPress={onClose}>
-            <Text style={s.modalCloseBtnText}>మూసివేయండి</Text>
+          <TouchableOpacity style={[s.modalCloseBtn, { paddingVertical: rs.closeBtnVPad, marginHorizontal: rs.modalHeaderHPad, marginVertical: rs.closeBtnMarginV, borderRadius: rs.closeBtnRadius }]} onPress={onClose}>
+            <Text style={[s.modalCloseBtnText, { fontSize: rs.closeBtnTextSize }]}>మూసివేయండి</Text>
           </TouchableOpacity>
         </View>
       </View>
     </Modal>
   );
+}
+
+/**
+ * Responsive values hook — all hardcoded sizes flow through usePick
+ */
+function useResponsive() {
+  // Card
+  const cardRadius = usePick({ default: 16, lg: 18, xl: 20 });
+  const hPad = usePick({ default: 16, lg: 18, xl: 22 });
+  const contentHPad = usePick({ default: 18, lg: 20, xl: 24 });
+  const headerVPad = usePick({ default: 14, lg: 16, xl: 18 });
+
+  // Header
+  const headerIcon = usePick({ default: 22, lg: 24, xl: 28 });
+  const headerTitleSize = usePick({ default: 22, lg: 24, xl: 26 });
+  const headerSubSize = usePick({ default: 14, lg: 15, xl: 16 });
+
+  // Theme badge
+  const themeSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const badgeHPad = usePick({ default: 10, lg: 12, xl: 14 });
+  const badgeVPad = usePick({ default: 4, lg: 5, xl: 6 });
+  const badgeRadius = usePick({ default: 12, lg: 14, xl: 16 });
+
+  // Sanskrit
+  const sanskritSize = usePick({ default: 19, lg: 21, xl: 23 });
+  const sanskritLineHeight = usePick({ default: 30, lg: 33, xl: 36 });
+
+  // Telugu / primary translation
+  const teluguVPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const labelSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const teluguSize = usePick({ default: 17, lg: 18, xl: 20 });
+  const teluguLineHeight = usePick({ default: 28, lg: 30, xl: 32 });
+
+  // English toggle
+  const toggleVPad = usePick({ default: 8, lg: 10, xl: 12 });
+  const chevronSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const toggleTextSize = usePick({ default: 14, lg: 15, xl: 16 });
+
+  // English / secondary translation
+  const englishSize = usePick({ default: 16, lg: 17, xl: 18 });
+  const englishLineHeight = usePick({ default: 26, lg: 28, xl: 30 });
+
+  // Library button
+  const actionVPad = usePick({ default: 10, lg: 12, xl: 14 });
+  const libIcon = usePick({ default: 18, lg: 20, xl: 22 });
+  const crownIcon = usePick({ default: 14, lg: 16, xl: 18 });
+  const libBtnVPad = usePick({ default: 6, lg: 8, xl: 10 });
+  const libBtnHPad = usePick({ default: 12, lg: 14, xl: 18 });
+  const libBtnRadius = usePick({ default: 16, lg: 18, xl: 20 });
+  const libBtnTextSize = usePick({ default: 12, lg: 13, xl: 14 });
+
+  // Modal
+  const modalRadius = usePick({ default: 24, lg: 26, xl: 28 });
+  const modalHeaderVPad = usePick({ default: 20, lg: 22, xl: 26 });
+  const modalHeaderHPad = usePick({ default: 20, lg: 22, xl: 28 });
+  const modalTitleSize = usePick({ default: 22, lg: 24, xl: 26 });
+  const modalSubSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const closeXSize = usePick({ default: 36, lg: 40, xl: 44 });
+  const closeXTop = usePick({ default: 16, lg: 18, xl: 20 });
+  const closeXRight = usePick({ default: 16, lg: 18, xl: 20 });
+  const closeIcon = usePick({ default: 24, lg: 26, xl: 28 });
+
+  // List items
+  const listItemVPad = usePick({ default: 12, lg: 14, xl: 16 });
+  const chapterBadgeHPad = usePick({ default: 8, lg: 10, xl: 12 });
+  const chapterBadgeVPad = usePick({ default: 3, lg: 4, xl: 5 });
+  const chapterBadgeRadius = usePick({ default: 8, lg: 9, xl: 10 });
+  const chapterTextSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const listThemeSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const todayBadgeHPad = usePick({ default: 8, lg: 10, xl: 12 });
+  const todayBadgeVPad = usePick({ default: 2, lg: 3, xl: 4 });
+  const todayBadgeTextSize = usePick({ default: 10, lg: 11, xl: 12 });
+
+  // List expanded text
+  const listSanskritSize = usePick({ default: 14, lg: 15, xl: 17 });
+  const listSanskritLineHeight = usePick({ default: 22, lg: 24, xl: 27 });
+  const listTeluguSize = usePick({ default: 14, lg: 15, xl: 17 });
+  const listTeluguLineHeight = usePick({ default: 22, lg: 24, xl: 27 });
+  const listEnglishSize = usePick({ default: 13, lg: 14, xl: 16 });
+  const listEnglishLineHeight = usePick({ default: 20, lg: 22, xl: 25 });
+  const modalBottomPad = usePick({ default: 20, lg: 24, xl: 28 });
+
+  // PDF button
+  const pdfBtnVPad = usePick({ default: 10, lg: 12, xl: 14 });
+  const pdfBtnHPad = usePick({ default: 18, lg: 20, xl: 24 });
+  const pdfBtnRadius = usePick({ default: 14, lg: 16, xl: 18 });
+  const modalPdfTextSize = usePick({ default: 13, lg: 14, xl: 15 });
+
+  // Modal close button
+  const closeBtnVPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const closeBtnMarginV = usePick({ default: 12, lg: 14, xl: 16 });
+  const closeBtnRadius = usePick({ default: 12, lg: 14, xl: 16 });
+  const closeBtnTextSize = usePick({ default: 15, lg: 16, xl: 17 });
+
+  return {
+    cardRadius, hPad, contentHPad, headerVPad,
+    headerIcon, headerTitleSize, headerSubSize,
+    themeSize, badgeHPad, badgeVPad, badgeRadius,
+    sanskritSize, sanskritLineHeight,
+    teluguVPad, labelSize, teluguSize, teluguLineHeight,
+    toggleVPad, chevronSize, toggleTextSize,
+    englishSize, englishLineHeight,
+    actionVPad, libIcon, crownIcon, libBtnVPad, libBtnHPad, libBtnRadius, libBtnTextSize,
+    modalRadius, modalHeaderVPad, modalHeaderHPad, modalTitleSize, modalSubSize,
+    closeXSize, closeXTop, closeXRight, closeIcon,
+    listItemVPad, chapterBadgeHPad, chapterBadgeVPad, chapterBadgeRadius, chapterTextSize,
+    listThemeSize, todayBadgeHPad, todayBadgeVPad, todayBadgeTextSize,
+    listSanskritSize, listSanskritLineHeight,
+    listTeluguSize, listTeluguLineHeight,
+    listEnglishSize, listEnglishLineHeight,
+    modalBottomPad,
+    pdfBtnVPad, pdfBtnHPad, pdfBtnRadius, modalPdfTextSize,
+    closeBtnVPad, closeBtnMarginV, closeBtnRadius, closeBtnTextSize,
+  };
 }
 
 function buildAll30Html() {
@@ -280,81 +398,64 @@ function buildAll30Html() {
 const s = StyleSheet.create({
   container: {
     backgroundColor: DarkColors.bgCard,
-    borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: DarkColors.borderCard,
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
+  header: {},
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   headerText: { flex: 1, marginLeft: 10 },
-  headerTitle: { fontSize: 22, fontWeight: '900', color: DarkColors.goldLight, letterSpacing: 1 },
-  headerSub: { fontSize: 14, color: 'rgba(245,215,122,0.7)', marginTop: 2 },
+  headerTitle: { fontWeight: '900', color: DarkColors.goldLight, letterSpacing: 1 },
+  headerSub: { color: 'rgba(245,215,122,0.7)', marginTop: 2 },
   themeBadge: {
     backgroundColor: DarkColors.goldDim,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
   },
-  themeText: { fontSize: 12, color: DarkColors.goldLight, fontWeight: '700' },
+  themeText: { color: DarkColors.goldLight, fontWeight: '700' },
 
   sanskritBox: {
-    paddingHorizontal: 18,
-    paddingVertical: 18,
     backgroundColor: DarkColors.bgElevated,
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
   },
   sanskritText: {
-    fontSize: 19,
     color: DarkColors.goldLight,
-    lineHeight: 30,
     fontWeight: '500',
     textAlign: 'center',
     fontStyle: 'italic',
   },
 
-  teluguBox: { paddingHorizontal: 18, paddingVertical: 14 },
-  teluguLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '700', marginBottom: 6, letterSpacing: 0.5 },
-  teluguText: { fontSize: 17, color: DarkColors.textPrimary, lineHeight: 28, fontWeight: '500' },
+  teluguBox: {},
+  teluguLabel: { color: DarkColors.textMuted, fontWeight: '700', marginBottom: 6, letterSpacing: 0.5 },
+  teluguText: { color: DarkColors.textPrimary, fontWeight: '500' },
 
   englishToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: DarkColors.borderCard,
   },
-  englishToggleText: { fontSize: 14, color: DarkColors.textMuted, marginLeft: 6, fontWeight: '600' },
+  englishToggleText: { color: DarkColors.textMuted, marginLeft: 6, fontWeight: '600' },
 
-  englishBox: { paddingHorizontal: 18, paddingBottom: 14 },
-  englishText: { fontSize: 16, color: DarkColors.textSecondary, lineHeight: 26, fontStyle: 'italic' },
+  englishBox: {},
+  englishText: { color: DarkColors.textSecondary, fontStyle: 'italic' },
 
   actions: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: DarkColors.borderCard,
   },
   libraryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
     backgroundColor: DarkColors.goldDim,
   },
-  libraryBtnText: { fontSize: 12, color: DarkColors.goldLight, fontWeight: '600', marginLeft: 4 },
+  libraryBtnText: { color: DarkColors.goldLight, fontWeight: '600', marginLeft: 4 },
 
   premiumHint: {
     flexDirection: 'row',
@@ -367,30 +468,21 @@ const s = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: DarkColors.overlay, justifyContent: 'flex-end' },
   modalContent: {
     backgroundColor: DarkColors.bgCard,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     maxHeight: '85%',
   },
   modalHeader: {
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     position: 'relative',
     alignItems: 'center',
   },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1 },
-  modalSubtitle: { fontSize: 13, color: DarkColors.textMuted, marginTop: 4 },
+  modalTitle: { fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1 },
+  modalSubtitle: { color: DarkColors.textMuted, marginTop: 4 },
   modalCloseX: {
-    position: 'absolute', top: 16, right: 16,
-    width: 36, height: 36, borderRadius: 18,
+    position: 'absolute',
     backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center', justifyContent: 'center',
   },
 
   listItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
   },
@@ -399,46 +491,37 @@ const s = StyleSheet.create({
   listItemHeader: { flexDirection: 'row', alignItems: 'center' },
   listChapterBadge: {
     backgroundColor: '#4A1A6B',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
     marginRight: 10,
   },
-  listChapterText: { fontSize: 11, color: DarkColors.goldLight, fontWeight: '700' },
-  listTheme: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
+  listChapterText: { color: DarkColors.goldLight, fontWeight: '700' },
+  listTheme: { fontWeight: '600', color: DarkColors.textPrimary },
   todayBadge: {
     backgroundColor: DarkColors.saffron,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
     marginRight: 8,
   },
-  todayBadgeText: { fontSize: 10, color: DarkColors.textPrimary, fontWeight: '700' },
+  todayBadgeText: { color: DarkColors.textPrimary, fontWeight: '700' },
 
   listItemExpanded: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
-  listSanskrit: { fontSize: 14, color: DarkColors.goldLight, fontStyle: 'italic', lineHeight: 22, marginBottom: 8, textAlign: 'center' },
-  listTelugu: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 6 },
-  listEnglish: { fontSize: 13, color: DarkColors.textSecondary, lineHeight: 20, fontStyle: 'italic' },
+  listSanskrit: { color: DarkColors.goldLight, fontStyle: 'italic', marginBottom: 8, textAlign: 'center' },
+  listTelugu: { color: DarkColors.textPrimary, marginBottom: 6 },
+  listEnglish: { color: DarkColors.textSecondary, fontStyle: 'italic' },
 
   modalCloseBtn: {
-    alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginVertical: 12,
-    backgroundColor: DarkColors.saffron, borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: DarkColors.saffron,
   },
-  modalCloseBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
+  modalCloseBtnText: { fontWeight: '700', color: DarkColors.textPrimary },
   modalActions: {
     flexDirection: 'row', justifyContent: 'center', gap: 12,
-    paddingHorizontal: 20, paddingTop: 10,
   },
   modalPdfBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingVertical: 10, paddingHorizontal: 18, borderRadius: 14,
     backgroundColor: DarkColors.bgElevated, borderWidth: 1.5, borderColor: 'rgba(196,30,58,0.3)',
   },
-  modalPdfText: { fontSize: 13, fontWeight: '700', color: '#E8495A' },
+  modalPdfText: { fontWeight: '700', color: '#E8495A' },
   modalShareBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingVertical: 10, paddingHorizontal: 18, borderRadius: 14,
     backgroundColor: DarkColors.saffron,
   },
-  modalShareText: { fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary },
+  modalShareText: { fontWeight: '700', color: DarkColors.textPrimary },
 });

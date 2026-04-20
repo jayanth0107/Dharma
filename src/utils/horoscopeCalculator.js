@@ -131,6 +131,22 @@ const KARANAS = [
   { telugu: 'కింస్తుఘ్న', english: 'Kimstughna' },
 ];
 
+// --- Rashi Vedic Data (రత్నాలు, లోహాలు, ఉపాయాలు) ---
+const RASHI_VEDIC = {
+  0:  { gemstone: { te: 'పగడం (Coral)', en: 'Red Coral' }, gemstoneAlt: { te: 'కెంపు (Ruby)', en: 'Ruby' }, metal: { te: 'రాగి', en: 'Copper' }, luckyDay: { te: 'మంగళవారం', en: 'Tuesday' }, luckyColor: { te: 'ఎరుపు', en: 'Red' }, direction: { te: 'తూర్పు', en: 'East' }, mantra: 'ఓం అం అంగారకాయ నమః', deity: { te: 'హనుమాన్', en: 'Hanuman' }, bodyPart: { te: 'తల, మెదడు', en: 'Head, Brain' }, element: { te: 'అగ్ని', en: 'Fire' }, remedy: 'మంగళవారం హనుమాన్ చాలీసా పారాయణం, ఎరుపు పూలతో పూజ చేయండి. పగడపు ఉంగరం అనామిక వేలుకి ధరించండి.' },
+  1:  { gemstone: { te: 'వజ్రం (Diamond)', en: 'Diamond' }, gemstoneAlt: { te: 'పచ్చ (Emerald)', en: 'Emerald' }, metal: { te: 'వెండి', en: 'Silver' }, luckyDay: { te: 'శుక్రవారం', en: 'Friday' }, luckyColor: { te: 'తెలుపు', en: 'White' }, direction: { te: 'ఆగ్నేయం', en: 'South-East' }, mantra: 'ఓం శుం శుక్రాయ నమః', deity: { te: 'లక్ష్మీ దేవి', en: 'Goddess Lakshmi' }, bodyPart: { te: 'ముఖం, గొంతు', en: 'Face, Throat' }, element: { te: 'భూమి', en: 'Earth' }, remedy: 'శుక్రవారం లక్ష్మీ పూజ, తెల్లని వస్త్రాలు ధరించడం శుభకరం. వజ్ర ఉంగరం అనామిక వేలుకి ధరించండి.' },
+  2:  { gemstone: { te: 'పచ్చ (Emerald)', en: 'Emerald' }, gemstoneAlt: { te: 'పెరిడాట్', en: 'Peridot' }, metal: { te: 'కంచు', en: 'Bronze' }, luckyDay: { te: 'బుధవారం', en: 'Wednesday' }, luckyColor: { te: 'ఆకుపచ్చ', en: 'Green' }, direction: { te: 'ఉత్తరం', en: 'North' }, mantra: 'ఓం బుం బుధాయ నమః', deity: { te: 'విష్ణువు', en: 'Lord Vishnu' }, bodyPart: { te: 'భుజాలు, ఊపిరితిత్తులు', en: 'Shoulders, Lungs' }, element: { te: 'వాయువు', en: 'Air' }, remedy: 'బుధవారం విష్ణు సహస్రనామం పారాయణం, ఆకుపచ్చ మూంగ్ దాల్ దానం చేయండి. పచ్చ ఉంగరం చిటికెన వేలుకి ధరించండి.' },
+  3:  { gemstone: { te: 'ముత్యం (Pearl)', en: 'Pearl' }, gemstoneAlt: { te: 'మూన్‌స్టోన్', en: 'Moonstone' }, metal: { te: 'వెండి', en: 'Silver' }, luckyDay: { te: 'సోమవారం', en: 'Monday' }, luckyColor: { te: 'తెలుపు', en: 'White' }, direction: { te: 'వాయవ్యం', en: 'North-West' }, mantra: 'ఓం చం చంద్రాయ నమః', deity: { te: 'శివుడు', en: 'Lord Shiva' }, bodyPart: { te: 'ఛాతి, కడుపు', en: 'Chest, Stomach' }, element: { te: 'నీరు', en: 'Water' }, remedy: 'సోమవారం శివ అభిషేకం, తెల్లని పువ్వులు సమర్పించండి. ముత్యపు ఉంగరం అనామిక వేలుకి ధరించండి.' },
+  4:  { gemstone: { te: 'కెంపు (Ruby)', en: 'Ruby' }, gemstoneAlt: { te: 'గార్నెట్', en: 'Garnet' }, metal: { te: 'బంగారం', en: 'Gold' }, luckyDay: { te: 'ఆదివారం', en: 'Sunday' }, luckyColor: { te: 'నారింజ', en: 'Orange' }, direction: { te: 'తూర్పు', en: 'East' }, mantra: 'ఓం సూం సూర్యాయ నమః', deity: { te: 'సూర్య భగవానుడు', en: 'Sun God' }, bodyPart: { te: 'హృదయం, వెన్నెముక', en: 'Heart, Spine' }, element: { te: 'అగ్ని', en: 'Fire' }, remedy: 'ఆదివారం సూర్య నమస్కారాలు, ఆదిత్య హృదయం పారాయణం. కెంపు ఉంగరం అనామిక వేలుకి బంగారంలో ధరించండి.' },
+  5:  { gemstone: { te: 'పచ్చ (Emerald)', en: 'Emerald' }, gemstoneAlt: { te: 'పెరిడాట్', en: 'Peridot' }, metal: { te: 'కంచు', en: 'Bronze' }, luckyDay: { te: 'బుధవారం', en: 'Wednesday' }, luckyColor: { te: 'ఆకుపచ్చ', en: 'Green' }, direction: { te: 'దక్షిణం', en: 'South' }, mantra: 'ఓం బుం బుధాయ నమః', deity: { te: 'గణేశుడు', en: 'Lord Ganesha' }, bodyPart: { te: 'ఉదరం, ప్రేగులు', en: 'Abdomen, Intestines' }, element: { te: 'భూమి', en: 'Earth' }, remedy: 'బుధవారం గణేశ పూజ, ఆకుపచ్చ బియ్యం దానం. పచ్చ ఉంగరం చిటికెన వేలుకి ధరించండి.' },
+  6:  { gemstone: { te: 'వజ్రం (Diamond)', en: 'Diamond' }, gemstoneAlt: { te: 'వైట్ సఫైర్', en: 'White Sapphire' }, metal: { te: 'వెండి', en: 'Silver' }, luckyDay: { te: 'శుక్రవారం', en: 'Friday' }, luckyColor: { te: 'తెలుపు', en: 'White' }, direction: { te: 'పశ్చిమం', en: 'West' }, mantra: 'ఓం శుం శుక్రాయ నమః', deity: { te: 'లక్ష్మీ దేవి', en: 'Goddess Lakshmi' }, bodyPart: { te: 'మూత్రపిండాలు, నడుము', en: 'Kidneys, Lower Back' }, element: { te: 'వాయువు', en: 'Air' }, remedy: 'శుక్రవారం శ్రీ సూక్తం పారాయణం, తెలుపు వస్తువులు దానం. వజ్ర ఉంగరం అనామిక వేలుకి ధరించండి.' },
+  7:  { gemstone: { te: 'పగడం (Coral)', en: 'Red Coral' }, gemstoneAlt: { te: 'గార్నెట్', en: 'Garnet' }, metal: { te: 'రాగి', en: 'Copper' }, luckyDay: { te: 'మంగళవారం', en: 'Tuesday' }, luckyColor: { te: 'ఎరుపు', en: 'Red' }, direction: { te: 'దక్షిణం', en: 'South' }, mantra: 'ఓం అం అంగారకాయ నమః', deity: { te: 'శివుడు', en: 'Lord Shiva' }, bodyPart: { te: 'జననేంద్రియాలు', en: 'Reproductive Organs' }, element: { te: 'నీరు', en: 'Water' }, remedy: 'మంగళవారం శివ పూజ, మహామృత్యుంజయ మంత్ర జపం. పగడపు ఉంగరం అనామిక వేలుకి రాగిలో ధరించండి.' },
+  8:  { gemstone: { te: 'పుష్యరాగం (Yellow Sapphire)', en: 'Yellow Sapphire' }, gemstoneAlt: { te: 'సిట్రిన్', en: 'Citrine' }, metal: { te: 'బంగారం', en: 'Gold' }, luckyDay: { te: 'గురువారం', en: 'Thursday' }, luckyColor: { te: 'పసుపు', en: 'Yellow' }, direction: { te: 'ఈశాన్యం', en: 'North-East' }, mantra: 'ఓం బృం బృహస్పతయే నమః', deity: { te: 'దత్తాత్రేయ', en: 'Lord Dattatreya' }, bodyPart: { te: 'తొడలు, కాలేయం', en: 'Thighs, Liver' }, element: { te: 'అగ్ని', en: 'Fire' }, remedy: 'గురువారం పసుపు వస్త్రాలు ధరించి దత్తాత్రేయ స్తోత్రం పఠించండి. పుష్యరాగం చూపుడు వేలుకి బంగారంలో ధరించండి.' },
+  9:  { gemstone: { te: 'నీలం (Blue Sapphire)', en: 'Blue Sapphire' }, gemstoneAlt: { te: 'అమెథిస్ట్', en: 'Amethyst' }, metal: { te: 'ఇనుము', en: 'Iron' }, luckyDay: { te: 'శనివారం', en: 'Saturday' }, luckyColor: { te: 'నీలం', en: 'Blue/Black' }, direction: { te: 'పశ్చిమం', en: 'West' }, mantra: 'ఓం శం శనైశ్చరాయ నమః', deity: { te: 'హనుమాన్', en: 'Hanuman' }, bodyPart: { te: 'మోకాళ్ళు, ఎముకలు', en: 'Knees, Bones' }, element: { te: 'భూమి', en: 'Earth' }, remedy: 'శనివారం హనుమాన్ చాలీసా, నల్లని తిల దానం. నీలం రత్నం మధ్యవేలుకి ఇనుములో ధరించండి (పరీక్షించిన తర్వాత మాత్రమే).' },
+  10: { gemstone: { te: 'నీలం (Blue Sapphire)', en: 'Blue Sapphire' }, gemstoneAlt: { te: 'అమెథిస్ట్', en: 'Amethyst' }, metal: { te: 'ఇనుము', en: 'Iron' }, luckyDay: { te: 'శనివారం', en: 'Saturday' }, luckyColor: { te: 'నీలం', en: 'Blue' }, direction: { te: 'పశ్చిమం', en: 'West' }, mantra: 'ఓం శం శనైశ్చరాయ నమః', deity: { te: 'శని భగవానుడు', en: 'Lord Shani' }, bodyPart: { te: 'కాళ్ళు, రక్త ప్రసరణ', en: 'Legs, Circulation' }, element: { te: 'వాయువు', en: 'Air' }, remedy: 'శనివారం శని స్తోత్రం పఠించి, నల్లని వస్తువులు దానం చేయండి. గాయత్రి మంత్ర జపం మేధాశక్తిని పెంచుతుంది.' },
+  11: { gemstone: { te: 'పుష్యరాగం (Yellow Sapphire)', en: 'Yellow Sapphire' }, gemstoneAlt: { te: 'అక్వామెరిన్', en: 'Aquamarine' }, metal: { te: 'బంగారం', en: 'Gold' }, luckyDay: { te: 'గురువారం', en: 'Thursday' }, luckyColor: { te: 'పసుపు', en: 'Yellow' }, direction: { te: 'ఈశాన్యం', en: 'North-East' }, mantra: 'ఓం బృం బృహస్పతయే నమః', deity: { te: 'విష్ణువు', en: 'Lord Vishnu' }, bodyPart: { te: 'పాదాలు, రోగనిరోధక శక్తి', en: 'Feet, Immune System' }, element: { te: 'నీరు', en: 'Water' }, remedy: 'గురువారం విష్ణు సహస్రనామం పారాయణం, పసుపు పువ్వులు సమర్పించండి. పుష్యరాగం చూపుడు వేలుకి బంగారంలో ధరించండి.' },
+};
+
 // --- Rashi Predictions (రాశి ఫలాలు) ---
 const RASHI_PREDICTIONS = {
   0: { // Mesha / Aries
@@ -475,6 +491,9 @@ export function generateHoroscope(name, birthDate, birthTime, birthPlace) {
   // 12. Daily forecast based on current transits vs birth rashi
   const dailyForecast = generateDailyForecast(rashiIndex % 12);
 
+  // 13. Vedic remedies, gemstones, metals
+  const vedic = RASHI_VEDIC[rashiIndex % 12];
+
   const result = {
     name,
     birthDate,
@@ -491,6 +510,7 @@ export function generateHoroscope(name, birthDate, birthTime, birthPlace) {
     karana,
     predictions,
     dailyForecast,
+    vedic,
     source: 'astronomy-engine (local)',
   };
 

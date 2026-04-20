@@ -3,28 +3,40 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { EKADASHI_2026 } from '../data/ekadashi';
 
 export function TodayEkadashiBanner({ ekadashi }) {
+  const bannerIconSize = usePick({ default: 22, md: 24, lg: 26 });
+  const bannerLabelSize = usePick({ default: 12, md: 13, lg: 14 });
+  const bannerTitleSize = usePick({ default: 20, md: 22, lg: 24 });
+  const bannerEnglishSize = usePick({ default: 13, md: 14, lg: 15 });
+  const bannerPadV = usePick({ default: 12, md: 14, lg: 16 });
+  const bannerPadH = usePick({ default: 14, md: 16, lg: 20 });
+  const bannerMx = usePick({ default: 16, md: 20, lg: 24 });
+  const sigPadV = usePick({ default: 8, md: 10, lg: 12 });
+  const sigPadH = usePick({ default: 14, md: 16, lg: 20 });
+  const sigFontSize = usePick({ default: 13, md: 14, lg: 15 });
+  const sigLineHeight = usePick({ default: 18, md: 20, lg: 22 });
   if (!ekadashi) return null;
   return (
-    <View style={styles.bannerContainer}>
+    <View style={[styles.bannerContainer, { marginHorizontal: bannerMx }]}>
       <LinearGradient
         colors={['#1A1A2E', '#2E1A47', '#4A1A6B']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        style={styles.bannerGradient}
+        style={[styles.bannerGradient, { paddingVertical: bannerPadV, paddingHorizontal: bannerPadH }]}
       >
-        <MaterialCommunityIcons name="hands-pray" size={24} color="#E0B0FF" />
+        <MaterialCommunityIcons name="hands-pray" size={bannerIconSize} color="#E0B0FF" />
         <View style={styles.bannerContent}>
-          <Text style={styles.bannerLabel}>నేడు ఏకాదశి</Text>
-          <Text style={styles.bannerTitle}>{ekadashi.name}</Text>
-          <Text style={styles.bannerEnglish}>{ekadashi.nameEnglish}</Text>
+          <Text style={[styles.bannerLabel, { fontSize: bannerLabelSize }]}>నేడు ఏకాదశి</Text>
+          <Text style={[styles.bannerTitle, { fontSize: bannerTitleSize }]}>{ekadashi.name}</Text>
+          <Text style={[styles.bannerEnglish, { fontSize: bannerEnglishSize }]}>{ekadashi.nameEnglish}</Text>
         </View>
-        <MaterialCommunityIcons name="flower-tulip" size={24} color="#E0B0FF" />
+        <MaterialCommunityIcons name="flower-tulip" size={bannerIconSize} color="#E0B0FF" />
       </LinearGradient>
-      <View style={styles.significanceRow}>
-        <Text style={styles.significanceText}>{ekadashi.significance}</Text>
+      <View style={[styles.significanceRow, { paddingVertical: sigPadV, paddingHorizontal: sigPadH }]}>
+        <Text style={[styles.significanceText, { fontSize: sigFontSize, lineHeight: sigLineHeight }]}>{ekadashi.significance}</Text>
       </View>
     </View>
   );
@@ -34,37 +46,55 @@ export function UpcomingEkadashiItem({ ekadashi }) {
   const d = new Date(ekadashi.date);
   const isPast = ekadashi.isPast;
   const daysLeft = ekadashi.daysLeft;
+
+  // Responsive values
+  const itemPad = usePick({ default: 12, md: 14, lg: 16 });
+  const dateColWidth = usePick({ default: 50, md: 56, lg: 62 });
+  const dayFontSize = usePick({ default: 22, md: 26, lg: 28 });
+  const monthFontSize = usePick({ default: 12, md: 14, lg: 15 });
+  const weekdayFontSize = usePick({ default: 11, md: 12, lg: 13 });
+  const nameFontSize = usePick({ default: 16, md: 18, lg: 20 });
+  const englishFontSize = usePick({ default: 13, md: 15, lg: 16 });
+  const pakshaIconSize = usePick({ default: 11, md: 12, lg: 14 });
+  const pakshaFontSize = usePick({ default: 9, md: 9, lg: 10 });
+  const badgeNumSize = usePick({ default: 18, md: 20, lg: 22 });
+  const badgeLabelSize = usePick({ default: 10, md: 11, lg: 12 });
+  const badgePadH = usePick({ default: 8, md: 10, lg: 12 });
+  const badgePadV = usePick({ default: 5, md: 6, lg: 8 });
+  const dividerMx = usePick({ default: 10, md: 12, lg: 14 });
+  const dividerH = usePick({ default: 46, md: 52, lg: 58 });
+
   return (
-    <View style={styles.ekadashiItem}>
+    <View style={[styles.ekadashiItem, { padding: itemPad }]}>
       {/* Prominent calendar date on the left, matching the festivals/holidays layout */}
-      <View style={styles.ekadashiDateCol}>
-        <Text style={styles.ekadashiDay}>{d.getDate()}</Text>
-        <Text style={styles.ekadashiMonth}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
-        <Text style={styles.ekadashiWeekday}>{d.toLocaleDateString('en-IN', { weekday: 'short' })}</Text>
+      <View style={[styles.ekadashiDateCol, { width: dateColWidth }]}>
+        <Text style={[styles.ekadashiDay, { fontSize: dayFontSize }]}>{d.getDate()}</Text>
+        <Text style={[styles.ekadashiMonth, { fontSize: monthFontSize }]}>{d.toLocaleDateString('en-IN', { month: 'short' })}</Text>
+        <Text style={[styles.ekadashiWeekday, { fontSize: weekdayFontSize }]}>{d.toLocaleDateString('en-IN', { weekday: 'short' })}</Text>
       </View>
-      <View style={styles.ekadashiDivider} />
+      <View style={[styles.ekadashiDivider, { marginHorizontal: dividerMx, height: dividerH }]} />
 
       <View style={styles.ekadashiInfo}>
         <View style={styles.ekadashiNameRow}>
-          <Text style={styles.ekadashiName}>{ekadashi.name}</Text>
+          <Text style={[styles.ekadashiName, { fontSize: nameFontSize }]}>{ekadashi.name}</Text>
           <View style={[styles.pakshaBadge, ekadashi.pakshaEnglish === 'Shukla' ? styles.shukla : styles.krishna]}>
             <MaterialCommunityIcons
               name={ekadashi.pakshaEnglish === 'Shukla' ? 'moon-waxing-crescent' : 'moon-waning-crescent'}
-              size={12}
+              size={pakshaIconSize}
               color={DarkColors.textSecondary}
               style={{ marginRight: 3 }}
             />
-            <Text style={styles.pakshaText}>{ekadashi.paksha}</Text>
+            <Text style={[styles.pakshaText, { fontSize: pakshaFontSize }]}>{ekadashi.paksha}</Text>
           </View>
         </View>
-        <Text style={styles.ekadashiEnglish}>{ekadashi.nameEnglish}</Text>
+        <Text style={[styles.ekadashiEnglish, { fontSize: englishFontSize }]}>{ekadashi.nameEnglish}</Text>
       </View>
 
       {/* Days-left badge on the right — absolute value + "ago/today/days" */}
       {daysLeft !== undefined && (
-        <View style={styles.ekadashiBadge}>
-          <Text style={styles.ekadashiDaysNum}>{Math.abs(daysLeft)}</Text>
-          <Text style={styles.ekadashiDaysLabel}>
+        <View style={[styles.ekadashiBadge, { paddingHorizontal: badgePadH, paddingVertical: badgePadV }]}>
+          <Text style={[styles.ekadashiDaysNum, { fontSize: badgeNumSize }]}>{Math.abs(daysLeft)}</Text>
+          <Text style={[styles.ekadashiDaysLabel, { fontSize: badgeLabelSize }]}>
             {daysLeft === 0 ? 'నేడు' : isPast ? 'గతం' : 'రోజులు'}
           </Text>
         </View>
@@ -75,6 +105,28 @@ export function UpcomingEkadashiItem({ ekadashi }) {
 
 export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate, showAll: showAllInline = false }) {
   const [showAllModal, setShowAllModal] = useState(false);
+
+  // Responsive values for section + modal
+  const viewAllIconSize = usePick({ default: 14, md: 16, lg: 18 });
+  const viewAllFontSize = usePick({ default: 12, md: 13, lg: 14 });
+  const viewAllPadV = usePick({ default: 8, md: 10, lg: 12 });
+  const modalHeaderPadV = usePick({ default: 16, md: 20, lg: 24 });
+  const modalTitleSize = usePick({ default: 18, md: 20, lg: 22 });
+  const modalSubtitleSize = usePick({ default: 13, md: 14, lg: 15 });
+  const modalHeaderIconSize = usePick({ default: 20, md: 22, lg: 24 });
+  const modalCloseIconSize = usePick({ default: 22, md: 24, lg: 26 });
+  const modalCloseBtnSize = usePick({ default: 34, md: 36, lg: 40 });
+  const allEkPadV = usePick({ default: 10, md: 12, lg: 14 });
+  const allEkPadH = usePick({ default: 16, md: 20, lg: 24 });
+  const allEkDateSize = usePick({ default: 13, md: 15, lg: 16 });
+  const allEkNameSize = usePick({ default: 15, md: 17, lg: 18 });
+  const allEkEnglishSize = usePick({ default: 12, md: 13, lg: 14 });
+  const allEkMoonSize = usePick({ default: 10, md: 10, lg: 12 });
+  const allEkLeftWidth = usePick({ default: 58, md: 65, lg: 72 });
+  const todayTagSize = usePick({ default: 11, md: 12, lg: 13 });
+  const modalCloseFontSize = usePick({ default: 14, md: 15, lg: 16 });
+  const modalClosePadV = usePick({ default: 12, md: 14, lg: 16 });
+  const modalCloseMx = usePick({ default: 20, md: 24, lg: 28 });
 
   return (
     <View>
@@ -91,10 +143,10 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
           ))}
 
           {!showAllInline && (
-            <TouchableOpacity style={styles.viewAllBtn} onPress={() => setShowAllModal(true)}>
-              <MaterialCommunityIcons name="calendar-month" size={16} color={DarkColors.goldLight} style={{ marginRight: 6 }} />
-              <Text style={styles.viewAllText}>అన్ని ఏకాదశులు చూడండి</Text>
-              <MaterialCommunityIcons name="chevron-right" size={16} color={DarkColors.goldLight} />
+            <TouchableOpacity style={[styles.viewAllBtn, { paddingVertical: viewAllPadV }]} onPress={() => setShowAllModal(true)}>
+              <MaterialCommunityIcons name="calendar-month" size={viewAllIconSize} color={DarkColors.goldLight} style={{ marginRight: 6 }} />
+              <Text style={[styles.viewAllText, { fontSize: viewAllFontSize }]}>అన్ని ఏకాదశులు చూడండి</Text>
+              <MaterialCommunityIcons name="chevron-right" size={viewAllIconSize} color={DarkColors.goldLight} />
             </TouchableOpacity>
           )}
         </View>
@@ -109,15 +161,15 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={[styles.modalHeader, { position: 'relative' }]}>
-              <MaterialCommunityIcons name="calendar-star" size={22} color={DarkColors.goldLight} />
-              <Text style={styles.modalTitle}> 2026 ఏకాదశి దినాలు</Text>
-              <Text style={styles.modalSubtitle}>మొత్తం 24 ఏకాదశి దినాలు</Text>
+            <View style={[styles.modalHeader, { position: 'relative', paddingVertical: modalHeaderPadV }]}>
+              <MaterialCommunityIcons name="calendar-star" size={modalHeaderIconSize} color={DarkColors.goldLight} />
+              <Text style={[styles.modalTitle, { fontSize: modalTitleSize }]}> 2026 ఏకాదశి దినాలు</Text>
+              <Text style={[styles.modalSubtitle, { fontSize: modalSubtitleSize }]}>మొత్తం 24 ఏకాదశి దినాలు</Text>
               <TouchableOpacity
-                style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}
+                style={{ position: 'absolute', top: 14, right: 16, width: modalCloseBtnSize, height: modalCloseBtnSize, borderRadius: modalCloseBtnSize / 2, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}
                 onPress={() => setShowAllModal(false)}
               >
-                <Ionicons name="close" size={24} color={DarkColors.textPrimary} />
+                <Ionicons name="close" size={modalCloseIconSize} color={DarkColors.textPrimary} />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -128,24 +180,24 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
                 const isPast = item.date < dateStr;
                 const isToday = item.date === dateStr;
                 return (
-                  <View style={[styles.allEkItem, isPast && styles.allEkItemPast, isToday && styles.allEkItemToday]}>
-                    <View style={styles.allEkLeft}>
-                      <Text style={[styles.allEkDate, isPast && styles.allEkTextPast]}>
+                  <View style={[styles.allEkItem, { paddingVertical: allEkPadV, paddingHorizontal: allEkPadH }, isPast && styles.allEkItemPast, isToday && styles.allEkItemToday]}>
+                    <View style={[styles.allEkLeft, { width: allEkLeftWidth }]}>
+                      <Text style={[styles.allEkDate, { fontSize: allEkDateSize }, isPast && styles.allEkTextPast]}>
                         {new Date(item.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
                       </Text>
                       <MaterialCommunityIcons
                         name={item.pakshaEnglish === 'Shukla' ? 'moon-waxing-crescent' : 'moon-waning-crescent'}
-                        size={10}
+                        size={allEkMoonSize}
                         color={isPast ? DarkColors.textMuted : (item.pakshaEnglish === 'Shukla' ? DarkColors.gold : DarkColors.textSecondary)}
                       />
                     </View>
                     <View style={styles.allEkRight}>
-                      <Text style={[styles.allEkName, isPast && styles.allEkTextPast]}>{item.name}</Text>
-                      <Text style={styles.allEkEnglish}>{item.nameEnglish}</Text>
+                      <Text style={[styles.allEkName, { fontSize: allEkNameSize }, isPast && styles.allEkTextPast]}>{item.name}</Text>
+                      <Text style={[styles.allEkEnglish, { fontSize: allEkEnglishSize }]}>{item.nameEnglish}</Text>
                       {isToday && (
                         <View style={styles.todayTagContainer}>
-                          <MaterialCommunityIcons name="check-circle" size={10} color={DarkColors.goldLight} />
-                          <Text style={styles.todayTag}> నేడు</Text>
+                          <MaterialCommunityIcons name="check-circle" size={allEkMoonSize} color={DarkColors.goldLight} />
+                          <Text style={[styles.todayTag, { fontSize: todayTagSize }]}> నేడు</Text>
                         </View>
                       )}
                     </View>
@@ -153,8 +205,8 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
                 );
               }}
             />
-            <TouchableOpacity style={styles.modalClose} onPress={() => setShowAllModal(false)}>
-              <Text style={styles.modalCloseText}>మూసివేయండి</Text>
+            <TouchableOpacity style={[styles.modalClose, { paddingVertical: modalClosePadV, marginHorizontal: modalCloseMx }]} onPress={() => setShowAllModal(false)}>
+              <Text style={[styles.modalCloseText, { fontSize: modalCloseFontSize }]}>మూసివేయండి</Text>
             </TouchableOpacity>
           </View>
         </View>

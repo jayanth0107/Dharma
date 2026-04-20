@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { getTodayFestival } from '../data/festivals';
 import { getTodayEkadashi } from '../data/ekadashi';
 
@@ -9,6 +10,16 @@ const TELUGU_DAYS = ['ఆ', 'సో', 'మం', 'బు', 'గు', 'శు', '�
 const ENGLISH_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function MiniCalendar({ selectedDate, onDateSelect }) {
+  const containerPadding = usePick({ default: 12, sm: 14, md: 16, xl: 24 });
+  const monthFontSize = usePick({ default: 16, md: 18, xl: 22 });
+  const navIconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const dayHeaderFontSize = usePick({ default: 12, md: 14, xl: 16 });
+  const dateFontSize = usePick({ default: 14, md: 16, xl: 18 });
+  const cellMinHeight = usePick({ default: 40, md: 46, xl: 54 });
+  const legendFontSize = usePick({ default: 11, md: 13, xl: 15 });
+  const legendDotSize = usePick({ default: 8, md: 10, xl: 12 });
+  const dotSize = usePick({ default: 5, md: 6, xl: 8 });
+  const borderRadius = usePick({ default: 12, md: 16, xl: 20 });
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
 
@@ -45,17 +56,17 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
   const selectedDay = selectedDate.getDate();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { padding: containerPadding, borderRadius }]}>
       {/* Month Header */}
       <View style={styles.monthHeader}>
         <TouchableOpacity onPress={prevMonth} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-left" size={22} color={DarkColors.saffron} />
+          <MaterialCommunityIcons name="chevron-left" size={navIconSize} color={DarkColors.saffron} />
         </TouchableOpacity>
         <View style={styles.monthTitleCol}>
-          <Text style={styles.monthTitle}>{monthNames[month]} {year}</Text>
+          <Text style={[styles.monthTitle, { fontSize: monthFontSize }]}>{monthNames[month]} {year}</Text>
         </View>
         <TouchableOpacity onPress={nextMonth} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.saffron} />
+          <MaterialCommunityIcons name="chevron-right" size={navIconSize} color={DarkColors.saffron} />
         </TouchableOpacity>
       </View>
 
@@ -63,7 +74,7 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
       <View style={styles.dayHeaderRow}>
         {TELUGU_DAYS.map((day, i) => (
           <View key={i} style={styles.dayHeaderCell}>
-            <Text style={[styles.dayHeaderText, i === 0 && styles.sundayText]}>
+            <Text style={[styles.dayHeaderText, { fontSize: dayHeaderFontSize }, i === 0 && styles.sundayText]}>
               {day}
             </Text>
           </View>
@@ -74,7 +85,7 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
       <View style={styles.grid}>
         {cells.map((day, i) => {
           if (day === null) {
-            return <View key={`empty-${i}`} style={styles.dateCell} />;
+            return <View key={`empty-${i}`} style={[styles.dateCell, { minHeight: cellMinHeight }]} />;
           }
 
           const date = new Date(year, month, day);
@@ -94,6 +105,7 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
               key={`day-${day}`}
               style={[
                 styles.dateCell,
+                { minHeight: cellMinHeight },
                 isSelected && styles.selectedCell,
                 isToday && !isSelected && styles.todayCell,
               ]}
@@ -101,6 +113,7 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
             >
               <Text style={[
                 styles.dateText,
+                { fontSize: dateFontSize },
                 isSunday && styles.sundayText,
                 isSelected && styles.selectedText,
                 isToday && !isSelected && styles.todayText,
@@ -109,8 +122,8 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
               </Text>
               {/* Event indicators */}
               <View style={styles.indicators}>
-                {hasEvent && <View style={[styles.dot, styles.festivalDot]} />}
-                {hasEkadashi && <View style={[styles.dot, styles.ekadashiDot]} />}
+                {hasEvent && <View style={[styles.dot, styles.festivalDot, { width: dotSize, height: dotSize, borderRadius: dotSize / 2 }]} />}
+                {hasEkadashi && <View style={[styles.dot, styles.ekadashiDot, { width: dotSize, height: dotSize, borderRadius: dotSize / 2 }]} />}
               </View>
             </TouchableOpacity>
           );
@@ -120,16 +133,16 @@ export function MiniCalendar({ selectedDate, onDateSelect }) {
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.festivalDot]} />
-          <Text style={styles.legendText}>పండుగ</Text>
+          <View style={[styles.legendDot, styles.festivalDot, { width: legendDotSize, height: legendDotSize, borderRadius: legendDotSize / 2 }]} />
+          <Text style={[styles.legendText, { fontSize: legendFontSize }]}>పండుగ</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.ekadashiDot]} />
-          <Text style={styles.legendText}>ఏకాదశి</Text>
+          <View style={[styles.legendDot, styles.ekadashiDot, { width: legendDotSize, height: legendDotSize, borderRadius: legendDotSize / 2 }]} />
+          <Text style={[styles.legendText, { fontSize: legendFontSize }]}>ఏకాదశి</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: DarkColors.saffron }]} />
-          <Text style={styles.legendText}>ఎంపిక</Text>
+          <View style={[styles.legendDot, { backgroundColor: DarkColors.saffron, width: legendDotSize, height: legendDotSize, borderRadius: legendDotSize / 2 }]} />
+          <Text style={[styles.legendText, { fontSize: legendFontSize }]}>ఎంపిక</Text>
         </View>
       </View>
     </View>

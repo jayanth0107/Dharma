@@ -150,8 +150,9 @@ async function searchWithPhoton(query) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 6000);
 
+  // bbox=68,6,98,38 covers India; bias lat/lon to center of India
   const response = await fetch(
-    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lat=20.5&lon=78.9&lang=en`,
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=15&lat=20.5&lon=78.9&bbox=68,6,98,38&lang=en`,
     {
       headers: { 'Accept': 'application/json' },
       signal: controller.signal,
@@ -183,15 +184,14 @@ async function searchWithPhoton(query) {
     };
   }).filter(r => r.latitude && r.longitude && r.name);
 
-  // Prioritize Indian results — Indian villages/cities should appear first
-  // when a user searches for a local place name like "tenali".
-  results.sort((a, b) => {
-    const aIndia = (a.country || '').toLowerCase() === 'india' ? 0 : 1;
-    const bIndia = (b.country || '').toLowerCase() === 'india' ? 0 : 1;
-    return aIndia - bIndia;
-  });
+  // Separate Indian and non-Indian results
+  const indian = results.filter(r => (r.country || '').toLowerCase() === 'india');
+  const others = results.filter(r => (r.country || '').toLowerCase() !== 'india');
 
-  return results;
+  // Return Indian results first; only add non-Indian if very few Indian results
+  if (indian.length >= 3) return indian;
+  return [...indian, ...others];
+
 }
 
 // MapMyIndia (Mappls) — best India coverage, needs API key

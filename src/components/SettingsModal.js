@@ -12,7 +12,9 @@ import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
 import { getPaymentStats } from '../utils/paymentSync';
 import { setAdConfig } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
+import { useApp } from '../context/AppContext';
 import { TR } from '../data/translations';
+import { usePick } from '../theme/responsive';
 
 // Admin verification (obfuscated)
 const _k = 42;
@@ -27,6 +29,24 @@ function verifyAdmin(input) {
 
 export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, embedded = false }) {
   const { t } = useLanguage();
+  const { location } = useApp();
+
+  // Responsive sizes
+  const headerIconSize = usePick({ default: 36, lg: 42, xl: 48 });
+  const titleSize = usePick({ default: 22, lg: 24, xl: 28 });
+  const sectionTitleSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const settingLabelSize = usePick({ default: 15, lg: 16, xl: 18 });
+  const settingSublabelSize = usePick({ default: 11, lg: 12, xl: 14 });
+  const settingIconSize = usePick({ default: 22, lg: 24, xl: 28 });
+  const settingRowPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const timeBtnSize = usePick({ default: 32, lg: 36, xl: 40 });
+  const timeValueSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const infoFontSize = usePick({ default: 14, lg: 15, xl: 17 });
+  const bodyPadH = usePick({ default: 20, lg: 26, xl: 32 });
+  const closeBtnFontSize = usePick({ default: 15, lg: 16, xl: 18 });
+  const paymentFontSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const paymentSmallSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const cloudStatSize = usePick({ default: 22, lg: 26, xl: 30 });
   const [settings, setSettings] = useState(null);
   const [tapCount, setTapCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -79,7 +99,8 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
     const updated = { ...settings, [key]: value };
     setSettings(updated);
     await saveNotifSettings(updated);
-    await setupDailyNotifications(updated);
+    const loc = location ? { latitude: location.latitude, longitude: location.longitude, altitude: location.altitude || 0 } : undefined;
+    await setupDailyNotifications(updated, loc);
   };
 
   if (!settings) return null;
@@ -91,18 +112,19 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
             <TouchableOpacity style={s.closeX} onPress={onClose}>
               <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
-            <MaterialCommunityIcons name="cog" size={36} color="#FFD700" />
-            <Text style={s.title}>{t(TR.settings.te, TR.settings.en)}</Text>
+            <MaterialCommunityIcons name="cog" size={headerIconSize} color="#FFD700" />
+            <Text style={[s.title, { fontSize: titleSize }]}>{t(TR.settings.te, TR.settings.en)}</Text>
             <Text style={s.subtitle}>{t(TR.settings.en, TR.settings.en)}</Text>
           </LinearGradient>
 
-          <ScrollView style={s.body} showsVerticalScrollIndicator={false}>
+          <ScrollView style={[s.body, { paddingHorizontal: bodyPadH }]} showsVerticalScrollIndicator={false}>
             {/* Notifications Section */}
-            <Text style={s.sectionTitle}>{t(TR.notifications.te, TR.notifications.en)}</Text>
+            <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t(TR.notifications.te, TR.notifications.en)}</Text>
 
             <SettingRow
               icon="bell" label={t(TR.allNotifications.te, TR.allNotifications.en)} sublabel={t(TR.allNotifSub.te, TR.allNotifSub.en)}
               value={settings.enabled} onChange={(v) => updateSetting('enabled', v)}
+              iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
             />
 
             {settings.enabled && (
@@ -110,39 +132,43 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                 <SettingRow
                   icon="pot-mix" label={t(TR.dailyPanchang.te, TR.dailyPanchang.en)} sublabel={t(TR.dailyPanchangSub.te, TR.dailyPanchangSub.en)}
                   value={settings.dailyPanchangam} onChange={(v) => updateSetting('dailyPanchangam', v)}
+                  iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
                 <SettingRow
                   icon="format-quote-open" label={t(TR.dailyQuote.te, TR.dailyQuote.en)} sublabel={t(TR.dailyQuoteSub.te, TR.dailyQuoteSub.en)}
                   value={settings.dailyQuote} onChange={(v) => updateSetting('dailyQuote', v)}
+                  iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
                 <SettingRow
                   icon="party-popper" label={t(TR.festivalReminder.te, TR.festivalReminder.en)} sublabel={t(TR.festivalReminderSub.te, TR.festivalReminderSub.en)}
                   value={settings.festivalReminder} onChange={(v) => updateSetting('festivalReminder', v)}
+                  iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
                 <SettingRow
                   icon="hands-pray" label={t(TR.ekadashiReminder.te, TR.ekadashiReminder.en)} sublabel={t(TR.ekadashiReminderSub.te, TR.ekadashiReminderSub.en)}
                   value={settings.ekadashiReminder} onChange={(v) => updateSetting('ekadashiReminder', v)}
+                  iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
 
                 {/* Time picker */}
-                <View style={s.timeRow}>
-                  <MaterialCommunityIcons name="clock-outline" size={20} color={DarkColors.saffron} />
-                  <Text style={s.timeLabel}>{t(TR.notifTime.te, TR.notifTime.en)}</Text>
+                <View style={[s.timeRow, { padding: settingRowPad }]}>
+                  <MaterialCommunityIcons name="clock-outline" size={settingIconSize} color={DarkColors.saffron} />
+                  <Text style={[s.timeLabel, { fontSize: settingLabelSize }]}>{t(TR.notifTime.te, TR.notifTime.en)}</Text>
                   <View style={s.timePickerRow}>
                     <TouchableOpacity
-                      style={s.timeBtn}
+                      style={[s.timeBtn, { width: timeBtnSize, height: timeBtnSize, borderRadius: timeBtnSize / 2 }]}
                       onPress={() => updateSetting('notifHour', Math.max(0, settings.notifHour - 1))}
                     >
-                      <Text style={s.timeBtnText}>−</Text>
+                      <Text style={[s.timeBtnText, { fontSize: timeValueSize }]}>−</Text>
                     </TouchableOpacity>
-                    <Text style={s.timeValue}>
+                    <Text style={[s.timeValue, { fontSize: timeValueSize }]}>
                       {String(settings.notifHour).padStart(2, '0')}:{String(settings.notifMinute).padStart(2, '0')}
                     </Text>
                     <TouchableOpacity
-                      style={s.timeBtn}
+                      style={[s.timeBtn, { width: timeBtnSize, height: timeBtnSize, borderRadius: timeBtnSize / 2 }]}
                       onPress={() => updateSetting('notifHour', Math.min(23, settings.notifHour + 1))}
                     >
-                      <Text style={s.timeBtnText}>+</Text>
+                      <Text style={[s.timeBtnText, { fontSize: timeValueSize }]}>+</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -152,7 +178,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
             {/* Admin-only controls — hidden behind version tap + passcode */}
             {adminUnlocked && (
               <>
-                <Text style={[s.sectionTitle, { marginTop: 20 }]}>{t(TR.adminControls.te, TR.adminControls.en)}</Text>
+                <Text style={[s.sectionTitle, { marginTop: 20, fontSize: sectionTitleSize }]}>{t(TR.adminControls.te, TR.adminControls.en)}</Text>
                 <SettingRow
                   icon="advertisements" label={t(TR.adsShow.te, TR.adsShow.en)}
                   sublabel={isPremium ? t(TR.adsShowSubPremium.te, TR.adsShowSubPremium.en) : t(TR.adsShowSubFree.te, TR.adsShowSubFree.en)}
@@ -161,12 +187,13 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     updateSetting('adsEnabled', v);
                     setAdConfig({ enabled: v });
                   }}
+                  iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
-                <View style={s.settingRow}>
-                  <MaterialCommunityIcons name="crown" size={22} color="#FFD700" style={{ marginRight: 12 }} />
+                <View style={[s.settingRow, { padding: settingRowPad }]}>
+                  <MaterialCommunityIcons name="crown" size={settingIconSize} color="#FFD700" style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.settingLabel}>{isPremium ? t(TR.premiumActive.te, TR.premiumActive.en) : `Premium ${t(TR.premiumInactive.te, TR.premiumInactive.en)}`}</Text>
-                    <Text style={s.settingSublabel}>{isPremium ? t(TR.premiumUnlocked.te, TR.premiumUnlocked.en) : t(TR.premiumLocked.te, TR.premiumLocked.en)}</Text>
+                    <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{isPremium ? t(TR.premiumActive.te, TR.premiumActive.en) : `Premium ${t(TR.premiumInactive.te, TR.premiumInactive.en)}`}</Text>
+                    <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{isPremium ? t(TR.premiumUnlocked.te, TR.premiumUnlocked.en) : t(TR.premiumLocked.te, TR.premiumLocked.en)}</Text>
                   </View>
                   <Switch
                     value={isPremium}
@@ -183,7 +210,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
 
                 {/* Payment Records */}
                 <TouchableOpacity
-                  style={[s.settingRow, { marginTop: 12, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 12 }]}
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: settingRowPad }]}
                   onPress={async () => {
                     if (!showPayments) {
                       const records = await getPaymentRecords();
@@ -192,10 +219,10 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     setShowPayments(!showPayments);
                   }}
                 >
-                  <MaterialCommunityIcons name="receipt" size={22} color={DarkColors.saffron} style={{ marginRight: 12 }} />
+                  <MaterialCommunityIcons name="receipt" size={settingIconSize} color={DarkColors.saffron} style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.settingLabel}>{t(TR.paymentRecords.te, TR.paymentRecords.en)}</Text>
-                    <Text style={s.settingSublabel}>{t(TR.paymentHistory.te, TR.paymentHistory.en)}</Text>
+                    <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{t(TR.paymentRecords.te, TR.paymentRecords.en)}</Text>
+                    <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{t(TR.paymentHistory.te, TR.paymentHistory.en)}</Text>
                   </View>
                   <MaterialCommunityIcons name={showPayments ? 'chevron-up' : 'chevron-down'} size={20} color={DarkColors.textMuted} />
                 </TouchableOpacity>
@@ -203,7 +230,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                 {showPayments && (
                   <View style={{ marginTop: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: DarkColors.borderCard }}>
                     {paymentRecords.length === 0 ? (
-                      <Text style={{ fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 12 }}>{t(TR.noPayments.te, TR.noPayments.en)}</Text>
+                      <Text style={{ fontSize: paymentFontSize, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 12 }}>{t(TR.noPayments.te, TR.noPayments.en)}</Text>
                     ) : (
                       paymentRecords.slice().reverse().map((r, i) => {
                         const sourceLabel = r.source === 'trial' ? '🆓 Free Trial'
@@ -215,21 +242,21 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                         return (
                           <View key={i} style={{ paddingVertical: 8, borderBottomWidth: i < paymentRecords.length - 1 ? 1 : 0, borderBottomColor: DarkColors.borderCard }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary }}>{sourceLabel}</Text>
-                              <Text style={{ fontSize: 12, fontWeight: '700', color: r.amount ? DarkColors.tulasiGreen : DarkColors.textMuted }}>
+                              <Text style={{ fontSize: paymentFontSize, fontWeight: '700', color: DarkColors.textPrimary }}>{sourceLabel}</Text>
+                              <Text style={{ fontSize: paymentFontSize - 1, fontWeight: '700', color: r.amount ? DarkColors.tulasiGreen : DarkColors.textMuted }}>
                                 {r.amount ? `₹${r.amount}` : 'Free'}
                               </Text>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 3 }}>
-                              <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>
+                              <Text style={{ fontSize: paymentSmallSize, color: DarkColors.textMuted }}>
                                 {r.planName || r.planId || '—'} • {r.days}d
                               </Text>
-                              <Text style={{ fontSize: 10, color: '#aaa' }}>
+                              <Text style={{ fontSize: paymentSmallSize - 1, color: '#aaa' }}>
                                 {r.date ? new Date(r.date).toLocaleString('te-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
                               </Text>
                             </View>
                             {r.screen ? (
-                              <Text style={{ fontSize: 10, color: '#bbb', marginTop: 1 }}>
+                              <Text style={{ fontSize: paymentSmallSize - 1, color: '#bbb', marginTop: 1 }}>
                                 via {r.screen} • {r.platform || 'web'}
                               </Text>
                             ) : null}
@@ -244,7 +271,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                 )}
                 {/* Cloud Payments (All Users) */}
                 <TouchableOpacity
-                  style={[s.settingRow, { marginTop: 12, backgroundColor: 'rgba(74,26,107,0.06)', borderRadius: 12, padding: 12 }]}
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: 'rgba(74,26,107,0.06)', borderRadius: 12, padding: settingRowPad }]}
                   onPress={async () => {
                     if (!showCloud) {
                       setCloudLoading(true);
@@ -255,10 +282,10 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     setShowCloud(!showCloud);
                   }}
                 >
-                  <MaterialCommunityIcons name="cloud-download" size={22} color="#9B6FCF" style={{ marginRight: 12 }} />
+                  <MaterialCommunityIcons name="cloud-download" size={settingIconSize} color="#9B6FCF" style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.settingLabel}>{t(TR.cloudPayments.te, TR.cloudPayments.en)}</Text>
-                    <Text style={s.settingSublabel}>{t(TR.cloudPaymentsSub.te, TR.cloudPaymentsSub.en)}</Text>
+                    <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{t(TR.cloudPayments.te, TR.cloudPayments.en)}</Text>
+                    <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{t(TR.cloudPaymentsSub.te, TR.cloudPaymentsSub.en)}</Text>
                   </View>
                   <MaterialCommunityIcons name={showCloud ? 'chevron-up' : 'chevron-down'} size={20} color={DarkColors.textMuted} />
                 </TouchableOpacity>
@@ -266,28 +293,28 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                 {showCloud && (
                   <View style={{ marginTop: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: DarkColors.borderCard }}>
                     {cloudLoading ? (
-                      <Text style={{ fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 16 }}>{t(TR.firebaseLoading.te, TR.firebaseLoading.en)}</Text>
+                      <Text style={{ fontSize: paymentFontSize, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 16 }}>{t(TR.firebaseLoading.te, TR.firebaseLoading.en)}</Text>
                     ) : !cloudStats ? (
-                      <Text style={{ fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 12 }}>{t(TR.noData.te, TR.noData.en)}</Text>
+                      <Text style={{ fontSize: paymentFontSize, color: DarkColors.textMuted, textAlign: 'center', paddingVertical: 12 }}>{t(TR.noData.te, TR.noData.en)}</Text>
                     ) : (
                       <>
                         {/* Stats summary */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, marginBottom: 10 }}>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: DarkColors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
-                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.totalRevenue.te, TR.totalRevenue.en)}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: DarkColors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
+                            <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.totalRevenue.te, TR.totalRevenue.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: '#9B6FCF' }}>{cloudStats.uniqueDevices}</Text>
-                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.devicesLabel.te, TR.devicesLabel.en)}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: '#9B6FCF' }}>{cloudStats.uniqueDevices}</Text>
+                            <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.devicesLabel.te, TR.devicesLabel.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: DarkColors.saffron }}>{cloudStats.purchases}</Text>
-                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.purchasesLabel.te, TR.purchasesLabel.en)}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: DarkColors.saffron }}>{cloudStats.purchases}</Text>
+                            <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.purchasesLabel.te, TR.purchasesLabel.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: 22, fontWeight: '900', color: DarkColors.gold }}>{cloudStats.trials}</Text>
-                            <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t(TR.trialsLabel.te, TR.trialsLabel.en)}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: DarkColors.gold }}>{cloudStats.trials}</Text>
+                            <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.trialsLabel.te, TR.trialsLabel.en)}</Text>
                           </View>
                         </View>
 
@@ -297,14 +324,14 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                           return (
                             <View key={r.id || i} style={{ paddingVertical: 6, borderBottomWidth: i < 19 ? 1 : 0, borderBottomColor: DarkColors.borderCard }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text style={{ fontSize: 12, fontWeight: '700', color: DarkColors.textPrimary }}>
+                                <Text style={{ fontSize: paymentFontSize - 1, fontWeight: '700', color: DarkColors.textPrimary }}>
                                   {srcLabel} {r.amount ? `₹${r.amount}` : 'Free'} — {r.planName || r.planId || r.source}
                                 </Text>
-                                <Text style={{ fontSize: 10, color: '#aaa' }}>{r.days}d</Text>
+                                <Text style={{ fontSize: paymentSmallSize - 1, color: '#aaa' }}>{r.days}d</Text>
                               </View>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 1 }}>
-                                <Text style={{ fontSize: 10, color: '#bbb' }}>{r.deviceId?.substring(0, 12) || '—'} • {r.platform || '?'}</Text>
-                                <Text style={{ fontSize: 10, color: '#bbb' }}>{r.date ? new Date(r.date).toLocaleDateString() : '—'}</Text>
+                                <Text style={{ fontSize: paymentSmallSize - 1, color: '#bbb' }}>{r.deviceId?.substring(0, 12) || '—'} • {r.platform || '?'}</Text>
+                                <Text style={{ fontSize: paymentSmallSize - 1, color: '#bbb' }}>{r.date ? new Date(r.date).toLocaleDateString() : '—'}</Text>
                               </View>
                             </View>
                           );
@@ -344,25 +371,25 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
               </View>
             )}
 
-            <Text style={[s.sectionTitle, { marginTop: 20 }]}>{t(TR.appInfo.te, TR.appInfo.en)}</Text>
+            <Text style={[s.sectionTitle, { marginTop: 20, fontSize: sectionTitleSize }]}>{t(TR.appInfo.te, TR.appInfo.en)}</Text>
 
             <TouchableOpacity onPress={handleVersionTap} activeOpacity={1}>
               <View style={s.infoRow}>
-                <Text style={s.infoLabel}>{t(TR.versionLabel.te, TR.versionLabel.en)}</Text>
-                <Text style={s.infoValue}>1.1.0</Text>
+                <Text style={[s.infoLabel, { fontSize: infoFontSize }]}>{t(TR.versionLabel.te, TR.versionLabel.en)}</Text>
+                <Text style={[s.infoValue, { fontSize: infoFontSize }]}>1.1.0</Text>
               </View>
             </TouchableOpacity>
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{t(TR.developer.te, TR.developer.en)}</Text>
-              <Text style={s.infoValue}>{t(TR.devTeam.te, TR.devTeam.en)}</Text>
+              <Text style={[s.infoLabel, { fontSize: infoFontSize }]}>{t(TR.developer.te, TR.developer.en)}</Text>
+              <Text style={[s.infoValue, { fontSize: infoFontSize }]}>{t(TR.devTeam.te, TR.devTeam.en)}</Text>
             </View>
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{t(TR.calculations.te, TR.calculations.en)}</Text>
-              <Text style={s.infoValue}>Drik Ganita + Lahiri Ayanamsa</Text>
+              <Text style={[s.infoLabel, { fontSize: infoFontSize }]}>{t(TR.calculations.te, TR.calculations.en)}</Text>
+              <Text style={[s.infoValue, { fontSize: infoFontSize }]}>Drik Ganita + Lahiri Ayanamsa</Text>
             </View>
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>{t(TR.dataYear.te, TR.dataYear.en)}</Text>
-              <Text style={s.infoValue}>2026</Text>
+              <Text style={[s.infoLabel, { fontSize: infoFontSize }]}>{t(TR.dataYear.te, TR.dataYear.en)}</Text>
+              <Text style={[s.infoValue, { fontSize: infoFontSize }]}>2026</Text>
             </View>
 
             {Platform.OS !== 'web' && (
@@ -378,20 +405,20 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
           </ScrollView>
 
           {/* Close */}
-          <TouchableOpacity style={s.closeBtn} onPress={onClose}>
-            <Text style={s.closeBtnText}>{t(TR.close.te, TR.close.en)}</Text>
+          <TouchableOpacity style={[s.closeBtn, { marginHorizontal: bodyPadH }]} onPress={onClose}>
+            <Text style={[s.closeBtnText, { fontSize: closeBtnFontSize }]}>{t(TR.close.te, TR.close.en)}</Text>
           </TouchableOpacity>
     </ModalOrView>
   );
 }
 
-function SettingRow({ icon, label, sublabel, value, onChange }) {
+function SettingRow({ icon, label, sublabel, value, onChange, iconSize = 22, labelSize = 15, sublabelSize = 11, rowPad = 14 }) {
   return (
-    <View style={s.settingRow}>
-      <MaterialCommunityIcons name={icon} size={22} color={DarkColors.saffron} style={{ marginRight: 12 }} />
+    <View style={[s.settingRow, { padding: rowPad }]}>
+      <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.saffron} style={{ marginRight: 12 }} />
       <View style={{ flex: 1 }}>
-        <Text style={s.settingLabel}>{label}</Text>
-        <Text style={s.settingSublabel}>{sublabel}</Text>
+        <Text style={[s.settingLabel, { fontSize: labelSize }]}>{label}</Text>
+        <Text style={[s.settingSublabel, { fontSize: sublabelSize }]}>{sublabel}</Text>
       </View>
       <Switch
         value={value}

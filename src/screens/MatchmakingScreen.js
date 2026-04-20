@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { TR } from '../data/translations';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
@@ -20,15 +21,20 @@ import { searchLocation } from '../utils/geolocation';
 
 // Place search results — defined OUTSIDE component to prevent re-mount on re-render
 function PlaceResults({ results, onSelect }) {
+  const markerSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const nameSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const subSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const itemPadV = usePick({ default: 12, lg: 14, xl: 16 });
+  const itemPadH = usePick({ default: 14, lg: 16, xl: 18 });
   if (!results.length) return null;
   return (
     <View style={s.placeResults}>
       {results.map((p, i) => (
-        <TouchableOpacity key={`${p.latitude}-${p.longitude}-${i}`} style={s.placeItem} onPress={() => onSelect(p)}>
-          <MaterialCommunityIcons name="map-marker" size={16} color={DarkColors.saffron} />
+        <TouchableOpacity key={`${p.latitude}-${p.longitude}-${i}`} style={[s.placeItem, { paddingVertical: itemPadV, paddingHorizontal: itemPadH }]} onPress={() => onSelect(p)}>
+          <MaterialCommunityIcons name="map-marker" size={markerSize} color={DarkColors.saffron} />
           <View style={{ flex: 1, marginLeft: 8 }}>
-            <Text style={s.placeItemName}>{p.name}</Text>
-            <Text style={s.placeItemSub} numberOfLines={1}>{p.displayName}</Text>
+            <Text style={[s.placeItemName, { fontSize: nameSize }]}>{p.name}</Text>
+            <Text style={[s.placeItemSub, { fontSize: subSize }]} numberOfLines={1}>{p.displayName}</Text>
           </View>
         </TouchableOpacity>
       ))}
@@ -38,6 +44,47 @@ function PlaceResults({ results, onSelect }) {
 
 export function MatchmakingScreen({ navigation }) {
   const { t } = useLanguage();
+
+  // ── Responsive sizing ──
+  const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
+  const cardPad = usePick({ default: 16, lg: 20, xl: 24 });
+  const personTitleSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const personIconSize = usePick({ default: 22, lg: 26, xl: 28 });
+  const inputFontSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const inputPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const calcBtnPadV = usePick({ default: 16, lg: 18, xl: 20 });
+  const calcBtnFontSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const calcBtnIcon = usePick({ default: 22, lg: 24, xl: 26 });
+  const scoreNumberSize = usePick({ default: 56, lg: 64, xl: 72 });
+  const scoreMaxSize = usePick({ default: 20, lg: 22, xl: 24 });
+  const scorePercentSize = usePick({ default: 24, lg: 28, xl: 32 });
+  const scoreHeaderPad = usePick({ default: 24, lg: 28, xl: 32 });
+  const verdictSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const verdictEnSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const coupleCardPad = usePick({ default: 14, lg: 18, xl: 22 });
+  const coupleNameSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const coupleNakSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const coupleRashiSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const coupleHeartIcon = usePick({ default: 24, lg: 28, xl: 32 });
+  const couplePersonIcon = usePick({ default: 20, lg: 22, xl: 24 });
+  const sectionLabelSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const kutaPad = usePick({ default: 14, lg: 18, xl: 22 });
+  const kutaNameSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const kutaNameEnSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const kutaDescSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const kutaScoreSize = usePick({ default: 22, lg: 26, xl: 30 });
+  const kutaMaxSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const resetBtnPadV = usePick({ default: 14, lg: 16, xl: 18 });
+  const resetBtnFontSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const resetBtnIcon = usePick({ default: 20, lg: 22, xl: 24 });
+  const nakChipLabelSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const nakChipValueSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const nakChipIconSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const nakChipPadV = usePick({ default: 10, lg: 12, xl: 14 });
+  const nakChipPadH = usePick({ default: 12, lg: 16, xl: 18 });
+  const selectedPlaceSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const bottomSpacer = usePick({ default: 30, lg: 40, xl: 50 });
+
   const [groomName, setGroomName] = useState('');
   const [brideName, setBrideName] = useState('');
   const [groomNak, setGroomNak] = useState(null);
@@ -101,7 +148,7 @@ export function MatchmakingScreen({ navigation }) {
       <PageHeader title={t(TR.matchmaking.te, TR.matchmaking.en)} />
       <TopTabBar />
 
-      <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
         {/* Date Picker Overlay */}
         {showDatePicker && (
@@ -134,19 +181,19 @@ export function MatchmakingScreen({ navigation }) {
         {!result ? (
           <>
             {/* ── Groom Section ── */}
-            <View style={s.personCard}>
+            <View style={[s.personCard, { padding: cardPad }]}>
               <View style={s.personHeader}>
-                <MaterialCommunityIcons name="human-male" size={22} color="#4A90D9" />
-                <Text style={[s.personTitle, { color: '#4A90D9' }]}>{t(TR.groomSection.te, TR.groomSection.en)}</Text>
+                <MaterialCommunityIcons name="human-male" size={personIconSize} color="#4A90D9" />
+                <Text style={[s.personTitle, { color: '#4A90D9', fontSize: personTitleSize }]}>{t(TR.groomSection.te, TR.groomSection.en)}</Text>
               </View>
-              <TextInput style={s.input} value={groomName} onChangeText={setGroomName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
-              <TouchableOpacity style={s.input} onPress={() => setShowDatePicker('groom')}>
-                <Text style={groomDob ? s.inputText : s.inputPlaceholder}>
+              <TextInput style={[s.input, { padding: inputPad, fontSize: inputFontSize }]} value={groomName} onChangeText={setGroomName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
+              <TouchableOpacity style={[s.input, { padding: inputPad }]} onPress={() => setShowDatePicker('groom')}>
+                <Text style={groomDob ? [s.inputText, { fontSize: inputFontSize }] : [s.inputPlaceholder, { fontSize: inputFontSize }]}>
                   {groomDob ? formatDate(groomDob) : t(TR.dobLabel.te, TR.dobLabel.en)}
                 </Text>
               </TouchableOpacity>
               <TextInput
-                style={s.input}
+                style={[s.input, { padding: inputPad, fontSize: inputFontSize }]}
                 value={groomPlaceQuery}
                 onChangeText={(text) => handlePlaceSearch(text, 'groom')}
                 placeholder={t(TR.birthPlace.te, TR.birthPlace.en)}
@@ -156,34 +203,34 @@ export function MatchmakingScreen({ navigation }) {
               {groomPlace && (
                 <View style={s.selectedPlace}>
                   <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
-                  <Text style={s.selectedPlaceText}>{groomPlace.displayName || groomPlace.name}</Text>
+                  <Text style={[s.selectedPlaceText, { fontSize: selectedPlaceSize }]}>{groomPlace.displayName || groomPlace.name}</Text>
                 </View>
               )}
               <PlaceResults results={groomPlaceResults} onSelect={(p) => selectPlace(p, 'groom')} />
               {/* Auto-detected nakshatra (read-only) — populated from DOB */}
               {groomNak !== null && (
-                <View style={s.nakChip}>
-                  <MaterialCommunityIcons name="star-four-points" size={16} color={DarkColors.gold} />
-                  <Text style={s.nakChipLabel}>{t('నక్షత్రం', 'Nakshatra')}:</Text>
-                  <Text style={s.nakChipValue}>{NAKSHATRAS[groomNak]} · {NAKSHATRAS_EN[groomNak]}</Text>
+                <View style={[s.nakChip, { paddingVertical: nakChipPadV, paddingHorizontal: nakChipPadH }]}>
+                  <MaterialCommunityIcons name="star-four-points" size={nakChipIconSize} color={DarkColors.gold} />
+                  <Text style={[s.nakChipLabel, { fontSize: nakChipLabelSize }]}>{t('నక్షత్రం', 'Nakshatra')}:</Text>
+                  <Text style={[s.nakChipValue, { fontSize: nakChipValueSize }]}>{NAKSHATRAS[groomNak]} · {NAKSHATRAS_EN[groomNak]}</Text>
                 </View>
               )}
             </View>
 
             {/* ── Bride Section ── */}
-            <View style={s.personCard}>
+            <View style={[s.personCard, { padding: cardPad }]}>
               <View style={s.personHeader}>
-                <MaterialCommunityIcons name="human-female" size={22} color="#E8495A" />
-                <Text style={[s.personTitle, { color: '#E8495A' }]}>{t(TR.brideSection.te, TR.brideSection.en)}</Text>
+                <MaterialCommunityIcons name="human-female" size={personIconSize} color="#E8495A" />
+                <Text style={[s.personTitle, { color: '#E8495A', fontSize: personTitleSize }]}>{t(TR.brideSection.te, TR.brideSection.en)}</Text>
               </View>
-              <TextInput style={s.input} value={brideName} onChangeText={setBrideName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
-              <TouchableOpacity style={s.input} onPress={() => setShowDatePicker('bride')}>
-                <Text style={brideDob ? s.inputText : s.inputPlaceholder}>
+              <TextInput style={[s.input, { padding: inputPad, fontSize: inputFontSize }]} value={brideName} onChangeText={setBrideName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
+              <TouchableOpacity style={[s.input, { padding: inputPad }]} onPress={() => setShowDatePicker('bride')}>
+                <Text style={brideDob ? [s.inputText, { fontSize: inputFontSize }] : [s.inputPlaceholder, { fontSize: inputFontSize }]}>
                   {brideDob ? formatDate(brideDob) : t(TR.dobLabel.te, TR.dobLabel.en)}
                 </Text>
               </TouchableOpacity>
               <TextInput
-                style={s.input}
+                style={[s.input, { padding: inputPad, fontSize: inputFontSize }]}
                 value={bridePlaceQuery}
                 onChangeText={(text) => handlePlaceSearch(text, 'bride')}
                 placeholder={t(TR.birthPlace.te, TR.birthPlace.en)}
@@ -193,74 +240,74 @@ export function MatchmakingScreen({ navigation }) {
               {bridePlace && (
                 <View style={s.selectedPlace}>
                   <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
-                  <Text style={s.selectedPlaceText}>{bridePlace.displayName || bridePlace.name}</Text>
+                  <Text style={[s.selectedPlaceText, { fontSize: selectedPlaceSize }]}>{bridePlace.displayName || bridePlace.name}</Text>
                 </View>
               )}
               <PlaceResults results={bridePlaceResults} onSelect={(p) => selectPlace(p, 'bride')} />
               {/* Auto-detected nakshatra (read-only) — populated from DOB */}
               {brideNak !== null && (
-                <View style={s.nakChip}>
-                  <MaterialCommunityIcons name="star-four-points" size={16} color={DarkColors.gold} />
-                  <Text style={s.nakChipLabel}>{t('నక్షత్రం', 'Nakshatra')}:</Text>
-                  <Text style={s.nakChipValue}>{NAKSHATRAS[brideNak]} · {NAKSHATRAS_EN[brideNak]}</Text>
+                <View style={[s.nakChip, { paddingVertical: nakChipPadV, paddingHorizontal: nakChipPadH }]}>
+                  <MaterialCommunityIcons name="star-four-points" size={nakChipIconSize} color={DarkColors.gold} />
+                  <Text style={[s.nakChipLabel, { fontSize: nakChipLabelSize }]}>{t('నక్షత్రం', 'Nakshatra')}:</Text>
+                  <Text style={[s.nakChipValue, { fontSize: nakChipValueSize }]}>{NAKSHATRAS[brideNak]} · {NAKSHATRAS_EN[brideNak]}</Text>
                 </View>
               )}
             </View>
             <TouchableOpacity
-              style={[s.calcBtn, (groomNak === null || brideNak === null) && s.calcBtnDisabled]}
+              style={[s.calcBtn, { paddingVertical: calcBtnPadV }, (groomNak === null || brideNak === null) && s.calcBtnDisabled]}
               onPress={handleCalculate}
               disabled={groomNak === null || brideNak === null}
             >
-              <MaterialCommunityIcons name="heart-multiple" size={22} color="#fff" />
-              <Text style={s.calcBtnText}>{t(TR.checkCompatibility.te, TR.checkCompatibility.en)}</Text>
+              <MaterialCommunityIcons name="heart-multiple" size={calcBtnIcon} color="#fff" />
+              <Text style={[s.calcBtnText, { fontSize: calcBtnFontSize }]}>{t(TR.checkCompatibility.te, TR.checkCompatibility.en)}</Text>
             </TouchableOpacity>
           </>
         ) : (
           <>
             {/* Score Header */}
-            <View style={[s.scoreHeader, { borderColor: result.verdictColor }]}>
-              <Text style={s.scoreNumber}>{result.totalScore}</Text>
-              <Text style={s.scoreMax}>/ {result.maxScore}</Text>
+            <View style={[s.scoreHeader, { borderColor: result.verdictColor, padding: scoreHeaderPad }]}>
+              <Text style={[s.scoreNumber, { fontSize: scoreNumberSize }]}>{result.totalScore}</Text>
+              <Text style={[s.scoreMax, { fontSize: scoreMaxSize }]}>/ {result.maxScore}</Text>
               <View style={s.scoreBar}>
                 <View style={[s.scoreBarFill, { width: `${result.percentage}%`, backgroundColor: result.verdictColor }]} />
               </View>
-              <Text style={[s.scorePercent, { color: result.verdictColor }]}>{result.percentage}%</Text>
-              <Text style={[s.verdict, { color: result.verdictColor }]}>{result.verdict}</Text>
-              <Text style={s.verdictEn}>{result.verdictEn}</Text>
+              <Text style={[s.scorePercent, { color: result.verdictColor, fontSize: scorePercentSize }]}>{result.percentage}%</Text>
+              <Text style={[s.verdict, { color: result.verdictColor, fontSize: verdictSize }]}>{result.verdict}</Text>
+              <Text style={[s.verdictEn, { fontSize: verdictEnSize }]}>{result.verdictEn}</Text>
             </View>
 
             {/* Couple Info */}
             <View style={s.coupleRow}>
-              <View style={s.coupleCard}>
-                <MaterialCommunityIcons name="human-male" size={20} color="#4A90D9" />
-                <Text style={s.coupleName}>{groomName || t(TR.groom.te, TR.groom.en)}</Text>
-                <Text style={s.coupleNak}>{result.groomNakshatra.telugu}</Text>
-                <Text style={s.coupleRashi}>{result.groomRashi.telugu}</Text>
+              <View style={[s.coupleCard, { padding: coupleCardPad }]}>
+                <MaterialCommunityIcons name="human-male" size={couplePersonIcon} color="#4A90D9" />
+                <Text style={[s.coupleName, { fontSize: coupleNameSize }]}>{groomName || t(TR.groom.te, TR.groom.en)}</Text>
+                <Text style={[s.coupleNak, { fontSize: coupleNakSize }]}>{result.groomNakshatra.telugu}</Text>
+                <Text style={[s.coupleRashi, { fontSize: coupleRashiSize }]}>{result.groomRashi.telugu}</Text>
               </View>
-              <MaterialCommunityIcons name="heart" size={24} color={result.verdictColor} />
-              <View style={s.coupleCard}>
-                <MaterialCommunityIcons name="human-female" size={20} color="#E8495A" />
-                <Text style={s.coupleName}>{brideName || t(TR.bride.te, TR.bride.en)}</Text>
-                <Text style={s.coupleNak}>{result.brideNakshatra.telugu}</Text>
-                <Text style={s.coupleRashi}>{result.brideRashi.telugu}</Text>
+              <MaterialCommunityIcons name="heart" size={coupleHeartIcon} color={result.verdictColor} />
+              <View style={[s.coupleCard, { padding: coupleCardPad }]}>
+                <MaterialCommunityIcons name="human-female" size={couplePersonIcon} color="#E8495A" />
+                <Text style={[s.coupleName, { fontSize: coupleNameSize }]}>{brideName || t(TR.bride.te, TR.bride.en)}</Text>
+                <Text style={[s.coupleNak, { fontSize: coupleNakSize }]}>{result.brideNakshatra.telugu}</Text>
+                <Text style={[s.coupleRashi, { fontSize: coupleRashiSize }]}>{result.brideRashi.telugu}</Text>
               </View>
             </View>
 
             {/* 8 Kuta Details */}
-            <Text style={s.sectionLabel}>{t(TR.ashtakootDetails.te, TR.ashtakootDetails.en)}</Text>
+            <Text style={[s.sectionLabel, { fontSize: sectionLabelSize }]}>{t(TR.ashtakootDetails.te, TR.ashtakootDetails.en)}</Text>
 
             {result.kutas.map((kuta, i) => (
-              <View key={i} style={s.kutaRow}>
+              <View key={i} style={[s.kutaRow, { padding: kutaPad }]}>
                 <View style={s.kutaInfo}>
-                  <Text style={s.kutaName}>{kuta.name}</Text>
-                  <Text style={s.kutaNameEn}>{kuta.nameEn}</Text>
-                  <Text style={s.kutaDesc}>{kuta.descriptionEn}</Text>
+                  <Text style={[s.kutaName, { fontSize: kutaNameSize }]}>{kuta.name}</Text>
+                  <Text style={[s.kutaNameEn, { fontSize: kutaNameEnSize }]}>{kuta.nameEn}</Text>
+                  <Text style={[s.kutaDesc, { fontSize: kutaDescSize }]}>{kuta.descriptionEn}</Text>
                 </View>
                 <View style={s.kutaScoreBox}>
-                  <Text style={[s.kutaScore, { color: kuta.score === kuta.max ? '#2E7D32' : kuta.score === 0 ? '#C41E3A' : DarkColors.gold }]}>
+                  <Text style={[s.kutaScore, { fontSize: kutaScoreSize, color: kuta.score === kuta.max ? '#2E7D32' : kuta.score === 0 ? '#C41E3A' : DarkColors.gold }]}>
                     {kuta.score}
                   </Text>
-                  <Text style={s.kutaMax}>/ {kuta.max}</Text>
+                  <Text style={[s.kutaMax, { fontSize: kutaMaxSize }]}>/ {kuta.max}</Text>
                 </View>
                 <View style={s.kutaBar}>
                   <View style={[s.kutaBarFill, {
@@ -271,13 +318,13 @@ export function MatchmakingScreen({ navigation }) {
               </View>
             ))}
 
-            <TouchableOpacity style={s.resetBtn} onPress={handleReset}>
-              <MaterialCommunityIcons name="refresh" size={20} color={DarkColors.saffron} />
-              <Text style={s.resetBtnText}>{t(TR.checkAnother.te, TR.checkAnother.en)}</Text>
+            <TouchableOpacity style={[s.resetBtn, { paddingVertical: resetBtnPadV }]} onPress={handleReset}>
+              <MaterialCommunityIcons name="refresh" size={resetBtnIcon} color={DarkColors.saffron} />
+              <Text style={[s.resetBtnText, { fontSize: resetBtnFontSize }]}>{t(TR.checkAnother.te, TR.checkAnother.en)}</Text>
             </TouchableOpacity>
           </>
         )}
-        <View style={{ height: 30 }} />
+        <View style={{ height: bottomSpacer }} />
       </ScrollView>
     </View>
     </SwipeWrapper>

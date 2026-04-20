@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Easing } fr
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, Type } from '../theme';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 import { formatINR } from '../utils/goldPriceService';
@@ -74,16 +75,22 @@ function LiveBadge() {
 // Single metal price card with full banner
 function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, title, subtitle, icon, label1, value1, label2, value2, isLive, showSparkles }) {
   const [imgOk, setImgOk] = React.useState(true);
+  const bannerH = usePick({ default: 100, md: 110, lg: 120, xl: 140 });
+  const titleIcon = usePick({ default: 20, md: 22, xl: 26 });
+  const titleFs = usePick({ default: 17, md: 19, xl: 22 });
+  const padH = usePick({ default: 14, md: 16, xl: 20 });
+  const priceRowPad = usePick({ default: 12, md: 14, xl: 18 });
+  const fallbackIcon = usePick({ default: 40, md: 48, xl: 56 });
 
   return (
     <View style={[gs.card, { borderColor: lightAccent }]}>
       {/* Full-width banner image */}
-      <View style={gs.bannerWrap}>
+      <View style={[gs.bannerWrap, { height: bannerH }]}>
         {imgOk ? (
           <Image source={typeof banner === 'string' ? { uri: banner } : banner} style={gs.bannerImage} resizeMode="cover" onError={() => setImgOk(false)} />
         ) : (
           <LinearGradient colors={gradientColors} style={gs.bannerFallback}>
-            <MaterialCommunityIcons name={icon} size={48} color={accentColor} />
+            <MaterialCommunityIcons name={icon} size={fallbackIcon} color={accentColor} />
           </LinearGradient>
         )}
         {/* Gradient overlay on image */}
@@ -109,10 +116,10 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
       </View>
 
       {/* Title row with jewellery icons */}
-      <View style={gs.titleRow}>
-        <MaterialCommunityIcons name={icon} size={22} color={accentColor} />
+      <View style={[gs.titleRow, { paddingHorizontal: padH }]}>
+        <MaterialCommunityIcons name={icon} size={titleIcon} color={accentColor} />
         <View style={gs.titleCol}>
-          <Text style={[gs.title, { color: accentColor }]}>{title}</Text>
+          <Text style={[gs.title, { color: accentColor, fontSize: titleFs }]}>{title}</Text>
           <Text style={gs.subtitle}>{subtitle}</Text>
         </View>
       </View>
@@ -121,7 +128,7 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
       <JewelleryBorder color={lightAccent} />
 
       {/* Prices */}
-      <View style={[gs.priceRow, { backgroundColor: lightAccent + '15', borderColor: lightAccent + '30' }]}>
+      <View style={[gs.priceRow, { backgroundColor: lightAccent + '15', borderColor: lightAccent + '30', marginHorizontal: padH, padding: priceRowPad }]}>
         <View style={gs.priceCol}>
           <Text style={gs.priceLabel}>{label1}</Text>
           <Text style={[gs.priceValue, { color: accentColor }]}>{value1}</Text>
@@ -140,12 +147,21 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
 
 export function GoldSilverPriceCard({ prices, loading }) {
   const { t } = useLanguage();
+  const sectionTitleFs = usePick({ default: 17, md: 19, xl: 22 });
+  const sectionSubFs = usePick({ default: 13, md: 14, xl: 16 });
+  const headerIconSize = usePick({ default: 16, md: 18, xl: 22 });
+  const loadingIconSize = usePick({ default: 32, md: 36, xl: 42 });
+  const loadingTitleFs = usePick({ default: 16, md: 18, xl: 20 });
+  const subIconSize = usePick({ default: 11, md: 12, xl: 14 });
+  const sectionMb = usePick({ default: 12, md: 14, xl: 18 });
+  const footerIconSize = usePick({ default: 11, md: 12, xl: 14 });
+
   if (loading) {
     return (
       <View style={gs.loadingWrap}>
         <LinearGradient colors={[DarkColors.bgCard, DarkColors.bgElevated, DarkColors.bgCard]} style={gs.loadingGradient}>
-          <MaterialCommunityIcons name="gold" size={36} color={DarkColors.gold} />
-          <Text style={gs.loadingTitle}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
+          <MaterialCommunityIcons name="gold" size={loadingIconSize} color={DarkColors.gold} />
+          <Text style={[gs.loadingTitle, { fontSize: loadingTitleFs }]}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
           <ActivityIndicator size="small" color={DarkColors.gold} style={{ marginTop: 10 }} />
           <Text style={gs.loadingText}>{t(TR.loadingPrices.te, TR.loadingPrices.en)}</Text>
         </LinearGradient>
@@ -160,16 +176,16 @@ export function GoldSilverPriceCard({ prices, loading }) {
       {/* Section header — jewellery themed */}
       <View style={gs.sectionHeader}>
         <View style={gs.headerOrnamentLine} />
-        <MaterialCommunityIcons name="diamond-stone" size={10} color={DarkColors.gold} />
-        <MaterialCommunityIcons name="gold" size={18} color={DarkColors.gold} style={{ marginHorizontal: 8 }} />
-        <MaterialCommunityIcons name="diamond-stone" size={10} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="diamond-stone" size={usePick({ default: 9, md: 10, xl: 12 })} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="gold" size={headerIconSize} color={DarkColors.gold} style={{ marginHorizontal: 8 }} />
+        <MaterialCommunityIcons name="diamond-stone" size={usePick({ default: 9, md: 10, xl: 12 })} color={DarkColors.gold} />
         <View style={gs.headerOrnamentLine} />
       </View>
-      <Text style={gs.sectionTitle}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
-      <View style={gs.sectionSubRow}>
-        <MaterialCommunityIcons name="necklace" size={12} color={DarkColors.gold} />
-        <Text style={gs.sectionSubtitle}>{t(TR.todayMarketPrices.te, TR.todayMarketPrices.en)}</Text>
-        <MaterialCommunityIcons name="ring" size={12} color={DarkColors.gold} />
+      <Text style={[gs.sectionTitle, { fontSize: sectionTitleFs }]}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
+      <View style={[gs.sectionSubRow, { marginBottom: sectionMb }]}>
+        <MaterialCommunityIcons name="necklace" size={subIconSize} color={DarkColors.gold} />
+        <Text style={[gs.sectionSubtitle, { fontSize: sectionSubFs }]}>{t(TR.todayMarketPrices.te, TR.todayMarketPrices.en)}</Text>
+        <MaterialCommunityIcons name="ring" size={subIconSize} color={DarkColors.gold} />
       </View>
 
       {/* Gold 22K */}
@@ -225,7 +241,7 @@ export function GoldSilverPriceCard({ prices, loading }) {
 
       {/* Footer */}
       <View style={gs.footer}>
-        <MaterialCommunityIcons name="information-outline" size={12} color={DarkColors.textMuted} />
+        <MaterialCommunityIcons name="information-outline" size={footerIconSize} color={DarkColors.textMuted} />
         <Text style={gs.footerText}>
           {prices.isFallback ? t(` ${TR.estimatedPrices.te}`, ` ${TR.estimatedPrices.en}`) :
             prices.lastUpdated ? ` ${t(TR.updated.te, TR.updated.en)}: ${prices.lastUpdated} • ${prices.source || t(TR.indianMarket.te, TR.indianMarket.en)}` : ''}
@@ -267,7 +283,7 @@ const gs = StyleSheet.create({
   },
 
   // Banner
-  bannerWrap: { width: '100%', height: 100, position: 'relative' },
+  bannerWrap: { width: '100%', height: 100, position: 'relative' }, // height overridden by usePick
   bannerImage: { width: '100%', height: '100%' },
   bannerFallback: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' },
   bannerOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 60 },

@@ -75,17 +75,47 @@ const FOOTER = `━━━━━━━━━━━━━━━━\nధర్మ D
 export function buildPanchangamShareText(panchangam, date, locationName) {
   if (!panchangam) return '';
   const dateStr = date.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  return `🙏 ధర్మ Daily — నేటి పంచాంగం\n\n` +
-    `📅 ${dateStr}\n📍 ${locationName || 'Hyderabad'}\n\n` +
-    `☀️ సూర్యోదయం: ${panchangam.sunriseFormatted || ''}\n` +
-    `🌅 సూర్యాస్తమయం: ${panchangam.sunsetFormatted || ''}\n\n` +
-    `🌙 తిథి: ${panchangam.tithi?.telugu || ''} (${panchangam.tithi?.english || ''})\n` +
-    `⭐ నక్షత్రం: ${panchangam.nakshatra?.telugu || ''} (${panchangam.nakshatra?.english || ''})\n` +
-    `🔮 యోగం: ${panchangam.yoga?.telugu || ''} (${panchangam.yoga?.english || ''})\n` +
-    `📐 కరణం: ${panchangam.karana?.telugu || ''} (${panchangam.karana?.english || ''})\n\n` +
-    `✅ బ్రహ్మ ముహూర్తం: ${panchangam.brahmaMuhurtam?.startFormatted || ''} - ${panchangam.brahmaMuhurtam?.endFormatted || ''}\n` +
-    `✅ అభిజిత్ ముహూర్తం: ${panchangam.abhijitMuhurtam?.startFormatted || ''} - ${panchangam.abhijitMuhurtam?.endFormatted || ''}\n` +
-    `❌ రాహు కాలం: ${panchangam.rahuKalam?.startFormatted || ''} - ${panchangam.rahuKalam?.endFormatted || ''}\n\n` + FOOTER;
+  const teluguDateStr = date.toLocaleDateString('te-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const paksha = panchangam.tithi?.paksha === 'శుక్ల' ? 'శుక్ల పక్షం (Shukla)' : 'కృష్ణ పక్షం (Krishna)';
+
+  let text = `🙏 *ధర్మ — నేటి పంచాంగం*\n`;
+  text += `━━━━━━━━━━━━━━━━\n`;
+  text += `📅 ${teluguDateStr}\n`;
+  text += `📅 ${dateStr}\n`;
+  text += `📍 ${locationName || 'Hyderabad'}\n\n`;
+
+  // ── పంచాంగ వివరాలు ──
+  text += `📿 *వారం:* ${panchangam.vaaram?.telugu || ''} (${panchangam.vaaram?.english || ''})\n`;
+  if (panchangam.vaaram?.deity) text += `   🙏 వారదేవత: ${panchangam.vaaram.deity}\n`;
+  text += `📅 *మాసం:* ${panchangam.teluguMonth?.telugu || ''} (${panchangam.teluguMonth?.english || ''})\n`;
+  text += `🗓️ *సంవత్సరం:* ${panchangam.teluguYear || ''}\n\n`;
+
+  text += `🌙 *తిథి:* ${panchangam.tithi?.telugu || ''} (${panchangam.tithi?.english || ''})\n`;
+  text += `   ${paksha}\n`;
+  text += `⭐ *నక్షత్రం:* ${panchangam.nakshatra?.telugu || ''} (${panchangam.nakshatra?.english || ''})\n`;
+  if (panchangam.nakshatra?.deity) text += `   🙏 నక్షత్ర దేవత: ${panchangam.nakshatra.deity}\n`;
+  text += `🔮 *యోగం:* ${panchangam.yoga?.telugu || ''} (${panchangam.yoga?.english || ''})\n`;
+  text += `🌿 *కరణం:* ${panchangam.karana?.telugu || ''} (${panchangam.karana?.english || ''})\n\n`;
+
+  // ── సూర్యోదయ / అస్తమయం ──
+  text += `☀️ *సూర్యోదయం:* ${panchangam.sunriseFormatted || ''}\n`;
+  text += `🌇 *సూర్యాస్తమయం:* ${panchangam.sunsetFormatted || ''}\n\n`;
+
+  // ── శుభ సమయాలు ──
+  text += `✅ *శుభ సమయాలు*\n`;
+  text += `   బ్రహ్మ ముహూర్తం: ${panchangam.brahmaMuhurtam?.startFormatted || ''} - ${panchangam.brahmaMuhurtam?.endFormatted || ''}\n`;
+  text += `   అభిజిత్ ముహూర్తం: ${panchangam.abhijitMuhurtam?.startFormatted || ''} - ${panchangam.abhijitMuhurtam?.endFormatted || ''}\n`;
+  text += `   అమృత కాలం: ${panchangam.amritKalam?.startFormatted || ''} - ${panchangam.amritKalam?.endFormatted || ''}\n\n`;
+
+  // ── అశుభ సమయాలు ──
+  text += `❌ *అశుభ సమయాలు*\n`;
+  text += `   రాహు కాలం: ${panchangam.rahuKalam?.startFormatted || ''} - ${panchangam.rahuKalam?.endFormatted || ''}\n`;
+  text += `   యమగండం: ${panchangam.yamaGanda?.startFormatted || ''} - ${panchangam.yamaGanda?.endFormatted || ''}\n`;
+  text += `   గుళిక కాలం: ${panchangam.gulikaKalam?.startFormatted || ''} - ${panchangam.gulikaKalam?.endFormatted || ''}\n`;
+  text += `   దుర్ముహూర్తం: ${panchangam.durmuhurtam?.startFormatted || ''} - ${panchangam.durmuhurtam?.endFormatted || ''}\n\n`;
+
+  text += FOOTER;
+  return text;
 }
 
 export function buildTimingsShareText(panchangam, date, locationName) {

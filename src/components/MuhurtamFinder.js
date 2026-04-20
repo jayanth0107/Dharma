@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { ModalOrView } from './ModalOrView';
 import { getDailyPanchangam, DEFAULT_LOCATION } from '../utils/panchangamCalculator';
 import { trackEvent } from '../utils/analytics';
@@ -402,6 +403,15 @@ function buildShareText(eventType, results, locationName) {
  * MuhurtamFinderCard — Compact card shown in main feed
  */
 export function MuhurtamFinderCard({ onOpen, isPremium = false }) {
+  const cardPad = usePick({ default: 14, md: 16, xl: 20 });
+  const cardIconSize = usePick({ default: 44, md: 48, xl: 56 });
+  const cardIconFontSize = usePick({ default: 24, md: 28, xl: 34 });
+  const cardTitleSize = usePick({ default: 15, md: 16, xl: 18 });
+  const cardDescSize = usePick({ default: 12, md: 12, xl: 14 });
+  const chevronSize = usePick({ default: 18, md: 20, xl: 24 });
+  const crownSize = usePick({ default: 14, md: 16, xl: 20 });
+  const premiumLabelSize = usePick({ default: 9, md: 9, xl: 11 });
+
   return (
     <TouchableOpacity
       style={mStyles.card}
@@ -413,21 +423,21 @@ export function MuhurtamFinderCard({ onOpen, isPremium = false }) {
     >
       <LinearGradient
         colors={['rgba(46,125,50,0.08)', 'rgba(212,160,23,0.08)']}
-        style={mStyles.cardGradient}
+        style={[mStyles.cardGradient, { padding: cardPad }]}
       >
-        <View style={mStyles.cardIcon}>
-          <MaterialCommunityIcons name="calendar-star" size={28} color={DarkColors.tulasiGreen} />
+        <View style={[mStyles.cardIcon, { width: cardIconSize, height: cardIconSize, borderRadius: cardIconSize / 2 }]}>
+          <MaterialCommunityIcons name="calendar-star" size={cardIconFontSize} color={DarkColors.tulasiGreen} />
         </View>
         <View style={mStyles.cardContent}>
-          <Text style={mStyles.cardTitle}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
-          <Text style={mStyles.cardDesc}>వివాహం, గృహ ప్రవేశం, ప్రయాణం... శుభ దినాలు తెలుసుకోండి</Text>
+          <Text style={[mStyles.cardTitle, { fontSize: cardTitleSize }]}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
+          <Text style={[mStyles.cardDesc, { fontSize: cardDescSize }]}>వివాహం, గృహ ప్రవేశం, ప్రయాణం... శుభ దినాలు తెలుసుకోండి</Text>
         </View>
         {isPremium ? (
-          <Ionicons name="chevron-forward" size={20} color={DarkColors.tulasiGreen} />
+          <Ionicons name="chevron-forward" size={chevronSize} color={DarkColors.tulasiGreen} />
         ) : (
           <View style={mStyles.premiumLock}>
-            <MaterialCommunityIcons name="crown" size={16} color={DarkColors.gold} />
-            <Text style={mStyles.premiumText}>Premium</Text>
+            <MaterialCommunityIcons name="crown" size={crownSize} color={DarkColors.gold} />
+            <Text style={[mStyles.premiumText, { fontSize: premiumLabelSize }]}>Premium</Text>
           </View>
         )}
       </LinearGradient>
@@ -459,6 +469,71 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   const [searching, setSearching] = useState(false);
   const [selectedResult, setSelectedResult] = useState(null);
 
+  // Responsive values
+  const headerPadV = usePick({ default: 18, md: 20, xl: 28 });
+  const headerPadH = usePick({ default: 16, md: 20, xl: 28 });
+  const headerIconSize = usePick({ default: 24, md: 28, xl: 34 });
+  const titleSize = usePick({ default: 19, md: 22, xl: 26 });
+  const subSize = usePick({ default: 12, md: 12, xl: 14 });
+  const closeXSize = usePick({ default: 22, md: 24, xl: 28 });
+  const closeXBox = usePick({ default: 32, md: 36, xl: 44 });
+
+  const lockIconSize = usePick({ default: 40, md: 48, xl: 56 });
+  const overlayTitleSize = usePick({ default: 20, md: 22, xl: 26 });
+  const overlayDescSize = usePick({ default: 13, md: 14, xl: 16 });
+  const overlayPadH = usePick({ default: 20, md: 24, xl: 32 });
+  const overlayPadV = usePick({ default: 24, md: 32, xl: 40 });
+  const planCardWidth = usePick({ default: 90, md: 100, xl: 120 });
+  const planCardPad = usePick({ default: 12, md: 14, xl: 18 });
+  const planTeluguSize = usePick({ default: 11, md: 12, xl: 14 });
+  const planPriceSize = usePick({ default: 20, md: 22, xl: 26 });
+  const planDurationSize = usePick({ default: 10, md: 10, xl: 12 });
+  const planBadgeSize = usePick({ default: 9, md: 9, xl: 11 });
+  const activateBtnPadV = usePick({ default: 12, md: 14, xl: 18 });
+  const activateBtnPadH = usePick({ default: 20, md: 24, xl: 32 });
+  const activateBtnTextSize = usePick({ default: 14, md: 15, xl: 17 });
+  const activateCrownSize = usePick({ default: 16, md: 18, xl: 22 });
+
+  const eventCardPadV = usePick({ default: 18, md: 22, xl: 28 });
+  const eventCardPadH = usePick({ default: 10, md: 12, xl: 16 });
+  const eventIconBox = usePick({ default: 56, md: 68, xl: 80 });
+  const eventIconFontSize = usePick({ default: 30, md: 36, xl: 44 });
+  const eventTeluguSize = usePick({ default: 15, md: 17, xl: 20 });
+  const eventEnglishSize = usePick({ default: 12, md: 13, xl: 15 });
+  const gridPad = usePick({ default: 10, md: 12, xl: 16 });
+
+  const resultHeaderPadH = usePick({ default: 14, md: 16, xl: 20 });
+  const resultHeaderPadV = usePick({ default: 10, md: 12, xl: 16 });
+  const backIconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const resultEventIconSize = usePick({ default: 18, md: 20, xl: 24 });
+  const resultEventNameSize = usePick({ default: 15, md: 16, xl: 18 });
+  const resultCountSize = usePick({ default: 12, md: 12, xl: 14 });
+
+  const searchIconSize = usePick({ default: 36, md: 40, xl: 48 });
+  const searchTextSize = usePick({ default: 14, md: 15, xl: 17 });
+  const searchPad = usePick({ default: 32, md: 40, xl: 48 });
+
+  const resultPadH = usePick({ default: 14, md: 16, xl: 20 });
+  const resultPadV = usePick({ default: 10, md: 12, xl: 16 });
+  const dateColWidth = usePick({ default: 44, md: 50, xl: 60 });
+  const dayFontSize = usePick({ default: 20, md: 22, xl: 26 });
+  const monthFontSize = usePick({ default: 11, md: 12, xl: 14 });
+  const weekdayFontSize = usePick({ default: 11, md: 12, xl: 14 });
+  const dateFulFontSize = usePick({ default: 13, md: 14, xl: 16 });
+  const scoreBadgePadH = usePick({ default: 7, md: 8, xl: 10 });
+  const scoreBadgePadV = usePick({ default: 2, md: 2, xl: 4 });
+  const scoreTextSize = usePick({ default: 10, md: 11, xl: 13 });
+  const scorePercentSize = usePick({ default: 10, md: 11, xl: 13 });
+  const chevronSize = usePick({ default: 14, md: 16, xl: 20 });
+
+  const reasonIconSize = usePick({ default: 13, md: 14, xl: 18 });
+  const reasonTextSize = usePick({ default: 12, md: 13, xl: 15 });
+  const reasonLineHeight = usePick({ default: 18, md: 20, xl: 24 });
+
+  const closeBtnPadV = usePick({ default: 12, md: 14, xl: 18 });
+  const closeBtnMarginH = usePick({ default: 16, md: 20, xl: 28 });
+  const closeBtnTextSize = usePick({ default: 14, md: 15, xl: 17 });
+
   const locationName = location?.area
     ? `${location.area}, ${location.name}`
     : location?.name || 'Hyderabad';
@@ -489,22 +564,22 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
           {/* Header */}
           <LinearGradient
             colors={[DarkColors.tulasiGreen, '#1B5E20']}
-            style={s.modalHeader}
+            style={[s.modalHeader, { paddingVertical: headerPadV, paddingHorizontal: headerPadH }]}
           >
-            <MaterialCommunityIcons name="calendar-star" size={28} color="#F5D77A" />
-            <Text style={s.modalTitle}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
-            <Text style={s.modalSub}>రాబోయే 90 రోజుల శుభ దినాలు</Text>
-            <TouchableOpacity style={s.closeX} onPress={handleClose}>
-              <Ionicons name="close" size={24} color="#FFF" />
+            <MaterialCommunityIcons name="calendar-star" size={headerIconSize} color="#F5D77A" />
+            <Text style={[s.modalTitle, { fontSize: titleSize }]}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
+            <Text style={[s.modalSub, { fontSize: subSize }]}>రాబోయే 90 రోజుల శుభ దినాలు</Text>
+            <TouchableOpacity style={[s.closeX, { width: closeXBox, height: closeXBox, borderRadius: closeXBox / 2 }]} onPress={handleClose}>
+              <Ionicons name="close" size={closeXSize} color="#FFF" />
             </TouchableOpacity>
           </LinearGradient>
 
           {!isPremium ? (
             /* Premium Lock Overlay */
-            <View style={s.premiumOverlay}>
-              <MaterialCommunityIcons name="lock" size={48} color={DarkColors.gold} />
-              <Text style={s.premiumOverlayTitle}>Premium అవసరం</Text>
-              <Text style={s.premiumOverlayDesc}>
+            <View style={[s.premiumOverlay, { paddingHorizontal: overlayPadH, paddingVertical: overlayPadV }]}>
+              <MaterialCommunityIcons name="lock" size={lockIconSize} color={DarkColors.gold} />
+              <Text style={[s.premiumOverlayTitle, { fontSize: overlayTitleSize }]}>Premium అవసరం</Text>
+              <Text style={[s.premiumOverlayDesc, { fontSize: overlayDescSize }]}>
                 శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి ప్రీమియం ఫీచర్. శుభ దినాలు కనుగొనడానికి ప్రీమియం యాక్టివేట్ చేయండి.
               </Text>
               <View style={s.premiumPlans}>
@@ -513,11 +588,11 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                   { label: 'Yearly', telugu: 'వార్షిక', price: '₹499', duration: '365 రోజులు', badge: '58% ఆదా' },
                   { label: 'Lifetime', telugu: 'లైఫ్‌టైమ్', price: '₹999', duration: 'శాశ్వతం', badge: 'Best Value' },
                 ].map((plan) => (
-                  <View key={plan.label} style={s.premiumPlanCard}>
-                    {plan.badge && <Text style={s.premiumPlanBadge}>{plan.badge}</Text>}
-                    <Text style={s.premiumPlanTelugu}>{plan.telugu}</Text>
-                    <Text style={s.premiumPlanPrice}>{plan.price}</Text>
-                    <Text style={s.premiumPlanDuration}>{plan.duration}</Text>
+                  <View key={plan.label} style={[s.premiumPlanCard, { width: planCardWidth, padding: planCardPad }]}>
+                    {plan.badge && <Text style={[s.premiumPlanBadge, { fontSize: planBadgeSize }]}>{plan.badge}</Text>}
+                    <Text style={[s.premiumPlanTelugu, { fontSize: planTeluguSize }]}>{plan.telugu}</Text>
+                    <Text style={[s.premiumPlanPrice, { fontSize: planPriceSize }]}>{plan.price}</Text>
+                    <Text style={[s.premiumPlanDuration, { fontSize: planDurationSize }]}>{plan.duration}</Text>
                   </View>
                 ))}
               </View>
@@ -530,10 +605,10 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
               >
                 <LinearGradient
                   colors={[DarkColors.saffron, DarkColors.gold]}
-                  style={s.premiumActivateBtnGradient}
+                  style={[s.premiumActivateBtnGradient, { paddingVertical: activateBtnPadV, paddingHorizontal: activateBtnPadH }]}
                 >
-                  <MaterialCommunityIcons name="crown" size={18} color="#FFF" />
-                  <Text style={s.premiumActivateBtnText}>Premium యాక్టివేట్ చేయండి</Text>
+                  <MaterialCommunityIcons name="crown" size={activateCrownSize} color="#FFF" />
+                  <Text style={[s.premiumActivateBtnText, { fontSize: activateBtnTextSize }]}>Premium యాక్టివేట్ చేయండి</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -543,17 +618,17 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
               data={EVENT_TYPES}
               keyExtractor={(item) => item.id}
               numColumns={2}
-              contentContainerStyle={{ padding: 12 }}
+              contentContainerStyle={{ padding: gridPad }}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={s.eventCard}
+                  style={[s.eventCard, { paddingVertical: eventCardPadV, paddingHorizontal: eventCardPadH }]}
                   onPress={() => handleEventSelect(item)}
                 >
-                  <View style={[s.eventIcon, { backgroundColor: item.color + '20' }]}>
-                    <MaterialCommunityIcons name={item.icon} size={36} color={item.color} />
+                  <View style={[s.eventIcon, { width: eventIconBox, height: eventIconBox, borderRadius: eventIconBox / 2, backgroundColor: item.color + '20' }]}>
+                    <MaterialCommunityIcons name={item.icon} size={eventIconFontSize} color={item.color} />
                   </View>
-                  <Text style={s.eventTelugu}>{item.telugu}</Text>
-                  <Text style={s.eventEnglish}>{item.english}</Text>
+                  <Text style={[s.eventTelugu, { fontSize: eventTeluguSize }]}>{item.telugu}</Text>
+                  <Text style={[s.eventEnglish, { fontSize: eventEnglishSize }]}>{item.english}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -561,13 +636,13 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
             /* Results */
             <View style={{ flex: 1 }}>
               {/* Back + Event info */}
-              <View style={s.resultHeader}>
+              <View style={[s.resultHeader, { paddingHorizontal: resultHeaderPadH, paddingVertical: resultHeaderPadV }]}>
                 <TouchableOpacity onPress={() => { setSelectedEvent(null); setResults([]); }}>
-                  <Ionicons name="arrow-back" size={22} color={DarkColors.textPrimary} />
+                  <Ionicons name="arrow-back" size={backIconSize} color={DarkColors.textPrimary} />
                 </TouchableOpacity>
-                <MaterialCommunityIcons name={selectedEvent.icon} size={20} color={selectedEvent.color} style={{ marginLeft: 10 }} />
-                <Text style={s.resultEventName}>{selectedEvent.telugu}</Text>
-                <Text style={s.resultCount}>{results.length} శుభ దినాలు</Text>
+                <MaterialCommunityIcons name={selectedEvent.icon} size={resultEventIconSize} color={selectedEvent.color} style={{ marginLeft: 10 }} />
+                <Text style={[s.resultEventName, { fontSize: resultEventNameSize }]}>{selectedEvent.telugu}</Text>
+                <Text style={[s.resultCount, { fontSize: resultCountSize }]}>{results.length} శుభ దినాలు</Text>
               </View>
 
               {/* Share Bar — PDF, WhatsApp, Share */}
@@ -580,14 +655,14 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
               )}
 
               {searching ? (
-                <View style={s.searchingBox}>
-                  <MaterialCommunityIcons name="magnify" size={40} color={DarkColors.tulasiGreen} />
-                  <Text style={s.searchingText}>శుభ దినాలు వెతుకుతోంది...</Text>
+                <View style={[s.searchingBox, { padding: searchPad }]}>
+                  <MaterialCommunityIcons name="magnify" size={searchIconSize} color={DarkColors.tulasiGreen} />
+                  <Text style={[s.searchingText, { fontSize: searchTextSize }]}>శుభ దినాలు వెతుకుతోంది...</Text>
                 </View>
               ) : results.length === 0 ? (
-                <View style={s.searchingBox}>
-                  <MaterialCommunityIcons name="calendar-remove" size={40} color={DarkColors.textMuted} />
-                  <Text style={s.searchingText}>ఈ కాలంలో శుభ దినాలు లేవు</Text>
+                <View style={[s.searchingBox, { padding: searchPad }]}>
+                  <MaterialCommunityIcons name="calendar-remove" size={searchIconSize} color={DarkColors.textMuted} />
+                  <Text style={[s.searchingText, { fontSize: searchTextSize }]}>ఈ కాలంలో శుభ దినాలు లేవు</Text>
                 </View>
               ) : (
                 <FlatList
@@ -605,35 +680,35 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
 
                     return (
                       <TouchableOpacity
-                        style={[s.resultItem, isExpanded && s.resultItemExpanded]}
+                        style={[s.resultItem, { paddingHorizontal: resultPadH, paddingVertical: resultPadV }, isExpanded && s.resultItemExpanded]}
                         onPress={() => setSelectedResult(isExpanded ? null : item)}
                       >
                         <View style={s.resultRow}>
-                          <View style={s.resultDateCol}>
-                            <Text style={s.resultDay}>{d.getDate()}</Text>
-                            <Text style={s.resultMonth}>
+                          <View style={[s.resultDateCol, { width: dateColWidth }]}>
+                            <Text style={[s.resultDay, { fontSize: dayFontSize }]}>{d.getDate()}</Text>
+                            <Text style={[s.resultMonth, { fontSize: monthFontSize }]}>
                               {d.toLocaleDateString('en-IN', { month: 'short' })}
                             </Text>
-                            <Text style={s.resultWeekday}>
+                            <Text style={[s.resultWeekday, { fontSize: weekdayFontSize }]}>
                               {WEEKDAY_NAMES_TE[d.getDay()].slice(0, 3)}
                             </Text>
                           </View>
 
                           <View style={s.resultInfo}>
-                            <Text style={s.resultDateFull}>
+                            <Text style={[s.resultDateFull, { fontSize: dateFulFontSize }]}>
                               {d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
                             </Text>
                             <View style={s.resultBadges}>
-                              <View style={[s.scoreBadge, { backgroundColor: ratingColors[item.rating] }]}>
-                                <Text style={s.scoreText}>{item.ratingTelugu}</Text>
+                              <View style={[s.scoreBadge, { backgroundColor: ratingColors[item.rating], paddingHorizontal: scoreBadgePadH, paddingVertical: scoreBadgePadV }]}>
+                                <Text style={[s.scoreText, { fontSize: scoreTextSize }]}>{item.ratingTelugu}</Text>
                               </View>
-                              <Text style={s.scorePercent}>{item.score}%</Text>
+                              <Text style={[s.scorePercent, { fontSize: scorePercentSize }]}>{item.score}%</Text>
                             </View>
                           </View>
 
                           <Ionicons
                             name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={16}
+                            size={chevronSize}
                             color={DarkColors.textMuted}
                           />
                         </View>
@@ -642,14 +717,14 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                           <View style={s.resultDetails}>
                             {item.reasons.map((r, i) => (
                               <View key={`r-${i}`} style={s.reasonRow}>
-                                <Ionicons name="checkmark-circle" size={14} color={DarkColors.tulasiGreen} />
-                                <Text style={s.reasonText}>{r}</Text>
+                                <Ionicons name="checkmark-circle" size={reasonIconSize} color={DarkColors.tulasiGreen} />
+                                <Text style={[s.reasonText, { fontSize: reasonTextSize, lineHeight: reasonLineHeight }]}>{r}</Text>
                               </View>
                             ))}
                             {item.warnings.map((w, i) => (
                               <View key={`w-${i}`} style={s.reasonRow}>
-                                <Ionicons name="alert-circle" size={14} color={DarkColors.saffron} />
-                                <Text style={[s.reasonText, { color: DarkDarkColors.saffronLight }]}>{w}</Text>
+                                <Ionicons name="alert-circle" size={reasonIconSize} color={DarkColors.saffron} />
+                                <Text style={[s.reasonText, { fontSize: reasonTextSize, lineHeight: reasonLineHeight, color: DarkColors.saffronLight }]}>{w}</Text>
                               </View>
                             ))}
                           </View>
@@ -663,8 +738,8 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
             </View>
           )}
 
-          <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
-            <Text style={s.closeBtnText}>మూసివేయండి</Text>
+          <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMarginH }]} onPress={handleClose}>
+            <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>మూసివేయండి</Text>
           </TouchableOpacity>
     </ModalOrView>
   );

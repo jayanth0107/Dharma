@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, Pla
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 
 const IS_WEB = Platform.OS === 'web';
@@ -85,35 +86,44 @@ const KIDS_SLOKAS = [
 function StoryTile({ story, onPress, wide }) {
   const { t } = useLanguage();
   const [imgOk, setImgOk] = useState(true);
-  const tileWidth = wide ? '48%' : 155;
+  const tileW = usePick({ default: 150, md: 155, lg: 170, xl: 190 });
+  const tileWidth = wide ? '48%' : tileW;
+  const imgH = usePick({ default: 100, md: 110, lg: 120, xl: 130 });
+  const titleFs = usePick({ default: 13, md: 14, xl: 16 });
+  const subFs = usePick({ default: 11, md: 12, xl: 13 });
+  const tilePad = usePick({ default: 8, md: 10, xl: 14 });
+  const fallbackIcon = usePick({ default: 32, md: 36, xl: 42 });
+  const badgeSize = usePick({ default: 22, md: 24, xl: 28 });
+  const badgeIcon = usePick({ default: 11, md: 12, xl: 14 });
+  const marginR = usePick({ default: 10, md: 12, xl: 14 });
 
   return (
     <TouchableOpacity
-      style={[st.tile, wide ? { width: tileWidth } : { width: tileWidth, marginRight: 12 }]}
+      style={[st.tile, wide ? { width: tileWidth } : { width: tileWidth, marginRight: marginR }]}
       onPress={onPress}
       activeOpacity={0.85}
     >
       {/* Deity image */}
-      <View style={st.tileImageWrap}>
+      <View style={[st.tileImageWrap, { height: imgH }]}>
         {imgOk ? (
           <Image source={typeof story.image === 'string' ? { uri: story.image } : story.image} style={st.tileImage} resizeMode="cover" onError={() => setImgOk(false)} />
         ) : (
           <View style={[st.tileFallback, { backgroundColor: story.color + '15' }]}>
-            <MaterialCommunityIcons name={story.icon} size={36} color={story.color} />
+            <MaterialCommunityIcons name={story.icon} size={fallbackIcon} color={story.color} />
           </View>
         )}
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.6)']} style={st.tileOverlay} />
-        <View style={[st.tileIconBadge, { backgroundColor: story.color }]}>
-          <MaterialCommunityIcons name={story.icon} size={12} color="#FFF" />
+        <View style={[st.tileIconBadge, { backgroundColor: story.color, width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
+          <MaterialCommunityIcons name={story.icon} size={badgeIcon} color="#FFF" />
         </View>
       </View>
       {/* Title */}
-      <View style={st.tileTitleWrap}>
-        <Text style={[st.tileTitle, { color: story.color }]} numberOfLines={2}>{t(story.title, story.english)}</Text>
-        <Text style={st.tileEnglish} numberOfLines={1}>{story.english}</Text>
+      <View style={[st.tileTitleWrap, { padding: tilePad }]}>
+        <Text style={[st.tileTitle, { color: story.color, fontSize: titleFs }]} numberOfLines={2}>{t(story.title, story.english)}</Text>
+        <Text style={[st.tileEnglish, { fontSize: subFs }]} numberOfLines={1}>{story.english}</Text>
         <View style={st.tileReadRow}>
-          <Text style={[st.tileRead, { color: story.color }]}>చదవండి</Text>
-          <MaterialCommunityIcons name="arrow-right" size={12} color={story.color} />
+          <Text style={[st.tileRead, { color: story.color, fontSize: subFs }]}>చదవండి</Text>
+          <MaterialCommunityIcons name="arrow-right" size={badgeIcon} color={story.color} />
         </View>
       </View>
     </TouchableOpacity>
@@ -123,15 +133,22 @@ function StoryTile({ story, onPress, wide }) {
 // Sloka card
 function SlokaCard({ sloka }) {
   const { t } = useLanguage();
+  const iconSize = usePick({ default: 18, md: 20, xl: 24 });
+  const iconWrapSize = usePick({ default: 34, md: 38, xl: 44 });
+  const cardPad = usePick({ default: 10, md: 12, xl: 16 });
+  const deityFs = usePick({ default: 11, md: 12, xl: 14 });
+  const slokaFs = usePick({ default: 14, md: 15, xl: 17 });
+  const meaningFs = usePick({ default: 11, md: 12, xl: 14 });
+
   return (
-    <View style={[st.slokaCard, { borderColor: sloka.color + '25' }]}>
-      <View style={[st.slokaIconWrap, { backgroundColor: sloka.color + '12' }]}>
-        <MaterialCommunityIcons name={sloka.icon} size={20} color={sloka.color} />
+    <View style={[st.slokaCard, { borderColor: sloka.color + '25', padding: cardPad }]}>
+      <View style={[st.slokaIconWrap, { backgroundColor: sloka.color + '12', width: iconWrapSize, height: iconWrapSize }]}>
+        <MaterialCommunityIcons name={sloka.icon} size={iconSize} color={sloka.color} />
       </View>
       <View style={st.slokaInfo}>
-        <Text style={st.slokaDeity}>{t(sloka.deity, sloka.deityEn)}</Text>
-        <Text style={st.slokaText}>{t(sloka.telugu, sloka.english)}</Text>
-        <Text style={st.slokaMeaning}>{t(sloka.meaning, sloka.meaningEn)}</Text>
+        <Text style={[st.slokaDeity, { fontSize: deityFs }]}>{t(sloka.deity, sloka.deityEn)}</Text>
+        <Text style={[st.slokaText, { fontSize: slokaFs }]}>{t(sloka.telugu, sloka.english)}</Text>
+        <Text style={[st.slokaMeaning, { fontSize: meaningFs }]}>{t(sloka.meaning, sloka.meaningEn)}</Text>
       </View>
     </View>
   );
@@ -141,6 +158,24 @@ export function KidsSection({ dayOfWeek }) {
   const { t } = useLanguage();
   const [activeStory, setActiveStory] = useState(null);
   const [modalImgFailed, setModalImgFailed] = useState(false);
+
+  const slokaLabelFs = usePick({ default: 13, md: 14, xl: 16 });
+  const slokaLabelMt = usePick({ default: 12, md: 14, xl: 18 });
+  const modalPad = usePick({ default: 16, md: 20, xl: 28 });
+  const modalTitleFs = usePick({ default: 21, md: 24, xl: 28 });
+  const modalSubFs = usePick({ default: 13, md: 14, xl: 16 });
+  const storyFs = usePick({ default: 15, md: 16, xl: 18 });
+  const storyLh = usePick({ default: 26, md: 28, xl: 32 });
+  const moralFs = usePick({ default: 13, md: 14, xl: 16 });
+  const moralPad = usePick({ default: 12, md: 14, xl: 18 });
+  const modalImgH = usePick({ default: 200, md: 220, xl: 280 });
+  const modalFallbackIcon = usePick({ default: 56, md: 64, xl: 76 });
+  const closeIconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const closeBtnPad = usePick({ default: 12, md: 14, xl: 18 });
+  const closeBtnFs = usePick({ default: 14, md: 15, xl: 17 });
+  const closeBtnMx = usePick({ default: 16, md: 20, xl: 28 });
+  const moralIconSize = usePick({ default: 16, md: 18, xl: 22 });
+  const webGridGap = usePick({ default: 8, md: 10, xl: 14 });
 
   // Show 4 stories starting from today's day
   const storyStart = dayOfWeek % KIDS_STORIES.length;
@@ -161,7 +196,7 @@ export function KidsSection({ dayOfWeek }) {
       {/* Stories — Grid on web, Horizontal carousel on mobile */}
       {IS_WEB ? (
         // Web: 2x2 tile grid
-        <View style={st.webGrid}>
+        <View style={[st.webGrid, { gap: webGridGap }]}>
           {visibleStories.map((story) => (
             <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); }} wide={true} />
           ))}
@@ -176,7 +211,7 @@ export function KidsSection({ dayOfWeek }) {
       )}
 
       {/* Slokas — 2 cards */}
-      <Text style={st.slokaSectionLabel}>{t('నేటి శ్లోకాలు (పిల్లలకు)', "Today's Slokas (for Kids)")}</Text>
+      <Text style={[st.slokaSectionLabel, { fontSize: slokaLabelFs, marginTop: slokaLabelMt }]}>{t('నేటి శ్లోకాలు (పిల్లలకు)', "Today's Slokas (for Kids)")}</Text>
       {visibleSlokas.map((sloka, i) => (
         <SlokaCard key={i} sloka={sloka} />
       ))}
@@ -190,29 +225,29 @@ export function KidsSection({ dayOfWeek }) {
                 style={st.modalCloseX}
                 onPress={() => setActiveStory(null)}
               >
-                <Ionicons name="close" size={22} color="#FFF" />
+                <Ionicons name="close" size={closeIconSize} color="#FFF" />
               </TouchableOpacity>
               <ScrollView showsVerticalScrollIndicator={false}>
                 {!modalImgFailed ? (
-                  <Image source={typeof activeStory.image === 'string' ? { uri: activeStory.image } : activeStory.image} style={st.modalImage} resizeMode="cover" onError={() => setModalImgFailed(true)} />
+                  <Image source={typeof activeStory.image === 'string' ? { uri: activeStory.image } : activeStory.image} style={[st.modalImage, { height: modalImgH }]} resizeMode="cover" onError={() => setModalImgFailed(true)} />
                 ) : (
-                  <View style={[st.modalImageFallback, { backgroundColor: activeStory.color + '15' }]}>
-                    <MaterialCommunityIcons name={activeStory.icon} size={64} color={activeStory.color} />
+                  <View style={[st.modalImageFallback, { backgroundColor: activeStory.color + '15', height: modalImgH }]}>
+                    <MaterialCommunityIcons name={activeStory.icon} size={modalFallbackIcon} color={activeStory.color} />
                   </View>
                 )}
-                <View style={st.modalBody}>
-                  <Text style={[st.modalTitle, { color: activeStory.color }]}>{t(activeStory.title, activeStory.english)}</Text>
-                  <Text style={st.modalEnglish}>{activeStory.english}</Text>
+                <View style={[st.modalBody, { padding: modalPad }]}>
+                  <Text style={[st.modalTitle, { color: activeStory.color, fontSize: modalTitleFs }]}>{t(activeStory.title, activeStory.english)}</Text>
+                  <Text style={[st.modalEnglish, { fontSize: modalSubFs }]}>{activeStory.english}</Text>
                   <View style={st.divider} />
-                  <Text style={st.storyText}>{t(activeStory.story, activeStory.storyEn || activeStory.story)}</Text>
-                  <View style={[st.moralBox, { backgroundColor: activeStory.color + '10', borderColor: activeStory.color + '30' }]}>
-                    <MaterialCommunityIcons name="lightbulb-on" size={18} color={activeStory.color} />
-                    <Text style={[st.moralText, { color: activeStory.color }]}>{t(activeStory.moral, activeStory.moralEn || activeStory.moral)}</Text>
+                  <Text style={[st.storyText, { fontSize: storyFs, lineHeight: storyLh }]}>{t(activeStory.story, activeStory.storyEn || activeStory.story)}</Text>
+                  <View style={[st.moralBox, { backgroundColor: activeStory.color + '10', borderColor: activeStory.color + '30', padding: moralPad }]}>
+                    <MaterialCommunityIcons name="lightbulb-on" size={moralIconSize} color={activeStory.color} />
+                    <Text style={[st.moralText, { color: activeStory.color, fontSize: moralFs }]}>{t(activeStory.moral, activeStory.moralEn || activeStory.moral)}</Text>
                   </View>
                 </View>
               </ScrollView>
-              <TouchableOpacity style={[st.closeBtn, { backgroundColor: activeStory.color }]} onPress={() => setActiveStory(null)}>
-                <Text style={st.closeBtnText}>మూసివేయండి</Text>
+              <TouchableOpacity style={[st.closeBtn, { backgroundColor: activeStory.color, paddingVertical: closeBtnPad, marginHorizontal: closeBtnMx }]} onPress={() => setActiveStory(null)}>
+                <Text style={[st.closeBtnText, { fontSize: closeBtnFs }]}>మూసివేయండి</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -6,6 +6,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
@@ -25,6 +26,29 @@ export function GoldScreen() {
   const [alert, setAlert] = useState(null);
   const [showAlertForm, setShowAlertForm] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
+
+  // Responsive sizing
+  const contentPad = usePick({ default: 16, lg: 20, xl: 28, xxl: 32 });
+  const cardPad = usePick({ default: 16, lg: 20, xl: 24 });
+  const cardMarginH = usePick({ default: 16, lg: 24, xl: 32 });
+  const cardRadius = usePick({ default: 16, lg: 18, xl: 20 });
+  const alertTitleSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const alertActiveTextSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const alertFormLabelSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const alertInputSize = usePick({ default: 16, lg: 17, xl: 18 });
+  const alertInputPad = usePick({ default: 14, lg: 16, xl: 18 });
+  const alertSetTextSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const alertSetBtnPadH = usePick({ default: 20, lg: 24, xl: 28 });
+  const alertSetupTextSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const alertSetupPadV = usePick({ default: 14, lg: 16, xl: 18 });
+  const alertClearTextSize = usePick({ default: 12, lg: 13, xl: 14 });
+  const bellIconSize = usePick({ default: 20, lg: 22, xl: 24 });
+  const plusIconSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const clearIconSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const alertActivePad = usePick({ default: 12, lg: 14, xl: 16 });
+  const scrollPadTop = usePick({ default: 12, lg: 16, xl: 20 });
+  const scrollPadBottom = usePick({ default: 20, lg: 24, xl: 28 });
+  const bottomSpacer = usePick({ default: 30, lg: 36, xl: 40 });
 
   useEffect(() => { getGoldAlert().then(setAlert); }, []);
 
@@ -54,59 +78,59 @@ export function GoldScreen() {
       <PageHeader title={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} />
       <TopTabBar />
       <ScrollView
-        style={s.scroll} contentContainerStyle={s.scrollContent}
+        style={s.scroll} contentContainerStyle={[s.scrollContent, { paddingBottom: scrollPadBottom, paddingTop: scrollPadTop }]}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DarkColors.gold} colors={[DarkColors.gold]} />}
       >
-        <View style={s.card}>
+        <View style={[s.card, { marginHorizontal: cardMarginH, padding: cardPad, borderRadius: cardRadius }]}>
           <GoldSilverPriceCard prices={goldSilverPrices} loading={pricesLoading} />
           <SectionShareRow section="gold" buildText={() => buildGoldShareText(goldSilverPrices)} />
         </View>
 
         {/* Gold Price Alert */}
-        <View style={s.alertCard}>
+        <View style={[s.alertCard, { marginHorizontal: cardMarginH, padding: cardPad, borderRadius: cardRadius }]}>
           <View style={s.alertHeader}>
-            <MaterialCommunityIcons name="bell-ring" size={20} color={DarkColors.gold} />
-            <Text style={s.alertTitle}>{t('బంగారం ధర అలర్ట్', 'Gold Price Alert')}</Text>
+            <MaterialCommunityIcons name="bell-ring" size={bellIconSize} color={DarkColors.gold} />
+            <Text style={[s.alertTitle, { fontSize: alertTitleSize }]}>{t('బంగారం ధర అలర్ట్', 'Gold Price Alert')}</Text>
           </View>
 
           {alert?.enabled ? (
-            <View style={s.alertActive}>
-              <Text style={s.alertActiveText}>
+            <View style={[s.alertActive, { padding: alertActivePad }]}>
+              <Text style={[s.alertActiveText, { fontSize: alertActiveTextSize }]}>
                 {t('అలర్ట్ సెట్:', 'Alert set:')} ₹{alert.targetPrice}/g {t('కంటే తక్కువైనప్పుడు', 'when price drops below')}
               </Text>
               <TouchableOpacity style={s.alertClearBtn} onPress={handleClearAlert}>
-                <MaterialCommunityIcons name="close-circle" size={16} color="#C41E3A" />
-                <Text style={s.alertClearText}>{t('రద్దు', 'Clear')}</Text>
+                <MaterialCommunityIcons name="close-circle" size={clearIconSize} color="#C41E3A" />
+                <Text style={[s.alertClearText, { fontSize: alertClearTextSize }]}>{t('రద్దు', 'Clear')}</Text>
               </TouchableOpacity>
             </View>
           ) : showAlertForm ? (
             <View style={s.alertForm}>
-              <Text style={s.alertFormLabel}>{t('ధర తగ్గినప్పుడు అలర్ట్ (₹/గ్రాం)', 'Alert when price drops below (₹/gram)')}</Text>
+              <Text style={[s.alertFormLabel, { fontSize: alertFormLabelSize }]}>{t('ధర తగ్గినప్పుడు అలర్ట్ (₹/గ్రాం)', 'Alert when price drops below (₹/gram)')}</Text>
               <View style={s.alertFormRow}>
                 <TextInput
-                  style={s.alertInput}
+                  style={[s.alertInput, { fontSize: alertInputSize, padding: alertInputPad }]}
                   value={targetPrice}
                   onChangeText={setTargetPrice}
                   placeholder="e.g. 7000"
                   placeholderTextColor={DarkColors.textMuted}
                   keyboardType="number-pad"
                 />
-                <TouchableOpacity style={s.alertSetBtn} onPress={handleSetAlert}>
-                  <Text style={s.alertSetText}>{t('సెట్', 'Set')}</Text>
+                <TouchableOpacity style={[s.alertSetBtn, { paddingHorizontal: alertSetBtnPadH }]} onPress={handleSetAlert}>
+                  <Text style={[s.alertSetText, { fontSize: alertSetTextSize }]}>{t('సెట్', 'Set')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
-            <TouchableOpacity style={s.alertSetupBtn} onPress={() => setShowAlertForm(true)}>
-              <MaterialCommunityIcons name="plus" size={18} color={DarkColors.gold} />
-              <Text style={s.alertSetupText}>{t('ధర అలర్ట్ సెట్ చేయండి', 'Set Price Alert')}</Text>
+            <TouchableOpacity style={[s.alertSetupBtn, { paddingVertical: alertSetupPadV }]} onPress={() => setShowAlertForm(true)}>
+              <MaterialCommunityIcons name="plus" size={plusIconSize} color={DarkColors.gold} />
+              <Text style={[s.alertSetupText, { fontSize: alertSetupTextSize }]}>{t('ధర అలర్ట్ సెట్ చేయండి', 'Set Price Alert')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         <AdBannerWidget variant="gold" />
-        <View style={{ height: 30 }} />
+        <View style={{ height: bottomSpacer }} />
       </ScrollView>
     </View>
     </SwipeWrapper>
@@ -116,40 +140,40 @@ export function GoldScreen() {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 20, paddingTop: 12 },
+  scrollContent: {},
   card: {
-    marginHorizontal: 16, marginBottom: 16,
-    backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16,
+    marginBottom: 16,
+    backgroundColor: DarkColors.bgCard,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   // Alert
   alertCard: {
-    marginHorizontal: 16, marginBottom: 16,
-    backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16,
+    marginBottom: 16,
+    backgroundColor: DarkColors.bgCard,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   alertHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  alertTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  alertTitle: { fontWeight: '800', color: DarkColors.gold },
   alertActive: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 10, padding: 12,
+    backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 10,
   },
-  alertActiveText: { fontSize: 14, fontWeight: '700', color: DarkColors.goldLight, flex: 1 },
+  alertActiveText: { fontWeight: '700', color: DarkColors.goldLight, flex: 1 },
   alertClearBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 6 },
-  alertClearText: { fontSize: 12, fontWeight: '700', color: '#C41E3A' },
+  alertClearText: { fontWeight: '700', color: '#C41E3A' },
   alertForm: {},
-  alertFormLabel: { fontSize: 13, color: DarkColors.textSecondary, marginBottom: 10 },
+  alertFormLabel: { color: DarkColors.textSecondary, marginBottom: 10 },
   alertFormRow: { flexDirection: 'row', gap: 10 },
   alertInput: {
-    flex: 1, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14,
-    fontSize: 16, color: DarkColors.textPrimary, borderWidth: 1, borderColor: DarkColors.borderCard,
+    flex: 1, backgroundColor: DarkColors.bgElevated, borderRadius: 12,
+    color: DarkColors.textPrimary, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  alertSetBtn: { backgroundColor: DarkColors.gold, borderRadius: 12, paddingHorizontal: 20, justifyContent: 'center' },
-  alertSetText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  alertSetBtn: { backgroundColor: DarkColors.gold, borderRadius: 12, justifyContent: 'center' },
+  alertSetText: { fontWeight: '800', color: '#fff' },
   alertSetupBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 12, paddingVertical: 14,
+    backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 12,
     borderWidth: 1, borderColor: DarkColors.borderGold, borderStyle: 'dashed',
   },
-  alertSetupText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  alertSetupText: { fontWeight: '700', color: DarkColors.gold },
 });

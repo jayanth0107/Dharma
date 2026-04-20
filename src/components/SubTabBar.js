@@ -5,8 +5,9 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Easing } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 
-function PulsingChevron({ direction }) {
+function PulsingChevron({ direction, size, circleSize }) {
   const pulse = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     Animated.loop(
@@ -17,8 +18,8 @@ function PulsingChevron({ direction }) {
     ).start();
   }, []);
   return (
-    <Animated.View style={[s.chevronCircle, { transform: [{ scale: pulse }] }]}>
-      <Ionicons name={direction === 'left' ? 'chevron-back' : 'chevron-forward'} size={14} color="#fff" />
+    <Animated.View style={[s.chevronCircle, { width: circleSize, height: circleSize, borderRadius: circleSize / 2, transform: [{ scale: pulse }] }]}>
+      <Ionicons name={direction === 'left' ? 'chevron-back' : 'chevron-forward'} size={size} color="#fff" />
     </Animated.View>
   );
 }
@@ -26,6 +27,13 @@ function PulsingChevron({ direction }) {
 export function SubTabBar({ tabs, activeTab, onTabChange }) {
   const scrollRef = useRef(null);
   const scrollXRef = useRef(0);
+  const tabFontSize = usePick({ default: 12, md: 13, xl: 15 });
+  const tabPaddingH = usePick({ default: 10, md: 14, xl: 20 });
+  const tabPaddingV = usePick({ default: 6, md: 8, xl: 12 });
+  const containerPaddingH = usePick({ default: 34, md: 40, xl: 50 });
+  const arrowWidth = usePick({ default: 30, md: 34, xl: 42 });
+  const chevronIconSize = usePick({ default: 12, md: 14, xl: 18 });
+  const chevronCircleSize = usePick({ default: 22, md: 24, xl: 30 });
 
   const navigateTab = (dir) => {
     const currentIdx = tabs.findIndex(t => t.id === activeTab);
@@ -47,15 +55,15 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
   return (
     <View style={s.wrapper}>
       {/* Left chevron — always visible */}
-      <TouchableOpacity style={s.arrowLeft} onPress={() => navigateTab(-1)} activeOpacity={0.7}>
-        <PulsingChevron direction="left" />
+      <TouchableOpacity style={[s.arrowLeft, { width: arrowWidth }]} onPress={() => navigateTab(-1)} activeOpacity={0.7}>
+        <PulsingChevron direction="left" size={chevronIconSize} circleSize={chevronCircleSize} />
       </TouchableOpacity>
 
       <ScrollView
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={s.container}
+        contentContainerStyle={[s.container, { paddingHorizontal: containerPaddingH }]}
         style={s.bar}
         onScroll={(e) => { scrollXRef.current = e.nativeEvent.contentOffset.x; }}
         scrollEventThrottle={16}
@@ -65,11 +73,11 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
           return (
             <TouchableOpacity
               key={tab.id}
-              style={[s.tab, isActive && s.tabActive]}
+              style={[s.tab, { paddingHorizontal: tabPaddingH, paddingVertical: tabPaddingV }, isActive && s.tabActive]}
               onPress={() => onTabChange(tab.id)}
               activeOpacity={0.7}
             >
-              <Text style={[s.tabText, isActive && s.tabTextActive]}>
+              <Text style={[s.tabText, { fontSize: tabFontSize }, isActive && s.tabTextActive]}>
                 {tab.label}
               </Text>
             </TouchableOpacity>
@@ -78,8 +86,8 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
       </ScrollView>
 
       {/* Right chevron — always visible */}
-      <TouchableOpacity style={s.arrowRight} onPress={() => navigateTab(1)} activeOpacity={0.7}>
-        <PulsingChevron direction="right" />
+      <TouchableOpacity style={[s.arrowRight, { width: arrowWidth }]} onPress={() => navigateTab(1)} activeOpacity={0.7}>
+        <PulsingChevron direction="right" size={chevronIconSize} circleSize={chevronCircleSize} />
       </TouchableOpacity>
     </View>
   );

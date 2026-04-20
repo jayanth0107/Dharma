@@ -180,38 +180,11 @@ export function HomeScreen({ navigation }) {
         {/* Divider */}
         <View style={s.headerDivider} />
 
-        {/* User greeting (logged in) or login prompt */}
-        {isLoggedIn ? (
-          <TouchableOpacity style={s.userGreeting} onPress={() => navigation.navigate('Login')}>
-            {profile?.name ? (
-              <Text style={s.userGreetingText}>
-                🙏 {t('నమస్కారం', 'Namaskaram')}, {profile.name}
-              </Text>
-            ) : (
-              <View style={s.setNamePrompt}>
-                <MaterialCommunityIcons name="account-edit" size={14} color={DarkColors.saffron} />
-                <Text style={s.setNameText}>{t('మీ పేరు సెట్ చేయండి', 'Set your name')} →</Text>
-              </View>
-            )}
-            {premiumActive && (
-              <View style={s.premiumPill}>
-                <MaterialCommunityIcons name="crown" size={10} color="#FFD700" />
-                <Text style={s.premiumPillText}>PRO</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={s.loginPrompt} onPress={() => navigation.navigate('Login')}>
-            <MaterialCommunityIcons name="login" size={14} color={DarkColors.saffron} />
-            <Text style={s.loginPromptText}>{t('లాగిన్ చేయండి — ప్రొఫైల్ సేవ్ చేయండి', 'Login to save your profile')}</Text>
-          </TouchableOpacity>
-        )}
-
         {/* Location pill + Language toggle — responsive */}
         <View style={s.locationRow}>
           <TouchableOpacity
             style={[s.locationPill, { paddingHorizontal: pillPadH, paddingVertical: pillPadV }]}
-            onPress={() => navigation.navigate('Location')}
+            onPress={() => setShowLocationPicker(true)}
             activeOpacity={0.7}
           >
             <Ionicons name="location" size={pillIconSz} color={DarkColors.saffron} />
@@ -235,18 +208,6 @@ export function HomeScreen({ navigation }) {
 
       <TopTabBar />
       <OfflineBanner />
-
-      {/* Quick action bar */}
-      <View style={s.quickBar}>
-        <TouchableOpacity style={s.quickAction} onPress={() => setShowPanchangamShare(true)}>
-          <MaterialCommunityIcons name="share-variant" size={18} color="#25D366" />
-          <Text style={s.quickActionText}>{t('పంచాంగం షేర్', 'Share Panchangam')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.quickAction} onPress={() => setShowDatePicker(true)}>
-          <MaterialCommunityIcons name="calendar-search" size={18} color={DarkColors.gold} />
-          <Text style={s.quickActionText}>{t('ఏదైనా తేదీ చూడండి', 'Check Any Date')}</Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Panchangam share modal with preview + all channels */}
       {showPanchangamShare && (
@@ -282,94 +243,79 @@ export function HomeScreen({ navigation }) {
         </View>
       )}
 
-      {/* ── Feature Grid (scrollable) ── */}
+      {/* ── Feature Grid (scrollable, single grid) ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
-        <FeatureGrid gap={12}>
-          {/* Row 1 — Daily essentials: 1.నేటి దినం 2.పండుగలు 3.రాశి ఫలాలు */}
+        <FeatureGrid>
+          {/* Row 1 — Daily essentials */}
           <FeatureTile
-            icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t('Panchang', 'పంచాంగం')}
-            accentColor={DarkColors.gold}
+            icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t("Today's Panchaang", 'నేటి పంచాంగం')}
             onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })}
           />
           <FeatureTile
             icon="party-popper" label={t(TR.festivals.te, TR.festivals.en)} sublabel={t('Festivals', 'పండుగలు')}
-            accentColor={DarkColors.tulasiGreen}
             onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })}
           />
           <FeatureTile
-            icon="star-circle" label={t('రాశి ఫలాలు', 'Rashi Predictions')} sublabel={t('Daily', 'రోజువారీ')}
-            accentColor="#9B6FCF"
+            icon="star-circle" label={t('రాశి ఫలాలు', 'Rashi Predictions')} sublabel={t('Daily Predictions', 'రోజువారీ ఫలాలు')}
             onPress={() => navigation.navigate('DailyRashi')}
           />
 
-          {/* Row 2 — PREMIUM ROW: 4.జాతకం 5.జాతక పొందిక 6.శుభ దినాలు */}
+          {/* Row 2 — PREMIUM */}
           <FeatureTile
-            icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Janma Kundali', 'జన్మ కుండలి')}
-            accentColor={DarkColors.saffron}
+            icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Vedic Horoscope', 'వేద జాతకం')}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Horoscope')}
           />
           <FeatureTile
             icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Love Match', 'ప్రేమ పొందిక')}
-            accentColor="#C41E3A"
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Matchmaking')}
           />
           <FeatureTile
-            icon="calendar-star" label={t('శుభ దినాలు', 'Auspicious Dates')} sublabel={t('Wedding, Travel...', 'వివాహం, ప్రయాణం...')}
-            accentColor={DarkColors.tulasiGreen}
+            icon="calendar-star" label={t('శుభ దినాలు', 'Auspicious Dates')} sublabel={t('Auspicious Dates', 'శుభ దినాలు')}
             isPremium={!premiumActive}
             onPress={() => navigation.navigate('Muhurtam')}
           />
 
-          {/* Row 3 — 7.జ్యోతిష్యం (free) 8.బంగారం 9.భగవద్గీత */}
+          {/* Row 3 */}
           <FeatureTile
-            icon="zodiac-leo" label={t('జ్యోతిష్యం', 'Astrology')} sublabel={t('Astro Features', 'జ్యోతిష్య సేవలు')}
-            accentColor={DarkColors.saffron}
+            icon="zodiac-leo" label={t('వేద విజ్ఞానం', 'Vedic Wisdom')} sublabel={t('Mantras, Vastu & more', 'మంత్రాలు, వాస్తు & మరిన్ని')}
             onPress={() => navigation.navigate('Astro')}
           />
           <FeatureTile
             icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Gold Price', 'బంగారం ధర')}
-            accentColor="#B8860B"
             onPress={() => navigation.navigate('Gold')}
           />
           <FeatureTile
             icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t('Gita', 'గీత')}
-            accentColor="#9B6FCF"
             onPress={() => navigation.navigate('Gita')}
           />
 
-          {/* Row 4 — 10.శుభ సమయాలు 11.మార్కెట్ 12.రిమైండర్ */}
+          {/* Row 4 */}
           <FeatureTile
-            icon="clock-check" label={t('శుభ సమయాలు', 'Auspicious Times')} sublabel={t('Rahu Kalam & more', 'రాహు కాలం & ఇంకా')}
-            accentColor="#C41E3A"
+            icon="clock-check" label={t('శుభ సమయాలు', 'Auspicious Times')} sublabel={t('Auspicious Times', 'శుభ సమయాలు')}
             onPress={() => navigation.navigate('GoodTimes', { tab: 'timings', _ts: Date.now() })}
           />
           <FeatureTile
             icon="chart-line" label={t('మార్కెట్', 'Market')} sublabel={t('NSE/BSE', 'Stocks')}
-            accentColor="#4A90D9"
             onPress={() => navigation.navigate('Market')}
           />
           <FeatureTile
             icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t('Set Reminder', 'రిమైండర్ సెట్')}
-            accentColor={DarkColors.saffron}
             onPress={() => navigation.navigate('Reminder')}
           />
 
-          {/* Row 5 — Kids stories + Temple finder + Donate (last) */}
+          {/* Row 5 */}
           <FeatureTile
             icon="baby-face-outline" label={t('పిల్లల కథలు', "Kid's Stories")} sublabel={t("Kid's Stories", 'పిల్లల కథలు')}
-            accentColor="#9B6FCF"
-            onPress={() => navigation.navigate('Kids')}
+            onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })}
           />
           <FeatureTile
             icon="temple-hindu" label={t('దేవాలయాలు', 'Nearby Temples')} sublabel={t('Find Temples', 'దగ్గరిలోని')}
-            accentColor={DarkColors.saffron}
             onPress={() => navigation.navigate('TempleNearby')}
           />
           <FeatureTile
             icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t('Donate', 'దానం')}
-            accentColor={DarkColors.tulasiGreen}
             onPress={() => navigation.navigate('Donate')}
           />
         </FeatureGrid>
@@ -507,7 +453,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   locationText: {
-    fontSize: 13, color: DarkColors.silver, fontWeight: '600', maxWidth: 180,
+    fontSize: 13, color: DarkColors.silver, fontWeight: '600', flexShrink: 1,
   },
   langToggle: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -541,8 +487,7 @@ const s = StyleSheet.create({
   },
   quickAction: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: DarkColors.bgCard, borderRadius: 10, paddingVertical: 8,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
+    paddingVertical: 8,
   },
   quickActionText: { fontSize: 11, fontWeight: '700', color: DarkColors.textSecondary },
 

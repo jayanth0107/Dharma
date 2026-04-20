@@ -1,16 +1,17 @@
 // ధర్మ — Temple Nearby Screen
-// Fetches real temples near user using Photon API + Google Maps for navigation
+// Fetches temples near user using Google Places API (New) + Google Maps for navigation
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform, ActivityIndicator, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/PageHeader';
 import { TopTabBar } from '../components/TopTabBar';
 import { SwipeWrapper } from '../components/SwipeWrapper';
-import { googlePlacesNearby } from '../utils/placesProxy';
+import { googlePlacesNearby, googlePlacesTextSearch, googlePlacesNearbyNew, googlePlacesTextSearchNew } from '../utils/placesProxy';
 
 function calcDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -32,118 +33,37 @@ function searchMapsFor(query, lat, lon) {
   else Linking.openURL(url).catch(() => {});
 }
 
-// ── MapMyIndia (Mappls) API Key ──
-// Sign up at https://developer.mappls.com/ (free: 5000 req/day)
-// Enable "Nearby Search" API in your dashboard
-// Paste your key here:
-const MAPPLS_API_KEY = 'hezkmfansqobtgpgeodtbeteynilvxgbgvla'; // e.g. 'your-api-key-here'
+// Words that confirm a place is NOT a temple
+const EXCLUDE_KEYWORDS = [
+  'church', 'mosque', 'masjid', 'gurudwara', 'dargah', 'chapel', 'cathedral',
+  'wine', 'wines', 'bar', 'pub', 'liquor', 'beer', 'toddy',
+  'restaurant', 'hotel', 'lodge', 'residency', 'resort', 'dhaba',
+  'nivasam', 'nilayam', 'nivas', 'apartments', 'towers', 'heights', 'enclave', 'colony',
+  'school', 'college', 'university', 'academy', 'institute',
+  'hospital', 'clinic', 'pharmacy', 'medical',
+  'shop', 'store', 'mart', 'market', 'supermarket', 'mall', 'plaza',
+  'bank', 'atm', 'finance', 'insurance',
+  'garage', 'auto', 'motors', 'petrol', 'diesel', 'gas station',
+  'salon', 'parlour', 'parlor', 'studio', 'gym', 'fitness',
+];
 
-// 1. Mappls Nearby Search (best India coverage)
-async function fetchTemplesFromMappls(lat, lon) {
-  if (!MAPPLS_API_KEY) return null;
-  try {
-    const resp = await fetch(
-      `https://atlas.mappls.com/api/places/nearby/json?keywords=temple,mandir,devasthanam&refLocation=${lat},${lon}&radius=10000&sortBy=dist:asc`,
-      { headers: { 'Authorization': `Bearer ${MAPPLS_API_KEY}` } }
-    );
-    const data = await resp.json();
-    if (!data.suggestedLocations) return null;
-    return data.suggestedLocations.map(p => {
-      const pLat = parseFloat(p.latitude);
-      const pLon = parseFloat(p.longitude);
-      if (!pLat || !pLon) return null;
-      const name = (p.placeName || '').toLowerCase();
-      if (name.includes('church') || name.includes('mosque') || name.includes('masjid') || name.includes('gurudwara')) return null;
-      return {
-        name: p.placeName || 'Temple',
-        city: p.placeAddress || '',
-        lat: pLat, lon: pLon,
-        distance: calcDistance(lat, lon, pLat, pLon),
-      };
-    }).filter(Boolean).sort((a, b) => a.distance - b.distance);
-  } catch { return null; }
-}
-
-// 2. Photon (OSM-based, unlimited, no CORS)
-async function fetchTemplesFromPhoton(lat, lon) {
-  const searches = ['mandir', 'temple', 'devasthanam', 'gudi', 'kovil', 'aalayam', 'swamy temple', 'devi temple', 'shiva temple', 'rama temple', 'ganesh temple', 'hanuman temple'];
-  const seen = new Set();
-  const allResults = [];
-  const results = await Promise.all(
-    searches.map(q =>
-      fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&limit=15&lang=en`)
-        .then(r => r.json()).then(d => d.features || []).catch(() => [])
-    )
-  );
-  results.flat().forEach(f => {
-    const p = f.properties || {};
-    const coords = f.geometry?.coordinates || [];
-    const pLon = coords[0], pLat = coords[1];
-    if (!pLat || !pLon || !p.name || p.name.length < 3) return;
-    const name = p.name.toLowerCase();
-    if (name.includes('church') || name.includes('mosque') || name.includes('masjid') ||
-        name.includes('gurudwara') || name.includes('dargah')) return;
-    const key = `${pLat.toFixed(4)},${pLon.toFixed(4)}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    allResults.push({
-      name: p.name,
-      city: [p.street, p.district || p.county, p.city, p.state].filter(Boolean).join(', '),
-      lat: pLat, lon: pLon,
-      distance: calcDistance(lat, lon, pLat, pLon),
-    });
+// Google Places (New) parser
+function parseNewResults(results, lat, lon) {
+  return results.filter(t => {
+    if (!t || !t.lat || !t.lon) return false;
+    const lower = (t.name || '').toLowerCase();
+    return !EXCLUDE_KEYWORDS.some(kw => lower.includes(kw));
   });
-  return allResults.sort((a, b) => a.distance - b.distance);
 }
 
-// Nominatim search with multiple queries, tightly bounded to user location
-async function fetchTemplesFromNominatim(lat, lon) {
-  try {
-    const delta = 0.09; // ~10km box
-    const vb = `${(lon - delta).toFixed(4)},${(lat + delta).toFixed(4)},${(lon + delta).toFixed(4)},${(lat - delta).toFixed(4)}`;
-    const queries = ['temple', 'mandir', 'devasthanam', 'gudi', 'kovil', 'swamy'];
-    const seen = new Set();
-    const allResults = [];
-
-    // Run searches sequentially (Nominatim rate limit: 1/sec)
-    for (const q of queries) {
-      try {
-        const resp = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=15&bounded=1&viewbox=${vb}&accept-language=en,te&addressdetails=1`,
-          { headers: { 'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)' } }
-        );
-        const data = await resp.json();
-        data.forEach(p => {
-          const pLat = parseFloat(p.lat), pLon = parseFloat(p.lon);
-          if (!pLat || !pLon) return;
-          const name = (p.display_name || '').split(',')[0] || '';
-          if (!name || name.length < 3) return;
-          const lower = name.toLowerCase();
-          if (lower.includes('church') || lower.includes('mosque') || lower.includes('masjid') || lower.includes('gurudwara') || lower.includes('dargah')) return;
-          const key = `${pLat.toFixed(4)},${pLon.toFixed(4)}`;
-          if (seen.has(key)) return;
-          seen.add(key);
-          const addr = p.address || {};
-          const city = [addr.road || addr.suburb, addr.city || addr.town || addr.county, addr.state].filter(Boolean).join(', ');
-          allResults.push({ name, city, lat: pLat, lon: pLon, distance: calcDistance(lat, lon, pLat, pLon) });
-        });
-        // Nominatim rate limit: wait 1.1 seconds between requests
-        await new Promise(r => setTimeout(r, 1100));
-      } catch {}
-    }
-    return allResults.sort((a, b) => a.distance - b.distance);
-  } catch { return []; }
-}
-
-// Google Places parser
+// Google Places (Legacy) parser
 function parseGoogleResults(data, lat, lon) {
   if (!data || !data.results) return [];
   return data.results.map(place => {
     const pLat = place.geometry?.location?.lat;
     const pLon = place.geometry?.location?.lng;
     if (!pLat || !pLon) return null;
-    const name = (place.name || '').toLowerCase();
-    if (name.includes('church') || name.includes('mosque') || name.includes('masjid') || name.includes('gurudwara')) return null;
+    if (EXCLUDE_KEYWORDS.some(kw => (place.name || '').toLowerCase().includes(kw))) return null;
     return {
       name: place.name || 'Temple',
       city: place.vicinity || '',
@@ -157,44 +77,55 @@ function parseGoogleResults(data, lat, lon) {
   }).filter(Boolean);
 }
 
-// Merge ALL sources — Google Places first (most accurate), then OSM sources
+// Fetch temples using Google Places API (works on both web and native)
 async function fetchTemples(lat, lon) {
   const seen = new Set();
   const merged = [];
+  let total = 0;
 
   const addResults = (results) => {
     if (!results) return;
     results.forEach(t => {
       if (!t || !t.lat || !t.lon) return;
-      const key = `${t.lat.toFixed(3)},${t.lon.toFixed(3)}`;
+      const key = `${t.lat.toFixed(4)},${t.lon.toFixed(4)}`;
       if (seen.has(key)) return;
+      const nameLower = (t.name || '').toLowerCase().trim();
+      const isDuplicate = merged.some(m => {
+        if (calcDistance(t.lat, t.lon, m.lat, m.lon) > 0.1) return false;
+        const existingName = (m.name || '').toLowerCase().trim();
+        return existingName === nameLower || existingName.includes(nameLower) || nameLower.includes(existingName);
+      });
+      if (isDuplicate) return;
       seen.add(key);
       merged.push(t);
+      total++;
     });
   };
 
-  // 1. Try Google Places (most accurate) via proxy
-  try {
-    const googleData = await googlePlacesNearby(lat, lon, 'hindu temple mandir', 10000);
-    const googleResults = parseGoogleResults(googleData, lat, lon);
-    addResults(googleResults);
-    if (__DEV__) console.log('Google Places:', googleResults.length, 'temples found');
-  } catch (e) {
-    if (__DEV__) console.warn('Google Places failed:', e.message);
+  // Google Places API (New) — two radii in parallel: nearby (1.5km) + wider (10km)
+  const [nearbySmall, textSmall, nearbyWide, textWide] = await Promise.all([
+    googlePlacesNearbyNew(lat, lon, 1500).catch(() => []),
+    googlePlacesTextSearchNew(lat, lon, 'hindu temple', 1500).catch(() => []),
+    googlePlacesNearbyNew(lat, lon, 10000).catch(() => []),
+    googlePlacesTextSearchNew(lat, lon, 'hindu temple', 10000).catch(() => []),
+  ]);
+  // Add small radius first so nearby temples are guaranteed in the list
+  addResults(parseNewResults(nearbySmall, lat, lon));
+  addResults(parseNewResults(textSmall, lat, lon));
+  addResults(parseNewResults(nearbyWide, lat, lon));
+  addResults(parseNewResults(textWide, lat, lon));
+
+  // Google Places Legacy API — native only (no CORS support)
+  if (Platform.OS !== 'web') {
+    const [legacyNearby, legacyText] = await Promise.all([
+      googlePlacesNearby(lat, lon, 'hindu temple mandir', 10000).catch(() => ({ results: [] })),
+      googlePlacesTextSearch(lat, lon, 'hindu temple near me', 10000).catch(() => ({ results: [] })),
+    ]);
+    addResults(parseGoogleResults(legacyNearby, lat, lon));
+    addResults(parseGoogleResults(legacyText, lat, lon));
   }
 
-  // 2. Also fetch from OSM sources in parallel for extra coverage
-  const osmPromises = [
-    fetchTemplesFromNominatim(lat, lon).catch(() => []),
-    fetchTemplesFromPhoton(lat, lon).catch(() => []),
-  ];
-  if (Platform.OS !== 'web' && MAPPLS_API_KEY) {
-    osmPromises.push(fetchTemplesFromMappls(lat, lon).catch(() => []));
-  }
-  const osmResults = await Promise.all(osmPromises);
-  osmResults.forEach(addResults);
-
-  return merged.sort((a, b) => a.distance - b.distance);
+  return { temples: merged.sort((a, b) => a.distance - b.distance), total };
 }
 
 const DISTANCE_OPTIONS = [1, 3, 5, 10];
@@ -202,33 +133,50 @@ const DISTANCE_OPTIONS = [1, 3, 5, 10];
 export function TempleNearbyScreen() {
   const { t } = useLanguage();
   const { location } = useApp();
+  const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
   const [temples, setTemples] = useState([]);
+  const [sourceInfo, setSourceInfo] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRange, setSelectedRange] = useState(5);
+  const [searchText, setSearchText] = useState('');
 
   const lastCoordsRef = useRef('');
-  const [usedLat, setUsedLat] = useState(location?.latitude);
-  const [usedLon, setUsedLon] = useState(location?.longitude);
+  const [usedLat, setUsedLat] = useState(null);
+  const [usedLon, setUsedLon] = useState(null);
+  const [locationLabel, setLocationLabel] = useState('');
+  const [gpsStatus, setGpsStatus] = useState('detecting');
 
-  // Try to get fresh GPS on screen open (browser or native)
+  // Get GPS location — browser geolocation first, then fall back to app location
   useEffect(() => {
-    // If on web, try browser geolocation directly for most accurate position
     if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.geolocation) {
+      setGpsStatus('detecting');
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setUsedLat(pos.coords.latitude);
           setUsedLon(pos.coords.longitude);
+          setLocationLabel(`GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
+          setGpsStatus('gps');
         },
-        () => {
-          // GPS denied — use app location
-          setUsedLat(location?.latitude);
-          setUsedLon(location?.longitude);
+        (err) => {
+          // GPS denied or failed — fall back to app location
+          if (location?.latitude) {
+            setUsedLat(location.latitude);
+            setUsedLon(location.longitude);
+            setLocationLabel(location.city || location.label || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+            setGpsStatus('app');
+          } else {
+            setGpsStatus('failed');
+          }
         },
-        { timeout: 5000, enableHighAccuracy: false }
+        { timeout: 10000, enableHighAccuracy: true }
       );
+    } else if (location?.latitude) {
+      setUsedLat(location.latitude);
+      setUsedLon(location.longitude);
+      setLocationLabel(location.city || location.label || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+      setGpsStatus('app');
     } else {
-      setUsedLat(location?.latitude);
-      setUsedLon(location?.longitude);
+      setGpsStatus('failed');
     }
   }, []);
 
@@ -237,6 +185,8 @@ export function TempleNearbyScreen() {
     if (location?.isAutoDetected && location?.latitude) {
       setUsedLat(location.latitude);
       setUsedLon(location.longitude);
+      setLocationLabel(location.city || location.label || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`);
+      setGpsStatus('gps');
     }
   }, [location?.latitude, location?.longitude]);
 
@@ -247,29 +197,97 @@ export function TempleNearbyScreen() {
     if (lastCoordsRef.current === coordKey) return;
     lastCoordsRef.current = coordKey;
 
-    if (__DEV__) console.log('Temple search at:', usedLat, usedLon);
     setLoading(true);
     setTemples([]);
+    setSourceInfo('');
     fetchTemples(usedLat, usedLon)
-      .then(results => { if (results) setTemples(results); })
-      .catch(() => {})
+      .then(result => {
+        if (result?.temples) setTemples(result.temples);
+        setSourceInfo(result?.total ? `Google Places: ${result.total} found` : 'No results — check API key & billing');
+      })
+      .catch(() => setSourceInfo('All sources failed'))
       .finally(() => setLoading(false));
   }, [usedLat, usedLon]);
 
-  const filtered = temples.filter(tmp => tmp.distance <= selectedRange);
+  const filtered = temples.filter(tmp => {
+    if (tmp.distance > selectedRange) return false;
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase();
+      return (tmp.name || '').toLowerCase().includes(q) || (tmp.city || '').toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const handleRefresh = () => {
+    if (!usedLat || !usedLon) return;
+    lastCoordsRef.current = null; // Reset so fetch triggers
+    setLoading(true);
+    setTemples([]);
+    setSourceInfo('');
+    fetchTemples(usedLat, usedLon)
+      .then(result => {
+        if (result?.temples) setTemples(result.temples);
+        setSourceInfo(result?.total ? `Google Places: ${result.total} found` : 'No results — check API key & billing');
+      })
+      .catch(() => setSourceInfo('All sources failed'))
+      .finally(() => setLoading(false));
+  };
 
   return (
     <SwipeWrapper screenName="TempleNearby">
     <View style={s.screen}>
       <PageHeader title={t('దేవాలయాలు', 'Nearby Temples')} />
       <TopTabBar />
-      <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false}>
 
-        {/* Google Maps Quick Search */}
-        <TouchableOpacity style={s.mapsBtn} onPress={() => searchMapsFor('Hindu temple near me', lat, lon)}>
-          <MaterialCommunityIcons name="google" size={20} color="#fff" />
-          <Text style={s.mapsBtnText}>{t('Google Maps లో వెతకండి', 'Search in Google Maps')}</Text>
-        </TouchableOpacity>
+        {/* Location indicator */}
+        <View style={s.locationRow}>
+          <MaterialCommunityIcons
+            name={gpsStatus === 'gps' ? 'crosshairs-gps' : gpsStatus === 'detecting' ? 'loading' : 'map-marker-alert'}
+            size={16}
+            color={gpsStatus === 'gps' ? DarkColors.tulasiGreen : gpsStatus === 'failed' ? DarkColors.kumkum : DarkColors.gold}
+          />
+          <Text style={s.locationText}>
+            {gpsStatus === 'detecting' ? t('లొకేషన్ గుర్తిస్తోంది...', 'Detecting location...')
+              : gpsStatus === 'failed' ? t('లొకేషన్ అందుబాటులో లేదు — Settings లో సెట్ చేయండి', 'Location unavailable — set in Settings')
+              : locationLabel}
+          </Text>
+          {gpsStatus !== 'detecting' && (
+            <Text style={s.locationBadge}>
+              {gpsStatus === 'gps' ? 'GPS' : gpsStatus === 'app' ? t('మాన్యువల్', 'Manual') : '—'}
+            </Text>
+          )}
+        </View>
+
+        {/* Refresh + Google Maps row */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+          <TouchableOpacity style={[s.mapsBtn, { flex: 1, marginBottom: 0 }]} onPress={() => searchMapsFor('Hindu temple near me', usedLat, usedLon)}>
+            <MaterialCommunityIcons name="google" size={20} color="#fff" />
+            <Text style={s.mapsBtnText}>{t('Google Maps లో వెతకండి', 'Search in Google Maps')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[s.mapsBtn, { marginBottom: 0, paddingHorizontal: 16, backgroundColor: DarkColors.gold }]} onPress={handleRefresh} disabled={loading}>
+            <MaterialCommunityIcons name="refresh" size={20} color="#0A0A0A" />
+            <Text style={[s.mapsBtnText, { color: '#0A0A0A' }]}>{t('రీఫ్రెష్', 'Refresh')}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Search box */}
+        <View style={s.searchRow}>
+          <MaterialCommunityIcons name="magnify" size={20} color={DarkColors.gold} style={{ marginRight: 8 }} />
+          <TextInput
+            style={s.searchInput}
+            placeholder={t('దేవాలయం పేరు వెతకండి...', 'Search temple name...')}
+            placeholderTextColor={DarkColors.textMuted}
+            value={searchText}
+            onChangeText={setSearchText}
+            autoCorrect={false}
+          />
+          {searchText.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchText('')} style={{ padding: 4 }}>
+              <MaterialCommunityIcons name="close-circle" size={18} color={DarkColors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Deity quick filters */}
         <View style={s.deityRow}>
@@ -279,7 +297,7 @@ export function TempleNearbyScreen() {
             { icon: 'elephant', label: t('గణేష్', 'Ganesh'), q: 'Ganesh temple near me', color: '#C41E3A' },
             { icon: 'shield-star', label: t('హనుమాన్', 'Hanuman'), q: 'Hanuman temple near me', color: DarkColors.tulasiGreen },
           ].map((d, i) => (
-            <TouchableOpacity key={i} style={s.deityBtn} onPress={() => searchMapsFor(d.q, lat, lon)}>
+            <TouchableOpacity key={i} style={s.deityBtn} onPress={() => searchMapsFor(d.q, usedLat, usedLon)}>
               <MaterialCommunityIcons name={d.icon} size={18} color={d.color} />
               <Text style={s.deityBtnText}>{d.label}</Text>
             </TouchableOpacity>
@@ -300,6 +318,7 @@ export function TempleNearbyScreen() {
           <Text style={s.sectionTitle}>{t('సమీపంలో దేవాలయాలు', 'Nearby Temples')}</Text>
           {!loading && <Text style={s.resultCount}>{filtered.length} {t('కనుగొనబడ్డాయి', 'found')}</Text>}
         </View>
+        {!loading && sourceInfo ? <Text style={s.sourceInfo}>{sourceInfo}</Text> : null}
 
         {/* Loading */}
         {loading && (
@@ -367,7 +386,28 @@ export function TempleNearbyScreen() {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   scroll: { flex: 1 },
-  content: { padding: 16 },
+  content: {},
+  // Location row
+  locationRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: DarkColors.bgCard, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+    marginBottom: 10, borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  locationText: { flex: 1, fontSize: 13, fontWeight: '600', color: DarkColors.textSecondary },
+  locationBadge: {
+    fontSize: 10, fontWeight: '800', color: DarkColors.gold,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
+    overflow: 'hidden',
+  },
+  // Search box
+  searchRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: DarkColors.bgCard, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
+    marginBottom: 12, borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  searchInput: {
+    flex: 1, fontSize: 15, color: DarkColors.textPrimary, fontWeight: '500', padding: 0,
+  },
   // Google Maps button
   mapsBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
@@ -395,6 +435,7 @@ const s = StyleSheet.create({
   resultHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   sectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
   resultCount: { fontSize: 12, color: DarkColors.textMuted },
+  sourceInfo: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginBottom: 10 },
   // Loading
   loadingBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 30 },
   loadingText: { fontSize: 13, color: DarkColors.textMuted },

@@ -16,6 +16,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
+import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
@@ -26,14 +27,14 @@ import {
   MEDITATION_GUIDES, calculateNameCompatibility,
 } from '../utils/astroFeatures';
 
-function SectionCard({ icon, color, title, subtitle, children }) {
+function SectionCard({ icon, color, title, subtitle, children, rs }) {
   return (
-    <View style={s.card}>
+    <View style={[s.card, { padding: rs.cardPad, marginBottom: rs.cardMargin, borderRadius: rs.cardRadius }]}>
       <View style={s.cardHeader}>
-        <MaterialCommunityIcons name={icon} size={22} color={color} style={{ marginRight: 8 }} />
+        <MaterialCommunityIcons name={icon} size={rs.iconSize} color={color} style={{ marginRight: rs.iconMR }} />
         <View style={{ flex: 1 }}>
-          <Text style={[s.cardTitle, { color }]}>{title}</Text>
-          {subtitle ? <Text style={s.cardSubtitle}>{subtitle}</Text> : null}
+          <Text style={[s.cardTitle, { color, fontSize: rs.cardTitleSize }]}>{title}</Text>
+          {subtitle ? <Text style={[s.cardSubtitle, { fontSize: rs.cardSubSize }]}>{subtitle}</Text> : null}
         </View>
       </View>
       {children}
@@ -41,11 +42,11 @@ function SectionCard({ icon, color, title, subtitle, children }) {
   );
 }
 
-function StatRow({ label, value }) {
+function StatRow({ label, value, rs }) {
   return (
-    <View style={s.statRow}>
-      <Text style={s.statLabel}>{label}</Text>
-      <Text style={s.statValue}>{value}</Text>
+    <View style={[s.statRow, { paddingVertical: rs.statPadV }]}>
+      <Text style={[s.statLabel, { fontSize: rs.statLabelSize }]}>{label}</Text>
+      <Text style={[s.statValue, { fontSize: rs.statValueSize }]}>{value}</Text>
     </View>
   );
 }
@@ -54,6 +55,48 @@ export function AstroScreen() {
   const { panchangam } = useApp();
   const { t, lang } = useLanguage();
   const today = new Date();
+
+  // Responsive sizing
+  const contentPad      = usePick({ default: 12, lg: 18, xl: 24 });
+  const cardPad         = usePick({ default: 14, lg: 18, xl: 22 });
+  const cardMargin      = usePick({ default: 12, lg: 16, xl: 20 });
+  const cardRadius      = usePick({ default: 16, lg: 18, xl: 20 });
+  const cardTitleSize   = usePick({ default: 17, lg: 19, xl: 21 });
+  const cardSubSize     = usePick({ default: 13, lg: 14, xl: 15 });
+  const iconSize        = usePick({ default: 22, lg: 26, xl: 30 });
+  const iconMR          = usePick({ default: 8, lg: 10, xl: 12 });
+  const statPadV        = usePick({ default: 8, lg: 10, xl: 12 });
+  const statLabelSize   = usePick({ default: 14, lg: 15, xl: 16 });
+  const statValueSize   = usePick({ default: 15, lg: 16, xl: 17 });
+  const mantraFontSize  = usePick({ default: 22, lg: 26, xl: 30 });
+  const mantraLineH     = usePick({ default: 32, lg: 38, xl: 44 });
+  const mantraCountSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const yogaNameSize    = usePick({ default: 22, lg: 26, xl: 30 });
+  const yogaDescSize    = usePick({ default: 13, lg: 14, xl: 15 });
+  const inputFontSize   = usePick({ default: 15, lg: 16, xl: 17 });
+  const inputPad        = usePick({ default: 12, lg: 14, xl: 16 });
+  const dateBtnPadV     = usePick({ default: 14, lg: 16, xl: 18 });
+  const dateBtnPadH     = usePick({ default: 14, lg: 16, xl: 18 });
+  const dateBtnFontSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const dateBtnIconSize = usePick({ default: 20, lg: 22, xl: 24 });
+  const dateBtnChevSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const meaningFontSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const vastuRoomSize   = usePick({ default: 15, lg: 16, xl: 17 });
+  const vastuTipSize    = usePick({ default: 13, lg: 14, xl: 15 });
+  const vastuTipLineH   = usePick({ default: 19, lg: 21, xl: 23 });
+  const compatScoreSize = usePick({ default: 36, lg: 42, xl: 48 });
+  const compatVerdSize  = usePick({ default: 15, lg: 16, xl: 17 });
+  const compatNumsSize  = usePick({ default: 12, lg: 13, xl: 14 });
+  const compatPadV      = usePick({ default: 14, lg: 18, xl: 22 });
+  const medRashiSize    = usePick({ default: 14, lg: 15, xl: 16 });
+  const medRashiWidth   = usePick({ default: 90, lg: 110, xl: 130 });
+  const medFocusSize    = usePick({ default: 13, lg: 14, xl: 15 });
+  const medDurSize      = usePick({ default: 12, lg: 13, xl: 14 });
+
+  const rs = {
+    cardPad, cardMargin, cardRadius, cardTitleSize, cardSubSize,
+    iconSize, iconMR, statPadV, statLabelSize, statValueSize,
+  };
 
   const lucky = useMemo(() => getTodayLucky(today), [today.toDateString()]);
   const mantra = useMemo(() => getTodayMantra(today), [today.toDateString()]);
@@ -77,7 +120,7 @@ export function AstroScreen() {
   return (
     <SwipeWrapper screenName="Astro">
     <View style={s.screen}>
-      <PageHeader title={t('జ్యోతిష్యం', 'Astrology')} />
+      <PageHeader title={t('వేద విజ్ఞానం', 'Vedic Wisdom')} />
       <TopTabBar />
 
       {/* Date picker overlay for numerology DOB */}
@@ -90,18 +133,19 @@ export function AstroScreen() {
         />
       )}
 
-      <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false}>
 
         {/* 1. Today's Lucky */}
         <SectionCard
+          rs={rs}
           icon="star-shooting"
           color={DarkColors.gold}
           title={t('నేటి అదృష్టం', "Today's Lucky")}
           subtitle={t(`${lucky.deity.te} గ్రహ దినం`, `${lucky.deity.en} day`)}
         >
-          <StatRow label={t('అదృష్ట రంగు', 'Lucky Color')} value={lang === 'te' ? lucky.color.te : lucky.color.en} />
-          <StatRow label={t('అదృష్ట దిశ', 'Lucky Direction')} value={lang === 'te' ? lucky.direction.te : lucky.direction.en} />
-          <StatRow label={t('అధిపతి దేవత', 'Ruling Deity')} value={lang === 'te' ? lucky.deity.te : lucky.deity.en} />
+          <StatRow rs={rs} label={t('అదృష్ట రంగు', 'Lucky Color')} value={lang === 'te' ? lucky.color.te : lucky.color.en} />
+          <StatRow rs={rs} label={t('అదృష్ట దిశ', 'Lucky Direction')} value={lang === 'te' ? lucky.direction.te : lucky.direction.en} />
+          <StatRow rs={rs} label={t('అధిపతి దేవత', 'Ruling Deity')} value={lang === 'te' ? lucky.deity.te : lucky.deity.en} />
           <SectionShareRow
             section="today_lucky"
             buildText={() => `🌟 ధర్మ — నేటి అదృష్టం / Today's Lucky\n\n` +
@@ -115,13 +159,14 @@ export function AstroScreen() {
 
         {/* 2. Today's Mantra */}
         <SectionCard
+          rs={rs}
           icon="om"
           color={DarkColors.saffron}
           title={t('నేటి మంత్రం', "Today's Mantra")}
           subtitle={lang === 'te' ? mantra.meaning.te : mantra.meaning.en}
         >
-          <Text style={s.mantraText}>{mantra.sanskrit}</Text>
-          <Text style={s.mantraCount}>{t(`${mantra.count} సార్లు జపించండి`, `Chant ${mantra.count} times`)}</Text>
+          <Text style={[s.mantraText, { fontSize: mantraFontSize, lineHeight: mantraLineH }]}>{mantra.sanskrit}</Text>
+          <Text style={[s.mantraCount, { fontSize: mantraCountSize }]}>{t(`${mantra.count} సార్లు జపించండి`, `Chant ${mantra.count} times`)}</Text>
           <SectionShareRow
             section="today_mantra"
             buildText={() => `🕉 ధర్మ — నేటి మంత్రం / Today's Mantra\n\n` +
@@ -136,37 +181,39 @@ export function AstroScreen() {
         {/* 3. Today's Yoga from panchangam */}
         {panchangam?.yoga && (
           <SectionCard
+            rs={rs}
             icon="weather-sunny"
             color={DarkColors.tulasiGreen}
             title={t('నేటి గ్రహ యోగం', "Today's Planet Yoga")}
           >
-            <Text style={s.yogaName}>{lang === 'te' ? panchangam.yoga.telugu : (panchangam.yoga.english || panchangam.yoga.telugu)}</Text>
+            <Text style={[s.yogaName, { fontSize: yogaNameSize }]}>{lang === 'te' ? panchangam.yoga.telugu : (panchangam.yoga.english || panchangam.yoga.telugu)}</Text>
             {panchangam.yoga.description ? (
-              <Text style={s.yogaDesc}>{panchangam.yoga.description}</Text>
+              <Text style={[s.yogaDesc, { fontSize: yogaDescSize }]}>{panchangam.yoga.description}</Text>
             ) : null}
           </SectionCard>
         )}
 
         {/* 4. Numerology */}
         <SectionCard
+          rs={rs}
           icon="numeric"
           color="#9B6FCF"
           title={t('సంఖ్యాశాస్త్రం', 'Numerology')}
           subtitle={t('మీ పుట్టిన తేదీ ఇవ్వండి', 'Enter your birth date')}
         >
-          <TouchableOpacity style={s.dateBtn} onPress={() => setShowDobPicker(true)} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="calendar" size={20} color={DarkColors.gold} />
-            <Text style={[s.dateBtnText, !numDob && { color: DarkColors.textMuted, fontWeight: '500' }]}>
+          <TouchableOpacity style={[s.dateBtn, { paddingVertical: dateBtnPadV, paddingHorizontal: dateBtnPadH }]} onPress={() => setShowDobPicker(true)} activeOpacity={0.7}>
+            <MaterialCommunityIcons name="calendar" size={dateBtnIconSize} color={DarkColors.gold} />
+            <Text style={[s.dateBtnText, { fontSize: dateBtnFontSize }, !numDob && { color: DarkColors.textMuted, fontWeight: '500' }]}>
               {numDobLabel || t('మీ పుట్టిన తేదీ ఎంచుకోండి', 'Pick your birth date')}
             </Text>
-            <MaterialCommunityIcons name="chevron-down" size={18} color={DarkColors.textMuted} />
+            <MaterialCommunityIcons name="chevron-down" size={dateBtnChevSize} color={DarkColors.textMuted} />
           </TouchableOpacity>
           {numResult && (
             <View style={{ marginTop: 12 }}>
-              <StatRow label={t('లైఫ్ పాత్ నంబర్', 'Life Path Number')} value={numResult.lifePath} />
-              <StatRow label={t('పుట్టిన నంబర్', 'Birth Number')} value={numResult.birthNumber} />
-              <StatRow label={t('అదృష్ట సంఖ్యలు', 'Lucky Numbers')} value={numResult.luckyNumbers.join(', ')} />
-              <Text style={s.meaningText}>{lang === 'te' ? numResult.meaning.te : numResult.meaning.en}</Text>
+              <StatRow rs={rs} label={t('లైఫ్ పాత్ నంబర్', 'Life Path Number')} value={numResult.lifePath} />
+              <StatRow rs={rs} label={t('పుట్టిన నంబర్', 'Birth Number')} value={numResult.birthNumber} />
+              <StatRow rs={rs} label={t('అదృష్ట సంఖ్యలు', 'Lucky Numbers')} value={numResult.luckyNumbers.join(', ')} />
+              <Text style={[s.meaningText, { fontSize: meaningFontSize }]}>{lang === 'te' ? numResult.meaning.te : numResult.meaning.en}</Text>
               <SectionShareRow
                 section="numerology"
                 buildText={() => `🔢 ధర్మ — సంఖ్యాశాస్త్రం / Numerology\n\n` +
@@ -183,45 +230,47 @@ export function AstroScreen() {
 
         {/* 5. Vastu Tips */}
         <SectionCard
+          rs={rs}
           icon="home-variant"
           color={DarkColors.tulasiGreen}
           title={t('వాస్తు చిట్కాలు', 'Vastu Tips')}
           subtitle={t('మీ ఇంటి శక్తి కోసం', 'For your home energy')}
         >
           {VASTU_TIPS.map((tip, i) => (
-            <View key={i} style={s.vastuRow}>
-              <Text style={s.vastuRoom}>{lang === 'te' ? tip.room.te : tip.room.en}</Text>
-              <Text style={s.vastuTip}>{lang === 'te' ? tip.tip.te : tip.tip.en}</Text>
+            <View key={i} style={[s.vastuRow, { paddingVertical: statPadV }]}>
+              <Text style={[s.vastuRoom, { fontSize: vastuRoomSize }]}>{lang === 'te' ? tip.room.te : tip.room.en}</Text>
+              <Text style={[s.vastuTip, { fontSize: vastuTipSize, lineHeight: vastuTipLineH }]}>{lang === 'te' ? tip.tip.te : tip.tip.en}</Text>
             </View>
           ))}
         </SectionCard>
 
         {/* 6. Name Compatibility */}
         <SectionCard
+          rs={rs}
           icon="heart-multiple"
           color="#C41E3A"
           title={t('పేరు అనుకూలత', 'Name Compatibility')}
           subtitle={t('రెండు పేర్లు ఇవ్వండి', 'Enter two names')}
         >
           <TextInput
-            style={s.input}
+            style={[s.input, { fontSize: inputFontSize, padding: inputPad }]}
             value={n1}
             onChangeText={setN1}
             placeholder={t('మొదటి పేరు', 'First name')}
             placeholderTextColor={DarkColors.textMuted}
           />
           <TextInput
-            style={[s.input, { marginTop: 8 }]}
+            style={[s.input, { marginTop: 8, fontSize: inputFontSize, padding: inputPad }]}
             value={n2}
             onChangeText={setN2}
             placeholder={t('రెండవ పేరు', 'Second name')}
             placeholderTextColor={DarkColors.textMuted}
           />
           {compat && (
-            <View style={s.compatBox}>
-              <Text style={s.compatScore}>{compat.score}%</Text>
-              <Text style={s.compatVerdict}>{compat.verdict.emoji}  {lang === 'te' ? compat.verdict.te : compat.verdict.en}</Text>
-              <Text style={s.compatNums}>{t(`సంఖ్యలు: ${compat.num1} + ${compat.num2}`, `Numbers: ${compat.num1} + ${compat.num2}`)}</Text>
+            <View style={[s.compatBox, { paddingVertical: compatPadV }]}>
+              <Text style={[s.compatScore, { fontSize: compatScoreSize }]}>{compat.score}%</Text>
+              <Text style={[s.compatVerdict, { fontSize: compatVerdSize }]}>{compat.verdict.emoji}  {lang === 'te' ? compat.verdict.te : compat.verdict.en}</Text>
+              <Text style={[s.compatNums, { fontSize: compatNumsSize }]}>{t(`సంఖ్యలు: ${compat.num1} + ${compat.num2}`, `Numbers: ${compat.num1} + ${compat.num2}`)}</Text>
             </View>
           )}
           {compat && (
@@ -239,16 +288,17 @@ export function AstroScreen() {
 
         {/* 7. Meditation Guides — all 12 rashis */}
         <SectionCard
+          rs={rs}
           icon="meditation"
           color="#9B6FCF"
           title={t('ధ్యాన మార్గదర్శి', 'Meditation Guide')}
           subtitle={t('మీ రాశి కోసం', 'For each rashi')}
         >
           {MEDITATION_GUIDES.map((m, i) => (
-            <View key={i} style={s.medRow}>
-              <Text style={s.medRashi}>{lang === 'te' ? m.rashi.te : m.rashi.en}</Text>
-              <Text style={s.medFocus}>{lang === 'te' ? m.focus.te : m.focus.en}</Text>
-              <Text style={s.medDuration}>{m.duration}</Text>
+            <View key={i} style={[s.medRow, { paddingVertical: statPadV }]}>
+              <Text style={[s.medRashi, { fontSize: medRashiSize, width: medRashiWidth }]}>{lang === 'te' ? m.rashi.te : m.rashi.en}</Text>
+              <Text style={[s.medFocus, { fontSize: medFocusSize }]}>{lang === 'te' ? m.focus.te : m.focus.en}</Text>
+              <Text style={[s.medDuration, { fontSize: medDurSize }]}>{m.duration}</Text>
             </View>
           ))}
         </SectionCard>

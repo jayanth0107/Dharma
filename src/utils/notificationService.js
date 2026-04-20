@@ -95,10 +95,113 @@ export async function saveNotifSettings(settings) {
 }
 
 /**
+ * Build rich notification title — includes festival/ekadashi if today is special
+ */
+function buildNotifTitle(today) {
+  try {
+    const { getTodayFestivals } = require('../data/festivals');
+    const { getTodayEkadashi } = require('../data/ekadashi');
+    const festivals = getTodayFestivals(today);
+    const ekadashi = getTodayEkadashi(today);
+
+    if (festivals.length > 0) {
+      return `🎉 ${festivals[0].telugu} — నేటి పంచాంగం`;
+    }
+    if (ekadashi) {
+      return `🙏 ${ekadashi.telugu || ekadashi.name} — నేటి పంచాంగం`;
+    }
+    return '🙏 ధర్మ — నేటి పంచాంగం';
+  } catch {
+    return '🙏 ధర్మ — నేటి పంచాంగం';
+  }
+}
+
+/**
+ * Build rich notification body with panchangam + special days + rashi
+ */
+function buildNotifBody(location, rashiIndex) {
+  const today = new Date();
+  const lines = [];
+
+  // ── Panchangam ──
+  try {
+    const { getDailyPanchangam } = require('./panchangamCalculator');
+    const p = getDailyPanchangam(today, location);
+    if (p?.tithi?.telugu) {
+      lines.push(`━━━━━━━━━━━━━━━━`);
+      lines.push(`🌙 ${p.tithi.telugu}  ⭐ ${p.nakshatra.telugu}`);
+      lines.push(`🔮 ${p.yoga.telugu}  📿 ${p.vaaram?.telugu || ''}`);
+      lines.push(`🌅 ${p.sunriseFormatted}  🌇 ${p.sunsetFormatted}`);
+      lines.push(`✅ అభిజిత్: ${p.abhijitMuhurtam?.startFormatted}-${p.abhijitMuhurtam?.endFormatted}`);
+      lines.push(`❌ రాహు: ${p.rahuKalam?.startFormatted}-${p.rahuKalam?.endFormatted}`);
+    }
+  } catch {}
+
+  // ── Festivals ──
+  try {
+    const { getTodayFestivals } = require('../data/festivals');
+    const festivals = getTodayFestivals(today);
+    if (festivals.length > 0) {
+      lines.push(`━━━━━━━━━━━━━━━━`);
+      festivals.forEach(f => {
+        lines.push(`🎊 పండుగ: ${f.telugu} (${f.english})`);
+      });
+    }
+  } catch {}
+
+  // ── Ekadashi ──
+  try {
+    const { getTodayEkadashi } = require('../data/ekadashi');
+    const ekadashi = getTodayEkadashi(today);
+    if (ekadashi) {
+      lines.push(`🙏 ఏకాదశి: ${ekadashi.telugu || ekadashi.name} (${ekadashi.english || ekadashi.nameEnglish})`);
+    }
+  } catch {}
+
+  // ── Public Holidays ──
+  try {
+    const { PUBLIC_HOLIDAYS_2026 } = require('../data/holidays');
+    const dateStr = today.toISOString().split('T')[0];
+    const holiday = PUBLIC_HOLIDAYS_2026.find(h => h.date === dateStr);
+    if (holiday) {
+      lines.push(`🏛️ సెలవు: ${holiday.telugu || holiday.english}`);
+    }
+  } catch {}
+
+  // ── Observances (Chaturthi, Pournami, Amavasya, Pradosham) ──
+  try {
+    const { CHATURTHI_2026, POURNAMI_2026, AMAVASYA_2026, PRADOSHAM_2026 } = require('../data/observances');
+    const dateStr = today.toISOString().split('T')[0];
+    if (POURNAMI_2026.some(d => d.date === dateStr)) lines.push(`🌕 నేడు పౌర్ణమి`);
+    if (AMAVASYA_2026.some(d => d.date === dateStr)) lines.push(`🌑 నేడు అమావాస్య`);
+    if (CHATURTHI_2026.some(d => d.date === dateStr)) lines.push(`🙏 నేడు సంకష్ట చతుర్థి`);
+    if (PRADOSHAM_2026.some(d => d.date === dateStr)) lines.push(`🔱 నేడు ప్రదోషం`);
+  } catch {}
+
+  // ── Rashi prediction ──
+  try {
+    const { getAllDailyRashi, RASHIS } = require('./dailyRashiService');
+    if (rashiIndex != null && rashiIndex >= 0 && rashiIndex <= 11) {
+      const pred = getAllDailyRashi(today)[rashiIndex];
+      if (pred) {
+        lines.push(`━━━━━━━━━━━━━━━━`);
+        lines.push(`🌟 ${RASHIS[rashiIndex].te}: ${pred.overall.te}`);
+      }
+    }
+  } catch {}
+
+  if (lines.length === 0) return getTodayQuote();
+  return lines.join('\n');
+}
+
+/**
  * Request notification permissions and schedule daily notifications
  * Call on app start and when settings change
+ * @param {object} settings — notification settings
+ * @param {object} location — { latitude, longitude, altitude } for panchangam
+ * @param {number|null} myRashiIndex — user's saved rashi index (0-11) or null
  */
-export async function setupDailyNotifications(settings) {
+export async function setupDailyNotifications(settings, location, myRashiIndex) {
   if (Platform.OS === 'web') return; // No push on web
 
   try {
@@ -113,13 +216,15 @@ export async function setupDailyNotifications(settings) {
 
     if (!settings.enabled) return;
 
-    // Schedule daily panchangam notification
+    const today = new Date();
+
+    // Schedule daily panchangam notification with real tithi/nakshatra/festivals
     if (settings.dailyPanchangam) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '🙏 ధర్మ Daily — నేటి పంచాంగం',
-          body: getTodayQuote(),
-          data: { type: 'daily_panchangam' },
+          title: buildNotifTitle(today),
+          body: buildNotifBody(location, myRashiIndex),
+          data: { type: 'daily_panchangam', screen: 'Panchang' },
         },
         trigger: {
           hour: settings.notifHour,
@@ -135,7 +240,7 @@ export async function setupDailyNotifications(settings) {
         content: {
           title: '🕉️ నేటి సుభాషితం',
           body: getTodayQuote(),
-          data: { type: 'daily_quote' },
+          data: { type: 'daily_quote', screen: 'Gita' },
         },
         trigger: {
           hour: 12,
