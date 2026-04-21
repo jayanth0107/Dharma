@@ -38,7 +38,7 @@ export function PageHeader({ title, onMenuPress }) {
             <MaterialCommunityIcons name="menu" size={menuIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity style={s.iconBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')}>
             <Ionicons name="arrow-back" size={navIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         )}

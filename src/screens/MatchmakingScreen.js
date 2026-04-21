@@ -183,8 +183,8 @@ export function MatchmakingScreen({ navigation }) {
             {/* ── Groom Section ── */}
             <View style={[s.personCard, { padding: cardPad }]}>
               <View style={s.personHeader}>
-                <MaterialCommunityIcons name="human-male" size={personIconSize} color="#4A90D9" />
-                <Text style={[s.personTitle, { color: '#4A90D9', fontSize: personTitleSize }]}>{t(TR.groomSection.te, TR.groomSection.en)}</Text>
+                <MaterialCommunityIcons name="human-male" size={personIconSize} color={DarkColors.gold} />
+                <Text style={[s.personTitle, { color: DarkColors.gold, fontSize: personTitleSize }]}>{t(TR.groomSection.te, TR.groomSection.en)}</Text>
               </View>
               <TextInput style={[s.input, { padding: inputPad, fontSize: inputFontSize }]} value={groomName} onChangeText={setGroomName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
               <TouchableOpacity style={[s.input, { padding: inputPad }]} onPress={() => setShowDatePicker('groom')}>
@@ -220,8 +220,8 @@ export function MatchmakingScreen({ navigation }) {
             {/* ── Bride Section ── */}
             <View style={[s.personCard, { padding: cardPad }]}>
               <View style={s.personHeader}>
-                <MaterialCommunityIcons name="human-female" size={personIconSize} color="#E8495A" />
-                <Text style={[s.personTitle, { color: '#E8495A', fontSize: personTitleSize }]}>{t(TR.brideSection.te, TR.brideSection.en)}</Text>
+                <MaterialCommunityIcons name="human-female" size={personIconSize} color={DarkColors.saffron} />
+                <Text style={[s.personTitle, { color: DarkColors.saffron, fontSize: personTitleSize }]}>{t(TR.brideSection.te, TR.brideSection.en)}</Text>
               </View>
               <TextInput style={[s.input, { padding: inputPad, fontSize: inputFontSize }]} value={brideName} onChangeText={setBrideName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
               <TouchableOpacity style={[s.input, { padding: inputPad }]} onPress={() => setShowDatePicker('bride')}>
@@ -258,7 +258,7 @@ export function MatchmakingScreen({ navigation }) {
               onPress={handleCalculate}
               disabled={groomNak === null || brideNak === null}
             >
-              <MaterialCommunityIcons name="heart-multiple" size={calcBtnIcon} color="#fff" />
+              <MaterialCommunityIcons name="heart-multiple" size={calcBtnIcon} color="#0A0A0A" />
               <Text style={[s.calcBtnText, { fontSize: calcBtnFontSize }]}>{t(TR.checkCompatibility.te, TR.checkCompatibility.en)}</Text>
             </TouchableOpacity>
           </>
@@ -279,14 +279,14 @@ export function MatchmakingScreen({ navigation }) {
             {/* Couple Info */}
             <View style={s.coupleRow}>
               <View style={[s.coupleCard, { padding: coupleCardPad }]}>
-                <MaterialCommunityIcons name="human-male" size={couplePersonIcon} color="#4A90D9" />
+                <MaterialCommunityIcons name="human-male" size={couplePersonIcon} color={DarkColors.gold} />
                 <Text style={[s.coupleName, { fontSize: coupleNameSize }]}>{groomName || t(TR.groom.te, TR.groom.en)}</Text>
                 <Text style={[s.coupleNak, { fontSize: coupleNakSize }]}>{result.groomNakshatra.telugu}</Text>
                 <Text style={[s.coupleRashi, { fontSize: coupleRashiSize }]}>{result.groomRashi.telugu}</Text>
               </View>
               <MaterialCommunityIcons name="heart" size={coupleHeartIcon} color={result.verdictColor} />
               <View style={[s.coupleCard, { padding: coupleCardPad }]}>
-                <MaterialCommunityIcons name="human-female" size={couplePersonIcon} color="#E8495A" />
+                <MaterialCommunityIcons name="human-female" size={couplePersonIcon} color={DarkColors.saffron} />
                 <Text style={[s.coupleName, { fontSize: coupleNameSize }]}>{brideName || t(TR.bride.te, TR.bride.en)}</Text>
                 <Text style={[s.coupleNak, { fontSize: coupleNakSize }]}>{result.brideNakshatra.telugu}</Text>
                 <Text style={[s.coupleRashi, { fontSize: coupleRashiSize }]}>{result.brideRashi.telugu}</Text>
@@ -304,7 +304,7 @@ export function MatchmakingScreen({ navigation }) {
                   <Text style={[s.kutaDesc, { fontSize: kutaDescSize }]}>{kuta.descriptionEn}</Text>
                 </View>
                 <View style={s.kutaScoreBox}>
-                  <Text style={[s.kutaScore, { fontSize: kutaScoreSize, color: kuta.score === kuta.max ? '#2E7D32' : kuta.score === 0 ? '#C41E3A' : DarkColors.gold }]}>
+                  <Text style={[s.kutaScore, { fontSize: kutaScoreSize, color: kuta.score === kuta.max ? DarkColors.tulasiGreen : kuta.score === 0 ? DarkColors.kumkum : DarkColors.gold }]}>
                     {kuta.score}
                   </Text>
                   <Text style={[s.kutaMax, { fontSize: kutaMaxSize }]}>/ {kuta.max}</Text>
@@ -312,7 +312,7 @@ export function MatchmakingScreen({ navigation }) {
                 <View style={s.kutaBar}>
                   <View style={[s.kutaBarFill, {
                     width: `${(kuta.score / kuta.max) * 100}%`,
-                    backgroundColor: kuta.score === kuta.max ? '#2E7D32' : kuta.score === 0 ? '#C41E3A' : DarkColors.gold,
+                    backgroundColor: kuta.score === kuta.max ? DarkColors.tulasiGreen : kuta.score === 0 ? DarkColors.kumkum : DarkColors.gold,
                   }]} />
                 </View>
               </View>
@@ -369,9 +369,9 @@ const s = StyleSheet.create({
   selectorClose: { backgroundColor: DarkColors.saffron, padding: 14, alignItems: 'center' },
   selectorCloseText: { fontSize: 15, fontWeight: '700', color: '#fff' },
   // Calculate
-  calcBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#C41E3A', borderRadius: 16, paddingVertical: 16, marginTop: 8 },
+  calcBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: DarkColors.gold, borderRadius: 16, paddingVertical: 16, marginTop: 8 },
   calcBtnDisabled: { opacity: 0.4 },
-  calcBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  calcBtnText: { fontSize: 16, fontWeight: '800', color: '#0A0A0A' },
   // Results
   scoreHeader: { alignItems: 'center', backgroundColor: DarkColors.bgCard, borderRadius: 20, padding: 24, borderWidth: 2, marginBottom: 16 },
   scoreNumber: { fontSize: 56, fontWeight: '900', color: DarkColors.gold },

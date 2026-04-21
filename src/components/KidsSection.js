@@ -5,82 +5,10 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
+import { KIDS_STORIES, getStoriesForDay } from '../data/kidsStories';
+import { KIDS_SLOKAS, getSlokasForDay } from '../data/kidsSlokas';
 
 const IS_WEB = Platform.OS === 'web';
-
-// All 7 stories
-const KIDS_STORIES = [
-  {
-    id: 1, title: 'గణేశుని తెలివి', english: 'Ganesha\'s Wisdom',
-    icon: 'elephant', color: '#E8751A',
-    image: require('../../assets/deities/ganesha.jpg'),
-    story: 'ఒకసారి శివపార్వతులు తమ ఇద్దరు కుమారులైన గణేశుడు, కుమారస్వామిలకు ఒక పోటీ పెట్టారు. "భూ ప్రదక్షిణ చేసి ముందుగా వచ్చినవారికి ఒక ఫలం ఇస్తాము" అని చెప్పారు.\n\nకుమారస్వామి తన నెమలి వాహనంపై వేగంగా బయలుదేరాడు. కానీ గణేశుడు ఆలోచించాడు. ఆయన తన తల్లిదండ్రుల చుట్టూ మూడుసార్లు ప్రదక్షిణ చేశాడు.\n\n"తల్లిదండ్రులే సర్వలోకాలు. వారి చుట్టూ ప్రదక్షిణ చేస్తే భూ ప్రదక్షిణ చేసినట్లే" అని చెప్పాడు.\n\nశివపార్వతులు సంతోషించి గణేశునికి ఫలం ఇచ్చారు.',
-    storyEn: 'Once, Lord Shiva and Parvati challenged their two sons Ganesha and Kartikeya to a race around the world. "Whoever circles the Earth first wins a special fruit," they said.\n\nKartikeya set off swiftly on his peacock. But Ganesha thought cleverly. He simply walked around his parents three times.\n\n"Parents are the whole world. Circling them is the same as circling the Earth," he explained.\n\nShiva and Parvati were delighted and gave the fruit to Ganesha.',
-    moral: 'నేర్పు: తల్లిదండ్రుల సేవే గొప్ప పూజ. తెలివితో ఆలోచిస్తే కష్టమైన పనులు కూడా సులభమవుతాయి.',
-    moralEn: 'Lesson: Serving parents is the greatest worship. With wisdom, even the hardest tasks become easy.',
-  },
-  {
-    id: 2, title: 'హనుమంతుని భక్తి', english: 'Hanuman\'s Devotion',
-    icon: 'shield-star', color: '#C41E3A',
-    image: require('../../assets/deities/hanuman.jpg'),
-    story: 'హనుమంతుడు శ్రీరాముడి పరమ భక్తుడు. ఒకసారి సీతాదేవి హనుమంతునికి ముత్యాల హారం బహుమతిగా ఇచ్చింది.\n\nహనుమంతుడు ఒక్కొక్క ముత్యాన్ని పళ్ళతో కొరికి చూసి పడేస్తున్నాడు. "ఏమిటి ఈ అపచారం?" అని అడిగారు.\n\n"ఏ ముత్యంలోనూ శ్రీరాముడు లేడు. రాముడు లేని వస్తువు నాకెందుకు?" అన్నాడు హనుమంతుడు.\n\nహనుమంతుడు తన గుండె చీల్చి చూపించాడు — అందులో శ్రీరాముడు, సీతాదేవి కనిపించారు!',
-    storyEn: 'Hanuman was Lord Rama\'s greatest devotee. Once, Sita gifted Hanuman a beautiful pearl necklace.\n\nHanuman began biting each pearl and throwing them away. "What disrespect is this?" everyone asked.\n\n"None of these pearls contain Lord Rama. What use is anything without Rama?" said Hanuman.\n\nHanuman then tore open his chest — and there, everyone could see Lord Rama and Sita in his heart!',
-    moral: 'నేర్పు: నిజమైన భక్తి హృదయంలో ఉంటుంది. దేవుడిని ప్రేమతో తలచుకుంటే ఆయన మన హృదయంలోనే ఉంటాడు.',
-    moralEn: 'Lesson: True devotion lives in the heart. When you love God sincerely, He resides within you always.',
-  },
-  {
-    id: 3, title: 'ధ్రువుని తపస్సు', english: 'Dhruva\'s Penance',
-    icon: 'star-four-points', color: '#4A90D9',
-    image: require('../../assets/deities/krishna.webp'),
-    story: 'ధ్రువుడు ఐదేళ్ల బాలుడు. తన తండ్రి ఒడిలో కూర్చోవాలని వెళ్ళాడు. కానీ సవతి తల్లి అడ్డుకుని "నీకు అర్హత లేదు, దేవుని ప్రార్థించి అడుగు" అని అవమానించింది.\n\nధ్రువుడు అడవికి వెళ్ళి విష్ణువును ధ్యానించాడు. ఒక కాలిమీద నిలబడి, ఆహారం, నీరు లేకుండా తపస్సు చేశాడు.\n\nవిష్ణువు ప్రత్యక్షమై ధ్రువ నక్షత్ర స్థానం ఇచ్చాడు — ఎప్పటికీ చెరగని, ఆకాశంలో స్థిరంగా ఉండే స్థానం.',
-    storyEn: 'Dhruva was a five-year-old boy. He went to sit on his father\'s lap, but his stepmother stopped him saying "You are not worthy. Go pray to God if you want that."\n\nDhruva went to the forest and meditated on Lord Vishnu. Standing on one foot, without food or water, he performed intense penance.\n\nLord Vishnu appeared and granted him the Pole Star position — an eternal, unshakable place in the sky.',
-    moral: 'నేర్పు: చిన్నవాళ్ళు కూడా గొప్ప పనులు చేయగలరు. పట్టుదలతో ఏదైనా సాధించవచ్చు.',
-    moralEn: 'Lesson: Even children can achieve great things. With determination, anything is possible.',
-  },
-  {
-    id: 4, title: 'ప్రహ్లాదుని విశ్వాసం', english: 'Prahlada\'s Faith',
-    icon: 'fire', color: '#C55A11',
-    image: require('../../assets/deities/venkateswara.jpg'),
-    story: 'ప్రహ్లాదుడు రాక్షస రాజు హిరణ్యకశిపుని కుమారుడు. కానీ చిన్నతనం నుండే విష్ణు భక్తుడు.\n\nతండ్రి ఎంత బెదిరించినా "నారాయణ" అనే మానలేదు. విషసర్పాలతో, ఏనుగులతో, కొండమీద నుండి పడేసినా — ప్రహ్లాదునికి ఏమీ కాలేదు.\n\nనరసింహ స్వామి స్తంభం నుండి ఉద్భవించి ప్రహ్లాదుని కాపాడాడు!',
-    storyEn: 'Prahlada was the son of the demon king Hiranyakashipu. But from childhood, he was a devoted worshipper of Lord Vishnu.\n\nNo matter how much his father threatened him, Prahlada never stopped chanting "Narayana." Poisonous snakes, elephants, being thrown off cliffs — nothing could harm Prahlada.\n\nLord Narasimha emerged from a pillar and protected Prahlada!',
-    moral: 'నేర్పు: నిజమైన భక్తిని ఎవరూ ఆపలేరు. ధర్మం ఎల్లప్పుడూ గెలుస్తుంది.',
-    moralEn: 'Lesson: No one can stop true devotion. Dharma (righteousness) always wins.',
-  },
-  {
-    id: 5, title: 'శ్రవణ కుమారుని సేవ', english: 'Shravana\'s Service',
-    icon: 'heart', color: '#2E7D32',
-    image: require('../../assets/deities/rama.jpg'),
-    story: 'శ్రవణ కుమారుడు అంధులైన తల్లిదండ్రులను కావడిలో మోస్తూ తీర్థయాత్రలకు తీసుకువెళ్ళేవాడు.\n\nచివరి క్షణంలో కూడా "నా తల్లిదండ్రులకు నీళ్ళు ఇవ్వండి" అని అడిగాడు.',
-    storyEn: 'Shravana Kumar carried his blind parents in baskets on his shoulders, taking them on pilgrimages across the land.\n\nEven in his last moments, he said "Please give water to my parents."',
-    moral: 'నేర్పు: తల్లిదండ్రుల సేవ అన్నింటికంటే గొప్పది. మాతృదేవో భవ, పితృదేవో భవ.',
-    moralEn: 'Lesson: Serving parents is the greatest duty. Mother and Father are like God.',
-  },
-  {
-    id: 6, title: 'కృష్ణుడు - గోవర్ధన గిరి', english: 'Krishna Lifts Govardhana',
-    icon: 'terrain', color: '#4A1A6B',
-    image: require('../../assets/deities/krishna.webp'),
-    story: 'కృష్ణుడు తన చిటికెన వేలిమీద గోవర్ధన పర్వతాన్ని ఎత్తి గొడుగులా పట్టుకున్నాడు. ఇంద్రుడు ఏడు రోజులు వర్షం కురిపించినా గోపాలురందరూ అడుగున తలదాచుకున్నారు.\n\nచివరికి ఇంద్రుడు తన తప్పు తెలుసుకుని క్షమాపణ కోరాడు.',
-    storyEn: 'Krishna lifted the entire Govardhana mountain on his little finger like an umbrella. Even though Indra poured rain for seven days, all the villagers took shelter underneath.\n\nFinally, Indra realized his mistake and asked for forgiveness.',
-    moral: 'నేర్పు: ధైర్యంతో నిలబడితే ఎంత పెద్ద కష్టమైనా తట్టుకోవచ్చు.',
-    moralEn: 'Lesson: With courage and faith, you can withstand even the greatest challenges.',
-  },
-  {
-    id: 7, title: 'హరిశ్చంద్రుని సత్యం', english: 'Harishchandra\'s Truth',
-    icon: 'scale-balance', color: '#D4A017',
-    image: require('../../assets/deities/shiva.jpg'),
-    story: 'హరిశ్చంద్రుడు సత్యం చెప్పే రాజు. రాజ్యం, సంపద, కుటుంబం అన్నీ కోల్పోయినా సత్యాన్ని వదలలేదు.\n\nచివరికి దేవతలు ప్రత్యక్షమై "నిజమైన ధర్మమూర్తి" అని కీర్తించారు.',
-    storyEn: 'Harishchandra was a king who always spoke the truth. He lost his kingdom, wealth, and family — but never gave up truth.\n\nFinally, the gods appeared and praised him as "the true embodiment of Dharma."',
-    moral: 'నేర్పు: ఎంత కష్టమైనా సత్యాన్ని వదలకూడదు. సత్యమేవ జయతే.',
-    moralEn: 'Lesson: Never abandon truth, no matter how difficult. Truth alone triumphs — Satyameva Jayate.',
-  },
-];
-
-const KIDS_SLOKAS = [
-  { telugu: 'ఓం గం గణపతయే నమః', english: 'Om Gam Ganapataye Namaha', meaning: 'గణేశునికి నమస్కారం — అడ్డంకులు తొలగించమని ప్రార్థన', meaningEn: 'Salutations to Lord Ganesha — prayer to remove obstacles', deity: 'గణేశుడు', deityEn: 'Ganesha', icon: 'elephant', color: '#E8751A' },
-  { telugu: 'ఓం నమః శివాయ', english: 'Om Namah Shivaya', meaning: 'శివునికి నమస్కారం — శాంతి కోసం ప్రార్థన', meaningEn: 'Salutations to Lord Shiva — prayer for peace', deity: 'శివుడు', deityEn: 'Shiva', icon: 'om', color: '#4A90D9' },
-  { telugu: 'సరస్వతి నమస్తుభ్యం వరదే కామరూపిణి', english: 'Saraswati Namastubhyam Varade Kamarupini', meaning: 'సరస్వతీ దేవికి నమస్కారం — చదువులో తెలివి కోసం', meaningEn: 'Salutations to Goddess Saraswati — prayer for wisdom in studies', deity: 'సరస్వతి', deityEn: 'Saraswati', icon: 'book-open-page-variant', color: '#7B1FA2' },
-  { telugu: 'గురుర్బ్రహ్మా గురుర్విష్ణుః', english: 'Gurur Brahma Gurur Vishnu', meaning: 'గురువు బ్రహ్మ, గురువు విష్ణువు — టీచర్‌కు గౌరవం', meaningEn: 'The teacher is Brahma, the teacher is Vishnu — respect for teachers', deity: 'గురువు', deityEn: 'Guru', icon: 'school', color: '#2E7D32' },
-];
 
 // Story tile component — used in both grid and carousel
 function StoryTile({ story, onPress, wide }) {
@@ -89,8 +17,8 @@ function StoryTile({ story, onPress, wide }) {
   const tileW = usePick({ default: 150, md: 155, lg: 170, xl: 190 });
   const tileWidth = wide ? '48%' : tileW;
   const imgH = usePick({ default: 100, md: 110, lg: 120, xl: 130 });
-  const titleFs = usePick({ default: 13, md: 14, xl: 16 });
-  const subFs = usePick({ default: 11, md: 12, xl: 13 });
+  const titleFs = usePick({ default: 15, md: 16, xl: 18 });
+  const subFs = usePick({ default: 13, md: 14, xl: 15 });
   const tilePad = usePick({ default: 8, md: 10, xl: 14 });
   const fallbackIcon = usePick({ default: 32, md: 36, xl: 42 });
   const badgeSize = usePick({ default: 22, md: 24, xl: 28 });
@@ -108,22 +36,22 @@ function StoryTile({ story, onPress, wide }) {
         {imgOk ? (
           <Image source={typeof story.image === 'string' ? { uri: story.image } : story.image} style={st.tileImage} resizeMode="cover" onError={() => setImgOk(false)} />
         ) : (
-          <View style={[st.tileFallback, { backgroundColor: story.color + '15' }]}>
-            <MaterialCommunityIcons name={story.icon} size={fallbackIcon} color={story.color} />
+          <View style={[st.tileFallback, { backgroundColor: DarkColors.gold + '15' }]}>
+            <MaterialCommunityIcons name={story.icon} size={fallbackIcon} color={DarkColors.gold} />
           </View>
         )}
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.6)']} style={st.tileOverlay} />
-        <View style={[st.tileIconBadge, { backgroundColor: story.color, width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
-          <MaterialCommunityIcons name={story.icon} size={badgeIcon} color="#FFF" />
+        <View style={[st.tileIconBadge, { backgroundColor: DarkColors.gold, width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
+          <MaterialCommunityIcons name={story.icon} size={badgeIcon} color="#0A0A0A" />
         </View>
       </View>
       {/* Title */}
-      <View style={[st.tileTitleWrap, { padding: tilePad }]}>
-        <Text style={[st.tileTitle, { color: story.color, fontSize: titleFs }]} numberOfLines={2}>{t(story.title, story.english)}</Text>
+      <View style={[st.tileTitleWrap, { paddingHorizontal: tilePad, paddingTop: tilePad + 4, paddingBottom: tilePad }]}>
+        <Text style={[st.tileTitle, { color: DarkColors.gold, fontSize: titleFs }]} numberOfLines={2}>{t(story.title, story.english)}</Text>
         <Text style={[st.tileEnglish, { fontSize: subFs }]} numberOfLines={1}>{story.english}</Text>
         <View style={st.tileReadRow}>
-          <Text style={[st.tileRead, { color: story.color, fontSize: subFs }]}>చదవండి</Text>
-          <MaterialCommunityIcons name="arrow-right" size={badgeIcon} color={story.color} />
+          <Text style={[st.tileRead, { color: DarkColors.gold, fontSize: subFs }]}>{t('చదవండి', 'Read')}</Text>
+          <MaterialCommunityIcons name="arrow-right" size={badgeIcon} color={DarkColors.gold} />
         </View>
       </View>
     </TouchableOpacity>
@@ -133,17 +61,17 @@ function StoryTile({ story, onPress, wide }) {
 // Sloka card
 function SlokaCard({ sloka }) {
   const { t } = useLanguage();
-  const iconSize = usePick({ default: 18, md: 20, xl: 24 });
-  const iconWrapSize = usePick({ default: 34, md: 38, xl: 44 });
-  const cardPad = usePick({ default: 10, md: 12, xl: 16 });
-  const deityFs = usePick({ default: 11, md: 12, xl: 14 });
-  const slokaFs = usePick({ default: 14, md: 15, xl: 17 });
-  const meaningFs = usePick({ default: 11, md: 12, xl: 14 });
+  const iconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const iconWrapSize = usePick({ default: 38, md: 42, xl: 48 });
+  const cardPad = usePick({ default: 12, md: 14, xl: 18 });
+  const deityFs = usePick({ default: 13, md: 14, xl: 16 });
+  const slokaFs = usePick({ default: 16, md: 17, xl: 19 });
+  const meaningFs = usePick({ default: 13, md: 14, xl: 16 });
 
   return (
-    <View style={[st.slokaCard, { borderColor: sloka.color + '25', padding: cardPad }]}>
-      <View style={[st.slokaIconWrap, { backgroundColor: sloka.color + '12', width: iconWrapSize, height: iconWrapSize }]}>
-        <MaterialCommunityIcons name={sloka.icon} size={iconSize} color={sloka.color} />
+    <View style={[st.slokaCard, { borderColor: DarkColors.gold + '25', padding: cardPad }]}>
+      <View style={[st.slokaIconWrap, { backgroundColor: DarkColors.gold + '12', width: iconWrapSize, height: iconWrapSize }]}>
+        <MaterialCommunityIcons name={sloka.icon} size={iconSize} color={DarkColors.gold} />
       </View>
       <View style={st.slokaInfo}>
         <Text style={[st.slokaDeity, { fontSize: deityFs }]}>{t(sloka.deity, sloka.deityEn)}</Text>
@@ -159,7 +87,7 @@ export function KidsSection({ dayOfWeek }) {
   const [activeStory, setActiveStory] = useState(null);
   const [modalImgFailed, setModalImgFailed] = useState(false);
 
-  const slokaLabelFs = usePick({ default: 13, md: 14, xl: 16 });
+  const slokaLabelFs = usePick({ default: 16, md: 18, xl: 20 });
   const slokaLabelMt = usePick({ default: 12, md: 14, xl: 18 });
   const modalPad = usePick({ default: 16, md: 20, xl: 28 });
   const modalTitleFs = usePick({ default: 21, md: 24, xl: 28 });
@@ -177,19 +105,11 @@ export function KidsSection({ dayOfWeek }) {
   const moralIconSize = usePick({ default: 16, md: 18, xl: 22 });
   const webGridGap = usePick({ default: 8, md: 10, xl: 14 });
 
-  // Show 4 stories starting from today's day
-  const storyStart = dayOfWeek % KIDS_STORIES.length;
-  const visibleStories = [];
-  for (let i = 0; i < 4; i++) {
-    visibleStories.push(KIDS_STORIES[(storyStart + i) % KIDS_STORIES.length]);
-  }
+  // Show 4 unique stories rotating by day-of-year (50 stories = unique for ~12 days)
+  const visibleStories = getStoriesForDay(new Date());
 
-  // Show 2 slokas
-  const slokaStart = dayOfWeek % KIDS_SLOKAS.length;
-  const visibleSlokas = [
-    KIDS_SLOKAS[slokaStart],
-    KIDS_SLOKAS[(slokaStart + 1) % KIDS_SLOKAS.length],
-  ];
+  // Show 2 slokas rotating by day-of-year (30 slokas = unique for 15 days)
+  const visibleSlokas = getSlokasForDay(new Date());
 
   return (
     <View style={st.container}>
@@ -246,8 +166,8 @@ export function KidsSection({ dayOfWeek }) {
                   </View>
                 </View>
               </ScrollView>
-              <TouchableOpacity style={[st.closeBtn, { backgroundColor: activeStory.color, paddingVertical: closeBtnPad, marginHorizontal: closeBtnMx }]} onPress={() => setActiveStory(null)}>
-                <Text style={[st.closeBtnText, { fontSize: closeBtnFs }]}>మూసివేయండి</Text>
+              <TouchableOpacity style={[st.closeBtn, { borderColor: DarkColors.gold, paddingVertical: closeBtnPad, marginHorizontal: closeBtnMx }]} onPress={() => setActiveStory(null)}>
+                <Text style={[st.closeBtnText, { fontSize: closeBtnFs }]}>{t('మూసివేయండి', 'Close')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -284,8 +204,8 @@ const st = StyleSheet.create({
     position: 'absolute', top: 8, left: 8, width: 24, height: 24, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
-  tileTitleWrap: { padding: 10 },
-  tileTitle: { fontSize: 14, fontWeight: '800', lineHeight: 18 },
+  tileTitleWrap: { paddingHorizontal: 10, paddingTop: 14, paddingBottom: 10 },
+  tileTitle: { fontSize: 14, fontWeight: '800', lineHeight: 22 },
   tileEnglish: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   tileReadRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
   tileRead: { fontSize: 12, fontWeight: '700' },
@@ -326,6 +246,6 @@ const st = StyleSheet.create({
     borderRadius: 12, marginTop: 20, borderWidth: 1, gap: 10,
   },
   moralText: { flex: 1, fontSize: 14, fontWeight: '600', lineHeight: 22 },
-  closeBtn: { alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20, borderRadius: 14 },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
+  closeBtn: { alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20, borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: DarkColors.gold },
+  closeBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 });

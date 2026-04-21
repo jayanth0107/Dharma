@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -158,10 +158,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: DarkColors.borderCard,
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0px 1px 4px rgba(0,0,0,0.08)' }
+      : { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 4 }),
   },
   monthHeader: {
     flexDirection: 'row',

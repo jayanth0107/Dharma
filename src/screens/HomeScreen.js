@@ -15,6 +15,7 @@ import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
+import { LOCATIONS } from '../utils/panchangamCalculator';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 import { FlagWithPole } from '../components/FlagWithPole';
 import { DrawerMenu } from '../components/DrawerMenu';
@@ -37,7 +38,6 @@ export function HomeScreen({ navigation }) {
   const { isLoggedIn, profile } = useAuth();
 
   const [showDrawer, setShowDrawer] = useState(false);
-  const [showShareApp, setShowShareApp] = useState(false);
   const [showPanchangamShare, setShowPanchangamShare] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -77,7 +77,16 @@ export function HomeScreen({ navigation }) {
     if (id === 'reminder') { navigation.navigate('Reminder'); return; }
     if (id === 'muhurtam') { navigation.navigate('Muhurtam'); return; }
     if (id === 'matchmaking') { navigation.navigate('Matchmaking'); return; }
-    if (id === 'share') { setShowShareApp(true); return; }
+    if (id === 'share') {
+      const msg = t(TR.shareMessage.te, TR.shareMessage.en);
+      if (Platform.OS === 'web') {
+        if (navigator.share) navigator.share({ text: msg }).catch(() => {});
+        else if (navigator.clipboard) { navigator.clipboard.writeText(msg); alert(t('కాపీ అయింది!', 'Copied to clipboard!')); }
+      } else {
+        Share.share({ message: msg, title: 'Dharma' }).catch(() => {});
+      }
+      return;
+    }
     if (id === 'rate') { navigation.navigate('InfoPage', { pageId: 'rate' }); return; }
     if (id === 'feedback') { navigation.navigate('InfoPage', { pageId: 'feedback' }); return; }
     if (id === 'privacy') { navigation.navigate('InfoPage', { pageId: 'privacy' }); return; }
@@ -97,12 +106,14 @@ export function HomeScreen({ navigation }) {
     );
   }
 
-  const locationText = locationDetecting
-    ? t('స్థానం గుర్తిస్తోంది...', 'Detecting location...')
-    : t(
-        location.telugu || location.name || 'హైదరాబాద్',
-        `${location.area ? location.area + ', ' : ''}${location.name || 'Hyderabad'}`
-      );
+  const getLocationText = () => {
+    if (locationDetecting) return t('స్థానం గుర్తిస్తోంది...', 'Detecting location...');
+    const englishName = location.name || 'Hyderabad';
+    const match = LOCATIONS.find(l => l.name === englishName);
+    if (match) return lang === 'te' ? match.telugu : match.name;
+    return englishName;
+  };
+  const locationText = getLocationText();
 
   return (
     <SwipeWrapper screenName="Home">
@@ -166,7 +177,7 @@ export function HomeScreen({ navigation }) {
               <MaterialCommunityIcons
                 name={isLoggedIn ? 'account-check' : 'account-circle-outline'}
                 size={20}
-                color={premiumActive ? '#FFD700' : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
+                color={premiumActive ? DarkColors.gold : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
               />
               {premiumActive && (
                 <View style={s.userCrown}>
@@ -236,7 +247,7 @@ export function HomeScreen({ navigation }) {
       {/* Year warning */}
       {new Date().getFullYear() !== 2026 && (
         <View style={s.yearWarning}>
-          <MaterialCommunityIcons name="alert" size={14} color="#FFD700" />
+          <MaterialCommunityIcons name="alert" size={14} color={DarkColors.gold} />
           <Text style={s.yearWarningText}>
             {t('పండుగలు/ఏకాదశి డేటా 2026 కోసం మాత్రమే. పంచాంగం గణనలు ఎప్పటికైనా ఖచ్చితం.', 'Festival/Ekadashi data is for 2026 only. Panchangam calculations work for any date.')}
           </Text>
@@ -247,77 +258,28 @@ export function HomeScreen({ navigation }) {
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
         <FeatureGrid>
           {/* Row 1 — Daily essentials */}
-          <FeatureTile
-            icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t("Today's Panchaang", 'నేటి పంచాంగం')}
-            onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })}
-          />
-          <FeatureTile
-            icon="party-popper" label={t(TR.festivals.te, TR.festivals.en)} sublabel={t('Festivals', 'పండుగలు')}
-            onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })}
-          />
-          <FeatureTile
-            icon="star-circle" label={t('రాశి ఫలాలు', 'Rashi Predictions')} sublabel={t('Daily Predictions', 'రోజువారీ ఫలాలు')}
-            onPress={() => navigation.navigate('DailyRashi')}
-          />
+          <FeatureTile icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t(TR.panchangSub.en, TR.panchangSub.te)} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
+          <FeatureTile icon="party-popper" label={t(TR.festivals.te, TR.festivals.en)} sublabel={t(TR.festivalsSub.en, TR.festivalsSub.te)} onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
+          <FeatureTile icon="star-circle" label={t(TR.dailyRashi.te, TR.dailyRashi.en)} sublabel={t(TR.dailyRashiSub.en, TR.dailyRashiSub.te)} onPress={() => navigation.navigate('DailyRashi')} />
 
           {/* Row 2 — PREMIUM */}
-          <FeatureTile
-            icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t('Vedic Horoscope', 'వేద జాతకం')}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Horoscope')}
-          />
-          <FeatureTile
-            icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t('Love Match', 'ప్రేమ పొందిక')}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Matchmaking')}
-          />
-          <FeatureTile
-            icon="calendar-star" label={t('శుభ దినాలు', 'Auspicious Dates')} sublabel={t('Auspicious Dates', 'శుభ దినాలు')}
-            isPremium={!premiumActive}
-            onPress={() => navigation.navigate('Muhurtam')}
-          />
+          <FeatureTile icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t(TR.jaatakamSub.en, TR.jaatakamSub.te)} isPremium={!premiumActive} onPress={() => navigation.navigate('Horoscope')} />
+          <FeatureTile icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t(TR.matchmakingSub.en, TR.matchmakingSub.te)} isPremium={!premiumActive} onPress={() => navigation.navigate('Matchmaking')} />
+          <FeatureTile icon="calendar-star" label={t(TR.muhurtamTile.te, TR.muhurtamTile.en)} sublabel={t(TR.muhurtamSub.en, TR.muhurtamSub.te)} onPress={() => navigation.navigate('Muhurtam')} />
 
           {/* Row 3 */}
-          <FeatureTile
-            icon="zodiac-leo" label={t('వేద విజ్ఞానం', 'Vedic Wisdom')} sublabel={t('Mantras, Vastu & more', 'మంత్రాలు, వాస్తు & మరిన్ని')}
-            onPress={() => navigation.navigate('Astro')}
-          />
-          <FeatureTile
-            icon="gold" label={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} sublabel={t('Gold Price', 'బంగారం ధర')}
-            onPress={() => navigation.navigate('Gold')}
-          />
-          <FeatureTile
-            icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t('Gita', 'గీత')}
-            onPress={() => navigation.navigate('Gita')}
-          />
+          <FeatureTile icon="zodiac-leo" label={t(TR.astro.te, TR.astro.en)} sublabel={t(TR.astroSub.en, TR.astroSub.te)} onPress={() => navigation.navigate('Astro')} />
+          <FeatureTile icon="gold" label={t(TR.gold.te, TR.gold.en)} sublabel={t(TR.goldSub.en, TR.goldSub.te)} onPress={() => navigation.navigate('Gold')} />
+          <FeatureTile icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t(TR.gitaSub.en, TR.gitaSub.te)} onPress={() => navigation.navigate('Gita')} />
 
           {/* Row 4 */}
-          <FeatureTile
-            icon="clock-check" label={t('శుభ సమయాలు', 'Auspicious Times')} sublabel={t('Auspicious Times', 'శుభ సమయాలు')}
-            onPress={() => navigation.navigate('GoodTimes', { tab: 'timings', _ts: Date.now() })}
-          />
-          <FeatureTile
-            icon="chart-line" label={t('మార్కెట్', 'Market')} sublabel={t('NSE/BSE', 'Stocks')}
-            onPress={() => navigation.navigate('Market')}
-          />
-          <FeatureTile
-            icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t('Set Reminder', 'రిమైండర్ సెట్')}
-            onPress={() => navigation.navigate('Reminder')}
-          />
+          <FeatureTile icon="chart-line" label={t(TR.market.te, TR.market.en)} sublabel={t(TR.marketSub.en, TR.marketSub.te)} onPress={() => navigation.navigate('Market')} />
+          <FeatureTile icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t(TR.kidsSub.en, TR.kidsSub.te)} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
+          <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />
 
-          {/* Row 5 */}
-          <FeatureTile
-            icon="baby-face-outline" label={t('పిల్లల కథలు', "Kid's Stories")} sublabel={t("Kid's Stories", 'పిల్లల కథలు')}
-            onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })}
-          />
-          <FeatureTile
-            icon="temple-hindu" label={t('దేవాలయాలు', 'Nearby Temples')} sublabel={t('Find Temples', 'దగ్గరిలోని')}
-            onPress={() => navigation.navigate('TempleNearby')}
-          />
-          <FeatureTile
-            icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t('Donate', 'దానం')}
-            onPress={() => navigation.navigate('Donate')}
-          />
+          {/* Row 5 — Utility */}
+          <FeatureTile icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t(TR.reminderSub.en, TR.reminderSub.te)} onPress={() => navigation.navigate('Reminder')} />
+          <FeatureTile icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t(TR.donateSub.en, TR.donateSub.te)} onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />
       </ScrollView>
@@ -325,13 +287,6 @@ export function HomeScreen({ navigation }) {
       {/* ── Overlays (only drawer + location + share) ── */}
       <DrawerMenu visible={showDrawer} onClose={() => setShowDrawer(false)} onAction={handleDrawerAction} />
       <LocationPickerModal />
-      {showShareApp && (
-        <SectionShareRow
-          section="share_app" hideButton autoOpen
-          onClose={() => setShowShareApp(false)}
-          buildText={() => t(TR.shareMessage.te, TR.shareMessage.en)}
-        />
-      )}
     </View>
     </SwipeWrapper>
   );
@@ -400,7 +355,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(46,125,50,0.1)',
   },
   userAvatarPremium: {
-    borderColor: '#FFD700',
+    borderColor: DarkColors.gold,
     backgroundColor: 'rgba(255,215,0,0.1)',
   },
   userCrown: {
@@ -420,20 +375,20 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 5,
   },
   setNameText: {
-    fontSize: 13, fontWeight: '700', color: '#4A90D9',
+    fontSize: 13, fontWeight: '700', color: DarkColors.saffron,
   },
   premiumPill: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
     backgroundColor: 'rgba(255,215,0,0.12)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8,
     borderWidth: 1, borderColor: 'rgba(255,215,0,0.25)',
   },
-  premiumPillText: { fontSize: 9, fontWeight: '900', color: '#FFD700' },
+  premiumPillText: { fontSize: 9, fontWeight: '900', color: DarkColors.gold },
   loginPrompt: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     marginTop: 6, paddingVertical: 5,
   },
   loginPromptText: {
-    fontSize: 13, fontWeight: '700', color: '#4A90D9',
+    fontSize: 13, fontWeight: '700', color: DarkColors.saffron,
   },
   headerDivider: {
     height: 1,
@@ -497,7 +452,7 @@ const s = StyleSheet.create({
     marginHorizontal: 16, marginVertical: 4, paddingHorizontal: 12, paddingVertical: 8,
     backgroundColor: 'rgba(255,215,0,0.08)', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,215,0,0.2)',
   },
-  yearWarningText: { flex: 1, fontSize: 11, color: '#FFD700', fontWeight: '600' },
+  yearWarningText: { flex: 1, fontSize: 11, color: DarkColors.gold, fontWeight: '600' },
 
   // Grid (scrollable). FeatureGrid handles the flex-wrap + equal row/column
   // gaps internally, so gridContent just provides outer padding.

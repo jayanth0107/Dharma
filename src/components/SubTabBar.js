@@ -2,7 +2,7 @@
 // Compact horizontal tabs with always-visible pulsing scroll arrows
 
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Easing, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -152,7 +152,8 @@ const s = StyleSheet.create({
     width: 24, height: 24, borderRadius: 12,
     backgroundColor: DarkColors.saffron, alignItems: 'center', justifyContent: 'center',
     elevation: 4,
-    shadowColor: DarkColors.saffron, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, shadowRadius: 4,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0px 2px 4px rgba(232,117,26,0.3)' }
+      : { shadowColor: DarkColors.saffron, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 }),
   },
 });

@@ -72,25 +72,28 @@ export function LocationPickerModal({ forceOpen, onDone }) {
     if (onDone) setTimeout(() => onDone(), 500);
   };
 
-  return (
-    <Modal
-      visible={isOpen}
-      animationType={forceOpen ? 'none' : 'slide'}
-      transparent={!forceOpen}
-      onRequestClose={closeModal}
-    >
-      <View style={forceOpen ? { flex: 1 } : s.overlay}>
-        <View style={forceOpen ? { flex: 1, backgroundColor: DarkColors.bgElevated } : s.content}>
+  const innerContent = (
+    <>
           <View style={[s.header, { paddingVertical: headerPadV }]}>
+            {forceOpen && (
+              <TouchableOpacity
+                style={[s.backBtn, { width: closeXBtnSize, height: closeXBtnSize, borderRadius: closeXBtnSize / 2 }]}
+                onPress={closeModal}
+              >
+                <Ionicons name="arrow-back" size={closeXSize} color={DarkColors.gold} />
+              </TouchableOpacity>
+            )}
             <Ionicons name="location" size={locationIconSize} color={DarkColors.saffron} />
             <Text style={[s.title, { fontSize: titleSize }]}> {t(TR.chooseLocation.te, TR.chooseLocation.en)}</Text>
             <Text style={[s.subtitle, { fontSize: subtitleSize }]}>{t(TR.gpsAutoDetect.te, TR.gpsAutoDetect.en)}</Text>
-            <TouchableOpacity
-              style={[s.closeX, { width: closeXBtnSize, height: closeXBtnSize, borderRadius: closeXBtnSize / 2 }]}
-              onPress={closeModal}
-            >
-              <Ionicons name="close" size={closeXSize} color={DarkColors.silver} />
-            </TouchableOpacity>
+            {!forceOpen && (
+              <TouchableOpacity
+                style={[s.closeX, { width: closeXBtnSize, height: closeXBtnSize, borderRadius: closeXBtnSize / 2 }]}
+                onPress={closeModal}
+              >
+                <Ionicons name="close" size={closeXSize} color={DarkColors.gold} />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* GPS Auto-detect */}
@@ -101,7 +104,7 @@ export function LocationPickerModal({ forceOpen, onDone }) {
           >
             <MaterialCommunityIcons
               name={locationDetecting ? 'loading' : 'crosshairs-gps'}
-              size={gpsIconSize} color="#fff" style={{ marginRight: 8 }}
+              size={gpsIconSize} color="#0A0A0A" style={{ marginRight: 8 }}
             />
             <Text style={[s.gpsBtnText, { fontSize: gpsBtnTextSize }]}>
               {locationDetecting ? t(TR.detectingLocation.te, TR.detectingLocation.en) : t(TR.detectMyLocation.te, TR.detectMyLocation.en)}
@@ -111,7 +114,7 @@ export function LocationPickerModal({ forceOpen, onDone }) {
           {/* Current location badge */}
           {location.isAutoDetected && (
             <View style={[s.currentBadge, { marginHorizontal: marginH }]}>
-              <Ionicons name="navigate" size={badgeIconSize} color={DarkColors.tulasiGreen} />
+              <Ionicons name="navigate" size={badgeIconSize} color={DarkColors.gold} />
               <Text style={[s.currentText, { fontSize: badgeTextSize }]}>
                 {location.area ? `${location.area}, ` : ''}{location.name}{location.state ? `, ${location.state}` : ''}
               </Text>
@@ -196,9 +199,34 @@ export function LocationPickerModal({ forceOpen, onDone }) {
             </>
           )}
 
-          <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMarginH }]} onPress={closeModal}>
-            <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>{t(TR.close.te, TR.close.en)}</Text>
-          </TouchableOpacity>
+          {!forceOpen && (
+            <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMarginH }]} onPress={closeModal}>
+              <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>{t(TR.close.te, TR.close.en)}</Text>
+            </TouchableOpacity>
+          )}
+    </>
+  );
+
+  // When forceOpen (full-page screen), render inline — no Modal wrapper
+  if (forceOpen) {
+    return (
+      <View style={{ flex: 1, backgroundColor: DarkColors.bgElevated }}>
+        {innerContent}
+      </View>
+    );
+  }
+
+  // Normal modal mode
+  return (
+    <Modal
+      visible={isOpen}
+      animationType="slide"
+      transparent
+      onRequestClose={closeModal}
+    >
+      <View style={s.overlay}>
+        <View style={s.content}>
+          {innerContent}
         </View>
       </View>
     </Modal>
@@ -212,22 +240,27 @@ const s = StyleSheet.create({
   title: { fontWeight: '800', color: DarkColors.textPrimary },
   subtitle: { color: DarkColors.textMuted, marginTop: 4 },
   closeX: {
-    position: 'absolute', top: 14, right: 16,
+    position: 'absolute', top: 14, right: 16, zIndex: 10,
+    backgroundColor: DarkColors.bgCard,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  backBtn: {
+    position: 'absolute', top: 14, left: 16, zIndex: 10,
     backgroundColor: DarkColors.bgCard,
     alignItems: 'center', justifyContent: 'center',
   },
   gpsBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: DarkColors.tulasiGreen, borderRadius: 12,
+    backgroundColor: DarkColors.gold, borderRadius: 12,
     marginTop: 12,
   },
-  gpsBtnText: { fontWeight: '700', color: '#fff' },
+  gpsBtnText: { fontWeight: '700', color: '#0A0A0A' },
   currentBadge: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     marginTop: 8, paddingVertical: 8,
-    backgroundColor: 'rgba(46,125,50,0.15)', borderRadius: 8, gap: 6,
+    backgroundColor: 'rgba(212,160,23,0.1)', borderRadius: 8, gap: 6,
   },
-  currentText: { fontWeight: '600', color: DarkColors.tulasiGreen },
+  currentText: { fontWeight: '600', color: DarkColors.gold },
   searchBox: {
     flexDirection: 'row', alignItems: 'center',
     marginTop: 12, marginBottom: 8,
@@ -248,7 +281,8 @@ const s = StyleSheet.create({
   locationSub: { color: DarkColors.textMuted, marginTop: 2 },
   closeBtn: {
     alignItems: 'center', marginTop: 10,
-    backgroundColor: DarkColors.saffron, borderRadius: 12,
+    backgroundColor: 'transparent', borderRadius: 12,
+    borderWidth: 1.5, borderColor: DarkColors.gold,
   },
-  closeBtnText: { fontWeight: '700', color: '#fff' },
+  closeBtnText: { fontWeight: '700', color: DarkColors.gold },
 });

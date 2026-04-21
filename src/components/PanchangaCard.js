@@ -104,10 +104,10 @@ export function TimingCard({ icon, label, startTime, endTime, isActive, accentCo
 
 export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
   const bgColors = isAuspicious
-    ? ['rgba(46,125,50,0.08)', 'rgba(76,175,80,0.04)']
-    : ['rgba(196,30,58,0.06)', 'rgba(232,117,26,0.04)'];
-  const borderColor = isAuspicious ? 'rgba(46,125,50,0.2)' : 'rgba(196,30,58,0.15)';
-  const iconColor = isAuspicious ? DarkColors.tulasiGreen : DarkColors.kumkum;
+    ? ['rgba(212,160,23,0.06)', 'rgba(212,160,23,0.02)']
+    : ['rgba(232,117,26,0.06)', 'rgba(232,117,26,0.02)'];
+  const borderColor = isAuspicious ? 'rgba(212,160,23,0.2)' : 'rgba(232,117,26,0.15)';
+  const iconColor = isAuspicious ? DarkColors.gold : DarkColors.saffron;
   const iconName = isAuspicious ? 'check-decagram' : 'close-octagon-outline';
   const nameSize = usePick({ default: 16, lg: 18, xl: 20 });
   const timeSize = usePick({ default: 16, lg: 18, xl: 20 });
@@ -148,7 +148,7 @@ export function SlokaCard({ sloka }) {
   return (
     <View style={styles.slokaContainer}>
       <LinearGradient
-        colors={[DarkColors.bgCard, '#6B1C23', DarkColors.bgCard]}
+        colors={[DarkColors.bgCard, 'rgba(212,160,23,0.08)', DarkColors.bgCard]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.slokaGradient, { paddingVertical: padV }]}

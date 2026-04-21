@@ -127,7 +127,7 @@ export function DailyRashiScreen() {
   return (
     <SwipeWrapper screenName="DailyRashi">
     <View style={s.screen}>
-      <PageHeader title={t('రాశి ఫలాలు', 'Rashi Predictions')} />
+      <PageHeader title={t('మీ  రాశి', 'Your Rashi')} />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
@@ -143,7 +143,7 @@ export function DailyRashiScreen() {
             <View style={s.myRashiHeader}>
               <Image source={RASHIS[myRashi.rashiIndex].image} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
               <View style={{ flex: 1 }}>
-                <Text style={s.myRashiLabel}>{t('మీ రాశి', 'Your Rashi')}</Text>
+                <Text style={s.myRashiLabel}>{t('మీ  రాశి', 'Your Rashi')}</Text>
                 <Text style={[s.myRashiName, { fontSize: nameFontSize + 2 }]}>{t(myRashi.rashiTe, myRashi.rashiEn)}</Text>
               </View>
               <TouchableOpacity onPress={handleClearRashi} style={s.changeBtn}>

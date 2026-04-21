@@ -26,7 +26,6 @@ const UPI_LOGOS = {
 };
 
 const DONATION_AMOUNTS = [
-  { amount: 11, label: '₹11', telugu: 'ఏకాదశి సేవ', emoji: '🙏' },
   { amount: 51, label: '₹51', telugu: 'పూజా సమర్పణ', emoji: '🪔' },
   { amount: 101, label: '₹101', telugu: 'దీప దానం', emoji: '🕯️' },
   { amount: 251, label: '₹251', telugu: 'అన్నదానం', emoji: '🍚' },
@@ -192,7 +191,7 @@ export function DonateCard({ onExpand }) {
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={() => onExpand(null)}>
       <LinearGradient
-        colors={['#2E7D32', '#1B5E20']}
+        colors={['#1A1008', '#0A0A0A']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.cardGradient, { padding: cardPad }]}
@@ -301,34 +300,26 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
-          {/* Fixed Header — stays visible while scrolling */}
-          <LinearGradient
-            colors={['#2E7D32', '#1B5E20', '#0D3B0F']}
-            style={[styles.modalHeader, { paddingHorizontal: headerPadH, paddingTop: headerPadTop, paddingBottom: headerPadBottom }]}
-          >
-            <View style={styles.modalHeaderRow}>
-              <TouchableOpacity onPress={onClose} accessibilityLabel={t(TR.back.te, TR.back.en)} accessibilityRole="button">
-                <Ionicons name="arrow-back" size={headerBackIcon} color="#fff" />
-              </TouchableOpacity>
-              <Text style={[styles.modalHeaderTitle, { fontSize: headerTitleSize }]}>{t(TR.donateHeaderTitle.te, TR.donateHeaderTitle.en)}</Text>
-              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: headerCopyPadH, paddingVertical: headerCopyPadV, borderRadius: 12, gap: 4 }}>
-                <MaterialCommunityIcons name="content-copy" size={headerCopyIcon} color="#FFD700" />
-                <Text style={{ fontSize: headerCopyTextSize, fontWeight: '700', color: '#FFD700' }}>UPI ID</Text>
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Decorative icon + quote */}
-            <View style={{ alignItems: 'center', backgroundColor: '#0D3B0F', paddingBottom: quotePadBottom }}>
-              <MaterialCommunityIcons name="hand-heart" size={quoteIconSize} color="#FFD700" style={{ marginTop: 4 }} />
-              <Text style={[styles.modalQuote, { fontSize: quoteSize }]}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
+            {/* Quote section with back + UPI copy */}
+            <View style={{ backgroundColor: 'rgba(212,160,23,0.08)', paddingBottom: 10, paddingTop: 6, paddingHorizontal: headerPadH }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <TouchableOpacity onPress={onClose} accessibilityLabel={t(TR.back.te, TR.back.en)} accessibilityRole="button" style={{ padding: 4 }}>
+                  <Ionicons name="arrow-back" size={headerBackIcon} color={DarkColors.gold} />
+                </TouchableOpacity>
+                <MaterialCommunityIcons name="hand-heart" size={quoteIconSize} color={DarkColors.gold} />
+                <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(212,160,23,0.15)', paddingHorizontal: headerCopyPadH, paddingVertical: headerCopyPadV, borderRadius: 12, gap: 4 }}>
+                  <MaterialCommunityIcons name="content-copy" size={headerCopyIcon} color={DarkColors.gold} />
+                  <Text style={{ fontSize: headerCopyTextSize, fontWeight: '700', color: DarkColors.gold }}>UPI ID</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={[styles.modalQuote, { fontSize: quoteSize + 2, marginTop: 0 }]}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
               <Text style={[styles.modalQuoteEn, { fontSize: quoteEnSize }]}>{t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}</Text>
             </View>
 
             <View style={[styles.modalBody, { padding: bodyPad }]}>
-              {/* Message */}
-              <Text style={[styles.modalMessage, { fontSize: msgSize, lineHeight: msgLineH }]}>
+              {/* Message — full width */}
+              <Text style={[styles.modalMessage, { fontSize: msgSize + 1, lineHeight: msgLineH + 4, textAlign: 'center', marginBottom: 16 }]}>
                 {t(TR.donateMessage.te, TR.donateMessage.en)}
               </Text>
 
@@ -416,7 +407,7 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
                     accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`}
                     accessibilityRole="button"
                   >
-                    <MaterialCommunityIcons name="content-copy" size={copyIconSize} color={DarkColors.tulasiGreen} />
+                    <MaterialCommunityIcons name="content-copy" size={copyIconSize} color={DarkColors.gold} />
                     <Text style={[styles.copyText, { fontSize: copyTextSize }]}>{t(TR.copy.te, TR.copy.en)}</Text>
                   </TouchableOpacity>
                 </View>
@@ -493,15 +484,17 @@ const styles = StyleSheet.create({
   qrAmountBadge: {
     position: 'absolute',
     bottom: -12,
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#0A0A0A',
     paddingHorizontal: 16,
     paddingVertical: 4,
     borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: DarkColors.gold,
   },
   qrAmountText: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#fff',
+    color: DarkColors.gold,
   },
   qrNote: {
     fontSize: 12,
@@ -515,7 +508,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     elevation: 4,
-    shadowColor: '#2E7D32',
+    shadowColor: DarkColors.gold,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -541,7 +534,7 @@ const styles = StyleSheet.create({
   // ---- Modal ----
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modal: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' },
-  modalHeader: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  modalHeader: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16 },
   modalHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   modalHeaderTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
   modalQuote: { fontSize: 15, fontWeight: '700', color: '#FFD700', textAlign: 'center', marginTop: 6, fontStyle: 'italic' },
@@ -556,7 +549,7 @@ const styles = StyleSheet.create({
     width: '30%', backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14,
     alignItems: 'center', borderWidth: 1.5, borderColor: DarkColors.borderCard,
   },
-  amountCardActive: { borderColor: '#2E7D32', backgroundColor: 'rgba(46,125,50,0.15)' },
+  amountCardActive: { borderColor: DarkColors.gold, backgroundColor: 'rgba(212,160,23,0.12)' },
   // UPI app buttons
   appBtnsSection: { marginTop: 16, marginBottom: 8 },
   appBtnsTitle: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 10, textAlign: 'center' },
@@ -576,7 +569,7 @@ const styles = StyleSheet.create({
 
   amountEmoji: { fontSize: 22, marginBottom: 6 },
   amountValue: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary },
-  amountValueActive: { color: '#2E7D32' },
+  amountValueActive: { color: DarkColors.gold },
   amountTelugu: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
 
   // UPI box
@@ -584,14 +577,14 @@ const styles = StyleSheet.create({
     backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 16,
     marginTop: 20, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  upiLabel: { fontSize: 11, fontWeight: '700', color: DarkColors.tulasiGreen, letterSpacing: 1, marginBottom: 8 },
+  upiLabel: { fontSize: 11, fontWeight: '700', color: DarkColors.gold, letterSpacing: 1, marginBottom: 8 },
   upiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   upiId: { fontSize: 18, fontWeight: '700', color: DarkColors.textPrimary, letterSpacing: 0.5 },
   copyBtn: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(46,125,50,0.1)',
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, gap: 4,
   },
-  copyText: { fontSize: 12, fontWeight: '700', color: DarkColors.tulasiGreen },
+  copyText: { fontSize: 12, fontWeight: '700', color: DarkColors.gold },
   upiNote: { fontSize: 11, color: DarkColors.textMuted, marginTop: 8 },
 
   // Thank you
@@ -604,6 +597,6 @@ const styles = StyleSheet.create({
   // Close
   // De-emphasized close — subtle text link, not a dominant button.
   // The primary CTA is the UPI pay buttons above; close is just an escape hatch.
-  closeBtn: { alignItems: 'center', paddingVertical: 10, marginHorizontal: 20, marginBottom: 30 },
-  closeBtnText: { fontSize: 13, fontWeight: '600', color: DarkColors.textMuted, textDecorationLine: 'underline' },
+  closeBtn: { alignItems: 'center', paddingVertical: 12, marginHorizontal: 20, marginBottom: 30, backgroundColor: 'transparent', borderRadius: 12, borderWidth: 1.5, borderColor: DarkColors.gold },
+  closeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
 });

@@ -28,7 +28,7 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
   const iconSize = usePick({ default: 32, md: 34, lg: 36, xl: 40 });
   const tileMinH = usePick({ default: 110, md: 120, lg: 140, xl: 150 });
   const labelSize = usePick({ default: 15, md: 16, lg: 17, xl: 18 });
-  const subSize = usePick({ default: 12, md: 13, lg: 14, xl: 15 });
+  const subSize = usePick({ default: 13, md: 14, lg: 15, xl: 16 });
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
   const widthStyle = gridCtx?.tileWidth

@@ -11,8 +11,7 @@ export function LocationScreen({ navigation }) {
 
   return (
     <View style={s.screen}>
-      <PageHeader title={t('ప్రదేశం — Location', 'Location')} />
-      <LocationPickerModal forceOpen={true} onDone={() => navigation.goBack()} />
+      <LocationPickerModal forceOpen={true} onDone={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home')} />
     </View>
   );
 }

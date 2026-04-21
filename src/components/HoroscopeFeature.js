@@ -316,7 +316,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
               </TouchableOpacity>
             )}
             <MaterialCommunityIcons name="zodiac-leo" size={24} color={DarkColors.gold} />
-            <Text style={s.title}>{t('వేద జాతకం', 'Vedic Birth Chart')}</Text>
+            <Text style={s.title}>{t('వేద జాతకం', 'Vedic Horoscope')}</Text>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -575,7 +575,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   <TouchableOpacity style={s.generateBtn} onPress={handleGenerate} activeOpacity={0.8}>
                     <View style={s.generateGradient}>
                       <MaterialCommunityIcons name="zodiac-leo" size={22} color={DarkColors.gold} />
-                      <Text style={s.generateText}>{t('జాతకం రూపొందించండి', 'Generate Birth Chart')}</Text>
+                      <Text style={s.generateText}>{t('జాతకం రూపొందించండి', 'Generate Horoscope')}</Text>
                     </View>
                   </TouchableOpacity>
                 )}
@@ -960,8 +960,8 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
           {/* Fixed close — only in modal mode (embedded screens use PageHeader back) */}
           {!embedded && (
             <TouchableOpacity style={s.closeBtn} onPress={handleClose}>
-              <Ionicons name="close" size={16} color="#C0C0C0" />
-              <Text style={s.closeBtnText}>మూసివేయండి</Text>
+              <Ionicons name="close" size={16} color={DarkColors.gold} />
+              <Text style={s.closeBtnText}>{t('మూసివేయండి', 'Close')}</Text>
             </TouchableOpacity>
           )}
     </ModalOrView>
@@ -1273,7 +1273,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     paddingVertical: 12, marginHorizontal: 20, marginBottom: 20,
     backgroundColor: 'transparent', borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(192,192,192,0.35)',
+    borderWidth: 1.5, borderColor: DarkColors.gold,
   },
-  closeBtnText: { fontSize: 14, fontWeight: '600', color: '#C0C0C0' },
+  closeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
 });

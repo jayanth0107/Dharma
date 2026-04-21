@@ -212,7 +212,7 @@ export function CalendarScreen({ route }) {
                 <PanchangaCard label={t(TR.samvatsaram.te, TR.samvatsaram.en)} teluguValue={panchangam.teluguYear} accentColor={DarkColors.gold} />
                 <PanchangaCard label={t(TR.tithi.te, TR.tithi.en)} teluguValue={t(panchangam.tithi.telugu, panchangam.tithi.english || panchangam.tithi.telugu)} sublabel={t(panchangam.tithi.paksha + ' ' + TR.paksha.te, (panchangam.tithi.paksha === 'శుక్ల' ? 'Shukla' : 'Krishna') + ' ' + TR.paksha.en)} accentColor={DarkColors.saffron} />
                 <PanchangaCard label={t(TR.nakshatra.te, TR.nakshatra.en)} teluguValue={t(panchangam.nakshatra.telugu, panchangam.nakshatra.english || panchangam.nakshatra.telugu)} sublabel={t(`${TR.deity.te}: ${panchangam.nakshatra.deity}`, `${TR.deity.en}: ${panchangam.nakshatra.deity}`)} accentColor={DarkColors.gold} />
-                <PanchangaCard label={t(TR.yogam.te, TR.yogam.en)} teluguValue={t(panchangam.yoga.telugu, panchangam.yoga.english || panchangam.yoga.telugu)} accentColor={DarkColors.tulasiGreen} />
+                <PanchangaCard label={t(TR.yogam.te, TR.yogam.en)} teluguValue={t(panchangam.yoga.telugu, panchangam.yoga.english || panchangam.yoga.telugu)} accentColor={DarkColors.gold} />
                 <PanchangaCard label={t(TR.karanam.te, TR.karanam.en)} teluguValue={t(panchangam.karana.telugu, panchangam.karana.english || panchangam.karana.telugu)} accentColor={DarkColors.kumkum} />
               </View>
 
@@ -230,23 +230,23 @@ export function CalendarScreen({ route }) {
         {activeSubTab === 'timings' && (
           <View style={s.card}>
             <View style={s.cardHeader}>
-              <MaterialCommunityIcons name="clock-check" size={16} color={DarkColors.tulasiGreen} />
-              <Text style={[s.cardTitle, { color: DarkColors.tulasiGreen }]}>{t(TR.auspiciousTimes.te, TR.auspiciousTimes.en)}</Text>
+              <MaterialCommunityIcons name="clock-check" size={16} color={DarkColors.gold} />
+              <Text style={[s.cardTitle, { color: DarkColors.gold }]}>{t(TR.auspiciousTimes.te, TR.auspiciousTimes.en)}</Text>
             </View>
             <MuhurthamCard muhurtham={panchangam.brahmaMuhurtam} isActive={isTimeInRange(panchangam.brahmaMuhurtam.start, panchangam.brahmaMuhurtam.end)} isAuspicious={true} />
             <MuhurthamCard muhurtham={panchangam.abhijitMuhurtam} isActive={isTimeInRange(panchangam.abhijitMuhurtam.start, panchangam.abhijitMuhurtam.end)} isAuspicious={true} />
             <MuhurthamCard muhurtham={panchangam.amritKalam} isActive={isTimeInRange(panchangam.amritKalam.start, panchangam.amritKalam.end)} isAuspicious={true} />
 
             <View style={[s.cardHeader, { marginTop: 14 }]}>
-              <MaterialCommunityIcons name="clock-alert" size={14} color={DarkColors.kumkum} />
-              <Text style={[s.cardTitle, { color: DarkColors.kumkum }]}>{t(TR.inauspiciousTimes.te, TR.inauspiciousTimes.en)}</Text>
+              <MaterialCommunityIcons name="clock-alert" size={14} color={DarkColors.saffron} />
+              <Text style={[s.cardTitle, { color: DarkColors.saffron }]}>{t(TR.inauspiciousTimes.te, TR.inauspiciousTimes.en)}</Text>
             </View>
             <MuhurthamCard muhurtham={panchangam.durmuhurtam} isActive={isTimeInRange(panchangam.durmuhurtam.start, panchangam.durmuhurtam.end)} isAuspicious={false} />
             {panchangam.durmuhurtam.start2 && (
               <MuhurthamCard muhurtham={{ ...panchangam.durmuhurtam, start: panchangam.durmuhurtam.start2, end: panchangam.durmuhurtam.end2, telugu: 'దుర్ముహూర్తం (2)', english: 'Durmuhurtam (2)' }} isActive={isTimeInRange(panchangam.durmuhurtam.start2, panchangam.durmuhurtam.end2)} isAuspicious={false} />
             )}
-            <TimingCard iconName="cancel" label={panchangam.rahuKalam.telugu} startTime={panchangam.rahuKalam.startFormatted} endTime={panchangam.rahuKalam.endFormatted} isActive={isTimeInRange(panchangam.rahuKalam.start, panchangam.rahuKalam.end)} accentColor={DarkColors.kumkum} />
-            <TimingCard iconName="alert-circle" label={panchangam.yamaGanda.telugu} startTime={panchangam.yamaGanda.startFormatted} endTime={panchangam.yamaGanda.endFormatted} isActive={isTimeInRange(panchangam.yamaGanda.start, panchangam.yamaGanda.end)} accentColor={DarkColors.saffronDark} />
+            <TimingCard iconName="cancel" label={panchangam.rahuKalam.telugu} startTime={panchangam.rahuKalam.startFormatted} endTime={panchangam.rahuKalam.endFormatted} isActive={isTimeInRange(panchangam.rahuKalam.start, panchangam.rahuKalam.end)} accentColor={DarkColors.saffron} />
+            <TimingCard iconName="alert-circle" label={panchangam.yamaGanda.telugu} startTime={panchangam.yamaGanda.startFormatted} endTime={panchangam.yamaGanda.endFormatted} isActive={isTimeInRange(panchangam.yamaGanda.start, panchangam.yamaGanda.end)} accentColor={DarkColors.saffron} />
             <TimingCard iconName="alert-rhombus" label={panchangam.gulikaKalam.telugu} startTime={panchangam.gulikaKalam.startFormatted} endTime={panchangam.gulikaKalam.endFormatted} isActive={isTimeInRange(panchangam.gulikaKalam.start, panchangam.gulikaKalam.end)} accentColor={DarkColors.saffron} />
 
             <SectionShareRow section="timings" buildText={() => buildTimingsShareText(panchangam, selectedDate, locationDisplay)} />
@@ -260,7 +260,7 @@ export function CalendarScreen({ route }) {
               title={t(TR.festivals.te, TR.festivals.en)}
               subtitle={t('2026 పండుగలు — క్రింద చూడండి', '2026 festivals — scroll below')}
               icon="party-popper"
-              iconColor={DarkColors.tulasiGreen}
+              iconColor={DarkColors.gold}
             />
             {(() => {
               const items = withRecentPast(withDaysLeft(FESTIVALS_2026, selectedDate));
@@ -434,10 +434,6 @@ export function CalendarScreen({ route }) {
         {/* ── Kids Tab ── */}
         {activeSubTab === 'kids' && (
           <View style={s.card}>
-            <View style={s.cardHeader}>
-              <MaterialCommunityIcons name="baby-face-outline" size={16} color="#9B6FCF" />
-              <Text style={[s.cardTitle, { color: '#9B6FCF' }]}>{t(TR.kidsStories.te, TR.kidsStories.en)}</Text>
-            </View>
             <KidsSection dayOfWeek={selectedDate.getDay()} />
           </View>
         )}

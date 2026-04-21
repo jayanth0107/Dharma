@@ -1,4 +1,4 @@
-// ధర్మ — Muhurtam Finder Screen (full page)
+// ధర్మ — Muhurtam & Timings Screen (full page)
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { DarkColors } from '../theme/colors';
@@ -16,7 +16,7 @@ export function MuhurtamScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Muhurtam">
     <View style={s.screen}>
-      <PageHeader title={t('శుభ దినాలు', 'Auspicious Dates')} />
+      <PageHeader title={t('శుభ ముహూర్తాలు & సమయాలు', 'Muhurtam & Timings')} />
       <TopTabBar />
       <MuhurtamFinderModal
         visible={true}

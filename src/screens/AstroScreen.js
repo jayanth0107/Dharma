@@ -183,7 +183,7 @@ export function AstroScreen() {
           <SectionCard
             rs={rs}
             icon="weather-sunny"
-            color={DarkColors.tulasiGreen}
+            color={DarkColors.gold}
             title={t('నేటి గ్రహ యోగం', "Today's Planet Yoga")}
           >
             <Text style={[s.yogaName, { fontSize: yogaNameSize }]}>{lang === 'te' ? panchangam.yoga.telugu : (panchangam.yoga.english || panchangam.yoga.telugu)}</Text>
@@ -197,7 +197,7 @@ export function AstroScreen() {
         <SectionCard
           rs={rs}
           icon="numeric"
-          color="#9B6FCF"
+          color={DarkColors.gold}
           title={t('సంఖ్యాశాస్త్రం', 'Numerology')}
           subtitle={t('మీ పుట్టిన తేదీ ఇవ్వండి', 'Enter your birth date')}
         >
@@ -232,7 +232,7 @@ export function AstroScreen() {
         <SectionCard
           rs={rs}
           icon="home-variant"
-          color={DarkColors.tulasiGreen}
+          color={DarkColors.saffron}
           title={t('వాస్తు చిట్కాలు', 'Vastu Tips')}
           subtitle={t('మీ ఇంటి శక్తి కోసం', 'For your home energy')}
         >
@@ -248,7 +248,7 @@ export function AstroScreen() {
         <SectionCard
           rs={rs}
           icon="heart-multiple"
-          color="#C41E3A"
+          color={DarkColors.saffron}
           title={t('పేరు అనుకూలత', 'Name Compatibility')}
           subtitle={t('రెండు పేర్లు ఇవ్వండి', 'Enter two names')}
         >
@@ -290,7 +290,7 @@ export function AstroScreen() {
         <SectionCard
           rs={rs}
           icon="meditation"
-          color="#9B6FCF"
+          color={DarkColors.gold}
           title={t('ధ్యాన మార్గదర్శి', 'Meditation Guide')}
           subtitle={t('మీ రాశి కోసం', 'For each rashi')}
         >
@@ -347,7 +347,7 @@ const s = StyleSheet.create({
   },
 
   // Yoga
-  yogaName: { fontSize: 22, fontWeight: '900', color: DarkColors.tulasiGreen, textAlign: 'center', paddingVertical: 6 },
+  yogaName: { fontSize: 22, fontWeight: '900', color: DarkColors.gold, textAlign: 'center', paddingVertical: 6 },
   yogaDesc: { fontSize: 13, color: DarkColors.textSecondary, textAlign: 'center', marginTop: 4, fontStyle: 'italic' },
 
   // Inputs
@@ -375,12 +375,12 @@ const s = StyleSheet.create({
 
   // Vastu
   vastuRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
-  vastuRoom: { fontSize: 15, fontWeight: '800', color: DarkColors.tulasiGreen, marginBottom: 3 },
+  vastuRoom: { fontSize: 15, fontWeight: '800', color: DarkColors.saffron, marginBottom: 3 },
   vastuTip: { fontSize: 13, color: DarkColors.textSecondary, lineHeight: 19 },
 
   // Name compat
-  compatBox: { alignItems: 'center', paddingVertical: 14, marginTop: 8, backgroundColor: 'rgba(196,30,58,0.08)', borderRadius: 12 },
-  compatScore: { fontSize: 36, fontWeight: '900', color: '#C41E3A' },
+  compatBox: { alignItems: 'center', paddingVertical: 14, marginTop: 8, backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 12 },
+  compatScore: { fontSize: 36, fontWeight: '900', color: DarkColors.gold },
   compatVerdict: { fontSize: 15, color: DarkColors.textPrimary, fontWeight: '700', marginTop: 4 },
   compatNums: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4 },
 
@@ -389,7 +389,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  medRashi: { fontSize: 14, fontWeight: '800', color: '#9B6FCF', width: 90 },
+  medRashi: { fontSize: 14, fontWeight: '800', color: DarkColors.gold, width: 90 },
   medFocus: { fontSize: 13, color: DarkColors.textSecondary, flex: 1, marginHorizontal: 8 },
   medDuration: { fontSize: 12, color: DarkColors.gold, fontWeight: '700' },
 });

@@ -67,7 +67,7 @@ export async function reverseGeocode(latitude, longitude) {
     const timeout = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=te,en&zoom=10`,
+      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en&zoom=10`,
       {
         headers: {
           'User-Agent': 'Dharma/1.0 (Telugu Panchangam App)',
@@ -311,7 +311,7 @@ export async function autoDetectLocation() {
     if (ipLoc) {
       return {
         name: ipLoc.city || 'Current Location',
-        telugu: ipLoc.city || 'ప్రస్తుత స్థానం',
+        telugu: '',
         displayName: [ipLoc.city, ipLoc.state, ipLoc.country].filter(Boolean).join(', '),
         area: '',
         state: ipLoc.state || '',
@@ -329,8 +329,8 @@ export async function autoDetectLocation() {
 
   return {
     name: geo?.city || geo?.area || 'Current Location',
-    telugu: geo?.displayName || 'ప్రస్తుత స్థానం',
-    displayName: geo?.displayName || 'ప్రస్తుత స్థానం',
+    telugu: '',
+    displayName: geo?.displayName || '',
     area: geo?.area || '',
     state: geo?.state || '',
     country: geo?.country || '',

@@ -120,7 +120,7 @@ export function UpcomingFestivalItem({ festival, daysLeft }) {
               <Text style={[styles.detailCountdown, { fontSize: detailCountdownSize }]}>ఇంకా {daysLeft} రోజులు మిగిలి ఉన్నాయి</Text>
             )}
             <TouchableOpacity style={styles.detailClose} onPress={() => setShowDetail(false)}>
-              <Text style={[styles.detailCloseText, { fontSize: detailCloseSize }]}>మూసివేయండి</Text>
+              <Text style={[styles.detailCloseText, { fontSize: detailCloseSize }]}>{t('మూసివేయండి', 'Close')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -188,7 +188,8 @@ const styles = StyleSheet.create({
   detailDesc: { fontSize: 15, color: DarkColors.textSecondary, lineHeight: 24 },
   detailCountdown: { fontSize: 13, color: DarkColors.gold, fontWeight: '600', marginTop: 12, fontStyle: 'italic' },
   detailClose: {
-    backgroundColor: DarkColors.saffron, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 20,
+    backgroundColor: 'transparent', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 20,
+    borderWidth: 1.5, borderColor: DarkColors.gold,
   },
-  detailCloseText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  detailCloseText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 });

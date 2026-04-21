@@ -17,9 +17,19 @@ import { ModalOrView } from './ModalOrView';
 import { getDailyPanchangam, DEFAULT_LOCATION } from '../utils/panchangamCalculator';
 import { trackEvent } from '../utils/analytics';
 import { SectionShareRow } from './SectionShareRow';
+import { useLanguage } from '../context/LanguageContext';
+import { useApp } from '../context/AppContext';
+import { TimingCard, MuhurthamCard } from './PanchangaCard';
 
 // Event types with their auspicious conditions
 const EVENT_TYPES = [
+  {
+    id: 'today_timings',
+    telugu: 'నేటి శుభ సమయాలు',
+    english: "Today's Auspicious Timings",
+    icon: 'clock-check',
+    color: DarkColors.gold,
+  },
   {
     id: 'wedding',
     telugu: 'వివాహం',
@@ -45,7 +55,7 @@ const EVENT_TYPES = [
     telugu: 'ప్రయాణం',
     english: 'Travel',
     icon: 'airplane-takeoff',
-    color: '#4A90D9',
+    color: DarkColors.gold,
     goodTithis: [1, 2, 3, 5, 7, 10, 11, 13],
     goodNakshatras: [1, 3, 5, 7, 11, 12, 14, 16, 20, 21, 25, 26],
     avoidWeekdays: [2],
@@ -75,7 +85,7 @@ const EVENT_TYPES = [
     telugu: 'విద్యారంభం',
     english: 'Start Education',
     icon: 'school',
-    color: '#6B3FA0',
+    color: '#9B6FCF',
     goodTithis: [1, 2, 3, 5, 7, 10, 11, 13],
     goodNakshatras: [1, 3, 5, 7, 11, 14, 16, 20, 21, 25, 26],
     avoidWeekdays: [2, 6],
@@ -191,7 +201,7 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
 
   const ratingColorMap = {
     excellent: '#2E7D32',
-    good: '#4A90D9',
+    good: '#E8751A',
     fair: '#E8751A',
     avoid: '#C41E3A',
   };
@@ -288,7 +298,7 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
   <div style="display: flex; justify-content: space-between; padding: 12px 16px; background: #F5E6D3; border-radius: 10px; margin-bottom: 16px; font-size: 13px;">
     <div><strong>స్థానం / Location:</strong> ${locationName || 'Hyderabad'}</div>
     <div><strong>తేదీ / Generated:</strong> ${generatedDate}</div>
-    <div><strong>మొత్తం శుభ దినాలు:</strong> ${results.length}</div>
+    <div><strong>మొత్తం శుభ ముహూర్తాలు:</strong> ${results.length}</div>
   </div>
 
   <!-- Results -->
@@ -371,7 +381,7 @@ function buildShareText(eventType, results, locationName) {
     `📋 ${eventType.telugu} / ${eventType.english}\n` +
     `📍 ${locationName || 'Hyderabad'}\n` +
     `📅 ${new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}\n` +
-    `${results.length} శుభ దినాలు (90 రోజుల్లో)\n` +
+    `${results.length} శుభ ముహూర్తాలు (90 రోజుల్లో)\n` +
     `━━━━━━━━━━━━━━━━\n\n`;
 
   const dateLines = results.map((item, idx) => {
@@ -403,6 +413,7 @@ function buildShareText(eventType, results, locationName) {
  * MuhurtamFinderCard — Compact card shown in main feed
  */
 export function MuhurtamFinderCard({ onOpen, isPremium = false }) {
+  const { t } = useLanguage();
   const cardPad = usePick({ default: 14, md: 16, xl: 20 });
   const cardIconSize = usePick({ default: 44, md: 48, xl: 56 });
   const cardIconFontSize = usePick({ default: 24, md: 28, xl: 34 });
@@ -426,14 +437,14 @@ export function MuhurtamFinderCard({ onOpen, isPremium = false }) {
         style={[mStyles.cardGradient, { padding: cardPad }]}
       >
         <View style={[mStyles.cardIcon, { width: cardIconSize, height: cardIconSize, borderRadius: cardIconSize / 2 }]}>
-          <MaterialCommunityIcons name="calendar-star" size={cardIconFontSize} color={DarkColors.tulasiGreen} />
+          <MaterialCommunityIcons name="calendar-star" size={cardIconFontSize} color={DarkColors.gold} />
         </View>
         <View style={mStyles.cardContent}>
-          <Text style={[mStyles.cardTitle, { fontSize: cardTitleSize }]}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
-          <Text style={[mStyles.cardDesc, { fontSize: cardDescSize }]}>వివాహం, గృహ ప్రవేశం, ప్రయాణం... శుభ దినాలు తెలుసుకోండి</Text>
+          <Text style={[mStyles.cardTitle, { fontSize: cardTitleSize }]}>{t('శుభ ముహూర్తాలు తెలుసుకోండి', 'Find Auspicious Dates')}</Text>
+          <Text style={[mStyles.cardDesc, { fontSize: cardDescSize }]}>{t('వివాహం, గృహ ప్రవేశం, ప్రయాణం... శుభ ముహూర్తాలు తెలుసుకోండి', 'Wedding, Housewarming, Travel... Find the best muhurtam dates')}</Text>
         </View>
         {isPremium ? (
-          <Ionicons name="chevron-forward" size={chevronSize} color={DarkColors.tulasiGreen} />
+          <Ionicons name="chevron-forward" size={chevronSize} color={DarkColors.gold} />
         ) : (
           <View style={mStyles.premiumLock}>
             <MaterialCommunityIcons name="crown" size={crownSize} color={DarkColors.gold} />
@@ -464,6 +475,8 @@ function ShareBar({ eventType, results, locationName }) {
  * MuhurtamFinderModal — Full finder experience
  */
 export function MuhurtamFinderModal({ visible, onClose, location, isPremium = false, onOpenPremium, embedded = false }) {
+  const { t } = useLanguage();
+  const { panchangam, isTimeInRange } = useApp();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -473,8 +486,8 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   const headerPadV = usePick({ default: 18, md: 20, xl: 28 });
   const headerPadH = usePick({ default: 16, md: 20, xl: 28 });
   const headerIconSize = usePick({ default: 24, md: 28, xl: 34 });
-  const titleSize = usePick({ default: 19, md: 22, xl: 26 });
-  const subSize = usePick({ default: 12, md: 12, xl: 14 });
+  const titleSize = usePick({ default: 16, md: 18, xl: 20 });
+  const subSize = usePick({ default: 12, md: 13, xl: 14 });
   const closeXSize = usePick({ default: 22, md: 24, xl: 28 });
   const closeXBox = usePick({ default: 32, md: 36, xl: 44 });
 
@@ -499,7 +512,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   const eventIconBox = usePick({ default: 56, md: 68, xl: 80 });
   const eventIconFontSize = usePick({ default: 30, md: 36, xl: 44 });
   const eventTeluguSize = usePick({ default: 15, md: 17, xl: 20 });
-  const eventEnglishSize = usePick({ default: 12, md: 13, xl: 15 });
+  const eventEnglishSize = usePick({ default: 14, md: 15, xl: 17 });
   const gridPad = usePick({ default: 10, md: 12, xl: 16 });
 
   const resultHeaderPadH = usePick({ default: 14, md: 16, xl: 20 });
@@ -539,6 +552,14 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
     : location?.name || 'Hyderabad';
 
   const handleEventSelect = (eventType) => {
+    if (eventType.id === 'today_timings') {
+      setSelectedEvent(eventType);
+      setResults([]);
+      setSearching(false);
+      setSelectedResult(null);
+      trackEvent('today_timings_tap');
+      return;
+    }
     setSelectedEvent(eventType);
     setSearching(true);
     setResults([]);
@@ -563,12 +584,12 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
           {/* Header */}
           <LinearGradient
-            colors={[DarkColors.tulasiGreen, '#1B5E20']}
+            colors={['#1A1008', '#0A0A0A']}
             style={[s.modalHeader, { paddingVertical: headerPadV, paddingHorizontal: headerPadH }]}
           >
             <MaterialCommunityIcons name="calendar-star" size={headerIconSize} color="#F5D77A" />
-            <Text style={[s.modalTitle, { fontSize: titleSize }]}>శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి</Text>
-            <Text style={[s.modalSub, { fontSize: subSize }]}>రాబోయే 90 రోజుల శుభ దినాలు</Text>
+            <Text style={[s.modalTitle, { fontSize: titleSize }]}>{t('శుభ ముహూర్తాలు తెలుసుకోండి', 'Find Auspicious Dates')}</Text>
+            <Text style={[s.modalSub, { fontSize: subSize }]}>{t('రాబోయే 90 రోజుల శుభ ముహూర్తాలు', 'Best muhurtam dates in the next 90 days')}</Text>
             <TouchableOpacity style={[s.closeX, { width: closeXBox, height: closeXBox, borderRadius: closeXBox / 2 }]} onPress={handleClose}>
               <Ionicons name="close" size={closeXSize} color="#FFF" />
             </TouchableOpacity>
@@ -578,15 +599,15 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
             /* Premium Lock Overlay */
             <View style={[s.premiumOverlay, { paddingHorizontal: overlayPadH, paddingVertical: overlayPadV }]}>
               <MaterialCommunityIcons name="lock" size={lockIconSize} color={DarkColors.gold} />
-              <Text style={[s.premiumOverlayTitle, { fontSize: overlayTitleSize }]}>Premium అవసరం</Text>
+              <Text style={[s.premiumOverlayTitle, { fontSize: overlayTitleSize }]}>{t('Premium అవసరం', 'Premium Required')}</Text>
               <Text style={[s.premiumOverlayDesc, { fontSize: overlayDescSize }]}>
-                శుభ దినాలు (ముహూర్తాలు) తెలుసుకోండి ప్రీమియం ఫీచర్. శుభ దినాలు కనుగొనడానికి ప్రీమియం యాక్టివేట్ చేయండి.
+                {t('ముహూర్తం ఫైండర్ ప్రీమియం ఫీచర్. శుభ ముహూర్తాలు కనుగొనడానికి ప్రీమియం యాక్టివేట్ చేయండి.', 'Muhurtam Finder is a premium feature. Activate premium to find auspicious dates.')}
               </Text>
               <View style={s.premiumPlans}>
                 {[
-                  { label: 'Monthly', telugu: 'నెలవారీ', price: '₹99', duration: '30 రోజులు' },
-                  { label: 'Yearly', telugu: 'వార్షిక', price: '₹499', duration: '365 రోజులు', badge: '58% ఆదా' },
-                  { label: 'Lifetime', telugu: 'లైఫ్‌టైమ్', price: '₹999', duration: 'శాశ్వతం', badge: 'Best Value' },
+                  { label: 'Monthly', telugu: t('నెలవారీ', 'Monthly'), price: '₹99', duration: t('30 రోజులు', '30 days') },
+                  { label: 'Yearly', telugu: t('వార్షిక', 'Yearly'), price: '₹499', duration: t('365 రోజులు', '365 days'), badge: t('58% ఆదా', '58% off') },
+                  { label: 'Lifetime', telugu: t('లైఫ్‌టైమ్', 'Lifetime'), price: '₹999', duration: t('శాశ్వతం', 'Forever'), badge: 'Best Value' },
                 ].map((plan) => (
                   <View key={plan.label} style={[s.premiumPlanCard, { width: planCardWidth, padding: planCardPad }]}>
                     {plan.badge && <Text style={[s.premiumPlanBadge, { fontSize: planBadgeSize }]}>{plan.badge}</Text>}
@@ -608,30 +629,85 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                   style={[s.premiumActivateBtnGradient, { paddingVertical: activateBtnPadV, paddingHorizontal: activateBtnPadH }]}
                 >
                   <MaterialCommunityIcons name="crown" size={activateCrownSize} color="#FFF" />
-                  <Text style={[s.premiumActivateBtnText, { fontSize: activateBtnTextSize }]}>Premium యాక్టివేట్ చేయండి</Text>
+                  <Text style={[s.premiumActivateBtnText, { fontSize: activateBtnTextSize }]}>{t('Premium యాక్టివేట్ చేయండి', 'Activate Premium')}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
           ) : !selectedEvent ? (
-            /* Event Type Selector */
+            /* Event Type Selector — flat grid with thin dividers (matches Home) */
             <FlatList
               data={EVENT_TYPES}
               keyExtractor={(item) => item.id}
               numColumns={2}
-              contentContainerStyle={{ padding: gridPad }}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[s.eventCard, { paddingVertical: eventCardPadV, paddingHorizontal: eventCardPadH }]}
-                  onPress={() => handleEventSelect(item)}
-                >
-                  <View style={[s.eventIcon, { width: eventIconBox, height: eventIconBox, borderRadius: eventIconBox / 2, backgroundColor: item.color + '20' }]}>
-                    <MaterialCommunityIcons name={item.icon} size={eventIconFontSize} color={item.color} />
-                  </View>
-                  <Text style={[s.eventTelugu, { fontSize: eventTeluguSize }]}>{item.telugu}</Text>
-                  <Text style={[s.eventEnglish, { fontSize: eventEnglishSize }]}>{item.english}</Text>
-                </TouchableOpacity>
-              )}
+              contentContainerStyle={{ }}
+              renderItem={({ item, index }) => {
+                const colPos = index % 2;
+                const isLastCol = colPos === 1;
+                const rowIndex = Math.floor(index / 2);
+                const totalRows = Math.ceil(EVENT_TYPES.length / 2);
+                const isLastRow = rowIndex === totalRows - 1;
+                return (
+                  <TouchableOpacity
+                    style={[s.eventCard, { paddingVertical: eventCardPadV, paddingHorizontal: eventCardPadH,
+                      borderRightWidth: isLastCol ? 0 : 1,
+                      borderRightColor: DarkColors.borderCard,
+                      borderBottomWidth: isLastRow ? 0 : 1,
+                      borderBottomColor: DarkColors.borderCard,
+                    }]}
+                    onPress={() => handleEventSelect(item)}
+                  >
+                    <View style={[s.eventIcon, { width: eventIconBox, height: eventIconBox, borderRadius: eventIconBox / 2, backgroundColor: DarkColors.gold + '20' }]}>
+                      <MaterialCommunityIcons name={item.icon} size={eventIconFontSize} color={DarkColors.gold} />
+                    </View>
+                    <Text style={[s.eventTelugu, { fontSize: eventTeluguSize }]}>{t(item.telugu, item.english)}</Text>
+                    <Text style={[s.eventEnglish, { fontSize: eventEnglishSize }]}>{t(item.english, item.telugu)}</Text>
+                  </TouchableOpacity>
+                );
+              }}
             />
+          ) : selectedEvent?.id === 'today_timings' ? (
+            /* Today's Auspicious Timings */
+            <View style={{ flex: 1 }}>
+              <View style={[s.resultHeader, { paddingHorizontal: resultHeaderPadH, paddingVertical: resultHeaderPadV }]}>
+                <TouchableOpacity onPress={() => setSelectedEvent(null)}>
+                  <Ionicons name="arrow-back" size={backIconSize} color={DarkColors.textPrimary} />
+                </TouchableOpacity>
+                <MaterialCommunityIcons name="clock-check" size={resultEventIconSize} color={DarkColors.gold} style={{ marginLeft: 10 }} />
+                <Text style={[s.resultEventName, { fontSize: resultEventNameSize }]}>{t('నేటి శుభ సమయాలు', "Today's Auspicious Timings")}</Text>
+              </View>
+              {panchangam ? (
+                <FlatList
+                  data={[{ key: 'timings' }]}
+                  renderItem={() => (
+                    <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                        <MaterialCommunityIcons name="check-decagram" size={16} color={DarkColors.gold} />
+                        <Text style={{ fontSize: 15, fontWeight: '800', color: DarkColors.gold }}>{t('శుభ సమయాలు', 'Auspicious Times')}</Text>
+                      </View>
+                      <MuhurthamCard muhurtham={panchangam.brahmaMuhurtam} isActive={isTimeInRange(panchangam.brahmaMuhurtam.start, panchangam.brahmaMuhurtam.end)} isAuspicious={true} />
+                      <MuhurthamCard muhurtham={panchangam.abhijitMuhurtam} isActive={isTimeInRange(panchangam.abhijitMuhurtam.start, panchangam.abhijitMuhurtam.end)} isAuspicious={true} />
+                      <MuhurthamCard muhurtham={panchangam.amritKalam} isActive={isTimeInRange(panchangam.amritKalam.start, panchangam.amritKalam.end)} isAuspicious={true} />
+
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 10 }}>
+                        <MaterialCommunityIcons name="close-octagon-outline" size={16} color={DarkColors.saffron} />
+                        <Text style={{ fontSize: 15, fontWeight: '800', color: DarkColors.saffron }}>{t('అశుభ సమయాలు', 'Inauspicious Times')}</Text>
+                      </View>
+                      <MuhurthamCard muhurtham={panchangam.durmuhurtam} isActive={isTimeInRange(panchangam.durmuhurtam.start, panchangam.durmuhurtam.end)} isAuspicious={false} />
+                      {panchangam.durmuhurtam.start2 && (
+                        <MuhurthamCard muhurtham={{ ...panchangam.durmuhurtam, start: panchangam.durmuhurtam.start2, end: panchangam.durmuhurtam.end2, telugu: 'దుర్ముహూర్తం (2)', english: 'Durmuhurtam (2)' }} isActive={isTimeInRange(panchangam.durmuhurtam.start2, panchangam.durmuhurtam.end2)} isAuspicious={false} />
+                      )}
+                      <TimingCard iconName="cancel" label={panchangam.rahuKalam.telugu} startTime={panchangam.rahuKalam.startFormatted} endTime={panchangam.rahuKalam.endFormatted} isActive={isTimeInRange(panchangam.rahuKalam.start, panchangam.rahuKalam.end)} accentColor={DarkColors.saffron} />
+                      <TimingCard iconName="alert-circle" label={panchangam.yamaGanda.telugu} startTime={panchangam.yamaGanda.startFormatted} endTime={panchangam.yamaGanda.endFormatted} isActive={isTimeInRange(panchangam.yamaGanda.start, panchangam.yamaGanda.end)} accentColor={DarkColors.saffron} />
+                      <TimingCard iconName="alert-rhombus" label={panchangam.gulikaKalam.telugu} startTime={panchangam.gulikaKalam.startFormatted} endTime={panchangam.gulikaKalam.endFormatted} isActive={isTimeInRange(panchangam.gulikaKalam.start, panchangam.gulikaKalam.end)} accentColor={DarkColors.saffron} />
+                    </View>
+                  )}
+                />
+              ) : (
+                <View style={{ alignItems: 'center', padding: 40 }}>
+                  <Text style={{ color: DarkColors.textMuted }}>{t('పంచాంగం లోడ్ అవుతోంది...', 'Loading panchangam...')}</Text>
+                </View>
+              )}
+            </View>
           ) : (
             /* Results */
             <View style={{ flex: 1 }}>
@@ -640,9 +716,9 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                 <TouchableOpacity onPress={() => { setSelectedEvent(null); setResults([]); }}>
                   <Ionicons name="arrow-back" size={backIconSize} color={DarkColors.textPrimary} />
                 </TouchableOpacity>
-                <MaterialCommunityIcons name={selectedEvent.icon} size={resultEventIconSize} color={selectedEvent.color} style={{ marginLeft: 10 }} />
-                <Text style={[s.resultEventName, { fontSize: resultEventNameSize }]}>{selectedEvent.telugu}</Text>
-                <Text style={[s.resultCount, { fontSize: resultCountSize }]}>{results.length} శుభ దినాలు</Text>
+                <MaterialCommunityIcons name={selectedEvent.icon} size={resultEventIconSize} color={DarkColors.gold} style={{ marginLeft: 10 }} />
+                <Text style={[s.resultEventName, { fontSize: resultEventNameSize }]}>{t(selectedEvent.telugu, selectedEvent.english)}</Text>
+                <Text style={[s.resultCount, { fontSize: resultCountSize }]}>{results.length} {t('శుభ ముహూర్తాలు', 'auspicious dates')}</Text>
               </View>
 
               {/* Share Bar — PDF, WhatsApp, Share */}
@@ -656,13 +732,13 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
 
               {searching ? (
                 <View style={[s.searchingBox, { padding: searchPad }]}>
-                  <MaterialCommunityIcons name="magnify" size={searchIconSize} color={DarkColors.tulasiGreen} />
-                  <Text style={[s.searchingText, { fontSize: searchTextSize }]}>శుభ దినాలు వెతుకుతోంది...</Text>
+                  <MaterialCommunityIcons name="magnify" size={searchIconSize} color={DarkColors.gold} />
+                  <Text style={[s.searchingText, { fontSize: searchTextSize }]}>{t('శుభ ముహూర్తాలు వెతుకుతోంది...', 'Searching for auspicious dates...')}</Text>
                 </View>
               ) : results.length === 0 ? (
                 <View style={[s.searchingBox, { padding: searchPad }]}>
                   <MaterialCommunityIcons name="calendar-remove" size={searchIconSize} color={DarkColors.textMuted} />
-                  <Text style={[s.searchingText, { fontSize: searchTextSize }]}>ఈ కాలంలో శుభ దినాలు లేవు</Text>
+                  <Text style={[s.searchingText, { fontSize: searchTextSize }]}>{t('ఈ కాలంలో శుభ ముహూర్తాలు లేవు', 'No auspicious dates found in this period')}</Text>
                 </View>
               ) : (
                 <FlatList
@@ -672,9 +748,9 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                     const d = item.date;
                     const isExpanded = selectedResult?.dateStr === item.dateStr;
                     const ratingColors = {
-                      excellent: DarkColors.tulasiGreen,
-                      good: '#4A90D9',
-                      fair: DarkColors.saffron,
+                      excellent: DarkColors.gold,
+                      good: DarkColors.saffron,
+                      fair: DarkColors.silver,
                       avoid: DarkColors.kumkum,
                     };
 
@@ -690,17 +766,20 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                               {d.toLocaleDateString('en-IN', { month: 'short' })}
                             </Text>
                             <Text style={[s.resultWeekday, { fontSize: weekdayFontSize }]}>
-                              {WEEKDAY_NAMES_TE[d.getDay()].slice(0, 3)}
+                              {t(WEEKDAY_NAMES_TE[d.getDay()].slice(0, 3), WEEKDAY_NAMES_EN[d.getDay()].slice(0, 3))}
                             </Text>
                           </View>
 
                           <View style={s.resultInfo}>
                             <Text style={[s.resultDateFull, { fontSize: dateFulFontSize }]}>
-                              {d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' })}
+                              {t(
+                                d.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' }),
+                                d.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })
+                              )}
                             </Text>
                             <View style={s.resultBadges}>
                               <View style={[s.scoreBadge, { backgroundColor: ratingColors[item.rating], paddingHorizontal: scoreBadgePadH, paddingVertical: scoreBadgePadV }]}>
-                                <Text style={[s.scoreText, { fontSize: scoreTextSize }]}>{item.ratingTelugu}</Text>
+                                <Text style={[s.scoreText, { fontSize: scoreTextSize }]}>{t(item.ratingTelugu, item.rating)}</Text>
                               </View>
                               <Text style={[s.scorePercent, { fontSize: scorePercentSize }]}>{item.score}%</Text>
                             </View>
@@ -717,7 +796,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                           <View style={s.resultDetails}>
                             {item.reasons.map((r, i) => (
                               <View key={`r-${i}`} style={s.reasonRow}>
-                                <Ionicons name="checkmark-circle" size={reasonIconSize} color={DarkColors.tulasiGreen} />
+                                <Ionicons name="checkmark-circle" size={reasonIconSize} color={DarkColors.gold} />
                                 <Text style={[s.reasonText, { fontSize: reasonTextSize, lineHeight: reasonLineHeight }]}>{r}</Text>
                               </View>
                             ))}
@@ -739,7 +818,7 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
           )}
 
           <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMarginH }]} onPress={handleClose}>
-            <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>మూసివేయండి</Text>
+            <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>{t('మూసివేయండి', 'Close')}</Text>
           </TouchableOpacity>
     </ModalOrView>
   );
@@ -787,10 +866,9 @@ const s = StyleSheet.create({
   },
 
   eventCard: {
-    flex: 1, margin: 8, paddingVertical: 22, paddingHorizontal: 12,
-    backgroundColor: DarkColors.bgElevated, borderRadius: 18,
+    flex: 1, paddingVertical: 22, paddingHorizontal: 12,
+    backgroundColor: 'transparent',
     alignItems: 'center',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   eventIcon: {
     width: 68, height: 68, borderRadius: 34,
@@ -805,7 +883,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   resultEventName: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginLeft: 6, flex: 1 },
-  resultCount: { fontSize: 12, color: DarkColors.tulasiGreen, fontWeight: '600' },
+  resultCount: { fontSize: 12, color: DarkColors.gold, fontWeight: '600' },
 
   searchingBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   searchingText: { fontSize: 15, color: DarkColors.textMuted, marginTop: 12 },
@@ -814,17 +892,17 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12,
     borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
   },
-  resultItemExpanded: { backgroundColor: 'rgba(46,125,50,0.12)' },
+  resultItemExpanded: { backgroundColor: 'rgba(212,160,23,0.08)' },
   resultRow: { flexDirection: 'row', alignItems: 'center' },
   resultDateCol: { width: 50, alignItems: 'center' },
-  resultDay: { fontSize: 22, fontWeight: '800', color: DarkColors.tulasiGreen },
+  resultDay: { fontSize: 22, fontWeight: '800', color: DarkColors.gold },
   resultMonth: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, textTransform: 'uppercase' },
   resultWeekday: { fontSize: 12, color: DarkColors.textSecondary },
   resultInfo: { flex: 1, marginLeft: 12 },
   resultDateFull: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
   resultBadges: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-  scoreBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
-  scoreText: { fontSize: 11, color: '#fff', fontWeight: '700' },
+  scoreBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  scoreText: { fontSize: 13, color: '#0A0A0A', fontWeight: '800' },
   scorePercent: { fontSize: 11, color: DarkColors.textMuted, marginLeft: 8, fontWeight: '600' },
 
   resultDetails: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
@@ -833,9 +911,10 @@ const s = StyleSheet.create({
 
   closeBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginVertical: 12,
-    backgroundColor: DarkColors.tulasiGreen, borderRadius: 12,
+    backgroundColor: 'transparent', borderRadius: 12,
+    borderWidth: 1.5, borderColor: DarkColors.gold,
   },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  closeBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 
   // Premium lock overlay styles
   premiumOverlay: {
@@ -861,7 +940,7 @@ const s = StyleSheet.create({
   },
   premiumPlanBadge: {
     fontSize: 9, fontWeight: '700', color: '#fff',
-    backgroundColor: DarkColors.tulasiGreen, borderRadius: 6,
+    backgroundColor: DarkColors.gold, borderRadius: 6,
     paddingHorizontal: 6, paddingVertical: 2, marginBottom: 6,
     overflow: 'hidden',
   },

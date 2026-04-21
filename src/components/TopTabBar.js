@@ -10,7 +10,7 @@ import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { DarkColors } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
-import { MAIN_SECTIONS } from '../navigation/TabNavigator';
+import { MAIN_SECTIONS } from '../navigation/sections';
 
 export function TopTabBar() {
   const navigation = useNavigation();

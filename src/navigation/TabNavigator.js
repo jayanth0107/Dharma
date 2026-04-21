@@ -35,40 +35,34 @@ import { TempleNearbyScreen } from '../screens/TempleNearbyScreen';
 
 const Tab = createBottomTabNavigator();
 
-// ── Main sections: visible in bottom bar + swipeable ──────────────
-// Order determines the swipe sequence. Exported so ScrollableTabBar
-// and SwipeWrapper can reference the ordered list.
-// All sections visible in bottom bar + top tab bar + swipeable.
-// Order matches the Home screen tile grid (12 tiles + utility extras).
-// Premium tiles (positions 4-6) appear together for visual emphasis.
-export const MAIN_SECTIONS = [
-  { name: 'Home',        component: withErrorBoundary(HomeScreen, 'Home'),             icon: 'home',                   te: 'హోమ్',         en: 'Home' },
-  // Row 1
-  { name: 'Panchang',    component: withErrorBoundary(CalendarScreen, 'Panchang'),     icon: 'pot-mix',                te: 'నేటి దినం',     en: 'Today', params: { tab: 'panchang' } },
-  { name: 'Festivals',   component: withErrorBoundary(CalendarScreen, 'Festivals'),    icon: 'party-popper',           te: 'పండుగలు',       en: 'Festivals', params: { tab: 'festivals' } },
-  { name: 'DailyRashi',  component: withErrorBoundary(DailyRashiScreen, 'DailyRashi'), icon: 'star-circle',            te: 'రాశి ఫలాలు',    en: 'Rashi Predictions' },
-  // Row 2 — PREMIUM
-  { name: 'Horoscope',   component: withErrorBoundary(HoroscopeScreen, 'Horoscope'),   icon: 'account-star',           te: 'వేద జాతకం',     en: 'Birth Chart' },
-  { name: 'Matchmaking', component: withErrorBoundary(MatchmakingScreen, 'Matchmaking'), icon: 'heart-multiple',       te: 'పొందిక',        en: 'Love Match' },
-  { name: 'Muhurtam',    component: withErrorBoundary(MuhurtamScreen, 'Muhurtam'),     icon: 'calendar-star',          te: 'శుభ దినాలు',    en: 'Auspicious Dates' },
-  // Row 3 — Free
-  { name: 'Astro',       component: withErrorBoundary(AstroScreen, 'Astro'),           icon: 'zodiac-leo',             te: 'వేద విజ్ఞానం',   en: 'Vedic Wisdom' },
-  { name: 'Gold',        component: withErrorBoundary(GoldScreen, 'Gold'),             icon: 'gold',                   te: 'బంగారం',        en: 'Gold' },
-  { name: 'Gita',        component: withErrorBoundary(GitaScreen, 'Gita'),             icon: 'book-open-page-variant', te: 'గీత',           en: 'Gita' },
-  // Row 4
-  { name: 'GoodTimes',   component: withErrorBoundary(CalendarScreen, 'GoodTimes'),    icon: 'clock-check',            te: 'శుభ సమయాలు',   en: 'Auspicious Times', params: { tab: 'timings' } },
-  { name: 'Market',      component: withErrorBoundary(MarketScreen, 'Market'),         icon: 'chart-line',             te: 'మార్కెట్',      en: 'Market' },
-  { name: 'Reminder',    component: ReminderScreen,                                    icon: 'bell-plus',              te: 'రిమైండర్',      en: 'Set Reminder' },
-  // Extras (Row 5 on Home)
-  { name: 'Kids',         component: withErrorBoundary(CalendarScreen, 'Kids'),         icon: 'baby-face-outline',      te: 'పిల్లల కథలు',   en: "Kid's Stories", params: { tab: 'kids' } },
-  { name: 'TempleNearby', component: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'), icon: 'temple-hindu',       te: 'దేవాలయాలు',     en: 'Nearby Temples' },
-  { name: 'Donate',       component: DonateScreen,                                      icon: 'hand-heart',             te: 'దానం',          en: 'Donate' },
-  { name: 'Premium',      component: PremiumScreen,                                     icon: 'crown',                  te: 'ప్రీమియం',      en: 'Premium' },
-  { name: 'More',         component: withErrorBoundary(MoreScreen, 'More'),             icon: 'dots-horizontal',        te: 'మరిన్ని',       en: 'More' },
-];
+// MAIN_SECTIONS lives in sections.js to avoid require cycles with
+// ScrollableTabBar / TopTabBar / SwipeWrapper.
+import { MAIN_SECTIONS } from './sections';
+export { MAIN_SECTIONS };
+
+// Map section names → wrapped screen components
+const SECTION_COMPONENTS = {
+  Home:         withErrorBoundary(HomeScreen, 'Home'),
+  Panchang:     withErrorBoundary(CalendarScreen, 'Panchang'),
+  Festivals:    withErrorBoundary(CalendarScreen, 'Festivals'),
+  DailyRashi:   withErrorBoundary(DailyRashiScreen, 'DailyRashi'),
+  Horoscope:    withErrorBoundary(HoroscopeScreen, 'Horoscope'),
+  Matchmaking:  withErrorBoundary(MatchmakingScreen, 'Matchmaking'),
+  Muhurtam:     withErrorBoundary(MuhurtamScreen, 'Muhurtam'),
+  Astro:        withErrorBoundary(AstroScreen, 'Astro'),
+  Gold:         withErrorBoundary(GoldScreen, 'Gold'),
+  Gita:         withErrorBoundary(GitaScreen, 'Gita'),
+  Market:       withErrorBoundary(MarketScreen, 'Market'),
+  Reminder:     ReminderScreen,
+  Kids:         withErrorBoundary(CalendarScreen, 'Kids'),
+  TempleNearby: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'),
+  Donate:       DonateScreen,
+  More:         withErrorBoundary(MoreScreen, 'More'),
+};
 
 // ── Utility screens: push-navigable only (not in bars or swipe) ──
 const UTILITY_SCREENS = [
+  { name: 'Premium',       component: PremiumScreen },
   { name: 'Settings',      component: SettingsScreen },
   { name: 'InfoPage',      component: WebViewScreen },
   { name: 'Login',         component: LoginScreen },
@@ -96,7 +90,7 @@ export function TabNavigator() {
         <Tab.Screen
           key={section.name}
           name={section.name}
-          component={section.component}
+          component={SECTION_COMPONENTS[section.name]}
         />
       ))}
       {UTILITY_SCREENS.map((screen) => (

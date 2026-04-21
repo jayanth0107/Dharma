@@ -176,7 +176,7 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
       {!hideButton && (
         <View style={s.row}>
           <TouchableOpacity style={s.pdfBtn} onPress={handlePdf} activeOpacity={0.7}>
-            <MaterialCommunityIcons name="file-pdf-box" size={btnIconSize} color="#C41E3A" />
+            <MaterialCommunityIcons name="file-pdf-box" size={btnIconSize} color={DarkColors.silver} />
             <Text style={[s.pdfBtnText, { fontSize: pdfFontSize }]}>PDF</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[s.shareBtn, { paddingHorizontal: sharePadH }]} onPress={handleOpen} activeOpacity={0.7}>
@@ -268,18 +268,15 @@ const s = StyleSheet.create({
   pdfBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingVertical: 9, paddingHorizontal: 16, borderRadius: 22,
-    backgroundColor: DarkColors.bgElevated, borderWidth: 1.5, borderColor: 'rgba(196,30,58,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(192,192,192,0.2)',
   },
-  pdfBtnText: { fontWeight: '700', color: '#C41E3A' },
+  pdfBtnText: { fontWeight: '700', color: DarkColors.silver },
   shareBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 9, borderRadius: 22,
-    backgroundColor: DarkColors.saffron,
-    elevation: 2,
-    shadowColor: DarkColors.saffron, shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, shadowRadius: 4,
+    backgroundColor: 'rgba(212,160,23,0.15)', borderWidth: 1, borderColor: 'rgba(212,160,23,0.35)',
   },
-  shareBtnText: { fontWeight: '700', color: '#fff' },
+  shareBtnText: { fontWeight: '700', color: DarkColors.gold },
 
   // Modal
   overlay: { flex: 1, backgroundColor: DarkColors.overlay, justifyContent: 'flex-end' },

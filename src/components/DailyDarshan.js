@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Image, Animated, Easing, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Animated, Easing, useWindowDimensions, Platform } from 'react-native';
 import { SectionShareRow } from './SectionShareRow';
 import { buildDarshanShareText } from '../utils/shareService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -294,18 +294,18 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: DarkColors.textPrimary,
     letterSpacing: 1,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    ...(Platform.OS === 'web'
+      ? { textShadow: '0px 1px 4px rgba(0,0,0,0.8)' }
+      : { textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }),
   },
   overlayEnglish: {
     fontSize: 16,
     color: DarkColors.textSecondary,
     fontWeight: '700',
     marginTop: 2,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    ...(Platform.OS === 'web'
+      ? { textShadow: '0px 1px 4px rgba(0,0,0,0.8)' }
+      : { textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }),
   },
   fallback: {
     width: '100%',

@@ -20,11 +20,6 @@ const MENU_ITEMS = [
   { id: 'premium', icon: 'crown', label: 'ప్రీమియం అప్‌గ్రేడ్', labelEn: 'Upgrade to Premium', accent: DarkColors.gold },
   { id: 'removeAds', icon: 'advertisements-off', label: 'ప్రకటనలు తొలగించు', labelEn: 'Remove Ads', accent: DarkColors.tulasiGreen },
   { id: 'divider1' },
-  // Quick features
-  { id: 'reminder', icon: 'bell-plus', label: 'రిమైండర్', labelEn: 'Reminders' },
-  { id: 'muhurtam', icon: 'calendar-star', label: 'శుభ దినాలు', labelEn: 'Auspicious Dates' },
-  { id: 'matchmaking', icon: 'heart-multiple', label: 'జాతక పొందిక', labelEn: 'Love Match' },
-  { id: 'divider2' },
   // App settings
   { id: 'notifications', icon: 'bell-outline', label: 'నోటిఫికేషన్స్', labelEn: 'Notifications' },
   { id: 'settings', icon: 'cog-outline', label: 'సెట్టింగ్స్', labelEn: 'Settings' },
@@ -66,8 +61,8 @@ export function DrawerMenu({ visible, onClose, onAction }) {
 
   const handlePress = (id) => {
     onClose();
-    // Small delay so drawer closes first
-    setTimeout(() => onAction(id), 200);
+    // Delay so drawer Modal fully unmounts before action opens another Modal
+    setTimeout(() => onAction(id), 350);
   };
 
   return (
@@ -89,7 +84,7 @@ export function DrawerMenu({ visible, onClose, onAction }) {
               <MaterialCommunityIcons
                 name={isLoggedIn ? 'account-check' : 'account-circle'}
                 size={avatarIconSize}
-                color={premiumActive ? '#FFD700' : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
+                color={premiumActive ? DarkColors.gold : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
               />
               {premiumActive && (
                 <View style={[s.premiumCrown, { width: crownCircle, height: crownCircle, borderRadius: crownCircle / 2 }]}>
@@ -208,7 +203,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(46,125,50,0.08)',
   },
   avatarPremium: {
-    borderColor: '#FFD700',
+    borderColor: DarkColors.gold,
     backgroundColor: 'rgba(255,215,0,0.08)',
   },
   premiumCrown: {
@@ -228,7 +223,7 @@ const s = StyleSheet.create({
     borderRadius: 6, alignSelf: 'flex-start', marginTop: 4,
   },
   freeBadgeText: {
-    fontSize: 9, fontWeight: '900', color: '#4A90D9', letterSpacing: 0.5,
+    fontSize: 9, fontWeight: '900', color: DarkColors.saffron, letterSpacing: 0.5,
   },
   guestBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6,

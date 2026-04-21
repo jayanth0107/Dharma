@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
+import { useLanguage } from '../context/LanguageContext';
 import { EKADASHI_2026 } from '../data/ekadashi';
 
 export function TodayEkadashiBanner({ ekadashi }) {
@@ -104,6 +105,7 @@ export function UpcomingEkadashiItem({ ekadashi }) {
 }
 
 export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate, showAll: showAllInline = false }) {
+  const { t } = useLanguage();
   const [showAllModal, setShowAllModal] = useState(false);
 
   // Responsive values for section + modal
@@ -206,7 +208,7 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
               }}
             />
             <TouchableOpacity style={[styles.modalClose, { paddingVertical: modalClosePadV, marginHorizontal: modalCloseMx }]} onPress={() => setShowAllModal(false)}>
-              <Text style={[styles.modalCloseText, { fontSize: modalCloseFontSize }]}>మూసివేయండి</Text>
+              <Text style={[styles.modalCloseText, { fontSize: modalCloseFontSize }]}>{t('మూసివేయండి', 'Close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -469,12 +471,14 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginHorizontal: 24,
     marginTop: 10,
-    backgroundColor: '#4A1A6B',
+    backgroundColor: 'transparent',
     borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: DarkColors.gold,
   },
   modalCloseText: {
     fontSize: 15,
     fontWeight: '700',
-    color: DarkColors.textPrimary,
+    color: DarkColors.gold,
   },
 });

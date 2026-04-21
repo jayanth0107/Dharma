@@ -1,0 +1,446 @@
+/**
+ * 50 Children's Stories from Puranas, Vedas, Upanishads & Panchatantra
+ * Rotated uniquely by day-of-year in KidsSection.js
+ *
+ * Sources: P = Purana, U = Upanishad/Veda, T = Panchatantra, E = Epic (Ramayana/Mahabharata)
+ *
+ * Each story uses one of the 8 available deity images:
+ *   ganesha, hanuman, krishna, rama, shiva, lakshmi, venkateswara, surya
+ */
+
+const IMAGES = {
+  ganesha: require('../../assets/deities/ganesha.jpg'),
+  hanuman: require('../../assets/deities/hanuman.jpg'),
+  krishna: require('../../assets/deities/krishna.webp'),
+  rama: require('../../assets/deities/rama.jpg'),
+  shiva: require('../../assets/deities/shiva.jpg'),
+  lakshmi: require('../../assets/deities/lakshmi.jpg'),
+  venkateswara: require('../../assets/deities/venkateswara.jpg'),
+  surya: require('../../assets/deities/surya.jpg'),
+};
+
+export const KIDS_STORIES = [
+  // ─── PURANAS (1–15) ───────────────────────────────────────────────
+  {
+    id: 1, title: 'గణేశుని తెలివి', english: "Ganesha's Wisdom",
+    source: 'P', icon: 'elephant', color: '#E8751A', image: IMAGES.ganesha,
+    story: 'ఒకసారి శివపార్వతులు తమ ఇద్దరు కుమారులైన గణేశుడు, కుమారస్వామిలకు ఒక పోటీ పెట్టారు. "భూ ప్రదక్షిణ చేసి ముందుగా వచ్చినవారికి ఒక ఫలం ఇస్తాము" అని చెప్పారు.\n\nకుమారస్వామి తన నెమలి వాహనంపై వేగంగా బయలుదేరాడు. కానీ గణేశుడు ఆలోచించాడు. ఆయన తన తల్లిదండ్రుల చుట్టూ మూడుసార్లు ప్రదక్షిణ చేశాడు.\n\n"తల్లిదండ్రులే సర్వలోకాలు. వారి చుట్టూ ప్రదక్షిణ చేస్తే భూ ప్రదక్షిణ చేసినట్లే" అని చెప్పాడు.\n\nశివపార్వతులు సంతోషించి గణేశునికి ఫలం ఇచ్చారు.',
+    storyEn: 'Once, Lord Shiva and Parvati challenged their two sons Ganesha and Kartikeya to a race around the world. "Whoever circles the Earth first wins a special fruit," they said.\n\nKartikeya set off swiftly on his peacock. But Ganesha thought cleverly. He simply walked around his parents three times.\n\n"Parents are the whole world. Circling them is the same as circling the Earth," he explained.\n\nShiva and Parvati were delighted and gave the fruit to Ganesha.',
+    moral: 'తల్లిదండ్రుల సేవే గొప్ప పూజ. తెలివితో ఆలోచిస్తే కష్టమైన పనులు కూడా సులభమవుతాయి.',
+    moralEn: 'Serving parents is the greatest worship. With wisdom, even the hardest tasks become easy.',
+  },
+  {
+    id: 2, title: 'హనుమంతుని భక్తి', english: "Hanuman's Devotion",
+    source: 'P', icon: 'shield-star', color: '#C41E3A', image: IMAGES.hanuman,
+    story: 'హనుమంతుడు శ్రీరాముడి పరమ భక్తుడు. ఒకసారి సీతాదేవి హనుమంతునికి ముత్యాల హారం బహుమతిగా ఇచ్చింది.\n\nహనుమంతుడు ఒక్కొక్క ముత్యాన్ని పళ్ళతో కొరికి చూసి పడేస్తున్నాడు. "ఏమిటి ఈ అపచారం?" అని అడిగారు.\n\n"ఏ ముత్యంలోనూ శ్రీరాముడు లేడు. రాముడు లేని వస్తువు నాకెందుకు?" అన్నాడు హనుమంతుడు.\n\nహనుమంతుడు తన గుండె చీల్చి చూపించాడు — అందులో శ్రీరాముడు, సీతాదేవి కనిపించారు!',
+    storyEn: "Hanuman was Lord Rama's greatest devotee. Once, Sita gifted Hanuman a beautiful pearl necklace.\n\nHanuman began biting each pearl and throwing them away. \"What disrespect is this?\" everyone asked.\n\n\"None of these pearls contain Lord Rama. What use is anything without Rama?\" said Hanuman.\n\nHanuman then tore open his chest — and there, everyone could see Lord Rama and Sita in his heart!",
+    moral: 'నిజమైన భక్తి హృదయంలో ఉంటుంది. దేవుడిని ప్రేమతో తలచుకుంటే ఆయన మన హృదయంలోనే ఉంటాడు.',
+    moralEn: 'True devotion lives in the heart. When you love God sincerely, He resides within you always.',
+  },
+  {
+    id: 3, title: 'ధ్రువుని తపస్సు', english: "Dhruva's Determination",
+    source: 'P', icon: 'star-four-points', color: '#4A90D9', image: IMAGES.venkateswara,
+    story: 'ధ్రువుడు ఐదేళ్ల బాలుడు. తన తండ్రి ఒడిలో కూర్చోవాలని వెళ్ళాడు. కానీ సవతి తల్లి అడ్డుకుని "నీకు అర్హత లేదు, దేవుని ప్రార్థించి అడుగు" అని అవమానించింది.\n\nధ్రువుడు అడవికి వెళ్ళి విష్ణువును ధ్యానించాడు. ఒక కాలిమీద నిలబడి, ఆహారం, నీరు లేకుండా తపస్సు చేశాడు.\n\nవిష్ణువు ప్రత్యక్షమై ధ్రువ నక్షత్ర స్థానం ఇచ్చాడు — ఎప్పటికీ చెరగని, ఆకాశంలో స్థిరంగా ఉండే స్థానం.',
+    storyEn: "Dhruva was a five-year-old boy. He went to sit on his father's lap, but his stepmother stopped him saying \"You are not worthy. Go pray to God if you want that.\"\n\nDhruva went to the forest and meditated on Lord Vishnu. Standing on one foot, without food or water, he performed intense penance.\n\nLord Vishnu appeared and granted him the Pole Star position — an eternal, unshakable place in the sky.",
+    moral: 'చిన్నవాళ్ళు కూడా గొప్ప పనులు చేయగలరు. పట్టుదలతో ఏదైనా సాధించవచ్చు.',
+    moralEn: 'Even children can achieve great things. With determination, anything is possible.',
+  },
+  {
+    id: 4, title: 'ప్రహ్లాదుని విశ్వాసం', english: "Prahlada's Faith",
+    source: 'P', icon: 'fire', color: '#C55A11', image: IMAGES.venkateswara,
+    story: 'ప్రహ్లాదుడు రాక్షస రాజు హిరణ్యకశిపుని కుమారుడు. కానీ చిన్నతనం నుండే విష్ణు భక్తుడు.\n\nతండ్రి ఎంత బెదిరించినా "నారాయణ" అనే మానలేదు. విషసర్పాలతో, ఏనుగులతో, కొండమీద నుండి పడేసినా — ప్రహ్లాదునికి ఏమీ కాలేదు.\n\nచివరికి నరసింహ స్వామి స్తంభం నుండి ఉద్భవించి ప్రహ్లాదుని కాపాడాడు. దుష్టశక్తిని నాశనం చేశాడు!',
+    storyEn: "Prahlada was the son of the demon king Hiranyakashipu. But from childhood, he was a devoted worshipper of Lord Vishnu.\n\nNo matter how much his father threatened him, Prahlada never stopped chanting \"Narayana.\" Poisonous snakes, elephants, being thrown off cliffs — nothing could harm Prahlada.\n\nFinally, Lord Narasimha emerged from a pillar and protected Prahlada, destroying the evil force!",
+    moral: 'నిజమైన భక్తిని ఎవరూ ఆపలేరు. ధర్మం ఎల్లప్పుడూ గెలుస్తుంది.',
+    moralEn: 'No one can stop true devotion. Dharma (righteousness) always wins.',
+  },
+  {
+    id: 5, title: 'శ్రవణ కుమారుని సేవ', english: "Shravana's Devotion to Parents",
+    source: 'P', icon: 'heart', color: '#2E7D32', image: IMAGES.rama,
+    story: 'శ్రవణ కుమారుడు అంధులైన తల్లిదండ్రులను కావడిలో మోస్తూ తీర్థయాత్రలకు తీసుకువెళ్ళేవాడు.\n\nవేసవి ఎండలో, వర్షంలో, చలిలో — ఎన్ని కష్టాలు వచ్చినా తల్లిదండ్రులను మోయడం మానలేదు. వారికి నీళ్ళు, ఆహారం అందించి, కథలు చెప్పి సంతోషపెట్టేవాడు.\n\nచివరి క్షణంలో కూడా "నా తల్లిదండ్రులకు నీళ్ళు ఇవ్వండి" అని అడిగాడు. ఆయన సేవ చూసి దేవతలే మెచ్చుకున్నారు.',
+    storyEn: "Shravana Kumar carried his blind parents in baskets on his shoulders, taking them on pilgrimages across the land.\n\nIn the summer heat, in rain, in cold — no matter what hardship came, he never stopped carrying his parents. He gave them water, food, and told them stories to keep them happy.\n\nEven in his last moments, he said \"Please give water to my parents.\" The gods themselves praised his devotion.",
+    moral: 'తల్లిదండ్రుల సేవ అన్నింటికంటే గొప్పది. మాతృదేవో భవ, పితృదేవో భవ.',
+    moralEn: 'Serving parents is the greatest duty. Mother and Father are like God.',
+  },
+  {
+    id: 6, title: 'కృష్ణుడు - గోవర్ధన గిరి', english: 'Krishna Lifts Govardhana',
+    source: 'P', icon: 'terrain', color: '#4A1A6B', image: IMAGES.krishna,
+    story: 'బృందావనంలో ప్రతి సంవత్సరం ఇంద్రుని పూజ చేసేవారు. కానీ చిన్న కృష్ణుడు "గోవర్ధన పర్వతాన్ని పూజించండి, అది మన గోవులకు గడ్డి, నీరు ఇస్తుంది" అన్నాడు.\n\nఇంద్రుడు కోపంతో ఏడు రోజులు భారీ వర్షం కురిపించాడు. కృష్ణుడు తన చిటికెన వేలిమీద గోవర్ధన పర్వతాన్ని ఎత్తి గొడుగులా పట్టుకున్నాడు. గోపాలురందరూ అడుగున తలదాచుకున్నారు.\n\nచివరికి ఇంద్రుడు తన తప్పు తెలుసుకుని క్షమాపణ కోరాడు.',
+    storyEn: "In Vrindavan, people worshipped Indra every year. But young Krishna said, \"Worship Govardhana mountain instead — it gives grass and water to our cows.\"\n\nIndra, furious, poured heavy rain for seven days. Krishna lifted the entire Govardhana mountain on his little finger like an umbrella. All the villagers took shelter underneath.\n\nFinally, Indra realized his mistake and asked for forgiveness.",
+    moral: 'ధైర్యంతో నిలబడితే ఎంత పెద్ద కష్టమైనా తట్టుకోవచ్చు. అహంకారం ఓటమికి దారి తీస్తుంది.',
+    moralEn: 'With courage and faith, you can withstand even the greatest challenges. Arrogance leads to defeat.',
+  },
+  {
+    id: 7, title: 'హరిశ్చంద్రుని సత్యం', english: "Harishchandra's Truth",
+    source: 'P', icon: 'scale-balance', color: '#D4A017', image: IMAGES.surya,
+    story: 'హరిశ్చంద్రుడు సత్యం చెప్పే రాజు. విశ్వామిత్ర మహర్షి ఆయనను పరీక్షించాడు. రాజ్యం, సంపద, కుటుంబం అన్నీ కోల్పోయాడు.\n\nచివరికి శ్మశానంలో కాపలాదారుగా పని చేశాడు. తన భార్య, కుమారుడు కూడా బానిసలయ్యారు. కానీ ఒక్క అబద్ధం కూడా చెప్పలేదు.\n\nచివరికి దేవతలు ప్రత్యక్షమై "నిజమైన ధర్మమూర్తి" అని కీర్తించారు. అన్నీ తిరిగి ఇచ్చారు.',
+    storyEn: "Harishchandra was a king who always spoke the truth. Sage Vishwamitra tested him. He lost his kingdom, wealth, and family.\n\nHe ended up working as a guard at a cremation ground. His wife and son became servants. But he never told a single lie.\n\nFinally, the gods appeared and praised him as \"the true embodiment of Dharma\" and restored everything.",
+    moral: 'ఎంత కష్టమైనా సత్యాన్ని వదలకూడదు. సత్యమేవ జయతే.',
+    moralEn: 'Never abandon truth, no matter how difficult. Truth alone triumphs — Satyameva Jayate.',
+  },
+  {
+    id: 8, title: 'గజేంద్ర మోక్షం', english: 'The Elephant King Saved',
+    source: 'P', icon: 'elephant', color: '#4A90D9', image: IMAGES.venkateswara,
+    story: 'ఒక అడవిలో గజేంద్రుడు అనే ఏనుగుల రాజు ఉండేవాడు. ఒకరోజు సరస్సులో నీళ్ళు తాగుతుండగా ఒక మొసలి ఆయన కాలు పట్టుకుంది.\n\nగజేంద్రుడు వేయి సంవత్సరాలు పోరాడాడు. శక్తి తగ్గిపోయింది. చివరికి తామర పువ్వును ఎత్తి "ఆదిమూలమా! నన్ను రక్షించు!" అని విష్ణువును ప్రార్థించాడు.\n\nవిష్ణువు గరుడుని మీద వెంటనే వచ్చి సుదర్శన చక్రంతో మొసలిని సంహరించి గజేంద్రుని రక్షించాడు.',
+    storyEn: "In a forest lived Gajendra, the king of elephants. One day while drinking water from a lake, a crocodile caught his leg.\n\nGajendra struggled for a thousand years. His strength faded. Finally, he lifted a lotus flower and prayed, \"O Supreme Lord! Save me!\"\n\nLord Vishnu immediately came on Garuda and destroyed the crocodile with his Sudarshana Chakra, saving Gajendra.",
+    moral: 'కష్టమైన సమయంలో దేవుడిని నిజాయితీగా ప్రార్థిస్తే ఆయన తప్పక వస్తాడు.',
+    moralEn: 'When you sincerely call upon God in difficult times, He will surely come to your rescue.',
+  },
+  {
+    id: 9, title: 'వామనుడు - మూడు అడుగులు', english: "Vamana's Three Steps",
+    source: 'P', icon: 'foot-print', color: '#E8751A', image: IMAGES.venkateswara,
+    story: 'బలి చక్రవర్తి చాలా గొప్ప రాజు, కానీ అహంకారం ఎక్కువ. మూడు లోకాలనూ జయించాడు. విష్ణువు వామనుడు అనే చిన్న బ్రాహ్మణ బాలుడి రూపంలో వచ్చాడు.\n\n"మూడు అడుగుల భూమి దానం ఇవ్వు" అని అడిగాడు. బలి నవ్వి "తీసుకో" అన్నాడు.\n\nవామనుడు విశ్వరూపం ధరించాడు! ఒక అడుగుతో భూమి, రెండో అడుగుతో ఆకాశం కొలిచాడు. "మూడో అడుగు ఎక్కడ?" అని అడిగాడు. బలి తన తలపై పెట్టమన్నాడు.',
+    storyEn: "Emperor Bali was a great king but very proud. He conquered all three worlds. Lord Vishnu came as Vamana, a small Brahmin boy.\n\n\"Give me just three steps of land,\" Vamana asked. Bali laughed and said, \"Take it.\"\n\nVamana grew to cosmic size! With one step he covered the Earth, with the second the sky. \"Where shall I place the third?\" he asked. Bali humbly offered his own head.",
+    moral: 'అహంకారం వినాశనానికి దారి. వినయం ఉంటే దేవుడు కూడా మెచ్చుకుంటాడు.',
+    moralEn: 'Pride leads to downfall. Humility is appreciated even by God.',
+  },
+  {
+    id: 10, title: 'సముద్ర మథనం', english: 'Churning of the Ocean',
+    source: 'P', icon: 'waves', color: '#4A90D9', image: IMAGES.shiva,
+    story: 'దేవతలు, రాక్షసులు కలిసి అమృతం కోసం సముద్రాన్ని మథించారు. మందర పర్వతాన్ని కవ్వంగా, వాసుకిని తాడుగా వాడారు.\n\nమొదట హాలాహలం అనే భయంకర విషం వచ్చింది. లోకాలు భయపడ్డాయి. శివుడు ఆ విషాన్ని తాగి గొంతులో నిలుపుకున్నాడు — అందుకే నీలకంఠుడు అయ్యాడు!\n\nతర్వాత లక్ష్మీదేవి, ఐరావతం, కామధేనువు, చివరికి అమృతం వచ్చాయి. విష్ణువు మోహినీ రూపంలో అమృతాన్ని దేవతలకు ఇచ్చాడు.',
+    storyEn: "The gods and demons churned the ocean together to obtain the nectar of immortality. They used Mount Mandara as the churning rod and Vasuki the serpent as the rope.\n\nFirst came Halahala, a terrible poison that frightened all worlds. Lord Shiva drank the poison and held it in his throat — that's why he's called Neelakantha (blue-throated)!\n\nThen came Goddess Lakshmi, Airavata the elephant, Kamadhenu the wish-fulfilling cow, and finally the nectar. Vishnu as Mohini distributed it to the gods.",
+    moral: 'కష్టపడితే మంచి ఫలితాలు వస్తాయి. ఇతరుల కోసం త్యాగం చేయడం గొప్పతనం.',
+    moralEn: 'Hard work brings good results. Sacrificing for others is true greatness.',
+  },
+  {
+    id: 11, title: 'నరసింహ అవతారం', english: 'Lord Narasimha Appears',
+    source: 'P', icon: 'shield-star', color: '#C55A11', image: IMAGES.venkateswara,
+    story: 'హిరణ్యకశిపుడు బ్రహ్మ వరం పొందాడు — "నేను మనిషి చేతిలో చావను, జంతువు చేతిలో చావను, పగలు చావను, రాత్రి చావను, లోపల చావను, బయట చావను."\n\nదీనితో అహంకారం పెరిగి "నేనే దేవుడిని" అన్నాడు. కుమారుడు ప్రహ్లాదుడు "విష్ణువు అంతటా ఉన్నాడు" అన్నాడు.\n\n"ఈ స్తంభంలో ఉన్నాడా?" అని స్తంభాన్ని కొట్టాడు. స్తంభం నుండి నరసింహుడు — సగం మనిషి, సగం సింహం — సంధ్యా సమయంలో, గడపమీద, తొడమీద పెట్టి సంహరించాడు!',
+    storyEn: "Hiranyakashipu obtained a boon from Brahma — \"I cannot be killed by man or animal, not during day or night, not inside or outside.\"\n\nWith this power he became arrogant and declared, \"I am God!\" His son Prahlada said, \"Vishnu is everywhere.\"\n\n\"Is He in this pillar?\" he struck the pillar. Lord Narasimha — half-man, half-lion — emerged at twilight, on the threshold, and placed him on his lap, fulfilling every condition of the boon!",
+    moral: 'ఎంత శక్తిమంతుడైనా ధర్మం ముందు నిలబడలేడు. దేవుడు తన భక్తులను ఎల్లప్పుడూ కాపాడతాడు.',
+    moralEn: 'No power can stand before righteousness. God always protects His devotees.',
+  },
+  {
+    id: 12, title: 'కృష్ణుడు - కాళీయ మర్దనం', english: 'Krishna Tames Kaliya',
+    source: 'P', icon: 'snake', color: '#2E7D32', image: IMAGES.krishna,
+    story: 'యమునా నదిలో కాళీయుడు అనే భయంకర సర్పం ఉండేది. దాని విషం నదిని కలుషితం చేసింది. చేపలు, పశువులు చనిపోయాయి.\n\nచిన్న కృష్ణుడు యమునలోకి దూకాడు! కాళీయుడు తన పడగలతో కృష్ణుడిని చుట్టుకున్నాడు. కానీ కృష్ణుడు కాళీయుని పడగలపై నాట్యం చేశాడు!\n\nచివరికి కాళీయుడు లొంగిపోయి "నన్ను క్షమించు" అన్నాడు. కృష్ణుడు "సముద్రానికి వెళ్ళు, ఇక ఎవరినీ బాధపెట్టకు" అని పంపాడు.',
+    storyEn: "In the Yamuna river lived Kaliya, a terrifying serpent. Its poison polluted the river. Fish and cattle died.\n\nYoung Krishna jumped into the Yamuna! Kaliya coiled around Krishna with his hoods. But Krishna danced on Kaliya's hoods!\n\nFinally Kaliya surrendered and said, \"Forgive me.\" Krishna said, \"Go to the ocean and never harm anyone again.\"",
+    moral: 'దుష్టశక్తిని ధైర్యంగా ఎదుర్కోవాలి. క్షమించడం గొప్ప లక్షణం.',
+    moralEn: 'Face evil with courage. Forgiveness is a noble quality.',
+  },
+  {
+    id: 13, title: 'భక్త మార్కండేయుడు', english: "Markandeya's Devotion to Shiva",
+    source: 'P', icon: 'om', color: '#4A1A6B', image: IMAGES.shiva,
+    story: 'మార్కండేయుడికి 16 సంవత్సరాల ఆయుర్దాయం మాత్రమే ఉంది. ఆయన చిన్నతనం నుండే శివ భక్తుడు.\n\n16వ సంవత్సరం వచ్చింది. యముడు పాశం వేయడానికి వచ్చాడు. మార్కండేయుడు శివలింగాన్ని గట్టిగా పట్టుకున్నాడు.\n\nయముడు పాశం వేయగా, శివుడు ప్రత్యక్షమై యముడిని తన్నాడు! "నా భక్తుడిని ముట్టుకోకు!" అన్నాడు. మార్కండేయునికి చిరంజీవిత్వం ఇచ్చాడు.',
+    storyEn: "Markandeya was destined to live only 16 years. From childhood, he was devoted to Lord Shiva.\n\nThe 16th year arrived. Yama, the god of death, came with his noose. Markandeya held onto the Shiva Lingam tightly.\n\nWhen Yama cast his noose, Lord Shiva appeared and kicked Yama away! \"Do not touch my devotee!\" he declared. He granted Markandeya eternal life.",
+    moral: 'భక్తి మరణాన్ని కూడా జయిస్తుంది. దేవుడిపై నమ్మకం ఉంచండి.',
+    moralEn: 'Devotion can conquer even death. Have faith in God.',
+  },
+  {
+    id: 14, title: 'మత్స్యావతారం', english: 'The Fish That Saved the World',
+    source: 'P', icon: 'fish', color: '#4A90D9', image: IMAGES.venkateswara,
+    story: 'ఒకరోజు మనువు అనే రాజు నదిలో చేతులు కడుగుతున్నాడు. ఒక చిన్న చేప "నన్ను కాపాడు" అని అడిగింది.\n\nమనువు చేపను కుండలో పెట్టాడు. చేప పెరిగిపోయింది! చెరువులో పెట్టాడు, అక్కడా పెరిగింది. సముద్రంలో పెట్టాడు, అక్కడా పెరిగింది!\n\nచేప విష్ణువు అని తెలిసింది. "ఏడు రోజుల్లో ప్రళయం వస్తుంది. ఒక పెద్ద నావ కట్టు, అన్ని విత్తనాలు, జంతువులను రక్షించు" అని చెప్పాడు.\n\nమనువు అలాగే చేసి ప్రపంచాన్ని రక్షించాడు!',
+    storyEn: "One day King Manu was washing his hands in a river. A tiny fish said, \"Please save me.\"\n\nManu placed the fish in a pot. It grew bigger! He put it in a pond, then a lake, then the ocean — it kept growing!\n\nThe fish revealed itself as Lord Vishnu. \"A great flood is coming in seven days. Build a large boat and save all seeds and animals,\" He said.\n\nManu did exactly that and saved the world!",
+    moral: 'చిన్న ప్రాణులను కూడా దయతో చూడాలి. మంచి చేస్తే మంచి జరుగుతుంది.',
+    moralEn: 'Be kind even to the smallest creatures. Good deeds bring good results.',
+  },
+  {
+    id: 15, title: 'కృష్ణుడు - చిలుక వృక్షం', english: 'Krishna and the Butter',
+    source: 'P', icon: 'pot-mix', color: '#E8751A', image: IMAGES.krishna,
+    story: 'చిన్న కృష్ణుడు వెన్న చాలా ఇష్టంగా తినేవాడు. యశోద అమ్మ కుండలో వెన్నను ఎత్తులో పెట్టేది.\n\nకృష్ణుడు తన స్నేహితులతో కలిసి ఒకరి భుజాలపై ఒకరు ఎక్కి వెన్న కుండలు చేరుకునేవాడు! ఇరుగుపొరుగు వారి ఇళ్ళలో కూడా వెన్న దొంగతనం చేసేవాడు.\n\nగోపికలు యశోద దగ్గరికి వచ్చి ఫిర్యాదు చేసేవారు. కానీ కృష్ణుడి ముద్దు మొహం చూసి ఎవరూ కోపంగా ఉండలేకపోయారు!',
+    storyEn: "Little Krishna loved eating butter. Mother Yashoda would hang the butter pots high up.\n\nKrishna and his friends would climb on each other's shoulders to reach the butter pots! He would even steal butter from the neighbors' houses.\n\nThe gopis would come to Yashoda to complain. But seeing Krishna's adorable face, nobody could stay angry!",
+    moral: 'పిల్లల అల్లరి వెనుక ప్రేమ ఉంటుంది. ప్రేమతో చేసే పనులు అందరికీ ఆనందం ఇస్తాయి.',
+    moralEn: "Behind children's mischief is love. Things done with love bring joy to everyone.",
+  },
+
+  // ─── UPANISHADS & VEDAS (16–25) ────────────────────────────────────
+  {
+    id: 16, title: 'నచికేతుడు - యముడి పాఠాలు', english: "Nachiketa's Lessons from Yama",
+    source: 'U', icon: 'book-open-page-variant', color: '#D4A017', image: IMAGES.surya,
+    story: 'నచికేతుడు అనే చిన్న బాలుడు తండ్రి యజ్ఞంలో బలహీన గోవులను దానం చేయడం చూసి "నన్ను ఎవరికి దానం చేస్తావు?" అని అడిగాడు.\n\nకోపంగా తండ్రి "యముడికి!" అన్నాడు. నచికేతుడు నిజంగానే యమలోకం వెళ్ళాడు!\n\nయముడు లేడు, మూడు రోజులు వేచి ఉన్నాడు. యముడు తిరిగి వచ్చి "మూడు వరాలు కోరుకో" అన్నాడు.\n\nనచికేతుడు — తండ్రి క్షేమం, అగ్నివిద్య, ఆత్మ రహస్యం కోరాడు. యముడు ఆత్మ శాశ్వతం అని, శరీరం తాత్కాలికమని బోధించాడు.',
+    storyEn: "Young Nachiketa saw his father donating weak cows in a ritual and asked, \"To whom will you give me?\"\n\nHis angry father said, \"To Yama!\" Nachiketa actually went to Yama's realm!\n\nYama was away, and Nachiketa waited three days. Impressed, Yama offered three boons.\n\nNachiketa asked for — his father's well-being, the knowledge of sacred fire, and the secret of the soul. Yama taught him that the soul is eternal and the body is temporary.",
+    moral: 'ధైర్యంగా ప్రశ్నలు అడగడం నేర్చుకోవడానికి మొదటి మెట్టు. జ్ఞానమే గొప్ప సంపద.',
+    moralEn: 'Asking questions courageously is the first step to learning. Knowledge is the greatest wealth.',
+  },
+  {
+    id: 17, title: 'సత్యకాముడు - నిజాయితీ బాలుడు', english: "Satyakama's Honesty",
+    source: 'U', icon: 'cow', color: '#2E7D32', image: IMAGES.surya,
+    story: 'సత్యకామ జాబాలుడు గురుకులంలో చేరాలనుకున్నాడు. గురువు "నీ తండ్రి ఎవరు? నీ గోత్రం ఏమిటి?" అని అడిగాడు.\n\nసత్యకాముడు "నాకు తెలియదు. నా తల్లి చెప్పింది — \'చాలా మంది దగ్గర పని చేశాను, నీ తండ్రి ఎవరో నాకూ తెలియదు\' అని" నిజాయితీగా చెప్పాడు.\n\nగురువు గౌతముడు చాలా సంతోషించాడు. "ఇంత నిజం చెప్పగలిగేవాడు బ్రాహ్మణుడే! నిన్ను శిష్యునిగా స్వీకరిస్తాను" అన్నాడు.',
+    storyEn: "Satyakama Jabala wanted to join a gurukul. The teacher asked, \"Who is your father? What is your lineage?\"\n\nSatyakama honestly said, \"I don't know. My mother told me — 'I worked for many people and I don't know who your father is.'\"\n\nTeacher Gautama was very pleased. \"Only a true Brahmin can speak such truth! I accept you as my student,\" he said.",
+    moral: 'నిజం చెప్పడం ఎప్పుడూ గొప్ప. నిజాయితీ మనిషిని గౌరవప్రదంగా చేస్తుంది.',
+    moralEn: 'Truth-telling is always noble. Honesty makes a person truly respectable.',
+  },
+  {
+    id: 18, title: 'ఉపకోసలుడు - అగ్ని బోధ', english: "Upakosala Learns from Fire",
+    source: 'U', icon: 'fire', color: '#C55A11', image: IMAGES.surya,
+    story: 'ఉపకోసలుడు 12 సంవత్సరాలు గురుకులంలో సేవ చేశాడు. కానీ గురువు అతనికి జ్ఞానం బోధించకుండా వెళ్ళిపోయాడు.\n\nఉపకోసలుడు బాధపడి ఆహారం మానేశాడు. అప్పుడు యజ్ఞాగ్నులు — గార్హపత్యం, ఆహవనీయం, దక్షిణాగ్ని — మాట్లాడాయి!\n\n"నీ సేవకు మెచ్చి మేము నీకు బ్రహ్మ జ్ఞానం బోధిస్తాము" అని చెప్పాయి. ప్రాణం, సూర్యుడు, చంద్రుడు — అన్నింటిలో బ్రహ్మం ఉందని నేర్పించాయి.',
+    storyEn: "Upakosala served in the gurukul for 12 years. But his teacher left without teaching him knowledge.\n\nUpakosala was so sad he stopped eating. Then the three sacred fires — Garhapatya, Ahavaniya, and Dakshinagni — spoke to him!\n\n\"We are pleased with your service and will teach you about Brahman,\" they said. They taught him that Brahman exists in everything — in breath, the sun, the moon.",
+    moral: 'నిష్ఠగా సేవ చేస్తే జ్ఞానం దానంతట అదే వస్తుంది. ఓర్పు ఫలిస్తుంది.',
+    moralEn: 'Sincere service leads to knowledge naturally. Patience always bears fruit.',
+  },
+  {
+    id: 19, title: 'శ్వేతకేతువు - "తత్ త్వమ్ అసి"', english: 'Shvetaketu — "You Are That"',
+    source: 'U', icon: 'tree', color: '#2E7D32', image: IMAGES.surya,
+    story: 'శ్వేతకేతువు 12 సంవత్సరాలు చదువుకుని గర్వంగా ఇంటికి వచ్చాడు. తండ్రి ఉద్దాలకుడు "ఆత్మ గురించి తెలుసా?" అని అడిగాడు.\n\n"ఒక మట్టి ముద్ద తెలిస్తే, దాని నుండి చేసిన అన్ని కుండలు తెలుస్తాయి." తండ్రి నీటిలో ఉప్పు కరిగించి చెప్పాడు — "ఉప్పు కనిపించడం లేదు, కానీ రుచి చూడు — అంతటా ఉంది!"\n\n"అలాగే దేవుడు కనిపించడు, కానీ అన్నింటిలో ఉన్నాడు. తత్ త్వమ్ అసి — నీవే అది!" అని బోధించాడు.',
+    storyEn: "Shvetaketu returned home after 12 years of study, full of pride. His father Uddalaka asked, \"Do you know about the Self?\"\n\n\"If you know one lump of clay, you know all pots made from it.\" The father dissolved salt in water and said — \"You can't see the salt, but taste it — it's everywhere!\"\n\n\"Similarly, God is invisible but exists in everything. Tat Tvam Asi — You Are That!\" he taught.",
+    moral: 'నిజమైన జ్ఞానం గర్వాన్ని తగ్గిస్తుంది. దేవుడు అన్నింటిలో, అందరిలో ఉన్నాడు.',
+    moralEn: 'True knowledge reduces pride. God exists in everything and everyone.',
+  },
+  {
+    id: 20, title: 'భృగువు - ఆనందం వెతుకుట', english: "Bhrigu's Search for Bliss",
+    source: 'U', icon: 'meditation', color: '#4A1A6B', image: IMAGES.shiva,
+    story: 'భృగువు తండ్రి వరుణుని దగ్గరికి వెళ్ళి "బ్రహ్మం ఏమిటి?" అని అడిగాడు.\n\nవరుణుడు "తపస్సు చేసి కనుగొను" అన్నాడు. భృగువు తపస్సు చేసి — ముందు "అన్నమే బ్రహ్మం" అనుకున్నాడు.\n\nమళ్ళీ తపస్సు — "ప్రాణమే బ్రహ్మం." మళ్ళీ — "మనసే బ్రహ్మం." మళ్ళీ — "విజ్ఞానమే బ్రహ్మం."\n\nచివరికి — "ఆనందమే బ్రహ్మం!" అని కనుగొన్నాడు. ఆనందం నుండే అన్నీ పుట్టాయి, ఆనందంలోనే కలుస్తాయి.',
+    storyEn: "Bhrigu went to his father Varuna and asked, \"What is Brahman?\"\n\nVaruna said, \"Find out through meditation.\" Bhrigu meditated and first thought — \"Food is Brahman.\"\n\nAgain he meditated — \"Breath is Brahman.\" Again — \"Mind is Brahman.\" Again — \"Knowledge is Brahman.\"\n\nFinally — \"Bliss is Brahman!\" he discovered. From bliss everything is born, and into bliss everything returns.",
+    moral: 'నిజమైన సమాధానం లోపల ఉంటుంది. ఓర్పుతో వెతికితే సత్యం దొరుకుతుంది.',
+    moralEn: 'True answers lie within. With patience and perseverance, truth can be found.',
+  },
+  {
+    id: 21, title: 'యాజ్ఞవల్క్యుడు - మైత్రేయి', english: 'Yajnavalkya & Maitreyi',
+    source: 'U', icon: 'heart-multiple', color: '#C41E3A', image: IMAGES.surya,
+    story: 'యాజ్ఞవల్క్యుడు సన్యాసం తీసుకోబోతున్నాడు. భార్య మైత్రేయికి ఆస్తి పంచి ఇస్తానన్నాడు.\n\nమైత్రేయి అడిగింది — "ఈ ఆస్తితో నాకు అమరత్వం వస్తుందా?"\n\n"రాదు" అన్నాడు యాజ్ఞవల్క్యుడు.\n\n"అయితే నాకు ఆస్తి వద్దు. జ్ఞానం చెప్పు!" అంది మైత్రేయి.\n\nయాజ్ఞవల్క్యుడు ఆత్మ జ్ఞానం బోధించాడు — "భర్త కోసం భర్తను ప్రేమించరు, ఆత్మ కోసం ప్రేమిస్తారు. ఆత్మను తెలుసుకుంటే అన్నీ తెలుస్తాయి."',
+    storyEn: "Yajnavalkya was about to become a monk. He offered to divide his wealth between his wives.\n\nMaitreyi asked, \"Will this wealth make me immortal?\"\n\n\"No,\" said Yajnavalkya.\n\n\"Then I don't want wealth. Teach me knowledge!\" said Maitreyi.\n\nYajnavalkya taught her about the Self — \"We don't love others for their sake, but for the sake of the Self within. Know the Self, and you know everything.\"",
+    moral: 'జ్ఞానం ధనం కంటే విలువైనది. నిజమైన ప్రేమ ఆత్మ స్థాయిలో ఉంటుంది.',
+    moralEn: 'Knowledge is more valuable than wealth. True love exists at the level of the soul.',
+  },
+  {
+    id: 22, title: 'సూర్యుని బోధన - గాయత్రీ మంత్రం', english: 'The Power of Gayatri Mantra',
+    source: 'U', icon: 'white-balance-sunny', color: '#D4A017', image: IMAGES.surya,
+    story: 'విశ్వామిత్ర మహర్షి రాజు నుండి ఋషిగా మారాలనుకున్నాడు. వేల సంవత్సరాలు తపస్సు చేశాడు.\n\nసూర్య భగవానుడు ప్రత్యక్షమై గాయత్రీ మంత్రం బోధించాడు — "ఓం భూర్భువస్సువః, తత్సవితుర్వరేణ్యం, భర్గో దేవస్య ధీమహి, ధియో యో నః ప్రచోదయాత్."\n\n"ఈ మంత్రం బుద్ధిని ప్రకాశింపజేస్తుంది. ప్రతి రోజు సూర్యోదయంలో చెప్పు" అని చెప్పాడు.\n\nవిశ్వామిత్రుడు బ్రహ్మర్షి అయ్యాడు!',
+    storyEn: "Sage Vishwamitra wanted to transform from a king to a sage. He meditated for thousands of years.\n\nThe Sun God appeared and taught him the Gayatri Mantra — \"Om Bhur Bhuvah Svah, Tat Savitur Varenyam, Bhargo Devasya Dhimahi, Dhiyo Yo Nah Prachodayat.\"\n\n\"This mantra illuminates the intellect. Chant it every morning at sunrise,\" He said.\n\nVishwamitra became a Brahmarishi — the highest sage!",
+    moral: 'రోజూ ప్రార్థన చేస్తే బుద్ధి, శక్తి పెరుగుతాయి. పట్టుదల అన్నీ సాధిస్తుంది.',
+    moralEn: 'Daily prayer increases wisdom and strength. Perseverance achieves everything.',
+  },
+  {
+    id: 23, title: 'ఏకలవ్యుడు - గురుభక్తి', english: "Ekalavya's Dedication",
+    source: 'U', icon: 'bow-arrow', color: '#C55A11', image: IMAGES.rama,
+    story: 'ఏకలవ్యుడు ద్రోణాచార్యుల వద్ద విలువిద్య నేర్చుకోవాలనుకున్నాడు. కానీ ద్రోణుడు "నువ్వు రాజకుమారుడవు కాదు" అని తిరస్కరించాడు.\n\nఏకలవ్యుడు అడవికి వెళ్ళి ద్రోణుని మట్టి విగ్రహం చేసి, దాని ముందు రోజూ సాధన చేశాడు. అర్జునుడి కంటే గొప్ప విలుకాడు అయ్యాడు!\n\nఒక కుక్క మొరగకుండా దాని నోట్లో బాణాలు వేసి నిశ్శబ్దం చేశాడు — ఎవరికీ హాని కలగకుండా! ద్రోణుడు ఆశ్చర్యపోయాడు.',
+    storyEn: "Ekalavya wanted to learn archery from Dronacharya. But Drona refused, saying \"You are not a prince.\"\n\nEkalavya went to the forest, made a clay statue of Drona, and practiced before it every day. He became a greater archer than Arjuna!\n\nHe once silenced a barking dog by filling its mouth with arrows — without hurting it at all! Drona was astonished.",
+    moral: 'నిజమైన శిష్యుడికి గురువు నిరాకరించినా సాధన ఆపడు. ఆత్మవిశ్వాసంతో సాధించవచ్చు.',
+    moralEn: "A true student never stops practicing, even if rejected. Self-confidence achieves everything.",
+  },
+  {
+    id: 24, title: 'సావిత్రి - యముడిని గెలిచింది', english: 'Savitri Defeats Death',
+    source: 'U', icon: 'shield-star', color: '#C41E3A', image: IMAGES.lakshmi,
+    story: 'సావిత్రి భర్త సత్యవంతుడికి ఒక సంవత్సరం ఆయుర్దాయం మాత్రమే. అయినా ఆమె అతనినే వివాహం చేసుకుంది.\n\nఆ రోజు వచ్చింది. యముడు సత్యవంతుని ప్రాణాలు తీశాడు. సావిత్రి యముడి వెనుక నడిచింది.\n\n"వెనుదిరుగు" అన్నాడు యముడు. కానీ సావిత్రి తెలివిగా వరాలు కోరింది — చివరి వరంగా "నాకు పిల్లలు కావాలి" అని కోరింది.\n\nభర్త లేకుండా పిల్లలు ఎలా? యముడు సత్యవంతుడిని బతికించవలసి వచ్చింది!',
+    storyEn: "Savitri's husband Satyavan was destined to die within a year. Yet she chose to marry him.\n\nThe day came. Yama took Satyavan's life. Savitri followed Yama.\n\n\"Turn back,\" said Yama. But Savitri cleverly asked for boons — as the final boon, she asked for \"children.\"\n\nHow could she have children without her husband? Yama had to bring Satyavan back to life!",
+    moral: 'ప్రేమ, తెలివి కలిస్తే మరణాన్ని కూడా గెలవచ్చు.',
+    moralEn: 'When love meets wisdom, even death can be conquered.',
+  },
+  {
+    id: 25, title: 'అరుణి - గురు ఆజ్ఞ', english: "Aruni's Obedience to Guru",
+    source: 'U', icon: 'water', color: '#4A90D9', image: IMAGES.surya,
+    story: 'ఆరుణి గురుకులంలో చదువుకునేవాడు. ఒక రాత్రి భారీ వర్షంలో పొలంలో గట్టు తెగిపోయింది. గురువు "నీళ్ళు ఆపు" అని చెప్పాడు.\n\nఆరుణి వెళ్ళి చూశాడు — గట్టు పెద్దగా తెగిపోయింది. రాళ్ళు, మట్టి ఏమీ పనికిరాలేదు. అప్పుడు ఆరుణి తానే పడుకుని శరీరంతో గట్టును ఆపాడు!\n\nరాత్రంతా చలిలో, నీటిలో పడుకున్నాడు. గురువు తెల్లవారుజామున వెతుక్కుంటూ వచ్చి చూసి కన్నీళ్ళతో ఆలింగనం చేసుకున్నాడు.',
+    storyEn: "Aruni was a student in a gurukul. One rainy night, the field embankment broke. The guru said, \"Stop the water.\"\n\nAruni went and saw the breach was too large. Stones and mud didn't work. So Aruni lay down and used his own body to block the water!\n\nHe lay in the cold water all night. At dawn, the guru came searching and, finding him, embraced him with tears.",
+    moral: 'గురువు మాట పాటించడం గొప్ప విద్య. నిబద్ధత విజయానికి మూలం.',
+    moralEn: "Obeying your teacher is the greatest learning. Commitment is the foundation of success.",
+  },
+
+  // ─── PANCHATANTRA (26–40) ──────────────────────────────────────────
+  {
+    id: 26, title: 'కాకి - నక్క కథ', english: 'The Crow and the Fox',
+    source: 'T', icon: 'bird', color: '#E8751A', image: IMAGES.ganesha,
+    story: 'ఒక కాకి చెట్టు మీద కూర్చుని రొట్టె ముక్క తింటున్నది. ఒక నక్క వచ్చి చూసింది.\n\n"కాకి గారూ! మీ గొంతు ఎంత బాగుంటుందో! ఒక్కసారి పాట పాడండి" అని పొగిడింది.\n\nకాకి గర్వంగా నోరు తెరిచి "కా!" అని అరిచింది. రొట్టె ముక్క కిందపడింది! నక్క తీసుకుని పారిపోయింది.\n\nకాకి బాధపడింది — "పొగడ్తలకు మోసపోయాను!"',
+    storyEn: "A crow sat on a tree eating a piece of bread. A fox came by and noticed.\n\n\"Dear Crow! Your voice is so beautiful! Please sing a song for me,\" the fox flattered.\n\nThe crow proudly opened its mouth and cawed — \"Kaa!\" The bread fell down! The fox grabbed it and ran away.\n\nThe crow was sad — \"I was fooled by flattery!\"",
+    moral: 'పొగడ్తలకు మోసపోకూడదు. తెలివిగా ఆలోచించాలి.',
+    moralEn: "Don't be fooled by flattery. Think wisely before acting.",
+  },
+  {
+    id: 27, title: 'తాబేలు - కుందేలు పందెం', english: 'The Tortoise and the Hare',
+    source: 'T', icon: 'tortoise', color: '#2E7D32', image: IMAGES.ganesha,
+    story: 'కుందేలు చాలా వేగంగా పరుగెత్తేది. తాబేలును చూసి "నువ్వు ఎంత నెమ్మదిగా ఉన్నావు! నాతో పందెం వేయగలవా?" అని ఎగతాళి చేసింది.\n\nతాబేలు ఒప్పుకుంది. పందెం మొదలైంది. కుందేలు ముందు పరుగెత్తి "తాబేలు ఇంకా దూరంలో ఉంది, కొంచెం నిద్రపోతాను" అని చెట్టు కింద పడుకుంది.\n\nతాబేలు ఆగకుండా నడుస్తూనే ఉంది. కుందేలు నిద్ర లేచేసరికి తాబేలు గమ్యం చేరుకుంది!\n\nకుందేలు సిగ్గుపడింది.',
+    storyEn: "The hare was very fast. Seeing the tortoise, it mocked, \"You are so slow! Can you race me?\"\n\nThe tortoise agreed. The race began. The hare ran ahead and thought, \"The tortoise is far behind, I'll take a nap\" and slept under a tree.\n\nThe tortoise kept walking without stopping. By the time the hare woke up, the tortoise had reached the finish line!\n\nThe hare was ashamed.",
+    moral: 'నెమ్మదిగా, స్థిరంగా పని చేస్తే విజయం సాధించవచ్చు. అతి నమ్మకం ఓటమికి దారి.',
+    moralEn: 'Slow and steady wins the race. Overconfidence leads to failure.',
+  },
+  {
+    id: 28, title: 'నలుగురు మిత్రులు - సింహం', english: 'Four Friends and the Lion',
+    source: 'T', icon: 'paw', color: '#C55A11', image: IMAGES.ganesha,
+    story: 'నలుగురు బ్రాహ్మణ మిత్రులు ఉన్నారు. ముగ్గురు గొప్ప విద్యావంతులు, నాలుగోవాడు సామాన్యుడు కానీ బుద్ధిమంతుడు.\n\nఅడవిలో సింహం ఎముకలు దొరికాయి. మొదటివాడు "ఎముకలు జోడించగలను" అన్నాడు — జోడించాడు. రెండోవాడు "మాంసం, చర్మం పెట్టగలను" — పెట్టాడు. మూడోవాడు "ప్రాణం పోయగలను" అన్నాడు.\n\nనాలుగోవాడు "ఆగండి! సింహం బతికితే మనల్ని తినేస్తుంది!" అన్నాడు. కానీ ఎవరూ వినలేదు. బుద్ధిమంతుడు చెట్టెక్కాడు. సింహం బతికి మిగతా ముగ్గురిని తినేసింది.',
+    storyEn: "Four Brahmin friends — three were highly learned, the fourth was ordinary but wise.\n\nIn a forest they found a lion's bones. The first said, \"I can assemble the skeleton\" — and did. The second said, \"I can add flesh and skin\" — and did. The third said, \"I can bring it to life.\"\n\nThe fourth said, \"Stop! If the lion comes alive, it will eat us!\" No one listened. The wise one climbed a tree. The lion came alive and ate the other three.",
+    moral: 'పుస్తక జ్ఞానం కంటే వ్యవహారిక జ్ఞానం ముఖ్యం. తెలివి లేకుండా విద్య ప్రమాదకరం.',
+    moralEn: 'Common sense is more important than book knowledge. Learning without wisdom is dangerous.',
+  },
+  {
+    id: 29, title: 'కోతి - మొసలి కథ', english: 'The Monkey and the Crocodile',
+    source: 'T', icon: 'fruit-cherries', color: '#C41E3A', image: IMAGES.ganesha,
+    story: 'నది ఒడ్డున ఒక కోతి చెట్టు మీద ఉండేది. రోజూ తీపి పండ్లు తినేది. నదిలో మొసలికి కూడా పండ్లు ఇచ్చేది.\n\nమొసలి భార్యకు ఆ పండ్లు చాలా ఇష్టం. ఒకరోజు "ఇంత తీపి పండ్లు తినే కోతి గుండె ఎంత తీపిగా ఉంటుందో! తీసుకురా" అని భర్తను పంపింది.\n\nమొసలి కోతిని తీసుకుని నదిలో వెళ్తున్నాడు. మధ్యలో నిజం చెప్పాడు. కోతి తెలివిగా "నా గుండె చెట్టు మీద పెట్టి వచ్చాను, వెనక్కి వెళ్దాం" అంది.\n\nచెట్టు దగ్గరికి చేరగానే కోతి ఎగిరి చెట్టు ఎక్కేసింది!',
+    storyEn: "A monkey lived on a tree by the river and ate sweet fruits. It shared fruits with a crocodile in the river daily.\n\nThe crocodile's wife loved the fruits. One day she said, \"The heart of a monkey that eats such sweet fruits must be even sweeter! Bring it to me.\"\n\nThe crocodile carried the monkey across the river and confessed midway. The clever monkey said, \"Oh! I left my heart on the tree. Let's go back.\"\n\nAs soon as they reached the tree, the monkey leaped up and was safe!",
+    moral: 'ఆపదలో తెలివిగా ఆలోచిస్తే బయటపడవచ్చు. నిజమైన స్నేహానికి ద్రోహం చేయకూడదు.',
+    moralEn: 'Quick thinking in danger can save you. Never betray true friendship.',
+  },
+  {
+    id: 30, title: 'ఎలుక - సింహం', english: 'The Mouse and the Lion',
+    source: 'T', icon: 'paw', color: '#D4A017', image: IMAGES.ganesha,
+    story: 'ఒక సింహం నిద్రపోతున్నది. ఒక చిన్న ఎలుక దాని మీద పారాడింది. సింహం మేల్కొని ఎలుకను పట్టుకుంది.\n\n"దయచేసి వదిలిపెట్టు! ఎప్పుడైనా నీకు సహాయం చేస్తాను" అంది ఎలుక. సింహం నవ్వి వదిలిపెట్టింది.\n\nకొన్ని రోజుల తర్వాత సింహం వేటగాడి వలలో చిక్కుకుంది. ఎలుక వచ్చి వలను కొరికి సింహాన్ని విడిపించింది!\n\nసింహం "చిన్నవాళ్ళను తక్కువ అంచనా వేయకూడదు" అని నేర్చుకుంది.',
+    storyEn: "A lion was sleeping. A tiny mouse ran over it. The lion woke up and caught the mouse.\n\n\"Please let me go! I'll help you someday,\" said the mouse. The lion laughed and released it.\n\nDays later, the lion got trapped in a hunter's net. The mouse came and gnawed through the ropes, freeing the lion!\n\nThe lion learned — \"Never underestimate the small.\"",
+    moral: 'చిన్నవారిని తక్కువ అంచనా వేయకూడదు. ఎవరైనా ఎప్పుడైనా సహాయం చేయగలరు.',
+    moralEn: 'Never underestimate anyone small. Even the littlest friend can help in big ways.',
+  },
+  {
+    id: 31, title: 'నీటిలో అద్దం - కుక్క కథ', english: 'The Dog and Its Reflection',
+    source: 'T', icon: 'dog', color: '#4A90D9', image: IMAGES.ganesha,
+    story: 'ఒక కుక్కకు ఒక మాంసం ముక్క దొరికింది. దానిని నోటికి కరుచుకుని వంతెన మీద నడుస్తున్నది.\n\nnనీటిలో తన ప్రతిబింబం చూసింది. "అరే! ఆ కుక్క దగ్గర కూడా మాంసం ముక్క ఉంది. దానిని కూడా లాక్కుంటాను" అనుకుంది.\n\nనోరు తెరిచి మొరగగానే తన మాంసం ముక్క నీటిలో పడిపోయింది! రెండూ పోయాయి.\n\nకుక్క బాధపడింది — "ఉన్నది కూడా పోగొట్టుకున్నాను!"',
+    storyEn: "A dog found a piece of meat. Carrying it in its mouth, it walked across a bridge.\n\nIt saw its reflection in the water. \"That dog also has meat! I'll grab that too,\" it thought.\n\nThe moment it opened its mouth to bark, its own meat fell into the water! It lost both.\n\nThe dog was sad — \"I lost what I already had!\"",
+    moral: 'ఉన్న దానితో సంతోషంగా ఉండాలి. అత్యాశ అన్నీ పోగొట్టిస్తుంది.',
+    moralEn: 'Be happy with what you have. Greed makes you lose everything.',
+  },
+  {
+    id: 32, title: 'పావురాలు - వేటగాడు', english: 'The Doves and the Net',
+    source: 'T', icon: 'bird', color: '#2E7D32', image: IMAGES.ganesha,
+    story: 'ఒక వేటగాడు అడవిలో వల పన్నాడు. పావురాల గుంపు ఆహారం చూసి వలలో చిక్కుకుంది.\n\nపావురాల రాజు చెప్పాడు — "ఒక్కొక్కరు విడిగా ఎగరాలని ప్రయత్నిస్తే విఫలం. అందరం కలిసి ఒకేసారి ఎగురుదాం!"\n\nఅన్ని పావురాలు కలిసి ఒకేసారి రెక్కలు కొట్టాయి! వలతో సహా ఎగిరిపోయాయి. ఎలుక స్నేహితుడి దగ్గరికి వెళ్ళి వలను కొరికించాయి.\n\nవేటగాడు ఆశ్చర్యంగా చూస్తూ ఉండిపోయాడు!',
+    storyEn: "A hunter spread a net in the forest. A flock of doves saw food and got trapped in the net.\n\nThe dove king said, \"If each tries to fly alone, we'll fail. Let's all fly together!\"\n\nAll the doves flapped their wings at once! They flew away carrying the entire net. They went to their mouse friend who gnawed through the net.\n\nThe hunter could only watch in amazement!",
+    moral: 'ఐక్యంగా ఉంటే ఏ కష్టాన్నైనా జయించవచ్చు. కలిసి ఉంటే కలదు సుఖం.',
+    moralEn: 'Unity can overcome any challenge. Together we are stronger.',
+  },
+  {
+    id: 33, title: 'జిత్తులమారి కుందేలు', english: 'The Clever Rabbit',
+    source: 'T', icon: 'rabbit', color: '#C55A11', image: IMAGES.ganesha,
+    story: 'అడవిలో ఒక క్రూర సింహం రోజూ ఒక జంతువును తినేది. జంతువులన్నీ భయపడ్డాయి.\n\nఒకరోజు కుందేలు వంతు వచ్చింది. కుందేలు ఆలస్యంగా వెళ్ళింది. "ఎందుకు ఆలస్యం?" గర్జించింది సింహం.\n\n"దారిలో మరో సింహం అడ్డుకుంది, అది ఈ అడవికి రాజు అని చెప్పింది" అంది కుందేలు.\n\nకోపంతో "ఎక్కడ ఆ సింహం?" అని అడిగింది. కుందేలు బావి దగ్గరికి తీసుకెళ్ళింది. సింహం నీటిలో తన ప్రతిబింబం చూసి గర్జించి, బావిలో దూకేసింది!',
+    storyEn: "In a forest, a cruel lion ate one animal every day. All animals were terrified.\n\nOne day, it was the rabbit's turn. The rabbit arrived late. \"Why are you late?\" the lion roared.\n\n\"Another lion blocked my path and claimed to be the king of this forest,\" said the rabbit.\n\nFurious, the lion demanded, \"Where is this lion?\" The rabbit led it to a well. The lion saw its own reflection, roared at it, and jumped in!",
+    moral: 'బలం కంటే బుద్ధి గొప్పది. తెలివిగా ఆలోచిస్తే బలవంతులను కూడా ఓడించవచ్చు.',
+    moralEn: 'Wisdom is greater than strength. Smart thinking can defeat even the powerful.',
+  },
+  {
+    id: 34, title: 'నక్క - ద్రాక్షలు', english: 'The Fox and the Grapes',
+    source: 'T', icon: 'fruit-grapes', color: '#4A1A6B', image: IMAGES.ganesha,
+    story: 'ఒక నక్కకు చాలా ఆకలి వేసింది. అడవిలో తిరుగుతూ ఒక చెట్టుమీద అందమైన ద్రాక్ష గుత్తులు చూసింది.\n\n"ఆహా! ఎంత రసంగా ఉంటాయో!" అని ఎగిరింది. అందలేదు. మళ్ళీ ఎగిరింది. మళ్ళీ, మళ్ళీ — ఎన్నిసార్లు ఎగిరినా అందలేదు.\n\nచివరికి విసుగు వచ్చి "ఆ ద్రాక్షలు పుల్లగా ఉంటాయి, నాకు వద్దు!" అని వెళ్ళిపోయింది.\n\nకానీ నిజానికి ద్రాక్షలు తీపిగా ఉన్నాయి!',
+    storyEn: "A fox was very hungry. While wandering in the forest, it saw beautiful bunches of grapes on a vine.\n\n\"Oh! How juicy they must be!\" it jumped. Couldn't reach. Jumped again. Again and again — no matter how many times, it couldn't reach.\n\nFinally, frustrated, it said, \"Those grapes must be sour anyway. I don't want them!\" and walked away.\n\nBut the grapes were actually sweet!",
+    moral: 'పొందలేని వస్తువును తక్కువ చేయడం తప్పు. ప్రయత్నం మానకూడదు.',
+    moralEn: "It's wrong to belittle what you cannot achieve. Never give up trying.",
+  },
+  {
+    id: 35, title: 'బంగారు గుడ్లు పెట్టే బాతు', english: 'The Goose That Laid Golden Eggs',
+    source: 'T', icon: 'egg', color: '#D4A017', image: IMAGES.lakshmi,
+    story: 'ఒక రైతు దగ్గర బంగారు గుడ్లు పెట్టే బాతు ఉంది. రోజూ ఒక బంగారు గుడ్డు పెట్టేది. రైతు రోజురోజుకూ ధనవంతుడయ్యాడు.\n\nకానీ అత్యాశ పెరిగింది. "రోజుకు ఒకటే గుడ్డు! బాతు లోపల ఎన్ని బంగారు గుడ్లు ఉన్నాయో! ఒకేసారి తీసుకుంటాను" అనుకున్నాడు.\n\nబాతును కోశాడు. లోపల ఒక్క గుడ్డు కూడా లేదు! బాతు కూడా పోయింది, బంగారు గుడ్లు కూడా పోయాయి.\n\nరైతు ఏడ్చాడు — "అత్యాశతో అన్నీ పోగొట్టుకున్నాను!"',
+    storyEn: "A farmer had a goose that laid golden eggs. Every day, one golden egg. The farmer became richer and richer.\n\nBut greed grew. \"Only one egg a day! How many golden eggs must be inside! I'll take them all at once,\" he thought.\n\nHe cut open the goose. Not a single egg inside! He lost both the goose and the golden eggs.\n\nThe farmer cried — \"Greed made me lose everything!\"",
+    moral: 'అత్యాశ సర్వనాశనం. ఉన్నదానితో సంతృప్తిగా ఉండాలి.',
+    moralEn: 'Greed leads to total loss. Be content with what you have.',
+  },
+  {
+    id: 36, title: 'ముగ్గురు చేపలు', english: 'The Three Fish',
+    source: 'T', icon: 'fish', color: '#4A90D9', image: IMAGES.ganesha,
+    story: 'ఒక చెరువులో ముగ్గురు చేపలు ఉన్నాయి. మొదటిది చాలా తెలివైనది, రెండోది సామాన్యం, మూడోది అజాగ్రత్తగా ఉండేది.\n\nవేటగాళ్ళు "రేపు ఈ చెరువులో చేపలు పట్టుదాం" అని మాట్లాడుకుంటూ విన్నాయి.\n\nమొదటి చేప వెంటనే నది ద్వారా వేరే చెరువుకు వెళ్ళిపోయింది. రెండో చేప "చూద్దాం" అని ఆగింది — వేటగాళ్ళు వచ్చినప్పుడు చచ్చినట్లు నటించి తప్పించుకుంది.\n\nమూడో చేప "ఏమీ కాదు" అని ఉండిపోయింది. వలలో చిక్కుకుంది!',
+    storyEn: "Three fish lived in a pond. The first was very wise, the second was average, and the third was careless.\n\nThey overheard fishermen say, \"Tomorrow we'll catch fish in this pond.\"\n\nThe first fish immediately escaped to another pond through a stream. The second fish waited — when the fishermen came, it played dead and escaped.\n\nThe third fish thought, \"Nothing will happen\" and stayed. It got caught in the net!",
+    moral: 'ముందుచూపు ఉంటే ఆపదలు రావు. ప్రమాదం గురించి విన్నప్పుడే ఆచరించాలి.',
+    moralEn: 'Foresight prevents danger. Act when you first learn of a threat.',
+  },
+  {
+    id: 37, title: 'బ్రాహ్మణుడు - మేక - దొంగలు', english: 'The Brahmin and the Three Thieves',
+    source: 'T', icon: 'skull-crossbones', color: '#C55A11', image: IMAGES.ganesha,
+    story: 'ఒక బ్రాహ్మణుడు యజ్ఞానికి మేకను తీసుకెళ్తున్నాడు. దారిలో ముగ్గురు దొంగలు చూశారు.\n\nమొదటివాడు "అయ్యా, మీరు కుక్కను ఎందుకు మోస్తున్నారు?" అన్నాడు. బ్రాహ్మణుడు "ఇది మేక!" అన్నాడు.\n\nకొంచెం దూరంలో రెండోవాడు "మీ భుజం మీద చచ్చిన దూడ ఉంది!" అన్నాడు. బ్రాహ్మణుడు అనుమానపడ్డాడు.\n\nమూడోవాడు "అయ్యో! మీరు గాడిదను మోస్తున్నారు!" అన్నాడు. బ్రాహ్మణుడు భయపడి మేకను వదిలేసి పారిపోయాడు. దొంగలు మేకను తీసుకెళ్ళారు.',
+    storyEn: "A Brahmin was carrying a goat to a ritual. Three thieves saw him on the way.\n\nThe first said, \"Sir, why are you carrying a dog?\" The Brahmin said, \"This is a goat!\"\n\nFurther on, the second said, \"There's a dead calf on your shoulder!\" The Brahmin grew doubtful.\n\nThe third said, \"Oh no! You're carrying a donkey!\" Frightened, the Brahmin dropped the goat and fled. The thieves took the goat.",
+    moral: 'మోసగాళ్ళ మాటలు నమ్మకూడదు. మన కళ్ళను నమ్మాలి.',
+    moralEn: "Don't believe tricksters. Trust your own eyes and judgment.",
+  },
+  {
+    id: 38, title: 'సింహం - కుందేళ్ళ కథ', english: 'The Lion and the Jackal',
+    source: 'T', icon: 'paw', color: '#C41E3A', image: IMAGES.ganesha,
+    story: 'అడవిలో ఒక ముసలి సింహం ఉంది. వేటాడే శక్తి లేదు. తెలివిగా గుహలో కూర్చుని "నేను అనారోగ్యంగా ఉన్నాను" అని ప్రకటించింది.\n\nజంతువులు పరామర్శకు వస్తున్నాయి — సింహం వాటిని తినేస్తున్నది!\n\nఒక నక్క వచ్చింది. గుహ బయటే నిలబడి "మహారాజా, ఎలా ఉన్నారు?" అని అడిగింది.\n\n"లోపలికి రా" అంది సింహం.\n\n"నేను అడుగుజాడలు చూస్తున్నాను — లోపలికి వెళ్ళిన జాడలు ఉన్నాయి, కానీ బయటికి వచ్చిన జాడలు లేవు!" అంది నక్క.\n\nనక్క ప్రాణాలు కాపాడుకుంది.',
+    storyEn: "An old lion couldn't hunt anymore. It cleverly sat in its cave and announced, \"I am very sick.\"\n\nAnimals came to visit — and the lion ate them all!\n\nA jackal came and stood outside the cave. \"Your Majesty, how are you?\" it asked.\n\n\"Come inside,\" said the lion.\n\n\"I see footprints going in, but none coming out!\" said the jackal.\n\nThe jackal saved its life.",
+    moral: 'జాగ్రత్తగా గమనిస్తే ప్రమాదాలను తప్పించుకోవచ్చు. ఆలోచించి అడుగు పెట్టాలి.',
+    moralEn: 'Careful observation can save you from danger. Think before you step.',
+  },
+  {
+    id: 39, title: 'కప్ప రాజు', english: 'The Frogs Who Wanted a King',
+    source: 'T', icon: 'frog', color: '#2E7D32', image: IMAGES.ganesha,
+    story: 'కప్పలు స్వేచ్ఛగా ఉన్నాయి, కానీ "మాకు రాజు కావాలి!" అని దేవేంద్రుడిని అడిగాయి.\n\nదేవేంద్రుడు ఒక పెద్ద కొయ్యదుంగను చెరువులో వేశాడు — "ఇదే మీ రాజు!" కప్పలు మొదట భయపడ్డాయి, తర్వాత కొయ్యదుంగ మీద ఆడుకోసాగాయి.\n\n"ఈ రాజు ఏమీ చేయడు! మాకు మరో రాజు కావాలి!" అన్నాయి.\n\nదేవేంద్రుడు కొంగను పంపాడు. కొంగ రోజూ కప్పలను తినేయసాగింది!\n\nకప్పలు "మా స్వేచ్ఛ మాకు ఇవ్వు!" అని ఏడ్చాయి.',
+    storyEn: "Frogs lived freely but demanded, \"We want a king!\" from Indra.\n\nIndra dropped a wooden log in the pond — \"Here is your king!\" The frogs were scared at first, then started playing on the log.\n\n\"This king does nothing! We want a real king!\" they complained.\n\nIndra sent a crane. The crane started eating the frogs every day!\n\nThe frogs cried, \"Give us back our freedom!\"",
+    moral: 'ఉన్న స్వేచ్ఛ విలువ తెలుసుకోవాలి. ఉన్నదానితో సంతోషపడకపోతే కష్టాలు వస్తాయి.',
+    moralEn: 'Appreciate the freedom you have. Discontent with what you have invites trouble.',
+  },
+  {
+    id: 40, title: 'నీలి నక్క', english: 'The Blue Jackal',
+    source: 'T', icon: 'palette', color: '#4A90D9', image: IMAGES.ganesha,
+    story: 'ఒక నక్క కుక్కల నుండి పారిపోతూ రంగు తొట్టిలో పడింది. శరీరమంతా నీలి రంగు అయింది!\n\nఅడవికి తిరిగి వచ్చింది. జంతువులన్నీ "ఇది ఏ జంతువు? దేవుడు పంపిన రాజు!" అని భయపడ్డాయి.\n\nనక్క "నేను దేవుడు పంపిన రాజును!" అని రాజ్యం చేసింది. సింహం, పులి, ఏనుగు అన్నీ సేవకులయ్యాయి.\n\nఒకరాత్రి ఇతర నక్కలు ఊళలు వేశాయి. నీలి నక్కకు ఆపుకోలేక తానూ ఊళ వేసింది! అందరికీ బయటపడింది. జంతువులు తరిమికొట్టాయి.',
+    storyEn: "A jackal fell into a dyer's vat while fleeing from dogs. Its body turned completely blue!\n\nBack in the forest, all animals were amazed. \"This must be a divine king sent by God!\" they feared.\n\nThe jackal declared, \"I am a king sent by God!\" Lions, tigers, elephants — all became its servants.\n\nOne night, other jackals howled. The blue jackal couldn't resist and howled too! Its identity was exposed. The animals chased it away.",
+    moral: 'అబద్ధాలతో ఎంతకాలం బతకగలం? నిజం ఎప్పుడో ఒకప్పుడు బయటపడుతుంది.',
+    moralEn: 'How long can you live with lies? The truth always comes out eventually.',
+  },
+
+  // ─── EPICS: RAMAYANA & MAHABHARATA (41–50) ─────────────────────────
+  {
+    id: 41, title: 'శ్రీరాముడు - అడవిలో 14 ఏళ్ళు', english: "Rama's Exile to the Forest",
+    source: 'E', icon: 'forest', color: '#2E7D32', image: IMAGES.rama,
+    story: 'దశరథ మహారాజు శ్రీరామునికి పట్టాభిషేకం చేయాలనుకున్నాడు. కానీ కైకేయి రెండు వరాలు కోరింది — భరతునికి రాజ్యం, రామునికి 14 ఏళ్ళు వనవాసం.\n\nరాముడు ఒక్క క్షణం కూడా బాధపడలేదు. "తండ్రి మాట నిలబెట్టాలి" అని చిరునవ్వుతో అడవికి బయలుదేరాడు.\n\nసీతాదేవి "భర్త ఉన్నచోటే నా స్థానం" అని వెంట వచ్చింది. లక్ష్మణుడు "అన్న లేకుండా నేను బతకలేను" అని వచ్చాడు.\n\nముగ్గురూ కలిసి అడవిలో సాధారణ జీవితం గడిపారు.',
+    storyEn: "King Dasharatha wanted to crown Rama as king. But Queen Kaikeyi asked for two boons — the kingdom for Bharata, and 14 years of exile for Rama.\n\nRama didn't feel sad even for a moment. \"Father's word must be honored,\" he said with a smile and set off for the forest.\n\nSita said, \"My place is where my husband is\" and followed. Lakshmana said, \"I cannot live without my brother\" and joined.\n\nThe three lived a simple life together in the forest.",
+    moral: 'తల్లిదండ్రుల మాట పాటించడం గొప్ప ధర్మం. కుటుంబ బంధం అన్నింటికంటే బలమైనది.',
+    moralEn: "Honoring parents' word is the greatest dharma. Family bond is the strongest of all.",
+  },
+  {
+    id: 42, title: 'జటాయువు - సీతాదేవి రక్షణ', english: "Jatayu's Sacrifice for Sita",
+    source: 'E', icon: 'bird', color: '#C55A11', image: IMAGES.rama,
+    story: 'రావణుడు సీతాదేవిని అపహరించుకుని పుష్పక విమానంలో లంకకు తీసుకెళ్తున్నాడు.\n\nజటాయువు అనే ముసలి డేగ సీతాదేవి ఏడుపు విన్నది. "నేను ముసలివాడిని, కానీ ధర్మం కోసం పోరాడతాను!" అని రావణుడిని ఎదుర్కొన్నది.\n\nరావణుడి ఖడ్గంతో జటాయువు రెక్కలు తెగిపోయాయి. కానీ చివరి శ్వాస వరకు పోరాడింది.\n\nశ్రీరాముడు వచ్చినప్పుడు జటాయువు "రావణుడు… దక్షిణం వైపు…" అని చెప్పి ప్రాణాలు వదిలింది. రాముడు తండ్రిలా అంత్యక్రియలు చేశాడు.',
+    storyEn: "Ravana kidnapped Sita and was flying to Lanka in his Pushpaka Vimana.\n\nJatayu, an old eagle, heard Sita's cries. \"I am old, but I will fight for righteousness!\" he challenged Ravana.\n\nRavana's sword cut off Jatayu's wings. But he fought till his last breath.\n\nWhen Rama arrived, Jatayu said, \"Ravana… went south…\" and gave up his life. Rama performed last rites for him as he would for his own father.",
+    moral: 'ధర్మం కోసం పోరాడడం అన్ని వయస్సులలో ఆదర్శం. నిస్వార్థ త్యాగం మరపురానిది.',
+    moralEn: 'Fighting for righteousness is admirable at any age. Selfless sacrifice is never forgotten.',
+  },
+  {
+    id: 43, title: 'హనుమంతుడు - సముద్రం దాటడం', english: 'Hanuman Leaps Across the Ocean',
+    source: 'E', icon: 'arrow-top-right-bold-outline', color: '#E8751A', image: IMAGES.hanuman,
+    story: 'సీతాదేవిని వెతకడానికి లంకకు వెళ్ళాలి. కానీ మధ్యలో పెద్ద సముద్రం!\n\nజాంబవంతుడు హనుమంతునికి చెప్పాడు — "నీ శక్తి నీకు తెలియదు! నువ్వు సముద్రం దాటగలవు!"\n\nహనుమంతుడు "జై శ్రీరామ్!" అని పర్వతం ఎక్కి, శరీరాన్ని పెంచి, సముద్రంపై ఎగిరాడు! దారిలో సురస, సింహిక అడ్డుపడ్డాయి — తెలివిగా తప్పించుకున్నాడు.\n\nలంకలో సీతాదేవిని కనుగొన్నాడు. "రాముడు వస్తున్నాడు, ధైర్యంగా ఉండు!" అని ఉంగరం ఇచ్చాడు.',
+    storyEn: "To find Sita, someone had to go to Lanka. But a vast ocean lay in between!\n\nJambavan told Hanuman, \"You don't know your own strength! You can cross the ocean!\"\n\nHanuman chanted \"Jai Shri Ram!\" climbed a mountain, grew enormous, and leaped across the ocean! Along the way, Surasa and Simhika tried to stop him — he cleverly escaped both.\n\nIn Lanka, he found Sita. \"Rama is coming. Stay brave!\" he said, giving her Rama's ring.",
+    moral: 'మనలో ఉన్న శక్తిని గుర్తించాలి. ఆత్మవిశ్వాసంతో అసాధ్యమైనవి కూడా సాధించవచ్చు.',
+    moralEn: 'Recognize the strength within you. With self-confidence, even the impossible becomes possible.',
+  },
+  {
+    id: 44, title: 'విభీషణుడు - ధర్మ మార్గం', english: "Vibhishana Chooses Dharma",
+    source: 'E', icon: 'arrow-decision', color: '#4A90D9', image: IMAGES.rama,
+    story: 'విభీషణుడు రావణుడి తమ్ముడు. సీతాదేవిని తిరిగి ఇవ్వమని అన్నయ్యకు చెప్పాడు.\n\n"అధర్మం చేస్తే లంక నాశనమవుతుంది. సీతాదేవిని తిరిగి ఇవ్వు" అని ప్రాధేయపడ్డాడు.\n\nరావణుడు కోపంతో "పో! నువ్వు నా తమ్ముడు కాదు!" అని తరిమేశాడు.\n\nవిభీషణుడు శ్రీరాముని శరణు వేడాడు. రాముడు "శరణు వచ్చిన వారిని కాపాడతాను" అని ఆశ్రయం ఇచ్చాడు.\n\nయుద్ధం తర్వాత రాముడు విభీషణుని లంక రాజుగా చేశాడు.',
+    storyEn: "Vibhishana was Ravana's brother. He begged Ravana to return Sita.\n\n\"If you continue this injustice, Lanka will be destroyed. Return Sita,\" he pleaded.\n\nRavana was furious. \"Go! You are not my brother!\" he banished him.\n\nVibhishana sought refuge with Lord Rama. Rama said, \"I protect all who surrender to me\" and welcomed him.\n\nAfter the war, Rama crowned Vibhishana as the king of Lanka.",
+    moral: 'ధర్మం కోసం అన్నీ త్యాగం చేయవచ్చు. సరైన పక్షాన నిలబడాలి.',
+    moralEn: 'One can sacrifice everything for righteousness. Always stand on the side of truth.',
+  },
+  {
+    id: 45, title: 'కర్ణుడు - దానవీరుడు', english: "Karna's Generosity",
+    source: 'E', icon: 'hand-heart', color: '#D4A017', image: IMAGES.surya,
+    story: 'కర్ణుడు సూర్యుని కుమారుడు, అద్భుత వీరుడు. పుట్టుకతోనే కవచ కుండలాలు ఉన్నాయి — వాటి వల్ల ఎవరూ ఓడించలేరు.\n\nఇంద్రుడు బ్రాహ్మణ వేషంలో వచ్చి "నీ కవచ కుండలాలు దానం ఇవ్వు" అని అడిగాడు. కర్ణునికి తెలుసు ఇది మోసం అని.\n\nకానీ "దానం కోరి వచ్చిన వారిని వెనక్కి పంపను" అని తన శరీరం నుండి కవచ కుండలాలు తెగగోసి ఇచ్చేశాడు!\n\nఇంద్రుడు "ఇంత దాతను ఎప్పుడూ చూడలేదు" అని మెచ్చుకున్నాడు.',
+    storyEn: "Karna was the son of the Sun God, a magnificent warrior. Born with divine armor and earrings — making him invincible.\n\nIndra came disguised as a Brahmin and asked, \"Donate your armor and earrings.\" Karna knew it was a trick.\n\nBut he said, \"I never turn away anyone who asks for charity\" and cut the armor from his own body and gave it away!\n\nIndra praised, \"I have never seen such generosity.\"",
+    moral: 'దానం గొప్ప ధర్మం. ఇచ్చేటప్పుడు తనకు నష్టం అయినా సరే ఇవ్వడమే నిజమైన దానం.',
+    moralEn: 'Charity is the greatest virtue. True giving means giving even when it costs you.',
+  },
+  {
+    id: 46, title: 'అభిమన్యుడు - చక్రవ్యూహం', english: "Abhimanyu's Courage",
+    source: 'E', icon: 'shield', color: '#C41E3A', image: IMAGES.krishna,
+    story: 'అభిమన్యుడు అర్జునుని కుమారుడు. 16 ఏళ్ళ వయసులోనే గొప్ప యోధుడు.\n\nకౌరవులు చక్రవ్యూహం పన్నారు. లోపలికి చొరబడడం అభిమన్యుడికి తెలుసు — తల్లి గర్భంలో ఉన్నప్పుడే తండ్రి చెప్పగా విన్నాడు. కానీ బయటికి రావడం తెలియదు!\n\nఅయినా ధైర్యంగా "నేను వెళ్తాను!" అని చక్రవ్యూహంలోకి దూసుకెళ్ళాడు. ఒంటరిగా ఎంతోమందిని ఓడించాడు.\n\nచివరికి అధర్మంగా ఏడుగురు కలిసి ఆయనను ఓడించారు. కానీ ఆయన ధైర్యం అందరినీ ఆశ్చర్యపరిచింది.',
+    storyEn: "Abhimanyu was Arjuna's son. At just 16, he was already a great warrior.\n\nThe Kauravas formed a Chakravyuha (battle formation). Abhimanyu knew how to enter — he had heard his father explain it while still in his mother's womb. But he didn't know how to exit!\n\nYet he bravely said, \"I will go!\" and charged into the formation. Alone, he defeated many warriors.\n\nFinally, seven warriors unfairly attacked him together. But his courage amazed everyone.",
+    moral: 'ధైర్యం ఫలితం కంటే ముఖ్యం. సరైన కారణం కోసం పోరాడడం వీరత్వం.',
+    moralEn: 'Courage matters more than the outcome. Fighting for the right cause is heroism.',
+  },
+  {
+    id: 47, title: 'విదురుడు - న్యాయ మార్గం', english: "Vidura's Wisdom",
+    source: 'E', icon: 'scale-balance', color: '#4A1A6B', image: IMAGES.krishna,
+    story: 'విదురుడు హస్తినాపుర రాజసభలో మంత్రి. ధృతరాష్ట్రునికి ఎప్పుడూ నిజం చెప్పేవాడు.\n\n"నీ కొడుకులు అధర్మం చేస్తున్నారు. పాండవులకు వారి భాగం ఇవ్వు" అని హెచ్చరించాడు.\n\nధృతరాష్ట్రుడు వినలేదు. ద్యూతంలో (జూదంలో) పాండవులు అన్నీ కోల్పోయినప్పుడు, ద్రౌపది వస్త్రాపహరణం జరుగుతున్నప్పుడు విదురుడు ఒక్కడే "ఆపండి! ఇది అధర్మం!" అని గొంతు ఎత్తాడు.\n\nచివరికి మహాభారత యుద్ధం జరిగింది — విదురుడు హెచ్చరించినట్లే.',
+    storyEn: "Vidura was a minister in the court of Hastinapura. He always told King Dhritarashtra the truth.\n\n\"Your sons are committing injustice. Give the Pandavas their share,\" he warned.\n\nDhritarashtra didn't listen. When the Pandavas lost everything in the dice game, when Draupadi was being humiliated, Vidura was the only one who raised his voice — \"Stop! This is wrong!\"\n\nUltimately, the great war of Mahabharata happened — exactly as Vidura had warned.",
+    moral: 'అందరూ మౌనంగా ఉన్నప్పుడు కూడా సత్యం చెప్పాలి. నిజం చెప్పడం ధైర్యం.',
+    moralEn: 'Speak truth even when everyone else is silent. Speaking up takes real courage.',
+  },
+  {
+    id: 48, title: 'ద్రౌపది - కృష్ణుని నమ్మకం', english: "Draupadi's Faith in Krishna",
+    source: 'E', icon: 'hand-clap', color: '#C41E3A', image: IMAGES.krishna,
+    story: 'జూదంలో ఓడిపోయాక, కౌరవసభలో ద్రౌపదిని అవమానించారు. దుశ్శాసనుడు ఆమె చీరను లాగాడు.\n\nద్రౌపది మొదట భీముడు, అర్జునుడు, ధర్మరాజును చూసింది — ఎవరూ ఆపలేదు. పెద్దలు తలలు వంచుకున్నారు.\n\nచివరికి ద్రౌపది రెండు చేతులెత్తి "కృష్ణా! రక్షించు!" అని మొరపెట్టింది.\n\nకృష్ణుడు అద్భుతం చేశాడు — చీర లాగుతున్న కొద్దీ పెరుగుతూనే ఉంది! దుశ్శాసనుడు అలసిపోయాడు. ద్రౌపది రక్షింపబడింది.',
+    storyEn: "After the dice game, Draupadi was humiliated in the Kaurava court. Dushasana pulled at her sari.\n\nDraupadi first looked at Bhima, Arjuna, Yudhishthira — none could stop it. The elders hung their heads.\n\nFinally, Draupadi raised both hands and cried, \"Krishna! Save me!\"\n\nKrishna performed a miracle — the more the sari was pulled, the more it grew! Dushasana exhausted himself. Draupadi was saved.",
+    moral: 'నిజమైన సంకటంలో దేవుడిని నమ్మితే ఆయన తప్పక రక్షిస్తాడు.',
+    moralEn: 'In true crisis, if you trust God sincerely, He will surely protect you.',
+  },
+  {
+    id: 49, title: 'భీముడు - హనుమంతుని భేటీ', english: 'Bhima Meets Hanuman',
+    source: 'E', icon: 'arm-flex', color: '#C55A11', image: IMAGES.hanuman,
+    story: 'భీముడు అడవిలో వెళ్తున్నాడు. దారిలో ఒక ముసలి కోతి తోక చాపుకుని పడుకుని ఉంది.\n\n"దారి ఇవ్వు!" అన్నాడు భీముడు గర్వంగా.\n\n"ముసలివాడిని, తోక తీయలేను. నువ్వే తీయి" అంది కోతి.\n\nభీముడు — మహా బలవంతుడు — తోకను ఎత్తడానికి ప్రయత్నించాడు. ఎంత బలం పెట్టినా కదలలేదు!\n\nఆ ముసలి కోతి హనుమంతుడని అర్థమైంది! భీముడు వినయంగా నమస్కరించాడు. హనుమంతుడు "అహంకారం వదిలిపెట్టు. నిజమైన బలం వినయంలో ఉంటుంది" అని ఆశీర్వదించాడు.',
+    storyEn: "Bhima was walking through a forest. On the path, an old monkey lay with its tail stretched across.\n\n\"Move aside!\" said Bhima proudly.\n\n\"I'm old and can't move my tail. You move it,\" said the monkey.\n\nBhima — the mightiest warrior — tried to lift the tail. No matter how hard he tried, it wouldn't budge!\n\nHe realized the old monkey was Hanuman! Bhima bowed humbly. Hanuman blessed him — \"Let go of pride. True strength lies in humility.\"",
+    moral: 'అహంకారం తెలివికి అడ్డు. వినయం ఉంటే దేవుడే ఆశీర్వదిస్తాడు.',
+    moralEn: 'Pride blocks wisdom. With humility, even God blesses you.',
+  },
+  {
+    id: 50, title: 'కృష్ణుడు - సుదాముని స్నేహం', english: "Krishna and Sudama's Friendship",
+    source: 'E', icon: 'handshake', color: '#D4A017', image: IMAGES.krishna,
+    story: 'సుదాముడు కృష్ణుడి చిన్ననాటి స్నేహితుడు. కానీ చాలా పేదవాడు. భార్య "కృష్ణుడి దగ్గరికి వెళ్ళు, ఆయన రాజు, సహాయం చేస్తాడు" అని పంపింది.\n\nసుదాముడు అటుకులు (అవలక్కి) బహుమతిగా తీసుకెళ్ళాడు. ద్వారకలో కృష్ణుడు స్నేహితుడిని చూసి పరుగెత్తి వచ్చాడు, కౌగలించుకున్నాడు, కాళ్ళు కడిగాడు!\n\nసుదాముడు సిగ్గుతో అటుకులు చూపించలేదు. కానీ కృష్ణుడు తానే తీసుకుని ప్రేమతో తిన్నాడు.\n\nసుదాముడు ఏమీ అడగకుండానే ఇంటికి వెళ్ళాడు — అక్కడ పేద గుడిసె స్థానంలో అందమైన భవనం ఉంది! కృష్ణుడి స్నేహం అంత గొప్పది.',
+    storyEn: "Sudama was Krishna's childhood friend, but very poor. His wife said, \"Go to Krishna, he is a king now, he will help.\"\n\nSudama took flattened rice (poha) as a gift. In Dwaraka, Krishna saw his friend, ran to him, embraced him, and washed his feet!\n\nSudama was too shy to show the humble rice. But Krishna himself took it and ate it with love.\n\nSudama went home without asking for anything — where his poor hut once stood was a beautiful mansion! Such was the power of Krishna's friendship.",
+    moral: 'నిజమైన స్నేహం ధనం చూడదు. ప్రేమతో ఇచ్చినది ఎంత చిన్నదైనా గొప్పదే.',
+    moralEn: "True friendship doesn't see wealth. Even the smallest gift given with love is precious.",
+  },
+];
+
+/**
+ * Get today's story based on day-of-year.
+ * Returns 4 unique stories that rotate daily (50 stories = unique for 50 days, then repeats).
+ */
+export function getStoriesForDay(date = new Date()) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const startIdx = (dayOfYear * 4) % KIDS_STORIES.length;
+  const stories = [];
+  for (let i = 0; i < 4; i++) {
+    stories.push(KIDS_STORIES[(startIdx + i) % KIDS_STORIES.length]);
+  }
+  return stories;
+}

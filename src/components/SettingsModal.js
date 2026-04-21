@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Switch, Platform, TextInput,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { ModalOrView } from './ModalOrView';
@@ -107,14 +107,14 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
           {/* Header */}
-          <LinearGradient colors={['#2C1810', '#4A1A0A']} style={s.header}>
+          <View style={s.header}>
             <TouchableOpacity style={s.closeX} onPress={onClose}>
-              <Ionicons name="close" size={24} color="rgba(255,255,255,0.7)" />
+              <Ionicons name="close" size={24} color={DarkColors.gold} />
             </TouchableOpacity>
-            <MaterialCommunityIcons name="cog" size={headerIconSize} color="#FFD700" />
+            <MaterialCommunityIcons name="cog" size={headerIconSize} color={DarkColors.gold} />
             <Text style={[s.title, { fontSize: titleSize }]}>{t(TR.settings.te, TR.settings.en)}</Text>
-            <Text style={s.subtitle}>{t(TR.settings.en, TR.settings.en)}</Text>
-          </LinearGradient>
+            <Text style={s.subtitle}>{t(TR.settings.en, TR.settings.te)}</Text>
+          </View>
 
           <ScrollView style={[s.body, { paddingHorizontal: bodyPadH }]} showsVerticalScrollIndicator={false}>
             {/* Notifications Section */}
@@ -375,7 +375,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
             <TouchableOpacity onPress={handleVersionTap} activeOpacity={1}>
               <View style={s.infoRow}>
                 <Text style={[s.infoLabel, { fontSize: infoFontSize }]}>{t(TR.versionLabel.te, TR.versionLabel.en)}</Text>
-                <Text style={[s.infoValue, { fontSize: infoFontSize }]}>1.1.0</Text>
+                <Text style={[s.infoValue, { fontSize: infoFontSize }]}>2.2.0</Text>
               </View>
             </TouchableOpacity>
             <View style={s.infoRow}>
@@ -436,16 +436,17 @@ const s = StyleSheet.create({
     maxHeight: '90%',
   },
   header: {
-    alignItems: 'center', paddingVertical: 24, paddingHorizontal: 20,
-    borderTopLeftRadius: 24, borderTopRightRadius: 24, position: 'relative',
+    alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20,
+    backgroundColor: DarkColors.bgElevated, borderBottomWidth: 1, borderBottomColor: 'rgba(212,160,23,0.2)',
+    position: 'relative',
   },
   closeX: {
-    position: 'absolute', top: 16, right: 16,
-    width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)',
+    position: 'absolute', top: 12, right: 16, zIndex: 10,
+    width: 36, height: 36, borderRadius: 18, backgroundColor: DarkColors.bgCard,
     alignItems: 'center', justifyContent: 'center',
   },
-  title: { fontSize: 22, fontWeight: '800', color: '#FFD700', marginTop: 8 },
-  subtitle: { fontSize: 12, color: 'rgba(255,248,240,0.5)', marginTop: 2 },
+  title: { fontSize: 22, fontWeight: '800', color: DarkColors.gold, marginTop: 6 },
+  subtitle: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
 
   body: { paddingHorizontal: 20, paddingTop: 16 },
 
@@ -510,7 +511,7 @@ const s = StyleSheet.create({
 
   closeBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20,
-    backgroundColor: DarkColors.saffron, borderRadius: 14,
+    backgroundColor: 'transparent', borderRadius: 14, borderWidth: 1.5, borderColor: DarkColors.gold,
   },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  closeBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 });

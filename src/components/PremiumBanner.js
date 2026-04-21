@@ -163,9 +163,9 @@ export function PremiumBanner({ onUpgrade, trialAvailable }) {
 
   return (
     <TouchableOpacity style={b.container} onPress={() => { onUpgrade(); trackEvent('premium_banner_tap'); }} activeOpacity={0.85}>
-      <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.5 }} style={[b.gradient, { paddingHorizontal: bPadH, paddingVertical: bPadV }]}>
+      <LinearGradient colors={[DarkColors.bgElevated, '#1A1008']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0.5 }} style={[b.gradient, { paddingHorizontal: bPadH, paddingVertical: bPadV }]}>
         <View style={[b.iconWrap, { width: bIconWrap, height: bIconWrap, borderRadius: bIconWrap / 2 }]}>
-          <MaterialCommunityIcons name="crown" size={bIconSize} color="#FFD700" />
+          <MaterialCommunityIcons name="crown" size={bIconSize} color={DarkColors.gold} />
         </View>
         <View style={b.textWrap}>
           <Text style={[b.title, { fontSize: bTitleSize }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
@@ -373,7 +373,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
           {/* Sticky Header — stays visible while scrolling */}
-          <LinearGradient colors={['#1A0A2E', '#2D1B4E', '#4A1A6B']} style={[s.header, { paddingVertical: headerPadV }, selectedPlan && { paddingVertical: headerPadV * 0.7 }]}>
+          <LinearGradient colors={[DarkColors.bgElevated, '#1A1008']} style={[s.header, { paddingVertical: headerPadV }, selectedPlan && { paddingVertical: headerPadV * 0.7 }]}>
             <TouchableOpacity style={[s.closeX, { width: closeXSize, height: closeXSize, borderRadius: closeXSize / 2 }]} onPress={handleClose}>
               <Ionicons name="close" size={closeIconSize} color="rgba(255,255,255,0.7)" />
             </TouchableOpacity>
@@ -382,7 +382,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 <Ionicons name="arrow-back" size={backIconSize} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
             )}
-            <MaterialCommunityIcons name="crown" size={selectedPlan ? crownSizeCompact : crownSize} color="#FFD700" />
+            <MaterialCommunityIcons name="crown" size={selectedPlan ? crownSizeCompact : crownSize} color={DarkColors.gold} />
             <Text style={[s.title, { fontSize: titleFont }, selectedPlan && { fontSize: titleFontCompact, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
             {!selectedPlan ? (
               <>
@@ -418,7 +418,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 {/* Free Trial */}
                 <View style={[s.trialSection, { paddingHorizontal: sectionPad }]}>
                   <TouchableOpacity style={s.trialBtn} onPress={handleStartTrial} disabled={activating}>
-                    <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={[s.trialGradient, { paddingVertical: trialBtnPadV }]}>
+                    <LinearGradient colors={[DarkColors.saffron, DarkColors.gold]} style={[s.trialGradient, { paddingVertical: trialBtnPadV }]}>
                       <MaterialCommunityIcons name="gift" size={trialIconSize} color="#FFF" />
                       <Text style={[s.trialBtnText, { fontSize: trialBtnFont }]}>
                         {activating ? t(TR.activating.te, TR.activating.en) : t(TR.trialCta.te, TR.trialCta.en)}
@@ -443,11 +443,11 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                       )}
                       <Text style={[s.planEmoji, { fontSize: planEmojiFont }]}>{plan.emoji}</Text>
                       <View style={s.planInfo}>
-                        <Text style={[s.planName, { fontSize: planNameFont }, plan.best && { color: '#9B6FCF' }]}>{plan.telugu} / {plan.english}</Text>
+                        <Text style={[s.planName, { fontSize: planNameFont }, plan.best && { color: DarkColors.gold }]}>{plan.telugu} / {plan.english}</Text>
                         {plan.savings && <Text style={[s.planSavings, { fontSize: planSavingsFont }]}>{plan.savings} savings</Text>}
                       </View>
-                      <Text style={[s.planPrice, { fontSize: planPriceFont }, plan.best && { color: '#9B6FCF' }]}>{plan.label}</Text>
-                      <Ionicons name="chevron-forward" size={planChevronSize} color={plan.best ? '#9B6FCF' : DarkColors.textMuted} />
+                      <Text style={[s.planPrice, { fontSize: planPriceFont }, plan.best && { color: DarkColors.gold }]}>{plan.label}</Text>
+                      <Ionicons name="chevron-forward" size={planChevronSize} color={plan.best ? DarkColors.gold : DarkColors.textMuted} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -560,7 +560,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                   <View style={s.upiRow}>
                     <Text style={[s.upiId, { fontSize: upiIdFont }]}>{UPI_ID}</Text>
                     <TouchableOpacity style={s.copyBtn} onPress={() => { copyUpiId(); if (Platform.OS === 'web') alert(t(TR.upiCopied.te, TR.upiCopied.en)); else Alert.alert(t(TR.upiCopied.te, TR.upiCopied.en), UPI_ID); }}>
-                      <MaterialCommunityIcons name="content-copy" size={16} color={DarkColors.tulasiGreen} />
+                      <MaterialCommunityIcons name="content-copy" size={16} color={DarkColors.gold} />
                       <Text style={[s.copyText, { fontSize: copyTextFont }]}>కాపీ</Text>
                     </TouchableOpacity>
                   </View>
@@ -570,7 +570,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 {paymentStep === 'idle' && (
                   <>
                     <TouchableOpacity style={s.activateBtn} onPress={handlePay} activeOpacity={0.8}>
-                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={[s.activateGradient, { paddingVertical: activateBtnPadV }]}>
+                      <LinearGradient colors={[DarkColors.saffron, DarkColors.gold]} style={[s.activateGradient, { paddingVertical: activateBtnPadV }]}>
                         <MaterialCommunityIcons name="bank-transfer" size={activateBtnIcon} color="#FFF" />
                         <Text style={[s.activateBtnText, { fontSize: activateBtnFont }]}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
                       </LinearGradient>
@@ -584,7 +584,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 {/* Loading state */}
                 {paymentStep === 'paying' && (
                   <View style={s.verifyingBox}>
-                    <ActivityIndicator size="large" color={DarkColors.tulasiGreen} />
+                    <ActivityIndicator size="large" color={DarkColors.gold} />
                     <Text style={[s.verifyingText, { fontSize: verifyingFont }]}>ప్రాసెస్ అవుతోంది...</Text>
                   </View>
                 )}
@@ -593,14 +593,14 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                 {paymentStep === 'confirm' && (
                   <>
                     <View style={[s.confirmBox, { padding: confirmPad }]}>
-                      <MaterialCommunityIcons name="check-circle-outline" size={confirmIconSize} color={DarkColors.tulasiGreen} />
+                      <MaterialCommunityIcons name="check-circle-outline" size={confirmIconSize} color={DarkColors.gold} />
                       <Text style={[s.confirmTitle, { fontSize: confirmTitleFont }]}>పేమెంట్ పూర్తయిందా?</Text>
                       <Text style={[s.confirmSubtext, { fontSize: confirmSubFont }]}>
                         UPI యాప్‌లో ₹{selectedPlan?.price} పంపిన తర్వాత క్రింది బటన్ నొక్కండి
                       </Text>
                     </View>
                     <TouchableOpacity style={s.activateBtn} onPress={handleConfirmPayment} activeOpacity={0.8}>
-                      <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={[s.activateGradient, { paddingVertical: activateBtnPadV }]}>
+                      <LinearGradient colors={[DarkColors.saffron, DarkColors.gold]} style={[s.activateGradient, { paddingVertical: activateBtnPadV }]}>
                         <MaterialCommunityIcons name="check-circle" size={activateBtnIcon} color="#FFF" />
                         <Text style={[s.activateBtnText, { fontSize: activateBtnFont }]}>అవును, పేమెంట్ చేశాను ✓</Text>
                       </LinearGradient>
@@ -615,7 +615,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
 
             {/* Close */}
             <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV }]} onPress={handleClose}>
-              <Text style={[s.closeBtnText, { fontSize: closeBtnFont }]}>తర్వాత / Maybe Later</Text>
+              <Text style={[s.closeBtnText, { fontSize: closeBtnFont }]}>{t('మూసివేయండి', 'Close')}</Text>
             </TouchableOpacity>
           </ScrollView>
     </ModalOrView>
@@ -627,12 +627,12 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
 const b = StyleSheet.create({
   container: { marginHorizontal: 20, marginVertical: 6, borderRadius: 16, overflow: 'hidden' },
   gradient: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16 },
-  iconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,215,0,0.15)', alignItems: 'center', justifyContent: 'center' },
+  iconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center' },
   textWrap: { flex: 1, marginLeft: 12 },
-  title: { fontSize: 15, fontWeight: '800', color: '#FFD700' },
+  title: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
   subtitle: { fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2, lineHeight: 16 },
-  badge: { backgroundColor: '#FFD700', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  badgeText: { fontSize: 10, fontWeight: '800', color: '#1A0A2E' },
+  badge: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  badgeText: { fontSize: 10, fontWeight: '800', color: '#0A0A0A' },
 });
 
 const q = StyleSheet.create({
@@ -643,8 +643,8 @@ const q = StyleSheet.create({
   image: { width: 200, height: 200 },
   fallback: { alignItems: 'center', justifyContent: 'center' },
   fallbackText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 8 },
-  badge: { position: 'absolute', bottom: -10, backgroundColor: '#9B6FCF', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 14, fontWeight: '800', color: '#FFD700' },
+  badge: { position: 'absolute', bottom: -10, backgroundColor: DarkColors.gold, paddingHorizontal: 14, paddingVertical: 4, borderRadius: 12 },
+  badgeText: { fontSize: 14, fontWeight: '800', color: DarkColors.gold },
 });
 
 const s = StyleSheet.create({
@@ -654,14 +654,14 @@ const s = StyleSheet.create({
   headerCompact: { paddingVertical: 10 },
   closeX: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   backX: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 26, fontWeight: '800', color: '#FFD700', marginTop: 12, letterSpacing: 1 },
+  title: { fontSize: 26, fontWeight: '800', color: DarkColors.gold, marginTop: 12, letterSpacing: 1 },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 8, textAlign: 'center' },
   subtitleEn: { fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
 
   perksSection: { paddingHorizontal: 20, paddingTop: 20 },
   perksTitle: { fontSize: 18, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 12 },
   perkRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
-  perkIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(155,111,207,0.15)', alignItems: 'center', justifyContent: 'center' },
+  perkIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center' },
   perkText: { flex: 1, marginLeft: 12 },
   perkTelugu: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
   perkEnglish: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
@@ -680,21 +680,21 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 16, marginBottom: 10,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  planCardBest: { borderColor: '#9B6FCF', borderWidth: 2, position: 'relative' },
-  bestBadge: { position: 'absolute', top: -10, right: 12, backgroundColor: '#9B6FCF', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
-  bestBadgeText: { fontSize: 9, fontWeight: '800', color: '#FFD700' },
+  planCardBest: { borderColor: DarkColors.gold, borderWidth: 2, position: 'relative' },
+  bestBadge: { position: 'absolute', top: -10, right: 12, backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
+  bestBadgeText: { fontSize: 9, fontWeight: '800', color: DarkColors.gold },
   planEmoji: { fontSize: 24, marginRight: 12 },
   planInfo: { flex: 1 },
   planName: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
-  planSavings: { fontSize: 11, color: DarkColors.tulasiGreen, fontWeight: '600', marginTop: 2 },
+  planSavings: { fontSize: 11, color: DarkColors.saffron, fontWeight: '600', marginTop: 2 },
   planPrice: { fontSize: 20, fontWeight: '800', color: DarkColors.textPrimary, marginRight: 8 },
 
   // Payment screen
   paySection: { paddingHorizontal: 20, paddingTop: 16 },
-  paySummary: { alignItems: 'center', paddingVertical: 16, backgroundColor: 'rgba(155,111,207,0.12)', borderRadius: 16 },
+  paySummary: { alignItems: 'center', paddingVertical: 16, backgroundColor: 'rgba(212,160,23,0.12)', borderRadius: 16 },
   paySummaryEmoji: { fontSize: 36 },
   paySummaryPlan: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginTop: 8 },
-  paySummaryPrice: { fontSize: 32, fontWeight: '800', color: '#9B6FCF', marginTop: 4 },
+  paySummaryPrice: { fontSize: 32, fontWeight: '800', color: DarkColors.gold, marginTop: 4 },
   paySummaryDuration: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4 },
 
   // UPI app buttons
@@ -729,10 +729,10 @@ const s = StyleSheet.create({
   appBtnText: { fontSize: 13, fontWeight: '700', flex: 1 },
   anyUpiBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(155,111,207,0.1)', borderRadius: 14, paddingVertical: 14,
-    borderWidth: 1, borderColor: 'rgba(155,111,207,0.2)', gap: 8, marginBottom: 8,
+    backgroundColor: 'rgba(212,160,23,0.1)', borderRadius: 14, paddingVertical: 14,
+    borderWidth: 1, borderColor: 'rgba(212,160,23,0.2)', gap: 8, marginBottom: 8,
   },
-  anyUpiBtnText: { fontSize: 14, fontWeight: '700', color: '#9B6FCF' },
+  anyUpiBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
 
   upiBox: {
     marginTop: 16, padding: 14, backgroundColor: DarkColors.bgElevated, borderRadius: 14,
@@ -741,8 +741,8 @@ const s = StyleSheet.create({
   upiLabel: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, marginBottom: 6 },
   upiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   upiId: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, letterSpacing: 0.5 },
-  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(46,125,50,0.08)', borderRadius: 10 },
-  copyText: { fontSize: 12, fontWeight: '600', color: DarkColors.tulasiGreen },
+  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 10 },
+  copyText: { fontSize: 12, fontWeight: '600', color: DarkColors.gold },
   upiNote: { fontSize: 11, color: DarkColors.textMuted, marginTop: 8 },
 
   activateBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 16 },
@@ -750,13 +750,13 @@ const s = StyleSheet.create({
   activateBtnText: { fontSize: 15, fontWeight: '800', color: '#FFF', marginLeft: 8 },
   activateNote: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 16 },
   verifyingBox: { alignItems: 'center', paddingVertical: 24, gap: 10 },
-  verifyingText: { fontSize: 16, fontWeight: '700', color: DarkColors.tulasiGreen, marginTop: 8 },
-  confirmBox: { alignItems: 'center', paddingVertical: 16, gap: 6, marginBottom: 12, backgroundColor: 'rgba(46,125,50,0.12)', borderRadius: 14, padding: 16 },
-  confirmTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.tulasiGreen },
+  verifyingText: { fontSize: 16, fontWeight: '700', color: DarkColors.gold, marginTop: 8 },
+  confirmBox: { alignItems: 'center', paddingVertical: 16, gap: 6, marginBottom: 12, backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 14, padding: 16 },
+  confirmTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
   confirmSubtext: { fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', lineHeight: 18 },
 
-  closeBtn: { alignItems: 'center', paddingVertical: 16, marginBottom: 20 },
-  closeBtnText: { fontSize: 14, color: DarkColors.textMuted, fontWeight: '600' },
+  closeBtn: { alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20, backgroundColor: 'transparent', borderRadius: 12, borderWidth: 1.5, borderColor: DarkColors.gold },
+  closeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
 
   // Claim code
   claimSection: { marginHorizontal: 20, marginTop: 16, marginBottom: 8 },

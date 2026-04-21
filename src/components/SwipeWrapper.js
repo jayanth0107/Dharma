@@ -10,7 +10,7 @@ import React, { useRef, useEffect } from 'react';
 import { View, PanResponder, Animated, Easing, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { MAIN_SECTIONS } from '../navigation/TabNavigator';
+import { MAIN_SECTIONS } from '../navigation/sections';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 

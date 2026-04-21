@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
-import { MAIN_SECTIONS } from '../navigation/TabNavigator';
+import { MAIN_SECTIONS } from '../navigation/sections';
 
 export function ScrollableTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
