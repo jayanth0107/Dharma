@@ -12,8 +12,8 @@
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -21,11 +21,13 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { SectionShareRow } from '../components/SectionShareRow';
-import { CalendarPicker } from '../components/CalendarPicker';
+import { BirthDatePicker } from '../components/BirthDatePicker';
+import { ClearableInput } from '../components/ClearableInput';
 import {
   getTodayLucky, calculateNumerology, VASTU_TIPS, getTodayMantra,
   MEDITATION_GUIDES, calculateNameCompatibility,
 } from '../utils/astroFeatures';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 function SectionCard({ icon, color, title, subtitle, children, rs }) {
   return (
@@ -115,7 +117,28 @@ export function AstroScreen() {
   // Name compat state
   const [n1, setN1] = useState('');
   const [n2, setN2] = useState('');
+  const [formLoaded, setFormLoaded] = useState(false);
   const compat = useMemo(() => calculateNameCompatibility(n1, n2), [n1, n2]);
+
+  // Load saved form on mount
+  useEffect(() => {
+    loadForm(FORM_KEYS.astro).then(saved => {
+      if (saved) {
+        if (saved.numDob) setNumDob(new Date(saved.numDob));
+        if (saved.n1) setN1(saved.n1);
+        if (saved.n2) setN2(saved.n2);
+      }
+      setFormLoaded(true);
+    });
+  }, []);
+
+  // Auto-save form when fields change
+  useEffect(() => {
+    if (!formLoaded) return;
+    if (numDob || n1 || n2) {
+      saveForm(FORM_KEYS.astro, { numDob: numDob?.toISOString(), n1, n2 });
+    }
+  }, [numDob, n1, n2, formLoaded]);
 
   return (
     <SwipeWrapper screenName="Astro">
@@ -124,15 +147,17 @@ export function AstroScreen() {
       <TopTabBar />
 
       {/* Date picker overlay for numerology DOB */}
-      {showDobPicker && (
-        <CalendarPicker
-          selectedDate={numDob || new Date(2000, 0, 1)}
-          title={t('మీ పుట్టిన తేదీ', 'Your Birth Date')}
-          onSelect={(d) => { setNumDob(d); setShowDobPicker(false); }}
-          onClose={() => setShowDobPicker(false)}
-        />
-      )}
+      <BirthDatePicker
+        visible={showDobPicker}
+        selectedDate={numDob || new Date(2000, 0, 1)}
+        showTime
+        title={t('మీ పుట్టిన తేదీ & సమయం', 'Your Birth Date & Time')}
+        lang={lang === 'te' ? 'te' : 'en'}
+        onSelect={(d) => { setNumDob(d); setShowDobPicker(false); }}
+        onClose={() => setShowDobPicker(false)}
+      />
 
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false}>
 
         {/* 1. Today's Lucky */}
@@ -252,14 +277,14 @@ export function AstroScreen() {
           title={t('పేరు అనుకూలత', 'Name Compatibility')}
           subtitle={t('రెండు పేర్లు ఇవ్వండి', 'Enter two names')}
         >
-          <TextInput
+          <ClearableInput
             style={[s.input, { fontSize: inputFontSize, padding: inputPad }]}
             value={n1}
             onChangeText={setN1}
             placeholder={t('మొదటి పేరు', 'First name')}
             placeholderTextColor={DarkColors.textMuted}
           />
-          <TextInput
+          <ClearableInput
             style={[s.input, { marginTop: 8, fontSize: inputFontSize, padding: inputPad }]}
             value={n2}
             onChangeText={setN2}
@@ -305,6 +330,7 @@ export function AstroScreen() {
 
         <View style={{ height: 30 }} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
     </SwipeWrapper>
   );

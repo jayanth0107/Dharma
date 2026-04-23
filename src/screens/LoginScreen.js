@@ -4,6 +4,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Platform,
+  KeyboardAvoidingView, ScrollView,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
@@ -13,6 +14,7 @@ import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
+import { ClearableInput } from '../components/ClearableInput';
 import { auth } from '../config/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
@@ -160,7 +162,8 @@ export function LoginScreen({ navigation }) {
     <View style={s.screen}>
       <PageHeader title={t('లాగిన్', 'Login')} />
 
-      <View style={[s.content, { padding: contentPad }]}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={[s.content, { padding: contentPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* reCAPTCHA container for web */}
         {Platform.OS === 'web' && <View nativeID="recaptcha-container" />}
 
@@ -169,7 +172,7 @@ export function LoginScreen({ navigation }) {
             <MaterialCommunityIcons name="cellphone" size={iconSize} color={DarkColors.gold} style={{ alignSelf: 'center', marginBottom: 16 }} />
             <Text style={[s.cardTitle, { fontSize: titleSize }]}>{t(TR.loginWithPhone.te, TR.loginWithPhone.en)}</Text>
             <Text style={[s.cardSub, { fontSize: subSize, lineHeight: subSize * 1.45 }]}>{t(TR.loginWithPhone.en, TR.loginWithPhone.en)}</Text>
-            <TextInput
+            <ClearableInput
               style={[s.input, { fontSize: inputSize, padding: inputPad }]}
               value={phone}
               onChangeText={setPhone}
@@ -195,7 +198,7 @@ export function LoginScreen({ navigation }) {
             <MaterialCommunityIcons name="shield-key" size={iconSize} color={DarkColors.saffron} style={{ alignSelf: 'center', marginBottom: 16 }} />
             <Text style={[s.cardTitle, { fontSize: titleSize }]}>{t(TR.enterOtp.te, TR.enterOtp.en)}</Text>
             <Text style={[s.cardSub, { fontSize: subSize, lineHeight: subSize * 1.45 }]}>{t(TR.otpSentTo.te, TR.otpSentTo.en)} {phone}</Text>
-            <TextInput
+            <ClearableInput
               style={[s.input, s.otpInput, { fontSize: otpFontSize, padding: inputPad }]}
               value={otp}
               onChangeText={setOtp}
@@ -261,7 +264,7 @@ export function LoginScreen({ navigation }) {
 
             {/* Name */}
             <Text style={[s.fieldLabel, { fontSize: labelSize }]}>{t(TR.displayName.te, TR.displayName.en)}</Text>
-            <TextInput
+            <ClearableInput
               style={[s.input, { fontSize: inputSize, padding: inputPad }]}
               value={name}
               onChangeText={setName}
@@ -288,7 +291,8 @@ export function LoginScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         )}
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

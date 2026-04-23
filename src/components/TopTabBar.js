@@ -4,11 +4,11 @@
 // Active tab gets a saffron underline; tapping navigates; auto-scrolls
 // to keep the active tab visible.
 
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { DarkColors } from '../theme';
-import { usePick } from '../theme/responsive';
+import { usePick, useWindow } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { MAIN_SECTIONS } from '../navigation/sections';
 
@@ -16,6 +16,8 @@ export function TopTabBar() {
   const navigation = useNavigation();
   const { t } = useLanguage();
   const scrollRef = useRef(null);
+  const scrollNodeRef = useRef(null);
+  const { width: screenW } = useWindow();
 
   // Responsive sizing — bigger on tablets, tighter on tiny phones.
   const tabPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 18, xl: 22 });
@@ -29,25 +31,41 @@ export function TopTabBar() {
     (state) => state.routes[state.index]?.name
   );
 
-  // Auto-center active tab using its REAL measured position (not a fixed
-  // PILL_WIDTH guess) so long labels like "దానం" / "సేవలు" don't end up
-  // clipped at the right edge.
+  // Auto-center active tab
   useEffect(() => {
     if (!activeRouteName || !scrollRef.current) return;
     const layout = tabLayouts.current[activeRouteName];
     if (!layout) return;
-    const screenW = Dimensions.get('window').width;
     const targetX = Math.max(0, layout.x - screenW / 2 + layout.width / 2);
     scrollRef.current.scrollTo({ x: targetX, animated: true });
-  }, [activeRouteName]);
+  }, [activeRouteName, screenW]);
+
+  // Enable mouse wheel horizontal scrolling on web
+  const onScrollViewRef = useCallback((node) => {
+    scrollRef.current = node;
+    if (Platform.OS === 'web' && node) {
+      const inner = node.getInnerViewNode?.() || node.getScrollableNode?.();
+      const el = inner || (node._nativeTag ? undefined : node);
+      if (el && el.addEventListener && !scrollNodeRef.current) {
+        scrollNodeRef.current = el;
+        el.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+            e.preventDefault();
+            el.scrollLeft += e.deltaY;
+          }
+        }, { passive: false });
+      }
+    }
+  }, []);
 
   return (
     <View style={s.bar}>
       <ScrollView
-        ref={scrollRef}
+        ref={onScrollViewRef}
         horizontal
-        showsHorizontalScrollIndicator={false}
+        showsHorizontalScrollIndicator={Platform.OS === 'web'}
         contentContainerStyle={s.content}
+        scrollEventThrottle={16}
       >
         {MAIN_SECTIONS.map((section) => {
           const isActive = section.name === activeRouteName;
@@ -58,10 +76,7 @@ export function TopTabBar() {
               onLayout={(e) => {
                 const { x, width } = e.nativeEvent.layout;
                 tabLayouts.current[section.name] = { x, width };
-                // If this tab just became visible and is the active one,
-                // re-trigger centering once layout is known.
                 if (isActive && scrollRef.current) {
-                  const screenW = Dimensions.get('window').width;
                   const targetX = Math.max(0, x - screenW / 2 + width / 2);
                   scrollRef.current.scrollTo({ x: targetX, animated: false });
                 }
@@ -91,6 +106,8 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bg,
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
+    // Thin scrollbar on web for discoverability
+    ...(Platform.OS === 'web' ? { overflow: 'hidden' } : {}),
   },
   content: {
     // Extra trailing padding so the last tabs (Donate / Premium / More)

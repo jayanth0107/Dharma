@@ -218,6 +218,8 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
 
     const today = new Date();
 
+    const channelId = Platform.OS === 'android' ? 'dharma-daily' : undefined;
+
     // Schedule daily panchangam notification with real tithi/nakshatra/festivals
     if (settings.dailyPanchangam) {
       await Notifications.scheduleNotificationAsync({
@@ -227,9 +229,10 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
           data: { type: 'daily_panchangam', screen: 'Panchang' },
         },
         trigger: {
+          type: 'daily',
           hour: settings.notifHour,
           minute: settings.notifMinute,
-          repeats: true,
+          ...(channelId && { channelId }),
         },
       });
     }
@@ -243,9 +246,10 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
           data: { type: 'daily_quote', screen: 'Gita' },
         },
         trigger: {
+          type: 'daily',
           hour: 12,
           minute: 0,
-          repeats: true,
+          ...(channelId && { channelId }),
         },
       });
     }

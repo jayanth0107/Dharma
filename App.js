@@ -16,6 +16,29 @@ import { OnboardingScreen } from './src/components/OnboardingScreen';
 import { TabNavigator } from './src/navigation/TabNavigator';
 import { DarkColors, WEB_MAX_WIDTH, IS_WEB } from './src/theme';
 
+// Configure notification handler so notifications display when app is in foreground (mobile only)
+if (Platform.OS !== 'web') {
+  try {
+    const Notifications = require('expo-notifications');
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+    // Create Android notification channel (required for Android 8+)
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('dharma-daily', {
+        name: 'Dharma Daily',
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: 'default',
+        vibrationPattern: [0, 250, 250, 250],
+      });
+    }
+  } catch {}
+}
+
 // Web-only: hide all scrollbars so they don't reserve layout width.
 // Users still scroll via wheel / touch / keyboard. Runs once per page load.
 if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharma-hide-scrollbars')) {

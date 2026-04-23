@@ -1,89 +1,112 @@
-# Google Play Store Listing — Dharma v2.0
+# Google Play Store Listing — Dharma v2.3
 
 ## App Name (30 chars max)
 Dharma: Telugu Astro, Calendar & Gold
 
 ## Short Description (80 chars max)
-Telugu Panchangam, Horoscope, Matchmaking, Muhurtam, Festivals & Gold Prices 🙏
+Telugu Panchangam, Horoscope, Matchmaking, Muhurtam, Rashi Predictions & Gold 🙏
 
 ## Full Description (4000 chars max)
 --- COPY BELOW ---
 
-🙏 ధర్మ 2.0 — Complete Telugu Panchangam & Vedic Astrology App!
+🙏 ధర్మ 2.3 — India's Most Complete Telugu Panchangam & Vedic Astrology App!
 
-ప్రతిరోజూ ఖగోళ శాస్త్ర ఆధారంగా ఖచ్చితమైన పంచాంగ సమాచారం — తిథి, నక్షత్రం, యోగం, కరణం, శుభ ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!
+ప్రతిరోజూ NASA-grade ఖగోళ గణనలతో ఖచ్చితమైన పంచాంగం — తిథి, నక్షత్రం, యోగం, కరణం, శుభ ముహూర్తాలు, జాతకం, జాతక పొందిక, రాశి ఫలాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో! తెలుగు & English రెండు భాషల్లో!
 
 ━━━━━━━━━━━━━━━━
 
-📿 పంచాంగం (Panchangam)
+📿 నేటి పంచాంగం (Today's Panchangam)
 • తిథి, నక్షత్రం, యోగం, కరణం — Drik Ganita ఖగోళ గణనలు
-• శుక్ల/కృష్ణ పక్షం — చంద్ర దశ ప్రదర్శన
-• తెలుగు సంవత్సరం, మాసం, వారం
+• సూర్యోదయం & సూర్యాస్తమయం — మీ నగరానికి ఖచ్చితంగా
+• శుక్ల/కృష్ణ పక్షం, తెలుగు సంవత్సరం, మాసం
+• నేటి విశేషం — చంద్ర దశ, నక్షత్ర దేవత, వారపూజ సూచన
+• బ్రహ్మ ముహూర్తం సమయం — ధ్యానానికి ఉత్తమ సమయం
+
+⏰ శుభ & అశుభ సమయాలు (Auspicious Timings)
+• అభిజిత్ ముహూర్తం, అమృత కాలం, బ్రహ్మ ముహూర్తం
+• రాహు కాలం, యమగండ కాలం, గుళిక కాలం, దుర్ముహూర్తం
+• ప్రస్తుతం ఏ సమయం నడుస్తోందో ప్రత్యక్ష సూచన
 • 13+ నగరాలకు GPS ఆధారిత గణనలు
 
-⏰ శుభ & అశుభ సమయాలు (Timings)
-• బ్రహ్మ ముహూర్తం, అభిజిత్ ముహూర్తం, అమృత కాలం
-• రాహు కాలం, యమగండ కాలం, గుళిక కాలం, దుర్ముహూర్తం
-• సూర్యోదయం & సూర్యాస్తమయం — మీ నగరానికి ఖచ్చితంగా
-• ప్రస్తుతం ఏ సమయం నడుస్తోందో ప్రత్యక్ష సూచన
+💕 అష్టకూట జాతక పొందిక (Matchmaking) ★ NEW
+• 8 కూటాల అష్టకూట కుండలి మిలన్ (36 పాయింట్ల స్కోర్)
+• వరుడు & వధువు వేద లక్షణాలు — వర్ణం, గణం, నాడి, యోని, రాశి అధిపతి
+• రాశి కుండలి చార్ట్‌లు (North Indian diamond style)
+• మంగళ దోష విశ్లేషణ + నివారణ ఉపాయాలు
+• ప్రతి కూటానికి "Read More" — వివరణాత్మక వివరణ + ఉపాయాలు
+• PDF రిపోర్ట్ డౌన్‌లోడ్ & WhatsApp షేర్ — పూర్తి వివరాలతో
+• 5 జంటలు సేవ్ — తిరిగి టైప్ చేయాల్సిన అవసరం లేదు!
 
-🎉 పండుగలు & వ్రతాలు (Festivals)
-• 30+ పండుగలు — తెలుగు & ఆంగ్లంలో వివరణతో
+♌ వేద జాతకం (Vedic Horoscope) ★ ENHANCED
+• చంద్ర రాశి, లగ్నం, నక్షత్రం, సూర్య రాశి — ఖచ్చితమైన గణనం
+• నవగ్రహ స్థానాలు (VedAstro API + astronomy-engine)
+• వ్యక్తిత్వం, వృత్తి, ఆరోగ్యం, సంబంధాలు, ఆధ్యాత్మికత — విస్తృత ఫలాలు
+• రత్నాలు, లోహాలు, శుభ రంగులు, దేవతా ఆరాధన — వేద ఉపాయాలు
+• ప్రతి విభాగానికి "Read More" — మీ వ్యక్తిగత వివరాలతో వివరణ
+• 5 ప్రొఫైల్స్ సేవ్ — కుటుంబ సభ్యుల జాతకం చూడండి
+• తెలుగు & English రెండు భాషల్లో పూర్తి ఫలాలు!
+
+⭐ రాశి ఫలాలు (Daily Rashi Predictions)
+• 12 రాశులకు రోజువారీ ఫలాలు — వృత్తి, ఆర్థికం, ఆరోగ్యం, సంబంధాలు
+• మీ రాశి ఆటోమేటిగ్గా గుర్తింపు — పుట్టిన తేదీ నమోదు చేయండి
+• అదృష్ట సంఖ్య, రంగు, దిక్కు
+• WhatsApp షేర్
+
+⭐ ముహూర్తం ఫైండర్ (Auspicious Date Finder)
+• వివాహం, గృహ ప్రవేశం, ప్రయాణం, వ్యాపారం, వాహనం, విద్య — 7 రకాల ఈవెంట్లు
+• 90 రోజుల్లో శుభ దినాలు — స్కోరు ఆధారంగా ర్యాంక్
+• PDF డౌన్‌లోడ్ & WhatsApp షేర్
+
+🎉 పండుగలు & వ్రతాలు (Festivals & Observances)
+• 30+ పండుగలు — తెలుగు & English వివరణతో
 • 24 ఏకాదశి దినాలు — ప్రాముఖ్యత & దేవత సహితం
 • సంకష్టహర చతుర్థి, పౌర్ణమి, అమావాస్య, ప్రదోషం
-• 22+ ప్రభుత్వ సెలవులు
-• ఫిల్టర్ చేయండి — ఏకాదశి, చతుర్థి, పౌర్ణమి వేరుగా చూడండి
+• 22+ ప్రభుత్వ సెలవులు + ఫిల్టర్ చేయండి
 
-💰 బంగారం & వెండి ధరలు (Gold Prices)
+💰 బంగారం & వెండి ధరలు (Gold & Silver Prices)
 • రోజువారీ 22K, 24K బంగారం & వెండి ధరలు
-• ప్రతి గ్రాం & 10 గ్రాముల ధరలు
-• భారతీయ మార్కెట్ ధరలు (దిగుమతి సుంకం + GST సహా)
+• ధర అలర్ట్ — మీ టార్గెట్ ధరకు నోటిఫికేషన్
 • 3 API ల ద్వారా ఖచ్చితమైన ధరలు + ఆఫ్‌లైన్ కాష్
-
-🙏 దైనిక దర్శనం (Daily Darshan)
-• ప్రతిరోజు వారదేవత — సుందరమైన చిత్రం & మంత్రం
-• సూర్యుడు, శివుడు, హనుమంతుడు, కృష్ణుడు, వేంకటేశ్వరుడు, లక్ష్మీదేవి, శ్రీరాముడు
-• WhatsApp, Telegram, Facebook కి షేర్ చేయండి
 
 📖 భగవద్గీత (Bhagavad Gita)
 • 30 శ్లోకాలు — సంస్కృతం, తెలుగు, ఆంగ్లం
 • రోజువారీ శ్లోకం + థీమ్ ఆధారిత బ్రౌజింగ్
 
-⭐ ముహూర్తం ఫైండర్ (Premium)
-• వివాహం, గృహ ప్రవేశం, ప్రయాణం, వ్యాపారం — 6 రకాల ఈవెంట్లు
-• 90 రోజుల్లో శుభ దినాలు — స్కోరు ఆధారంగా
-• PDF డౌన్‌లోడ్ & షేర్
+🔮 వేద విజ్ఞానం (Vedic Wisdom)
+• న్యూమరాలజీ — జన్మ తేదీ ఆధారిత జీవిత మార్గం
+• పేరు అనుకూలత — రెండు పేర్ల మధ్య స్కోరు
+• నేటి అదృష్టం — రంగు, దిక్కు, దేవత
+• వాస్తు చిట్కాలు + ధ్యాన మార్గదర్శకాలు
 
-♌ రాశి ఫలం — వేద జాతకం (Premium)
-• మీ జన్మ వివరాలతో వేద జాతకం రూపొందించండి
-• రాశి, లగ్నం, నక్షత్రం, నవగ్రహ స్థానాలు
-• వ్యక్తిత్వం, వృత్తి, ఆరోగ్యం, సంబంధాల ఫలాలు
-• PDF డౌన్‌లోడ్ & షేర్ — వాటర్‌మార్క్ సహితం
+🛕 సమీపంలోని దేవాలయాలు (Nearby Temples)
+• Google Places API — GPS ఆధారిత దేవాలయ శోధన
+• రేటింగ్, దూరం, Google Maps నావిగేషన్
 
-📅 మినీ క్యాలెండర్
-• నెలవారీ క్యాలెండర్ — పండుగ/ఏకాదశి మార్కర్లతో
-• నిన్న/ఈ రోజు/రేపు నావిగేషన్
+👶 పిల్లల విభాగం (Kids Section)
+• 50 నీతి కథలు — తెలుగులో (గణేశుడు, హనుమంతుడు, ధ్రువుడు...)
+• 30 శ్లోకాలు — సంస్కృతం + అర్థంతో
 
-👶 పిల్లల విభాగం
-• 7 నీతి కథలు — తెలుగులో (గణేశుడు, హనుమంతుడు, ధ్రువుడు...)
-• 4 శ్లోకాలు — అర్థంతో
+📊 మార్కెట్ (Indian Markets)
+• NSE/BSE ఇండెక్స్‌లు, ETFలు — Yahoo Finance ద్వారా
 
-🔬 ఖగోళ శాస్త్రం ఆధారంగా
+🔬 ఖగోళ శాస్త్రం ఆధారంగా (Astronomical Accuracy)
 Drik Ganita + Lahiri Ayanamsa + astronomy-engine లైబ్రరీ.
-NASA-grade ఖచ్చితత్వం — ఇతర యాప్‌లలో లేని ప్రామాణికత.
+NASA-grade ఖచ్చితత్వం — మీ జన్మ సమయం & స్థలం ఆధారంగా ఖచ్చితమైన గణనలు.
 
-📤 షేర్ & PDF
-• ప్రతి విభాగంలో షేర్ బటన్ — WhatsApp, Telegram, Gmail, Facebook
-• PDF డౌన్‌లోడ్ — ప్రింట్ చేయండి లేదా షేర్ చేయండి
+🌗 ప్రత్యేక లక్షణాలు
+• తెలుగు & English — ఒక్క నొక్కుతో భాష మారుస్తుంది
+• డార్క్ థీమ్ — కళ్ళకు హాయిగా, WCAG AAA ప్రామాణికత
+• ఫారం డేటా గుర్తుంచుకుంటుంది — తిరిగి టైప్ అవసరం లేదు
+• రోజువారీ నోటిఫికేషన్ — పంచాంగం & శ్లోకం
+• PDF రిపోర్ట్ & WhatsApp షేర్ — అన్ని విభాగాల్లో
 
-ధర్మ Daily — ప్రతిరోజూ మీ ఆధ్యాత్మిక సహచరుడు! 🙏
-
+ధర్మ — ప్రతిరోజూ మీ ఆధ్యాత్మిక సహచరుడు! 🙏
 సర్వే జనాః సుఖినో భవంతు
 
 --- END ---
 
-## Keywords (comma separated, max 15)
-telugu panchangam, తెలుగు పంచాంగం, tithi today, nakshatram today, rahu kalam today, today panchangam telugu, gold price today india, ekadashi 2026, telugu calendar 2026, muhurtham, festival calendar telugu, panchang today, hindu calendar 2026, sunrise sunset time, bhagavad gita telugu, rashi phalam telugu, jathakam telugu, vedic horoscope, telugu jathakam, రాశి ఫలం
+## Keywords (comma separated)
+telugu panchangam, తెలుగు పంచాంగం, tithi today, nakshatram today, rahu kalam today, today panchangam telugu, gold price today india, ekadashi 2026, telugu calendar 2026, muhurtham, festival calendar telugu, panchang today, hindu calendar 2026, sunrise sunset time, bhagavad gita telugu, rashi phalam telugu, jathakam telugu, vedic horoscope, telugu jathakam, రాశి ఫలం, matchmaking telugu, kundali milan, ashtakoot matching, jaataka pondika
 
 ## Category
 Lifestyle
@@ -98,7 +121,7 @@ Everyone
 Yes (Google AdMob)
 
 ## In-app Purchases
-Yes (Premium subscription — ₹49/month, ₹299/year, ₹999/lifetime)
+Yes (Premium — Weekly ₹29, Monthly ₹99, Yearly ₹499, Lifetime ₹999)
 
 ## Target Audience
 All ages
@@ -107,49 +130,7 @@ All ages
 1. India
 2. United States
 3. United Kingdom
-4. United Arab Emirates
-5. Singapore
-6. Australia
-7. Canada
-8. Malaysia
-9. South Africa
-10. New Zealand
-
-## Languages
-- Primary: Telugu (te)
-- Secondary: English (en)
-
-## Contact Details
-- Email: (your support email)
-- Website: https://jayanth0107.github.io/DharmaDaily
-
-## Privacy Policy URL
-https://jayanth0107.github.io/DharmaDaily/docs/privacy-policy.html
-
-## Feature Graphic (1024x500)
-Open `assets/feature-graphic.html` in Chrome → Screenshot at 1024x500 → Save as `feature-graphic.jpg`
-Or use: Chrome DevTools → Toggle Device Toolbar → Set to 1024x500 → Screenshot
-
-## Screenshots Required
-- At least 4 screenshots (phone)
-- Recommended: 8 screenshots covering:
-  1. Hero card (date + moon + sunrise/sunset)
-  2. Panchangam section (tithi, nakshatra cards)
-  3. Timings section (muhurtham + rahu kalam)
-  4. Festivals section (with filter pills)
-  5. Gold prices section
-  6. Daily Darshan (deity image)
-  7. Muhurtam Finder (premium feature)
-  8. Bhagavad Gita sloka
-
-## What's New (Release Notes)
-v1.1.0
-• నేపాల్ శైలి ధ్వజం యానిమేషన్ — హెడర్‌లో
-• ముహూర్తం ఫైండర్ — 6 రకాల ఈవెంట్లకు శుభ దినాలు
-• భగవద్గీత 30 శ్లోకాలు — సంస్కృతం, తెలుగు, ఆంగ్లం
-• PDF డౌన్‌లోడ్ ప్రతి విభాగంలో
-• షేర్ — WhatsApp, Telegram, Gmail, Facebook
-• Premium UPI పేమెంట్ — Google Pay, PhonePe, Paytm, BHIM
-• బంగారం & వెండి ప్రత్యక్ష ధరలు
-• మెరుగైన UI — కార్డ్ శైలి విభాగాలు, పల్సింగ్ నావిగేషన్
-• పాత ఫోన్లకు ఆప్టిమైజ్ — GPU యానిమేషన్లు
+4. Canada
+5. Australia
+6. UAE
+7. Singapore

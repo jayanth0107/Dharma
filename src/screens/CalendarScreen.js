@@ -204,23 +204,133 @@ export function CalendarScreen({ route }) {
               );
             })()}
 
-            {/* Panchangam Cards */}
+            {/* Sunrise / Sunset — prominent banner */}
+            {panchangam.sunrise && (
+              <View style={s.sunBanner}>
+                <View style={s.sunItem}>
+                  <MaterialCommunityIcons name="weather-sunset-up" size={22} color="#E8751A" />
+                  <View>
+                    <Text style={s.sunLabel}>{t('సూర్యోదయం', 'Sunrise')}</Text>
+                    <Text style={s.sunTime}>{panchangam.sunriseFormatted || panchangam.sunrise}</Text>
+                  </View>
+                </View>
+                <View style={s.sunDivider} />
+                <View style={s.sunItem}>
+                  <MaterialCommunityIcons name="weather-sunset-down" size={22} color="#9B6FCF" />
+                  <View>
+                    <Text style={s.sunLabel}>{t('సూర్యాస్తమయం', 'Sunset')}</Text>
+                    <Text style={s.sunTime}>{panchangam.sunsetFormatted || panchangam.sunset}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Panchangam Cards — 5 elements */}
             <View style={s.card}>
+              <Text style={s.sectionTitle}>{t('పంచాంగ అంశాలు', 'Panchangam Elements')}</Text>
               <View style={s.cardGrid}>
-                <PanchangaCard label={t(TR.vaaram.te, TR.vaaram.en)} teluguValue={t(panchangam.vaaram.telugu, panchangam.vaaram.english)} sublabel={t(`${TR.deity.te}: ${panchangam.vaaram.deity}`, `${TR.deity.en}: ${panchangam.vaaram.deity}`)} accentColor={panchangam.vaaram.id === 6 ? '#8E8EAE' : panchangam.vaaram.color || DarkColors.silver} />
-                <PanchangaCard label={t(TR.maasam.te, TR.maasam.en)} teluguValue={t(panchangam.teluguMonth.telugu, panchangam.teluguMonth.english)} accentColor={'#9B6FCF'} />
-                <PanchangaCard label={t(TR.samvatsaram.te, TR.samvatsaram.en)} teluguValue={panchangam.teluguYear} accentColor={DarkColors.gold} />
                 <PanchangaCard label={t(TR.tithi.te, TR.tithi.en)} teluguValue={t(panchangam.tithi.telugu, panchangam.tithi.english || panchangam.tithi.telugu)} sublabel={t(panchangam.tithi.paksha + ' ' + TR.paksha.te, (panchangam.tithi.paksha === 'శుక్ల' ? 'Shukla' : 'Krishna') + ' ' + TR.paksha.en)} accentColor={DarkColors.saffron} />
                 <PanchangaCard label={t(TR.nakshatra.te, TR.nakshatra.en)} teluguValue={t(panchangam.nakshatra.telugu, panchangam.nakshatra.english || panchangam.nakshatra.telugu)} sublabel={t(`${TR.deity.te}: ${panchangam.nakshatra.deity}`, `${TR.deity.en}: ${panchangam.nakshatra.deity}`)} accentColor={DarkColors.gold} />
-                <PanchangaCard label={t(TR.yogam.te, TR.yogam.en)} teluguValue={t(panchangam.yoga.telugu, panchangam.yoga.english || panchangam.yoga.telugu)} accentColor={DarkColors.gold} />
+                <PanchangaCard label={t(TR.yogam.te, TR.yogam.en)} teluguValue={t(panchangam.yoga.telugu, panchangam.yoga.english || panchangam.yoga.telugu)} accentColor={DarkColors.tulasiGreen} />
                 <PanchangaCard label={t(TR.karanam.te, TR.karanam.en)} teluguValue={t(panchangam.karana.telugu, panchangam.karana.english || panchangam.karana.telugu)} accentColor={DarkColors.kumkum} />
+                <PanchangaCard label={t(TR.vaaram.te, TR.vaaram.en)} teluguValue={t(panchangam.vaaram.telugu, panchangam.vaaram.english)} sublabel={t(`${TR.deity.te}: ${panchangam.vaaram.deity}`, `${TR.deity.en}: ${panchangam.vaaram.deity}`)} accentColor={panchangam.vaaram.id === 6 ? '#8E8EAE' : panchangam.vaaram.color || DarkColors.silver} />
+                <PanchangaCard label={t(TR.maasam.te, TR.maasam.en)} teluguValue={t(panchangam.teluguMonth.telugu, panchangam.teluguMonth.english)} sublabel={panchangam.teluguYear} accentColor={'#9B6FCF'} />
               </View>
+            </View>
 
-              {/* Daily Sloka */}
-              <View style={{ marginTop: 12 }}>
-                <SlokaCard sloka={panchangam.dailySloka} />
+            {/* Key Timings Summary — quick glance */}
+            <View style={s.card}>
+              <Text style={s.sectionTitle}>{t('ముఖ్య సమయాలు', 'Key Timings')}</Text>
+              <View style={s.timingsQuickGrid}>
+                {/* Auspicious */}
+                {panchangam.abhijitMuhurtam && (
+                  <View style={[s.timingQuickItem, { borderLeftColor: DarkColors.tulasiGreen }]}>
+                    <MaterialCommunityIcons name="check-circle" size={16} color={DarkColors.tulasiGreen} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.timingQuickLabel}>{t('అభిజిత్ ముహూర్తం', 'Abhijit Muhurtam')}</Text>
+                      <Text style={s.timingQuickValue}>{panchangam.abhijitMuhurtam.startFormatted} – {panchangam.abhijitMuhurtam.endFormatted}</Text>
+                    </View>
+                  </View>
+                )}
+                {panchangam.amritKalam && (
+                  <View style={[s.timingQuickItem, { borderLeftColor: DarkColors.gold }]}>
+                    <MaterialCommunityIcons name="star-circle" size={16} color={DarkColors.gold} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.timingQuickLabel}>{t('అమృత కాలం', 'Amrit Kalam')}</Text>
+                      <Text style={s.timingQuickValue}>{panchangam.amritKalam.startFormatted} – {panchangam.amritKalam.endFormatted}</Text>
+                    </View>
+                  </View>
+                )}
+                {/* Inauspicious */}
+                {panchangam.rahuKalam && (
+                  <View style={[s.timingQuickItem, { borderLeftColor: DarkColors.kumkum }]}>
+                    <MaterialCommunityIcons name="close-circle" size={16} color={DarkColors.kumkum} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.timingQuickLabel}>{t('రాహు కాలం', 'Rahu Kalam')}</Text>
+                      <Text style={s.timingQuickValue}>{panchangam.rahuKalam.startFormatted} – {panchangam.rahuKalam.endFormatted}</Text>
+                    </View>
+                  </View>
+                )}
+                {panchangam.yamaGanda && (
+                  <View style={[s.timingQuickItem, { borderLeftColor: '#E8751A' }]}>
+                    <MaterialCommunityIcons name="alert-circle" size={16} color="#E8751A" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.timingQuickLabel}>{t('యమగండ కాలం', 'Yama Gandam')}</Text>
+                      <Text style={s.timingQuickValue}>{panchangam.yamaGanda.startFormatted} – {panchangam.yamaGanda.endFormatted}</Text>
+                    </View>
+                  </View>
+                )}
               </View>
+            </View>
 
+            {/* Today's Significance */}
+            <View style={s.card}>
+              <Text style={s.sectionTitle}>{t('నేటి విశేషం', 'Today\'s Significance')}</Text>
+              <View style={s.significanceList}>
+                <View style={s.sigItem}>
+                  <MaterialCommunityIcons name="moon-waning-crescent" size={18} color={DarkColors.gold} />
+                  <Text style={s.sigText}>
+                    {t(
+                      `${panchangam.tithi.paksha} పక్షం — ${panchangam.tithi.paksha === 'శుక్ల' ? 'చంద్రుడు వృద్ధి చెందుతున్నాడు (వెన్నెల పెరుగుతోంది)' : 'చంద్రుడు క్షీణిస్తున్నాడు (వెన్నెల తగ్గుతోంది)'}`,
+                      `${panchangam.tithi.paksha === 'శుక్ల' ? 'Shukla' : 'Krishna'} Paksha — Moon is ${panchangam.tithi.paksha === 'శుక్ల' ? 'waxing (growing brighter)' : 'waning (growing dimmer)'}`
+                    )}
+                  </Text>
+                </View>
+                <View style={s.sigItem}>
+                  <MaterialCommunityIcons name="star-four-points" size={18} color={DarkColors.gold} />
+                  <Text style={s.sigText}>
+                    {t(
+                      `నేటి నక్షత్రం ${panchangam.nakshatra.telugu} — అధిష్టాన దేవత: ${panchangam.nakshatra.deity}`,
+                      `Today's star is ${panchangam.nakshatra.english || panchangam.nakshatra.telugu} — Ruling deity: ${panchangam.nakshatra.deity}`
+                    )}
+                  </Text>
+                </View>
+                <View style={s.sigItem}>
+                  <MaterialCommunityIcons name="hands-pray" size={18} color={DarkColors.saffron} />
+                  <Text style={s.sigText}>
+                    {t(
+                      `${panchangam.vaaram.telugu} — ${panchangam.vaaram.deity} ఆరాధన శుభప్రదం`,
+                      `${panchangam.vaaram.english || panchangam.vaaram.telugu} — Worship of ${panchangam.vaaram.deity} is auspicious`
+                    )}
+                  </Text>
+                </View>
+                {panchangam.brahmaMuhurtam && (
+                  <View style={s.sigItem}>
+                    <MaterialCommunityIcons name="meditation" size={18} color="#9B6FCF" />
+                    <Text style={s.sigText}>
+                      {t(
+                        `బ్రహ్మ ముహూర్తం: ${panchangam.brahmaMuhurtam.startFormatted} – ${panchangam.brahmaMuhurtam.endFormatted} — ధ్యానం, పూజకు ఉత్తమం`,
+                        `Brahma Muhurtam: ${panchangam.brahmaMuhurtam.startFormatted} – ${panchangam.brahmaMuhurtam.endFormatted} — Best for meditation & prayer`
+                      )}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Daily Sloka */}
+            <View style={s.card}>
+              <SlokaCard sloka={panchangam.dailySloka} />
               <SectionShareRow section="panchangam" buildText={() => buildPanchangamShareText(panchangam, selectedDate, locationDisplay)} />
             </View>
           </>
@@ -530,4 +640,40 @@ const s = StyleSheet.create({
   holidayBadge: { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8 },
   holidayDaysNum: { fontSize: 18, fontWeight: '900', color: DarkColors.gold },
   holidayDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '800', letterSpacing: 0.5 },
+
+  // Sunrise / Sunset banner
+  sunBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    marginHorizontal: 16, marginBottom: 14, paddingVertical: 14, paddingHorizontal: 16,
+    backgroundColor: DarkColors.bgCard, borderRadius: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  sunItem: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sunDivider: { width: 1, height: 32, backgroundColor: DarkColors.borderCard, marginHorizontal: 12 },
+  sunLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700' },
+  sunTime: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginTop: 2 },
+
+  // Section title inside cards
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold, marginBottom: 10, marginHorizontal: 4 },
+
+  // Key Timings quick grid
+  timingsQuickGrid: { gap: 8 },
+  timingQuickItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 10, paddingHorizontal: 12,
+    backgroundColor: DarkColors.bgCard, borderRadius: 12,
+    borderLeftWidth: 3, borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  timingQuickLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '700' },
+  timingQuickValue: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', marginTop: 1 },
+
+  // Today's Significance
+  significanceList: { gap: 10 },
+  sigItem: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    paddingVertical: 8, paddingHorizontal: 10,
+    backgroundColor: DarkColors.bgCard, borderRadius: 12,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  sigText: { flex: 1, fontSize: 14, color: DarkColors.silver, lineHeight: 21, fontWeight: '500' },
 });

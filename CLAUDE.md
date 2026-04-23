@@ -5,7 +5,7 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu Panchangam & Vedic Astrology mobile app. It provides astronomically accurate daily panchangam (Tithi, Nakshatra, Yoga, Karana), auspicious/inauspicious timings, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, Vedic horoscope (జాతకం), matchmaking, daily rashi predictions, live gold/silver prices, Indian market indices, and nearby temple finder — for Telugu-speaking users.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.1.0 (versionCode 5)
+**Version:** 2.3.0 (versionCode 7)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 
@@ -108,6 +108,11 @@ src/
     DonateSection.js                # UPI donation (embedded/modal)
     ReminderModal.js                # Reminder CRUD (embedded/modal)
     SettingsModal.js                # Settings + admin panel (embedded/modal)
+    ClearableInput.js               # TextInput with embedded clear (×) button
+    BirthDatePicker.js              # Scroll wheel date + time picker with manual input
+    BirthTimePicker.js              # Standalone time picker (legacy, merged into BirthDatePicker)
+    KundliChart.js                  # North Indian diamond Kundli chart (full + simple)
+    LocationSearchModal.js          # Full-screen location search (GPS + Google Places + popular cities)
     _deprecated/                    # Old components kept for reference
       FloatingMenu.js, StickyNavTabs.js, BottomTabBar.js, HeaderSection.js,
       ScreenHeader.js, DeityBanner.js, FadeInSection.js, FestivalConfetti.js,
@@ -141,6 +146,8 @@ src/
     whatsappShare.js                # WhatsApp-specific deep-link formatting
     shareCardBuilder.js             # HTML-to-image share card generator
     deviceCapability.js             # Animation/performance detection
+    formStorage.js                  # Shared form persistence (AsyncStorage/localStorage)
+    matchmakingReport.js            # Matchmaking PDF report generator (HTML)
     ratePrompt.js                   # Play Store rating prompt
   config/
     firebase.js                     # Firebase app + Firestore + Auth config

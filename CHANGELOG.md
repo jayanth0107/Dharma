@@ -6,6 +6,55 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.3.0] — 2026-04-23
+
+Major matchmaking overhaul, form persistence, accurate astronomical calculations,
+bilingual predictions, and comprehensive UX improvements across the app.
+
+### Added
+
+- **Shared form storage** (`src/utils/formStorage.js`) — centralized `loadForm/saveForm/clearForm` utility used by all screens. Data stays on-device only.
+- **ClearableInput** (`src/components/ClearableInput.js`) — TextInput with embedded clear (×) button, applied to all 11+ input fields across the app.
+- **BirthDatePicker upgraded** — combined date + time picker (scroll wheels + manual text input), keyboard-aware, bidirectional sync, 1-minute granularity.
+- **Matchmaking: Vedic Characteristics** — per-person profile cards showing 10 attributes (Varna, Gana, Nadi, Yoni, Vashya, Rashi Lord, Nak Lord, Element).
+- **Matchmaking: Read More popups** — each of the 8 kutas has detailed bilingual explanations (What it measures, How it works, Impact on Marriage, Remedy).
+- **Matchmaking: Saved Pairs** — up to 5 groom-bride pairs auto-saved for quick re-use.
+- **Matchmaking: Edit/Back buttons** — navigate from results back to form without losing data.
+- **Matchmaking: Kundli charts in PDF** — HTML-based North Indian diamond chart in the PDF report.
+- **Horoscope: Read More modals** — every section (Rashi, Nakshatra, Lagna, Personality, Career, etc.) has a detail popup with personalized info.
+- **Horoscope: Saved Profiles** — up to 5 birth profiles auto-saved for quick access.
+- **Horoscope: Bilingual predictions** — all 12 rashis × 5 sections now have `{ te, en }` translations with extended personality descriptions.
+- **Panchangam: Sunrise/Sunset banner** — prominent display on the Panchang tab.
+- **Panchangam: Key Timings summary** — Abhijit Muhurtam, Amrit Kalam, Rahu Kalam, Yama Gandam shown inline.
+- **Panchangam: Today's Significance** — moon phase, nakshatra deity, day worship guidance, Brahma Muhurtam timing.
+- **DailyRashi: Highlighted "Know Your Rashi"** — gradient card with gold border.
+- **DailyRashi: Alternating card backgrounds** — zebra-stripe + "My Rashi" gold highlight.
+- **Notification fix** — `setNotificationHandler` in App.js, Android channel `dharma-daily`, `type: 'daily'` triggers.
+- **Disclaimer** added to WhatsApp share text and PDF in matchmaking.
+- **Single port deployment** — all scripts pinned to `--port 8081`.
+
+### Changed
+
+- **Rashi calculation accuracy** — all screens now use `getNakshatraRashiFromDate()` which computes Moon sidereal longitude via `astronomy-engine`, matching the horoscope calculator exactly. Removed the flawed static `NAKSHATRA_TO_RASHI` lookup table fallback.
+- **Form persistence refactored** — HoroscopeFeature, ReminderModal, DailyRashiScreen, MatchmakingScreen all migrated from inline storage to shared `formStorage.js`.
+- **Dynamic recalculation** — nakshatra/rashi always recalculated from DOB on form load, never trusted from cache.
+- **Matchmaking section spacing** — consistent dividers (`rgba(255,255,255,0.15)`) between all sections.
+- **Couple card fonts** — name 18px/900, nakshatra 16px gold, rashi 15px white, with labeled sections.
+- **Horoscope fonts** — all prediction/key-info/navagraha text bumped 2-4px for readability.
+- **Bilingual switching** — score card, conclusion, kuta names/interpretations, section titles all use `t()`.
+- **Horoscope usage limits** — premium daily 10→50, monthly 50→100; free daily 1→2, monthly 3→5.
+- **Reminder minutes** — spinner increments changed from 5min to 1min.
+- **BirthTimePicker minutes** — 0-59 (every minute) instead of 0,5,10,...55.
+
+### Fixed
+
+- **Wrong rashi in matchmaking** — was using static nakshatra-to-rashi table; now uses Moon longitude (`Math.floor(moonDeg / 30)`).
+- **Notifications not working on Android** — missing `setNotificationHandler`, missing channel ID, wrong trigger format.
+- **Close button overlapping score** in Read More modal — changed from absolute to flex layout.
+- **Divider overlapping charts** — added explicit spacer + changed divider color from gold to white.
+
+---
+
 ## [2.1.0] — 2026-04-15
 
 UX & accessibility refresh: WCAG-AAA color tokens, larger fonts, responsive

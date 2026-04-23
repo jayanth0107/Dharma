@@ -2,7 +2,7 @@
 // Fetches temples near user using Google Places API (New) + Google Maps for navigation
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform, ActivityIndicator, TextInput, KeyboardAvoidingView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -12,6 +12,7 @@ import { PageHeader } from '../components/PageHeader';
 import { TopTabBar } from '../components/TopTabBar';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { googlePlacesNearby, googlePlacesTextSearch, googlePlacesNearbyNew, googlePlacesTextSearchNew } from '../utils/placesProxy';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 function calcDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -139,6 +140,24 @@ export function TempleNearbyScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedRange, setSelectedRange] = useState(5);
   const [searchText, setSearchText] = useState('');
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+
+  // Load saved search prefs on mount
+  useEffect(() => {
+    loadForm(FORM_KEYS.temple).then(saved => {
+      if (saved) {
+        if (saved.searchText) setSearchText(saved.searchText);
+        if (saved.selectedRange) setSelectedRange(saved.selectedRange);
+      }
+      setPrefsLoaded(true);
+    });
+  }, []);
+
+  // Auto-save search prefs when they change
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    saveForm(FORM_KEYS.temple, { searchText, selectedRange });
+  }, [searchText, selectedRange, prefsLoaded]);
 
   const lastCoordsRef = useRef('');
   const [usedLat, setUsedLat] = useState(null);
@@ -238,6 +257,7 @@ export function TempleNearbyScreen() {
     <View style={s.screen}>
       <PageHeader title={t('దేవాలయాలు', 'Nearby Temples')} />
       <TopTabBar />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false}>
 
         {/* Location indicator */}
@@ -378,6 +398,7 @@ export function TempleNearbyScreen() {
 
         <View style={{ height: 30 }} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
     </SwipeWrapper>
   );

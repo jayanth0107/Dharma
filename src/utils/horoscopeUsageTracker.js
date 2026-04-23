@@ -45,8 +45,8 @@ async function getStorage() {
 const STORAGE_KEY = '@dharma_horoscope_tracker';
 
 const LIMITS = {
-  free: { monthly: 3, daily: 1, cooldownSec: 60 },
-  premium: { monthly: 50, daily: 10, cooldownSec: 15 },
+  free: { monthly: 5, daily: 2, cooldownSec: 30 },
+  premium: { monthly: 100, daily: 50, cooldownSec: 5 },
 };
 
 const SUSPICIOUS_NAME_THRESHOLD = 10;
@@ -129,6 +129,9 @@ export async function loadUsageData() {
     if (typeof data.count !== 'number') { data.count = 0; changed = true; }
     if (typeof data.dailyCount !== 'number') { data.dailyCount = 0; changed = true; }
     if (typeof data.lastGenTime !== 'number') { data.lastGenTime = 0; changed = true; }
+
+    // One-time reset: clear counters if they exceeded old lower limits (limit migration)
+    if (data.dailyCount >= 10 || data.count >= 50) { data.dailyCount = 0; data.count = 0; changed = true; }
 
     if (changed) {
       await store.setItem(STORAGE_KEY, JSON.stringify(data));

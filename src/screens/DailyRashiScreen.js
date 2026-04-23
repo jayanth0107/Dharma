@@ -10,51 +10,24 @@ import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
-import { CalendarPicker } from '../components/CalendarPicker';
+import { BirthDatePicker } from '../components/BirthDatePicker';
 import { getAllDailyRashi, RASHIS } from '../utils/dailyRashiService';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SectionShareRow } from '../components/SectionShareRow';
+import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
+import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
 
-// Detect rashi from birth date using moon longitude
+// Detect rashi from birth date using accurate Moon sidereal longitude
 function detectRashiFromDOB(date) {
   try {
-    const { calculateNakshatra } = require('../utils/panchangamCalculator');
-    const nak = calculateNakshatra(date);
-    if (!nak) return null;
-    // Map nakshatra to rashi index (each rashi = 2.25 nakshatras)
-    const NAKSHATRAMS = require('../data/panchangam').NAKSHATRAMS;
-    const nakIndex = NAKSHATRAMS?.findIndex(n => n.telugu === nak.telugu);
-    if (nakIndex < 0) return null;
-    const rashiIndex = Math.floor(nakIndex / 2.25);
-    return Math.min(rashiIndex, 11);
+    const { rashiIndex } = getNakshatraRashiFromDate(date);
+    return rashiIndex;
   } catch {
     return null;
   }
 }
 
-// Persist my rashi in storage
-const RASHI_KEY = '@dharma_my_rashi';
-async function loadMyRashi() {
-  try {
-    if (Platform.OS === 'web') {
-      const raw = localStorage.getItem(RASHI_KEY);
-      return raw ? JSON.parse(raw) : null;
-    }
-    const AS = require('@react-native-async-storage/async-storage').default;
-    const raw = await AS.getItem(RASHI_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-async function saveMyRashi(data) {
-  try {
-    const json = JSON.stringify(data);
-    if (Platform.OS === 'web') localStorage.setItem(RASHI_KEY, json);
-    else {
-      const AS = require('@react-native-async-storage/async-storage').default;
-      await AS.setItem(RASHI_KEY, json);
-    }
-  } catch {}
-}
+// Persist my rashi via shared form storage
 
 const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
 
@@ -69,7 +42,9 @@ function buildRashiShareText(pred, date) {
     `❤️ *ఆరోగ్యం:* ${pred.health.te}\n` +
     `🤝 *సంబంధాలు:* ${pred.relationship.te}\n\n` +
     `🔢 అదృష్ట సంఖ్య: ${pred.luckyNumber} | 🎨 ${pred.luckyColor.te}\n\n` +
-    `━━━━━━━━━━━━━━━━\n📲 *Dharma App* — Telugu Rashi Predictions\n${PLAY_LINK}`;
+    `━━━━━━━━━━━━━━━━\n` +
+    `⚠️ _ఈ ఫలితం వేద జ్యోతిషం ఆధారంగా సలహా మాత్రమే._\n\n` +
+    `📲 *Dharma App* — Telugu Rashi Predictions\n${PLAY_LINK}`;
 }
 
 export function DailyRashiScreen() {
@@ -90,7 +65,19 @@ export function DailyRashiScreen() {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
-  useEffect(() => { loadMyRashi().then(setMyRashi); }, []);
+  // Always recalculate rashi from DOB — never trust cached index
+  useEffect(() => {
+    loadForm(FORM_KEYS.myRashi).then(saved => {
+      if (saved?.dob) {
+        try {
+          const { rashiIndex } = getNakshatraRashiFromDate(new Date(saved.dob));
+          setMyRashi({ ...saved, rashiIndex, rashiTe: RASHIS[rashiIndex].te, rashiEn: RASHIS[rashiIndex].en });
+        } catch { setMyRashi(saved); }
+      } else {
+        setMyRashi(saved);
+      }
+    });
+  }, []);
 
   const handleDobSelect = async (date) => {
     setShowDobPicker(false);
@@ -103,20 +90,14 @@ export function DailyRashiScreen() {
         rashiEn: RASHIS[rashiIndex].en,
       };
       setMyRashi(data);
-      await saveMyRashi(data);
+      await saveForm(FORM_KEYS.myRashi, data);
       setExpanded(null); // Reset expanded
     }
   };
 
   const handleClearRashi = async () => {
     setMyRashi(null);
-    try {
-      if (Platform.OS === 'web') localStorage.removeItem(RASHI_KEY);
-      else {
-        const AS = require('@react-native-async-storage/async-storage').default;
-        await AS.removeItem(RASHI_KEY);
-      }
-    } catch {}
+    clearForm(FORM_KEYS.myRashi);
   };
 
   // Sort: my rashi first, then rest
@@ -152,13 +133,21 @@ export function DailyRashiScreen() {
             </View>
           </View>
         ) : (
-          <TouchableOpacity style={s.setRashiCard} onPress={() => setShowDobPicker(true)}>
-            <Image source={require('../../assets/zodiac/leo.png')} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
-            <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={s.setRashiTitle}>{t('మీ రాశి తెలుసుకోండి', 'Know Your Rashi')}</Text>
-              <Text style={s.setRashiSub}>{t('పుట్టిన తేదీ నమోదు చేయండి → రాశి స్వయంచాలకంగా గుర్తించబడుతుంది', 'Enter birth date → Rashi auto-detected from moon position')}</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.textMuted} />
+          <TouchableOpacity style={s.setRashiCardOuter} onPress={() => setShowDobPicker(true)} activeOpacity={0.8}>
+            <LinearGradient
+              colors={['rgba(212,160,23,0.15)', 'rgba(232,117,26,0.10)', 'rgba(212,160,23,0.05)']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={s.setRashiGradient}
+            >
+              <Image source={require('../../assets/zodiac/leo.png')} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
+              <View style={{ flex: 1, marginLeft: 14 }}>
+                <Text style={s.setRashiTitle}>{t('మీ రాశి తెలుసుకోండి', 'Know Your Rashi')}</Text>
+                <Text style={s.setRashiSub}>{t('పుట్టిన తేదీ నమోదు చేయండి → రాశి స్వయంచాలకంగా గుర్తించబడుతుంది', 'Enter birth date → Rashi auto-detected from moon position')}</Text>
+              </View>
+              <View style={s.setRashiArrow}>
+                <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.gold} />
+              </View>
+            </LinearGradient>
           </TouchableOpacity>
         )}
 
@@ -167,10 +156,13 @@ export function DailyRashiScreen() {
           const isMyRashi = myRashi && pred.rashi.en === RASHIS[myRashi.rashiIndex].en;
           const originalIndex = predictions.indexOf(pred);
 
+          // Alternate background tints based on index
+          const cardBg = i % 2 === 0 ? 'rgba(212,160,23,0.04)' : 'transparent';
+
           return (
             <TouchableOpacity
               key={originalIndex}
-              style={s.rashiCard}
+              style={[s.rashiCard, { backgroundColor: cardBg }, isMyRashi && s.myRashiHighlight]}
               onPress={() => setExpanded(expanded === originalIndex ? null : originalIndex)}
               activeOpacity={0.7}
             >
@@ -286,14 +278,15 @@ export function DailyRashiScreen() {
       </ScrollView>
 
       {/* Date Picker — outside ScrollView so it overlays the full screen */}
-      {showDobPicker && (
-        <CalendarPicker
-          selectedDate={myRashi?.dob ? new Date(myRashi.dob) : null}
-          title={t('పుట్టిన తేదీ ఎంచుకోండి', 'Select Birth Date')}
-          onSelect={handleDobSelect}
-          onClose={() => setShowDobPicker(false)}
-        />
-      )}
+      <BirthDatePicker
+        visible={showDobPicker}
+        selectedDate={myRashi?.dob ? new Date(myRashi.dob) : null}
+        showTime
+        title={t('పుట్టిన తేదీ & సమయం', 'Birth Date & Time')}
+        lang={lang === 'te' ? 'te' : 'en'}
+        onSelect={handleDobSelect}
+        onClose={() => setShowDobPicker(false)}
+      />
     </View>
     </SwipeWrapper>
   );
@@ -323,16 +316,26 @@ const s = StyleSheet.create({
   changeBtn: { paddingHorizontal: 14, paddingVertical: 8 },
   changeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
 
-  // Set Rashi prompt (when not set)
-  setRashiCard: {
-    flexDirection: 'row', alignItems: 'center', paddingBottom: 18, marginBottom: 10,
-    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
+  // Set Rashi prompt (when not set) — highlighted card
+  setRashiCardOuter: {
+    marginBottom: 16, borderRadius: 16, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: DarkColors.borderGold,
   },
-  setRashiTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.silver },
-  setRashiSub: { fontSize: 14, color: DarkColors.textMuted, marginTop: 4, lineHeight: 20 },
+  setRashiGradient: {
+    flexDirection: 'row', alignItems: 'center',
+    padding: 16,
+  },
+  setRashiTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
+  setRashiSub: { fontSize: 13, color: DarkColors.silver, marginTop: 4, lineHeight: 20 },
+  setRashiArrow: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(212,160,23,0.15)',
+    alignItems: 'center', justifyContent: 'center',
+  },
 
   // Rashi card
-  rashiCard: { paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
+  rashiCard: { paddingVertical: 14, paddingHorizontal: 12, marginBottom: 6, borderRadius: 14, borderWidth: 1, borderColor: DarkColors.borderCard },
+  myRashiHighlight: { borderColor: DarkColors.borderGold, borderWidth: 1.5, backgroundColor: 'rgba(212,160,23,0.06)' },
   rashiHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   rashiName: { fontSize: 19, fontWeight: '800', color: DarkColors.silver },
   rashiMeta: { fontSize: 13, color: DarkColors.textMuted, marginTop: 3 },

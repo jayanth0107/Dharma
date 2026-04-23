@@ -1,50 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity, TextInput,
-  Platform, Alert, ScrollView,
+  Platform, Alert, ScrollView, KeyboardAvoidingView,
 } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { ModalOrView } from './ModalOrView';
-import { CalendarPicker } from './CalendarPicker';
+import { BirthDatePicker } from './BirthDatePicker';
+import { ClearableInput } from './ClearableInput';
 import { useLanguage } from '../context/LanguageContext';
-
-// --- Persistent Storage (AsyncStorage on native, localStorage on web) ---
-const Storage = {
-  async getItem(key) {
-    try {
-      if (Platform.OS === 'web') {
-        return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
-      }
-      // For native, use AsyncStorage if available, else fallback
-      try {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-        return await AsyncStorage.getItem(key);
-      } catch {
-        return null;
-      }
-    } catch {
-      return null;
-    }
-  },
-  async setItem(key, value) {
-    try {
-      if (Platform.OS === 'web') {
-        if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
-        return;
-      }
-      try {
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-        await AsyncStorage.setItem(key, value);
-      } catch { /* AsyncStorage not available */ }
-    } catch (e) {
-      console.warn('Storage.setItem failed:', e);
-    }
-  },
-};
-
-const STORAGE_KEY = '@dharma_reminders';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 export function getReminderCount(reminders) {
   return (reminders || []).length;
@@ -70,7 +36,7 @@ export function ReminderFAB({ onPress }) {
 }
 
 export function ReminderModal({ visible, onClose, selectedDate, embedded = false }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   // ── Responsive values ──
   const headerPadV = usePick({ default: 14, md: 16, xl: 20 });
   const headerPadH = usePick({ default: 16, md: 20, xl: 28 });
@@ -139,24 +105,13 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
 
   async function loadReminders() {
     try {
-      const stored = await Storage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setReminders(parsed);
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to load reminders:', e);
-    }
+      const parsed = await loadForm(FORM_KEYS.reminders);
+      if (Array.isArray(parsed)) setReminders(parsed);
+    } catch {}
   }
 
   async function saveReminders(data) {
-    try {
-      await Storage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.warn('Failed to save reminders:', e);
-    }
+    try { await saveForm(FORM_KEYS.reminders, data); } catch {}
   }
 
   function formatDateForInput(d) {
@@ -257,6 +212,7 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
             </View>
           </View>
 
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           {showList ? (
             /* Reminder List */
             <ScrollView style={[styles.listContainer, { padding: sectionPad }]}>
@@ -304,18 +260,18 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
                   {dateStr || 'తేదీ ఎంచుకోండి'}
                 </Text>
               </TouchableOpacity>
-              {showCalendar && (
-                <CalendarPicker
-                  selectedDate={dateObj}
-                  title="రిమైండర్ తేదీ"
-                  onSelect={(d) => {
-                    setDateObj(d);
-                    setDateStr(formatDateForInput(d));
-                    setShowCalendar(false);
-                  }}
-                  onClose={() => setShowCalendar(false)}
-                />
-              )}
+              <BirthDatePicker
+                visible={showCalendar}
+                selectedDate={dateObj}
+                title="రిమైండర్ తేదీ"
+                lang={lang === 'te' ? 'te' : 'en'}
+                onSelect={(d) => {
+                  setDateObj(d);
+                  setDateStr(formatDateForInput(d));
+                  setShowCalendar(false);
+                }}
+                onClose={() => setShowCalendar(false)}
+              />
 
               {/* Time — 12-hour AM/PM Picker (matches Horoscope style) */}
               <View style={[styles.fieldBlock, { padding: fieldBlockPad, borderRadius: fieldRadius, marginBottom: fieldMarginB }]}>
@@ -358,11 +314,11 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
                         <View style={styles.timeCol}>
                           <Text style={styles.timeColLabel}>నిమిషం</Text>
                           <View style={styles.timeSpinnerRow}>
-                            <TouchableOpacity style={[styles.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (mn - 5 + 60) % 60, isPm)}>
+                            <TouchableOpacity style={[styles.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (mn - 1 + 60) % 60, isPm)}>
                               <MaterialCommunityIcons name="minus" size={18} color={DarkColors.gold} />
                             </TouchableOpacity>
                             <Text style={[styles.timeSpinValue, { fontSize: timeDigitSize }]}>{String(mn).padStart(2, '0')}</Text>
-                            <TouchableOpacity style={[styles.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (mn + 5) % 60, isPm)}>
+                            <TouchableOpacity style={[styles.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (mn + 1) % 60, isPm)}>
                               <MaterialCommunityIcons name="plus" size={18} color={DarkColors.gold} />
                             </TouchableOpacity>
                           </View>
@@ -392,7 +348,7 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
                   <MaterialCommunityIcons name="format-title" size={fieldIconSize} color={DarkColors.gold} style={{ marginRight: fieldIconMR }} />
                   <Text style={[styles.fieldLabel, { fontSize: labelFontSize }]}>శీర్షిక</Text>
                 </View>
-                <TextInput
+                <ClearableInput
                   style={[styles.fieldTextInput, { fontSize: inputFontSize }]}
                   value={title}
                   onChangeText={setTitle}
@@ -409,7 +365,7 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
                   <MaterialCommunityIcons name="note-text" size={fieldIconSize} color={DarkColors.gold} style={{ marginRight: fieldIconMR }} />
                   <Text style={[styles.fieldLabel, { fontSize: labelFontSize }]}>గమనిక</Text>
                 </View>
-                <TextInput
+                <ClearableInput
                   style={[styles.fieldTextInput, { fontSize: inputFontSize }, styles.noteInput, { minHeight: noteMinHeight }]}
                   value={note}
                   onChangeText={setNote}
@@ -428,6 +384,7 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
               </TouchableOpacity>
             </ScrollView>
           )}
+          </KeyboardAvoidingView>
 
           {/* Fixed close button — always visible at bottom */}
           <TouchableOpacity style={[styles.fixedCloseBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMH, marginBottom: closeBtnMB, borderRadius: closeBtnRadius }]} onPress={onClose} accessibilityLabel="మూసివేయండి" accessibilityRole="button">

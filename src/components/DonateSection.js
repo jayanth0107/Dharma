@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Linking, Alert,
   Modal, ScrollView, Platform, Share, Image,
@@ -11,6 +11,7 @@ import { trackEvent } from '../utils/analytics';
 import { useLanguage } from '../context/LanguageContext';
 import { usePick } from '../theme/responsive';
 import { TR } from '../data/translations';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 // ---- CONFIGURATION ----
 const UPI_ID = '9535251573@ibl';
@@ -238,6 +239,18 @@ export function DonateCard({ onExpand }) {
 export function DonateModal({ visible, onClose, initialAmount, embedded = false }) {
   const [selectedAmount, setSelectedAmount] = useState(initialAmount || 101);
   const { t } = useLanguage();
+
+  // Load saved donation preference on mount
+  useEffect(() => {
+    loadForm(FORM_KEYS.donate).then(saved => {
+      if (saved?.selectedAmount && !initialAmount) setSelectedAmount(saved.selectedAmount);
+    });
+  }, []);
+
+  // Auto-save selected amount
+  useEffect(() => {
+    if (selectedAmount) saveForm(FORM_KEYS.donate, { selectedAmount });
+  }, [selectedAmount]);
 
   // Responsive values
   const headerPadH = usePick({ default: 16, lg: 20, xl: 24 });

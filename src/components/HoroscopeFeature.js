@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  TextInput, Platform, Alert, ActivityIndicator, Image, Linking,
+  TextInput, Platform, Alert, ActivityIndicator, Image, Linking, Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -13,7 +13,11 @@ import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
 import { googlePlacesAutocomplete, googlePlaceDetails } from '../utils/placesProxy';
 import { SectionShareRow } from './SectionShareRow';
-import { CalendarPicker } from './CalendarPicker';
+import { BirthDatePicker } from './BirthDatePicker';
+// BirthTimePicker merged into BirthDatePicker (showTime prop)
+import { LocationSearchModal } from './LocationSearchModal';
+import { ClearableInput } from './ClearableInput';
+import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
 
 // ── Horoscope Card (shown in main feed) ──
 export function HoroscopeCard({ onOpen, isPremium }) {
@@ -86,31 +90,7 @@ function getHoroscopeQrUrl(amount) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiStr)}`;
 }
 
-// Storage key for persisting form entries
-const HORO_FORM_KEY = '@dharma_horoscope_form';
-
-async function loadSavedForm() {
-  try {
-    if (Platform.OS === 'web') {
-      const raw = localStorage.getItem(HORO_FORM_KEY);
-      return raw ? JSON.parse(raw) : null;
-    }
-    const AS = require('@react-native-async-storage/async-storage').default;
-    const raw = await AS.getItem(HORO_FORM_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-async function saveFormData(data) {
-  try {
-    const json = JSON.stringify(data);
-    if (Platform.OS === 'web') localStorage.setItem(HORO_FORM_KEY, json);
-    else {
-      const AS = require('@react-native-async-storage/async-storage').default;
-      await AS.setItem(HORO_FORM_KEY, json);
-    }
-  } catch {}
-}
+// Form persistence via shared utility
 
 // ── Horoscope Modal (form + payment + results) ──
 export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, embedded = false }) {
@@ -134,17 +114,22 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
   const [placeQuery, setPlaceQuery] = useState('');
   const [placeResults, setPlaceResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [horoscope, setHoroscope] = useState(null);
   const [usageInfo, setUsageInfo] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [qrFailed, setQrFailed] = useState(false);
   const [formLoaded, setFormLoaded] = useState(false);
+  const [horoDetailModal, setHoroDetailModal] = useState(null); // key from HOROSCOPE_SECTION_DETAILS
+  const [savedProfiles, setSavedProfiles] = useState([]); // max 5 saved profiles
+  const [showSavedList, setShowSavedList] = useState(false);
   const searchTimer = useRef(null);
 
-  // Load saved form on first open
+  // Load saved form + saved profiles on first open
   React.useEffect(() => {
     if (visible && !formLoaded) {
-      loadSavedForm().then(saved => {
+      loadForm(FORM_KEYS.horoscope).then(saved => {
         if (saved) {
           if (saved.name) setName(saved.name);
           if (saved.birthDate) setBirthDate(saved.birthDate);
@@ -155,13 +140,52 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
         }
         setFormLoaded(true);
       });
+      loadForm(FORM_KEYS.horoscopeSaved).then(list => {
+        if (Array.isArray(list)) setSavedProfiles(list);
+      });
     }
   }, [visible, formLoaded]);
+
+  // Save profile to the list after generating a result (max 5, no duplicates by name+dob)
+  const saveProfileToList = (profileName, dob, time, place, placeQ) => {
+    const key = `${profileName}|${dob}`;
+    const entry = { name: profileName, birthDate: dob, birthDateObj: null, birthTime: time, birthPlace: place, placeQuery: placeQ || place?.name || '', savedAt: new Date().toISOString() };
+    setSavedProfiles(prev => {
+      const filtered = prev.filter(p => `${p.name}|${p.birthDate}` !== key);
+      const updated = [entry, ...filtered].slice(0, 5);
+      saveForm(FORM_KEYS.horoscopeSaved, updated);
+      return updated;
+    });
+  };
+
+  // Load a saved profile into the form
+  const loadProfile = (profile) => {
+    setName(profile.name || '');
+    setBirthDate(profile.birthDate || '');
+    setBirthDateObj(profile.birthDate ? (() => {
+      const parts = profile.birthDate.split('-');
+      if (parts.length === 3) return new Date(+parts[2], +parts[1] - 1, +parts[0]);
+      return null;
+    })() : null);
+    setBirthTime(profile.birthTime || '06:00');
+    setBirthPlace(profile.birthPlace || null);
+    setPlaceQuery(profile.placeQuery || profile.birthPlace?.name || '');
+    setShowSavedList(false);
+  };
+
+  // Delete a saved profile
+  const deleteProfile = (idx) => {
+    setSavedProfiles(prev => {
+      const updated = prev.filter((_, i) => i !== idx);
+      saveForm(FORM_KEYS.horoscopeSaved, updated);
+      return updated;
+    });
+  };
 
   // Auto-save form entries when they change
   React.useEffect(() => {
     if (formLoaded && (name || birthDate || birthTime || birthPlace)) {
-      saveFormData({ name, birthDate, birthDateObj: birthDateObj?.toISOString(), birthTime, placeQuery, birthPlace });
+      saveForm(FORM_KEYS.horoscope, { name, birthDate, birthDateObj: birthDateObj?.toISOString(), birthTime, placeQuery, birthPlace });
     }
   }, [name, birthDate, birthTime, birthPlace, formLoaded]);
 
@@ -251,6 +275,8 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
       const localResult = generateHoroscope(name.trim(), date, birthTime, birthPlace);
       setHoroscope(localResult);
       setStep('result');
+      // Auto-save this profile for quick access later (max 5)
+      saveProfileToList(name.trim(), birthDate, birthTime, birthPlace, placeQuery);
       // Then try enhanced APIs in background (adds Navagraha if available)
       generateEnhancedHoroscope(name.trim(), date, birthTime, birthPlace)
         .then(enhanced => { if (enhanced.navagraha) setHoroscope(enhanced); })
@@ -355,13 +381,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       setName(''); setBirthDate(''); setBirthDateObj(null);
                       setBirthTime('06:00'); setBirthPlace(null); setPlaceQuery('');
                       setPlaceResults([]);
-                      try {
-                        if (Platform.OS === 'web') localStorage.removeItem(HORO_FORM_KEY);
-                        else {
-                          const AS = require('@react-native-async-storage/async-storage').default;
-                          await AS.removeItem(HORO_FORM_KEY);
-                        }
-                      } catch {}
+                      clearForm(FORM_KEYS.horoscope);
                     }}
                   >
                     <MaterialCommunityIcons name="eraser" size={16} color={DarkColors.textMuted} />
@@ -369,13 +389,43 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   </TouchableOpacity>
                 </View>
 
+                {/* Saved Profiles — quick load */}
+                {savedProfiles.length > 0 && (
+                  <View style={s.savedSection}>
+                    <TouchableOpacity style={s.savedToggle} onPress={() => setShowSavedList(!showSavedList)} activeOpacity={0.7}>
+                      <MaterialCommunityIcons name="account-group" size={18} color={DarkColors.gold} />
+                      <Text style={s.savedToggleText}>{t('సేవ్ చేసిన ప్రొఫైల్స్', 'Saved Profiles')} ({savedProfiles.length})</Text>
+                      <MaterialCommunityIcons name={showSavedList ? 'chevron-up' : 'chevron-down'} size={18} color={DarkColors.gold} />
+                    </TouchableOpacity>
+                    {showSavedList && (
+                      <View style={s.savedList}>
+                        {savedProfiles.map((p, idx) => (
+                          <View key={idx} style={s.savedItem}>
+                            <TouchableOpacity style={s.savedItemMain} onPress={() => loadProfile(p)} activeOpacity={0.7}>
+                              <MaterialCommunityIcons name="account-circle" size={28} color={DarkColors.gold} />
+                              <View style={{ flex: 1 }}>
+                                <Text style={s.savedName}>{p.name}</Text>
+                                <Text style={s.savedMeta}>{p.birthDate} · {p.birthTime || '—'} · {p.birthPlace?.name || p.placeQuery || '—'}</Text>
+                              </View>
+                              <MaterialCommunityIcons name="arrow-right-circle" size={20} color={DarkColors.gold} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={s.savedDeleteBtn} onPress={() => deleteProfile(idx)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                              <MaterialCommunityIcons name="close" size={16} color={DarkColors.textMuted} />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                )}
+
                 {/* Name */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
                     <MaterialCommunityIcons name="account" size={18} color={DarkColors.gold} />
                     <Text style={s.fieldLabel}>{t('పేరు', 'Name')}</Text>
                   </View>
-                  <TextInput
+                  <ClearableInput
                     style={s.input}
                     value={name}
                     onChangeText={setName}
@@ -385,193 +435,104 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   />
                 </View>
 
-                {/* Birth Date — Calendar Picker */}
-                <View style={s.field}>
-                  <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="calendar" size={18} color={DarkColors.gold} />
-                    <Text style={s.fieldLabel}>{t('జన్మ తేదీ', 'Date of Birth')}</Text>
+                {/* Birth Date + Time — same row, tappable fields (AstroSage style) */}
+                <View style={s.dateTimeRow}>
+                  {/* Date — tap to open BirthDatePicker */}
+                  <View style={[s.field, { flex: 1, marginRight: 8 }]}>
+                    <View style={s.fieldHeader}>
+                      <MaterialCommunityIcons name="calendar" size={18} color={DarkColors.gold} />
+                      <Text style={s.fieldLabel}>{t('జన్మ తేదీ', 'Date of Birth')}</Text>
+                    </View>
+                    <TouchableOpacity style={s.input} onPress={() => setShowDatePicker(true)}>
+                      <Text style={birthDate ? { fontSize: 15, color: DarkColors.silver, fontWeight: '700' } : { fontSize: 15, color: DarkColors.textMuted }}>
+                        {birthDate || t('తేదీ ఎంచుకోండి', 'Select Date')}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity style={s.input} onPress={() => setShowDatePicker(true)}>
-                    <Text style={birthDate ? { fontSize: 15, color: DarkColors.silver } : { fontSize: 15, color: DarkColors.textMuted }}>
-                      {birthDate || t('తేదీ ఎంచుకోండి', 'Select Date')}
-                    </Text>
-                  </TouchableOpacity>
-                  {showDatePicker && (
-                    <CalendarPicker
-                      selectedDate={birthDateObj}
-                      title="జన్మ తేదీ / Date of Birth"
-                      onSelect={(d) => {
-                        setBirthDateObj(d);
-                        setBirthDate(`${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`);
-                        setShowDatePicker(false);
-                      }}
-                      onClose={() => setShowDatePicker(false)}
-                    />
-                  )}
+                  {/* Time — tap to open combined date+time picker */}
+                  <View style={[s.field, { flex: 1 }]}>
+                    <View style={s.fieldHeader}>
+                      <MaterialCommunityIcons name="clock-outline" size={18} color={DarkColors.gold} />
+                      <Text style={s.fieldLabel}>{t('సమయం', 'Time')}</Text>
+                    </View>
+                    <TouchableOpacity style={s.input} onPress={() => setShowDatePicker(true)}>
+                      <Text style={{ fontSize: 15, color: DarkColors.silver, fontWeight: '700' }}>
+                        {(() => { const [h24, m] = (birthTime || '06:00').split(':').map(Number); const isPm = h24 >= 12; const h12 = h24 % 12 === 0 ? 12 : h24 % 12; return `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${isPm ? 'PM' : 'AM'}`; })()}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
-                {/* Birth Time — 12-hour AM/PM Picker */}
-                <View style={s.field}>
-                  <View style={s.fieldHeader}>
-                    <MaterialCommunityIcons name="clock-outline" size={18} color={DarkColors.gold} />
-                    <Text style={s.fieldLabel}>{t('జన్మ సమయం', 'Time of Birth')}</Text>
-                  </View>
-                  {(() => {
-                    const [h24, m] = (birthTime || '06:00').split(':').map(Number);
-                    const isPm = h24 >= 12;
-                    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-                    const setFrom = (newH12, newM, newPm) => {
-                      let newH24 = newH12 % 12;
-                      if (newPm) newH24 += 12;
-                      setBirthTime(`${String(newH24).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
-                    };
-                    return (
-                      <View style={s.timePickerWrap}>
-                        {/* Time display */}
-                        <Text style={[s.timeDisplayBig, { fontSize: timeDisplaySize }]}>
-                          {String(h12).padStart(2, '0')}:{String(m).padStart(2, '0')} {isPm ? 'PM' : 'AM'}
-                        </Text>
+                {/* BirthDatePicker modal — combined date + time */}
+                <BirthDatePicker
+                  visible={showDatePicker}
+                  selectedDate={birthDateObj}
+                  selectedTime={birthTime || '06:00'}
+                  showTime
+                  lang={lang}
+                  title={t('జన్మ తేదీ & సమయం', 'Date & Time of Birth')}
+                  onSelect={(d, timeStr) => {
+                    setBirthDateObj(d);
+                    setBirthDate(`${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`);
+                    if (timeStr) setBirthTime(timeStr);
+                    setShowDatePicker(false);
+                  }}
+                  onClose={() => setShowDatePicker(false)}
+                />
 
-                        <View style={s.timeControlsRow}>
-                          {/* Hour column */}
-                          <View style={s.timeColumn}>
-                            <Text style={s.timeColumnLabel}>{t('గంట', 'Hour')}</Text>
-                            <View style={s.timeSpinnerRow}>
-                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12 === 1 ? 12 : h12 - 1, m, isPm)}>
-                                <MaterialCommunityIcons name="minus" size={18} color={DarkColors.gold} />
-                              </TouchableOpacity>
-                              <Text style={[s.timeSpinValue, { fontSize: timeDigitSize }]}>{String(h12).padStart(2, '0')}</Text>
-                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12 === 12 ? 1 : h12 + 1, m, isPm)}>
-                                <MaterialCommunityIcons name="plus" size={18} color={DarkColors.gold} />
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-
-                          <Text style={s.timeColonBig}>:</Text>
-
-                          {/* Minute column */}
-                          <View style={s.timeColumn}>
-                            <Text style={s.timeColumnLabel}>{t('నిమిషం', 'Minute')}</Text>
-                            <View style={s.timeSpinnerRow}>
-                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (m - 5 + 60) % 60, isPm)}>
-                                <MaterialCommunityIcons name="minus" size={18} color={DarkColors.gold} />
-                              </TouchableOpacity>
-                              <Text style={[s.timeSpinValue, { fontSize: timeDigitSize }]}>{String(m).padStart(2, '0')}</Text>
-                              <TouchableOpacity style={[s.timeSpinBtn, { width: spinBtnSize, height: spinBtnSize, borderRadius: spinBtnSize / 2 }]} onPress={() => setFrom(h12, (m + 5) % 60, isPm)}>
-                                <MaterialCommunityIcons name="plus" size={18} color={DarkColors.gold} />
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-
-                          {/* AM/PM column */}
-                          <View style={s.timeColumn}>
-                            <Text style={s.timeColumnLabel}>{t('కాలం', 'Period')}</Text>
-                            <View style={s.ampmGroup}>
-                              <TouchableOpacity
-                                style={[s.ampmBtn, !isPm && s.ampmBtnActive]}
-                                onPress={() => setFrom(h12, m, false)}
-                              >
-                                <Text style={[s.ampmText, !isPm && s.ampmTextActive]}>AM</Text>
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                style={[s.ampmBtn, isPm && s.ampmBtnActive]}
-                                onPress={() => setFrom(h12, m, true)}
-                              >
-                                <Text style={[s.ampmText, isPm && s.ampmTextActive]}>PM</Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-                    );
-                  })()}
-                  <Text style={s.fieldHint}>{t('ఖచ్చితమైన సమయం తెలియకపోతే అంచనా సమయం నమోదు చేయండి', 'Enter approximate time if exact time is not known')}</Text>
-                </View>
-
-                {/* Birth Place — with search + GPS */}
+                {/* Birth Place — tappable field opens full-screen LocationSearchModal */}
                 <View style={s.field}>
                   <View style={s.fieldHeader}>
                     <MaterialCommunityIcons name="map-marker" size={18} color={DarkColors.gold} />
                     <Text style={s.fieldLabel}>{t('జన్మ స్థలం', 'Place of Birth')}</Text>
-                    <TouchableOpacity
-                      style={s.gpsBtn}
-                      onPress={async () => {
-                        try {
-                          setSearching(true);
-                          const { autoDetectLocation } = require('../utils/geolocation');
-                          const loc = await autoDetectLocation();
-                          if (loc && loc.latitude) {
-                            setBirthPlace({
-                              name: loc.area || loc.name || 'Current Location',
-                              fullName: `${loc.area || ''}, ${loc.name || ''}`,
-                              latitude: loc.latitude,
-                              longitude: loc.longitude,
-                              altitude: loc.altitude || 0,
-                            });
-                            setPlaceQuery(loc.area ? `${loc.area}, ${loc.name}` : loc.name || 'GPS Location');
-                          }
-                        } catch {} finally { setSearching(false); }
-                      }}
-                    >
-                      <MaterialCommunityIcons name="crosshairs-gps" size={14} color={DarkColors.gold} />
-                      <Text style={s.gpsBtnText}>GPS</Text>
-                    </TouchableOpacity>
                   </View>
-                  <View style={s.placeInputRow}>
-                    <TextInput
-                      style={s.placeInput}
-                      value={placeQuery}
-                      onChangeText={handlePlaceSearch}
-                      placeholder={t('నగరం / గ్రామం / పట్టణం పేరు', 'City / Village / Town name')}
-                      placeholderTextColor={DarkColors.textMuted}
-                    />
-                    {(placeQuery.length > 0 || birthPlace) && (
-                      <TouchableOpacity
-                        style={s.placeClearBtn}
-                        onPress={() => { setPlaceQuery(''); setBirthPlace(null); setPlaceResults([]); }}
-                      >
-                        <MaterialCommunityIcons name="close-circle" size={20} color={DarkColors.textMuted} />
-                      </TouchableOpacity>
+                  <TouchableOpacity
+                    style={s.input}
+                    onPress={() => setShowLocationModal(true)}
+                    activeOpacity={0.7}
+                  >
+                    {birthPlace ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <MaterialCommunityIcons name="check-circle" size={16} color={DarkColors.tulasiGreen} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 15, color: DarkColors.silver, fontWeight: '700' }}>{birthPlace.name}</Text>
+                          <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>
+                            ({birthPlace.latitude?.toFixed(2)}°N, {birthPlace.longitude?.toFixed(2)}°E)
+                          </Text>
+                        </View>
+                        <TouchableOpacity onPress={() => { setBirthPlace(null); setPlaceQuery(''); }}>
+                          <MaterialCommunityIcons name="close-circle" size={18} color={DarkColors.textMuted} />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <MaterialCommunityIcons name="magnify" size={18} color={DarkColors.textMuted} />
+                        <Text style={{ fontSize: 15, color: DarkColors.textMuted, flex: 1 }}>
+                          {t('నగరం / గ్రామం / పట్టణం వెతకండి', 'Search city / village / town')}
+                        </Text>
+                        <MaterialCommunityIcons name="chevron-right" size={18} color={DarkColors.textMuted} />
+                      </View>
                     )}
-                    {searching && <ActivityIndicator size="small" color={DarkColors.gold} style={{ marginLeft: 8 }} />}
-                  </View>
-                  {birthPlace && (
-                    <View style={s.selectedPlace}>
-                      <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
-                      <Text style={s.selectedPlaceText}>{birthPlace.name} ({birthPlace.latitude.toFixed(2)}°, {birthPlace.longitude.toFixed(2)}°)</Text>
-                    </View>
-                  )}
-                  {!searching && placeQuery.length >= 2 && placeResults.length === 0 && !birthPlace && (
-                    <Text style={{ fontSize: 12, color: DarkColors.textMuted, marginTop: 6, fontStyle: 'italic' }}>
-                      {t('ఫలితాలు లేవు. ఆంగ్లంలో లేదా తెలుగులో ప్రయత్నించండి.', 'No results. Try in English or Telugu.')}
-                    </Text>
-                  )}
-                  {placeResults.length > 0 && !birthPlace && (
-                    <View style={s.placeList}>
-                      <Text style={s.placeListHeader}>{t('స్థలం ఎంచుకోండి', 'Select a place')} ({placeResults.length})</Text>
-                      <ScrollView style={s.placeListScroll} nestedScrollEnabled keyboardShouldPersistTaps="handled">
-                        {placeResults.map((place, i) => (
-                          <TouchableOpacity
-                            key={place.placeId || i}
-                            style={s.placeItem}
-                            onPress={() => handleSelectPlace(place)}
-                          >
-                            <MaterialCommunityIcons name="map-marker-outline" size={18} color={DarkColors.gold} />
-                            <View style={{ flex: 1 }}>
-                              <Text style={s.placeItemName}>{place.name}</Text>
-                              {place.description ? <Text style={s.placeItemDesc}>{place.description}</Text> : null}
-                            </View>
-                            <MaterialCommunityIcons name="chevron-right" size={16} color={DarkColors.textMuted} />
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
+                  </TouchableOpacity>
                   <Text style={s.fieldHint}>{t('గ్రామాలు, మండలాలు, జిల్లాలు — అన్ని ప్రదేశాలు అందుబాటులో', 'Villages, towns, districts — all locations available')}</Text>
                 </View>
 
-                {/* Generate Button — only show when suggestions list is not open */}
-                {(placeResults.length === 0 || birthPlace) && (
+                {/* Full-screen Location Search Modal */}
+                <LocationSearchModal
+                  visible={showLocationModal}
+                  onClose={() => setShowLocationModal(false)}
+                  onSelect={(place) => {
+                    setBirthPlace(place);
+                    setPlaceQuery(place.name || place.displayName || '');
+                  }}
+                  title={t('జన్మ స్థలం వెతకండి', 'Search Birth Place')}
+                  lang={lang}
+                  searchFn={googlePlacesAutocomplete}
+                  detailsFn={googlePlaceDetails}
+                />
+
+                {/* Generate Button */}
+                {(
                   <TouchableOpacity style={s.generateBtn} onPress={handleGenerate} activeOpacity={0.8}>
                     <View style={s.generateGradient}>
                       <MaterialCommunityIcons name="zodiac-leo" size={22} color={DarkColors.gold} />
@@ -730,35 +691,47 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   </Text>
                 </View>
 
-                {/* Rashi + Nakshatra + Lagna — key info */}
+                {/* Rashi + Nakshatra + Lagna — key info (tappable for Read More) */}
                 <View style={s.keyInfoGrid}>
-                  <KeyInfoCard label="రాశి" value={horoscope.rashi?.telugu} sub={horoscope.rashi?.english} icon="zodiac-leo" color="#9B6FCF" valueSize={keyValueSize} />
-                  <KeyInfoCard label="నక్షత్రం" value={horoscope.nakshatra?.telugu} sub={`పాద ${horoscope.nakshatra?.pada}`} icon="star-four-points" color={DarkColors.gold} valueSize={keyValueSize} />
-                  <KeyInfoCard label="లగ్నం" value={horoscope.lagna?.telugu} sub={horoscope.lagna?.english} icon="compass" color={DarkColors.saffron} valueSize={keyValueSize} />
-                  <KeyInfoCard label="సూర్య రాశి" value={horoscope.sunSign?.telugu} sub={horoscope.sunSign?.english} icon="white-balance-sunny" color="#E8751A" valueSize={keyValueSize} />
+                  {[
+                    { key: 'rashi', label: t('రాశి', 'Rashi'), value: horoscope.rashi?.telugu, sub: horoscope.rashi?.english, icon: 'zodiac-leo', color: '#9B6FCF' },
+                    { key: 'nakshatra', label: t('నక్షత్రం', 'Nakshatra'), value: horoscope.nakshatra?.telugu, sub: `${t('పాద', 'Pada')} ${horoscope.nakshatra?.pada}`, icon: 'star-four-points', color: DarkColors.gold },
+                    { key: 'lagna', label: t('లగ్నం', 'Lagna'), value: horoscope.lagna?.telugu, sub: horoscope.lagna?.english, icon: 'compass', color: DarkColors.saffron },
+                    { key: 'sunSign', label: t('సూర్య రాశి', 'Sun Sign'), value: horoscope.sunSign?.telugu, sub: horoscope.sunSign?.english, icon: 'white-balance-sunny', color: '#E8751A' },
+                  ].map(({ key, label, value, sub, icon, color }) => (
+                    <TouchableOpacity key={key} activeOpacity={0.7} onPress={() => setHoroDetailModal(key)} style={s.keyCardTouch}>
+                      <KeyInfoCard label={label} value={value} sub={sub} icon={icon} color={color} valueSize={keyValueSize} />
+                    </TouchableOpacity>
+                  ))}
                 </View>
 
                 {/* Birth Tithi, Yoga, Karana */}
                 <View style={s.birthPanchangRow}>
                   <View style={s.birthPanchangItem}>
-                    <Text style={s.bpLabel}>తిథి</Text>
-                    <Text style={s.bpValue}>{horoscope.tithi?.telugu}</Text>
+                    <Text style={s.bpLabel}>{t('తిథి', 'Tithi')}</Text>
+                    <Text style={s.bpValue}>{t(horoscope.tithi?.telugu, horoscope.tithi?.english || horoscope.tithi?.telugu)}</Text>
                   </View>
                   <View style={s.birthPanchangItem}>
-                    <Text style={s.bpLabel}>యోగం</Text>
-                    <Text style={s.bpValue}>{horoscope.yoga?.telugu}</Text>
+                    <Text style={s.bpLabel}>{t('యోగం', 'Yoga')}</Text>
+                    <Text style={s.bpValue}>{t(horoscope.yoga?.telugu, horoscope.yoga?.english || horoscope.yoga?.telugu)}</Text>
                   </View>
                   <View style={s.birthPanchangItem}>
-                    <Text style={s.bpLabel}>కరణం</Text>
-                    <Text style={s.bpValue}>{horoscope.karana?.telugu}</Text>
+                    <Text style={s.bpLabel}>{t('కరణం', 'Karana')}</Text>
+                    <Text style={s.bpValue}>{t(horoscope.karana?.telugu, horoscope.karana?.english || horoscope.karana?.telugu)}</Text>
                   </View>
                 </View>
 
                 {/* Navagraha — shown when API data is available */}
                 {horoscope.navagraha && (
                   <View style={s.navagrahaSection}>
-                    <Text style={s.predTitle}>నవగ్రహ స్థానాలు</Text>
-                    <Text style={{ fontSize: 11, color: '#999999', marginBottom: 10 }}>Source: {horoscope.source}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <Text style={s.predTitle}>{t('నవగ్రహ స్థానాలు', 'Navagraha Positions')}</Text>
+                      <TouchableOpacity style={s.readMoreBtn} onPress={() => setHoroDetailModal('navagraha')}>
+                        <MaterialCommunityIcons name="book-open-variant" size={13} color={DarkColors.gold} />
+                        <Text style={s.readMoreText}>{t('మరింత', 'More')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={{ fontSize: 12, color: '#999999', marginBottom: 10 }}>Source: {horoscope.source}</Text>
                     <View style={s.navagrahaGrid}>
                       {Object.values(horoscope.navagraha).map((planet, i) => (
                         <View key={i} style={s.navagrahaItem}>
@@ -774,19 +747,19 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 {/* Predictions */}
                 {horoscope.predictions && (
                   <View style={s.predictions}>
-                    <Text style={s.predTitle}>జాతక ఫలాలు</Text>
-                    <PredictionSection icon="account" title="వ్యక్తిత్వం" text={horoscope.predictions.personality} />
-                    <PredictionSection icon="briefcase" title="వృత్తి" text={horoscope.predictions.career} />
-                    <PredictionSection icon="heart-pulse" title="ఆరోగ్యం" text={horoscope.predictions.health} />
-                    <PredictionSection icon="account-heart" title="సంబంధాలు" text={horoscope.predictions.relationships} />
-                    <PredictionSection icon="meditation" title="ఆధ్యాత్మికత" text={horoscope.predictions.spiritual} />
+                    <Text style={s.predTitle}>{t('జాతక ఫలాలు', 'Horoscope Predictions')}</Text>
+                    <PredictionSection icon="account" title={t('వ్యక్తిత్వం', 'Personality')} text={t(horoscope.predictions.personality?.te || horoscope.predictions.personality, horoscope.predictions.personality?.en || horoscope.predictions.personality)} detailKey="personality" onReadMore={setHoroDetailModal} />
+                    <PredictionSection icon="briefcase" title={t('వృత్తి', 'Career')} text={t(horoscope.predictions.career?.te || horoscope.predictions.career, horoscope.predictions.career?.en || horoscope.predictions.career)} detailKey="career" onReadMore={setHoroDetailModal} />
+                    <PredictionSection icon="heart-pulse" title={t('ఆరోగ్యం', 'Health')} text={t(horoscope.predictions.health?.te || horoscope.predictions.health, horoscope.predictions.health?.en || horoscope.predictions.health)} detailKey="health" onReadMore={setHoroDetailModal} />
+                    <PredictionSection icon="account-heart" title={t('సంబంధాలు', 'Relationships')} text={t(horoscope.predictions.relationships?.te || horoscope.predictions.relationships, horoscope.predictions.relationships?.en || horoscope.predictions.relationships)} detailKey="relationships" onReadMore={setHoroDetailModal} />
+                    <PredictionSection icon="meditation" title={t('ఆధ్యాత్మికత', 'Spirituality')} text={t(horoscope.predictions.spiritual?.te || horoscope.predictions.spiritual, horoscope.predictions.spiritual?.en || horoscope.predictions.spiritual)} detailKey="spiritual" onReadMore={setHoroDetailModal} />
                   </View>
                 )}
 
                 {/* Daily Forecast */}
                 {horoscope.dailyForecast && (
                   <View style={s.dailyBox}>
-                    <Text style={s.dailyTitle}>📅 నేటి ఫలం</Text>
+                    <Text style={s.dailyTitle}>{t('📅 నేటి ఫలం', '📅 Today\'s Forecast')}</Text>
                     <Text style={s.dailyText}>{horoscope.dailyForecast}</Text>
                   </View>
                 )}
@@ -794,7 +767,13 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 {/* Vedic Remedies & Gemstones */}
                 {horoscope.vedic && (
                   <View style={s.predictions}>
-                    <Text style={s.predTitle}>💎 రత్నాలు & ఉపాయాలు</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <Text style={s.predTitle}>{t('💎 రత్నాలు & ఉపాయాలు', '💎 Gemstones & Remedies')}</Text>
+                      <TouchableOpacity style={s.readMoreBtn} onPress={() => setHoroDetailModal('vedic')}>
+                        <MaterialCommunityIcons name="book-open-variant" size={13} color={DarkColors.gold} />
+                        <Text style={s.readMoreText}>{t('మరింత', 'More')}</Text>
+                      </TouchableOpacity>
+                    </View>
 
                     {/* Gemstone + Metal + Lucky info grid */}
                     <View style={s.vedicGrid}>
@@ -964,14 +943,282 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
               <Text style={s.closeBtnText}>{t('మూసివేయండి', 'Close')}</Text>
             </TouchableOpacity>
           )}
+
+          {/* Read More Detail Modal — with personalized info */}
+          {horoDetailModal && (() => {
+            const detail = HOROSCOPE_SECTION_DETAILS[horoDetailModal];
+            if (!detail) return null;
+            const personal = buildPersonalDetail(horoDetailModal, horoscope, t);
+            return (
+              <Modal transparent animationType="slide" onRequestClose={() => setHoroDetailModal(null)}>
+                <View style={s.detailOverlay}>
+                  <View style={s.detailContainer}>
+                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+                      <View style={s.detailHeader}>
+                        <MaterialCommunityIcons name={detail.icon} size={24} color={DarkColors.gold} />
+                        <Text style={s.detailTitle}>{t(detail.title.te, detail.title.en)}</Text>
+                        <TouchableOpacity style={s.detailCloseBtn} onPress={() => setHoroDetailModal(null)}>
+                          <MaterialCommunityIcons name="close" size={22} color={DarkColors.textMuted} />
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Personalized details — your specific data */}
+                      {personal.personalInfo.length > 0 && (
+                        <View style={[s.detailSection, { backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 14, padding: 16 }]}>
+                          <View style={s.detailSectionHeader}>
+                            <MaterialCommunityIcons name="account-star" size={18} color={DarkColors.gold} />
+                            <Text style={s.detailSectionTitle}>{t('మీ వివరాలు', 'Your Details')}</Text>
+                          </View>
+                          {personal.personalInfo.map((item, idx) => (
+                            <View key={idx} style={s.personalRow}>
+                              <Text style={s.personalLabel}>{item.label}</Text>
+                              <Text style={s.personalValue}>{item.text}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+
+                      {/* What it means — general explanation */}
+                      <View style={s.detailSection}>
+                        <View style={s.detailSectionHeader}>
+                          <MaterialCommunityIcons name="information" size={18} color={DarkColors.gold} />
+                          <Text style={s.detailSectionTitle}>{t('ఏమిటి & ఎందుకు?', 'What & Why?')}</Text>
+                        </View>
+                        <Text style={s.detailBody}>{t(detail.whatItMeans.te, detail.whatItMeans.en)}</Text>
+                      </View>
+
+                      {/* How calculated */}
+                      {detail.howCalculated && (
+                        <View style={s.detailSection}>
+                          <View style={s.detailSectionHeader}>
+                            <MaterialCommunityIcons name="calculator" size={18} color={DarkColors.gold} />
+                            <Text style={s.detailSectionTitle}>{t('ఎలా లెక్కిస్తారు?', 'How Is It Calculated?')}</Text>
+                          </View>
+                          <Text style={s.detailBody}>{t(detail.howCalculated.te, detail.howCalculated.en)}</Text>
+                        </View>
+                      )}
+                    </ScrollView>
+
+                    <TouchableOpacity style={s.detailDoneBtn} onPress={() => setHoroDetailModal(null)}>
+                      <Text style={s.detailDoneBtnText}>{t('మూసివేయండి', 'Close')}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            );
+          })()}
     </ModalOrView>
   );
 }
 
-function KeyInfoCard({ label, value, sub, icon, color, valueSize = 18 }) {
+// ── Extended details for "Read More" popups in horoscope sections ──
+const HOROSCOPE_SECTION_DETAILS = {
+  rashi: {
+    icon: 'zodiac-leo',
+    title: { te: 'చంద్ర రాశి', en: 'Moon Sign (Rashi)' },
+    whatItMeans: {
+      te: 'చంద్ర రాశి అంటే మీరు పుట్టిన సమయంలో చంద్రుడు ఏ రాశిలో ఉన్నాడో అది. వేద జ్యోతిషంలో చంద్ర రాశి అత్యంత ముఖ్యమైనది — ఇది మీ మనస్సు, భావోద్వేగాలు, మరియు అంతర్గత స్వభావాన్ని నిర్ణయిస్తుంది. పాశ్చాత్య జ్యోతిషంలో సూర్య రాశి (Sun Sign) ప్రధానం, కానీ భారతీయ జ్యోతిషంలో చంద్ర రాశి ప్రధానం.',
+      en: 'Moon Sign (Rashi) is determined by the zodiac sign where the Moon was positioned at the time of your birth. In Vedic astrology, the Moon sign is the most important factor — it governs your mind, emotions, and inner nature. Unlike Western astrology which focuses on the Sun sign, Indian astrology prioritizes the Moon sign for all predictions and compatibility analysis.',
+    },
+    howCalculated: {
+      te: 'చంద్రుడి సిద్ధాంతిక (సాయన) రేఖాంశాన్ని ఖగోళ గణనల ద్వారా లెక్కిస్తారు, తర్వాత లాహిరి అయనాంశను తీసివేసి నిరయన (సాయన) రేఖాంశం పొందుతారు. 360° ను 12 రాశులుగా (ఒక్కొక్కటి 30°) విభజిస్తారు.',
+      en: 'The Moon\'s tropical longitude is computed using precise astronomical calculations (via astronomy-engine library), then Lahiri Ayanamsa is subtracted to get the sidereal longitude. The 360° circle is divided into 12 equal signs of 30° each.',
+    },
+  },
+  nakshatra: {
+    icon: 'star-four-points',
+    title: { te: 'జన్మ నక్షత్రం', en: 'Birth Star (Nakshatra)' },
+    whatItMeans: {
+      te: 'నక్షత్రం చంద్రుడు ఏ నక్షత్ర మండలంలో ఉన్నాడో సూచిస్తుంది. 27 నక్షత్రాలు ఉన్నాయి, ప్రతి ఒక్కటి 13°20\' విస్తీర్ణం. మీ జన్మ నక్షత్రం మీ వ్యక్తిత్వం, ప్రవర్తన, ఆరోగ్యం, మరియు జీవిత మార్గాన్ని ప్రభావితం చేస్తుంది. ప్రతి నక్షత్రానికి 4 పాదాలు ఉంటాయి.',
+      en: 'Nakshatra indicates which lunar mansion the Moon occupies. There are 27 Nakshatras, each spanning 13°20\'. Your birth Nakshatra influences personality, behavior, health, and life path. Each Nakshatra has 4 padas (quarters) that add further nuance.',
+    },
+    howCalculated: {
+      te: 'చంద్రుడి నిరయన రేఖాంశాన్ని 13.333° తో భాగిస్తే నక్షత్ర సూచిక వస్తుంది. శేషాన్ని 3.333° తో భాగిస్తే పాద సంఖ్య వస్తుంది.',
+      en: 'Dividing the Moon\'s sidereal longitude by 13.333° gives the Nakshatra index. The remainder divided by 3.333° gives the pada (quarter) number.',
+    },
+  },
+  lagna: {
+    icon: 'compass',
+    title: { te: 'లగ్నం (ఉదయ రాశి)', en: 'Ascendant (Lagna)' },
+    whatItMeans: {
+      te: 'లగ్నం అంటే మీరు పుట్టిన సమయంలో తూర్పు దిక్కున ఉదయిస్తున్న రాశి. ఇది మీ బాహ్య వ్యక్తిత్వం, శారీరక రూపం, మరియు ప్రపంచంతో మీరు ఎలా వ్యవహరిస్తారో నిర్ణయిస్తుంది. లగ్నం ప్రతి 2 గంటలకు మారుతుంది, కాబట్టి ఖచ్చితమైన పుట్టిన సమయం చాలా ముఖ్యం.',
+      en: 'Lagna (Ascendant) is the zodiac sign rising on the eastern horizon at the time of your birth. It determines your external personality, physical appearance, and how you interact with the world. The Ascendant changes every ~2 hours, making accurate birth time critical.',
+    },
+    howCalculated: {
+      te: 'పుట్టిన ప్రదేశం యొక్క అక్షాంశ-రేఖాంశం మరియు ఖచ్చితమైన సమయం ఆధారంగా స్థానిక నక్షత్ర సమయం (LST) లెక్కించి, తూర్పు క్షితిజంపై ఉన్న రాశిని నిర్ణయిస్తారు.',
+      en: 'Calculated using the birth location\'s latitude/longitude and precise time to compute Local Sidereal Time (LST), which determines the zodiac sign on the eastern horizon.',
+    },
+  },
+  sunSign: {
+    icon: 'white-balance-sunny',
+    title: { te: 'సూర్య రాశి', en: 'Sun Sign' },
+    whatItMeans: {
+      te: 'సూర్య రాశి అంటే మీరు పుట్టినప్పుడు సూర్యుడు ఏ రాశిలో ఉన్నాడో అది. ఇది మీ ఆత్మ, జీవిత లక్ష్యం, మరియు ప్రాథమిక శక్తిని సూచిస్తుంది. పాశ్చాత్య జ్యోతిషంలో ఇది ప్రధానం (your "star sign"), కానీ వేద జ్యోతిషంలో చంద్ర రాశి ఎక్కువ ప్రాధాన్యత కలిగి ఉంటుంది.',
+      en: 'Sun Sign is the zodiac sign where the Sun was positioned at your birth. It represents your soul, life purpose, and core energy. This is the primary sign in Western astrology ("your star sign"), but in Vedic astrology the Moon sign takes precedence for predictions.',
+    },
+    howCalculated: {
+      te: 'సూర్యుడి నిరయన రేఖాంశాన్ని 30° తో భాగిస్తే సూర్య రాశి వస్తుంది.',
+      en: 'Dividing the Sun\'s sidereal longitude by 30° gives the Sun sign index.',
+    },
+  },
+  personality: {
+    icon: 'account',
+    title: { te: 'వ్యక్తిత్వం', en: 'Personality' },
+    whatItMeans: {
+      te: 'మీ చంద్ర రాశి ఆధారంగా మీ సహజ స్వభావం, బలాలు, బలహీనతలు, మరియు ప్రవర్తన విధానం వివరించబడుతుంది. ఇది మీ జీవితంలో మీరు ఎలా నిర్ణయాలు తీసుకుంటారో, ఇతరులతో ఎలా వ్యవహరిస్తారో చెబుతుంది.',
+      en: 'Based on your Moon sign, your natural temperament, strengths, weaknesses, and behavioral patterns are described. This reveals how you make decisions, interact with others, and navigate life challenges.',
+    },
+  },
+  career: {
+    icon: 'briefcase',
+    title: { te: 'వృత్తి & వ్యాపారం', en: 'Career & Business' },
+    whatItMeans: {
+      te: 'మీ రాశి ఆధారంగా మీకు అనుకూలమైన వృత్తి రంగాలు, వ్యాపార అవకాశాలు, మరియు ఆర్థిక వ్యూహాలు వివరించబడతాయి. మీ గ్రహ స్థానాలు మీ వృత్తి జీవితంపై ఎలా ప్రభావం చూపుతాయో తెలుసుకోవచ్చు.',
+      en: 'Based on your rashi, suitable career fields, business opportunities, and financial strategies are described. Your planetary positions reveal how they influence your professional life and wealth generation.',
+    },
+  },
+  health: {
+    icon: 'heart-pulse',
+    title: { te: 'ఆరోగ్యం', en: 'Health & Wellness' },
+    whatItMeans: {
+      te: 'ప్రతి రాశికి నిర్దిష్ట శరీర భాగాలు సంబంధం కలిగి ఉంటాయి. మీ రాశి ఆధారంగా ఏ ఆరోగ్య సమస్యలు రావచ్చో, ఏ జాగ్రత్తలు తీసుకోవాలో వివరించబడుతుంది. నివారణ చర్యలు మరియు ఆయుర్వేద సూచనలు కూడా ఇవ్వబడతాయి.',
+      en: 'Each rashi is associated with specific body parts and health tendencies. Based on your rashi, potential health concerns, preventive measures, and Ayurvedic recommendations are provided to help you maintain good health.',
+    },
+  },
+  relationships: {
+    icon: 'account-heart',
+    title: { te: 'సంబంధాలు & వివాహం', en: 'Relationships & Marriage' },
+    whatItMeans: {
+      te: 'మీ రాశి మీ ప్రేమ జీవితం, వివాహ జీవితం, కుటుంబ సంబంధాలు, మరియు స్నేహాలపై ఎలా ప్రభావం చూపుతుందో వివరించబడుతుంది. అనుకూల రాశులు మరియు సంబంధాలలో జాగ్రత్తలు కూడా తెలుపబడతాయి.',
+      en: 'How your rashi influences your love life, marriage, family relationships, and friendships is described. Compatible rashis and relationship advice are also provided to help you build harmonious connections.',
+    },
+  },
+  spiritual: {
+    icon: 'meditation',
+    title: { te: 'ఆధ్యాత్మికత', en: 'Spirituality' },
+    whatItMeans: {
+      te: 'మీ రాశి ఆధారంగా మీ ఆధ్యాత్మిక మార్గం, ధ్యాన పద్ధతులు, మరియు ఆత్మ ఉన్నతి కోసం సూచనలు అందించబడతాయి. ప్రతి రాశికి నిర్దిష్ట దేవతలు, మంత్రాలు, మరియు పూజా విధానాలు ఉంటాయి.',
+      en: 'Based on your rashi, your spiritual path, meditation practices, and suggestions for soul elevation are provided. Each rashi has specific deities, mantras, and worship methods that resonate with your cosmic energy.',
+    },
+  },
+  vedic: {
+    icon: 'diamond-stone',
+    title: { te: 'రత్నాలు & ఉపాయాలు', en: 'Gemstones & Remedies' },
+    whatItMeans: {
+      te: 'వేద జ్యోతిషం ప్రకారం ప్రతి రాశికి నిర్దిష్ట రత్నాలు, లోహాలు, శుభ రంగులు, మరియు దేవతా ఆరాధన సిఫారసు చేయబడతాయి. ఈ ఉపాయాలు గ్రహ దోషాలను తగ్గించి, శుభ ఫలాలను పెంచుతాయి. రత్నం ధరించే ముందు తప్పనిసరిగా నిపుణ జ్యోతిషుడి సలహా తీసుకోండి.',
+      en: 'According to Vedic astrology, specific gemstones, metals, lucky colors, and deity worship are recommended for each rashi. These remedies help reduce planetary doshas and enhance auspicious results. Always consult an expert astrologer before wearing gemstones.',
+    },
+  },
+  navagraha: {
+    icon: 'orbit',
+    title: { te: 'నవగ్రహ స్థానాలు', en: 'Navagraha Positions' },
+    whatItMeans: {
+      te: 'నవగ్రహాలు (సూర్యుడు, చంద్రుడు, కుజుడు, బుధుడు, గురువు, శుక్రుడు, శని, రాహువు, కేతువు) మీరు పుట్టిన సమయంలో ఏ రాశులలో ఉన్నాయో చూపిస్తుంది. ప్రతి గ్రహం జీవితంలో ఒక నిర్దిష్ట అంశాన్ని ప్రభావితం చేస్తుంది — సూర్యుడు ఆత్మను, చంద్రుడు మనస్సును, కుజుడు శక్తిని, బుధుడు బుద్ధిని, గురువు జ్ఞానాన్ని సూచిస్తారు.',
+      en: 'The Navagraha (nine planets: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu) shows which rashis they occupied at your birth. Each planet influences a specific life aspect — Sun governs soul, Moon governs mind, Mars governs energy, Mercury governs intellect, Jupiter governs wisdom, Venus governs love, Saturn governs discipline.',
+    },
+  },
+};
+
+// Build personalized detail text for Read More modals based on horoscope data
+function buildPersonalDetail(key, horoscope, t) {
+  if (!horoscope) return null;
+  const v = horoscope.vedic || {};
+  const r = horoscope.rashi || {};
+  const n = horoscope.nakshatra || {};
+  const pred = horoscope.predictions || {};
+
+  // Helper to extract bilingual prediction text
+  const predText = (p) => p ? (typeof p === 'string' ? p : t(p.te, p.en)) : '';
+
+  const sections = {
+    personality: {
+      personalInfo: pred.personality ? [
+        { label: t('మీ వ్యక్తిత్వ లక్షణాలు', 'Your Personality Traits'), text: predText(pred.personality) },
+        v.bodyPart ? { label: t('సంబంధిత శరీర భాగం', 'Associated Body Part'), text: t(v.bodyPart.te, v.bodyPart.en) } : null,
+        v.element ? { label: t('తత్వం', 'Element'), text: t(v.element.te, v.element.en) } : null,
+      ].filter(Boolean) : [],
+    },
+    career: {
+      personalInfo: pred.career ? [
+        { label: t('మీ వృత్తి ఫలాలు', 'Your Career Predictions'), text: predText(pred.career) },
+        v.luckyDay ? { label: t('శుభ వారం (ముఖ్య నిర్ణయాలకు)', 'Lucky Day (for key decisions)'), text: t(v.luckyDay.te, v.luckyDay.en) } : null,
+        v.direction ? { label: t('శుభ దిక్కు (వ్యాపారానికి)', 'Lucky Direction (for business)'), text: t(v.direction.te, v.direction.en) } : null,
+        v.metal ? { label: t('శుభ లోహం', 'Lucky Metal'), text: t(v.metal.te, v.metal.en) } : null,
+      ].filter(Boolean) : [],
+    },
+    health: {
+      personalInfo: pred.health ? [
+        { label: t('మీ ఆరోగ్య ఫలాలు', 'Your Health Predictions'), text: predText(pred.health) },
+        v.bodyPart ? { label: t('జాగ్రత్త వహించాల్సిన శరీర భాగం', 'Body Part to Watch'), text: t(v.bodyPart.te, v.bodyPart.en) } : null,
+        v.remedy ? { label: t('ఆరోగ్య ఉపాయం', 'Health Remedy'), text: v.remedy } : null,
+      ].filter(Boolean) : [],
+    },
+    relationships: {
+      personalInfo: pred.relationships ? [
+        { label: t('మీ సంబంధ ఫలాలు', 'Your Relationship Predictions'), text: predText(pred.relationships) },
+        v.deity ? { label: t('ప్రార్థించాల్సిన దేవత', 'Deity to Worship'), text: t(v.deity.te, v.deity.en) } : null,
+        v.luckyColor ? { label: t('శుభ రంగు', 'Lucky Color'), text: t(v.luckyColor.te, v.luckyColor.en) } : null,
+      ].filter(Boolean) : [],
+    },
+    spiritual: {
+      personalInfo: pred.spiritual ? [
+        { label: t('మీ ఆధ్యాత్మిక మార్గం', 'Your Spiritual Path'), text: predText(pred.spiritual) },
+        v.deity ? { label: t('ఆరాధ్య దేవత', 'Presiding Deity'), text: t(v.deity.te, v.deity.en) } : null,
+        v.mantra ? { label: t('బీజ మంత్రం', 'Beeja Mantra'), text: v.mantra } : null,
+        v.remedy ? { label: t('ఆధ్యాత్మిక ఉపాయం', 'Spiritual Remedy'), text: v.remedy } : null,
+      ].filter(Boolean) : [],
+    },
+    rashi: {
+      personalInfo: [
+        { label: t('మీ చంద్ర రాశి', 'Your Moon Sign'), text: `${r.telugu} (${r.english})` },
+        v.deity ? { label: t('అధిష్టాన దేవత', 'Ruling Deity'), text: t(v.deity.te, v.deity.en) } : null,
+        v.element ? { label: t('తత్వం', 'Element'), text: t(v.element.te, v.element.en) } : null,
+        v.bodyPart ? { label: t('శరీర భాగం', 'Body Part'), text: t(v.bodyPart.te, v.bodyPart.en) } : null,
+        v.gemstone ? { label: t('ప్రధాన రత్నం', 'Primary Gemstone'), text: t(v.gemstone.te, v.gemstone.en) } : null,
+        v.metal ? { label: t('శుభ లోహం', 'Lucky Metal'), text: t(v.metal.te, v.metal.en) } : null,
+        v.luckyDay ? { label: t('శుభ వారం', 'Lucky Day'), text: t(v.luckyDay.te, v.luckyDay.en) } : null,
+        v.luckyColor ? { label: t('శుభ రంగు', 'Lucky Color'), text: t(v.luckyColor.te, v.luckyColor.en) } : null,
+        v.direction ? { label: t('శుభ దిక్కు', 'Lucky Direction'), text: t(v.direction.te, v.direction.en) } : null,
+        v.mantra ? { label: t('బీజ మంత్రం', 'Beeja Mantra'), text: v.mantra } : null,
+      ].filter(Boolean),
+    },
+    nakshatra: {
+      personalInfo: [
+        { label: t('మీ జన్మ నక్షత్రం', 'Your Birth Star'), text: `${n.telugu} (${n.english})` },
+        n.pada ? { label: t('పాదం', 'Pada'), text: `${n.pada}` } : null,
+        n.deity ? { label: t('నక్షత్ర దేవత', 'Nakshatra Deity'), text: n.deity } : null,
+      ].filter(Boolean),
+    },
+    lagna: {
+      personalInfo: [
+        { label: t('మీ లగ్నం', 'Your Ascendant'), text: `${horoscope.lagna?.telugu} (${horoscope.lagna?.english})` },
+        horoscope.lagna?.lord ? { label: t('లగ్నాధిపతి', 'Lagna Lord'), text: horoscope.lagna.lord } : null,
+      ].filter(Boolean),
+    },
+    sunSign: {
+      personalInfo: [
+        { label: t('మీ సూర్య రాశి', 'Your Sun Sign'), text: `${horoscope.sunSign?.telugu} (${horoscope.sunSign?.english})` },
+      ],
+    },
+    vedic: {
+      personalInfo: [
+        v.gemstone ? { label: t('ప్రధాన రత్నం', 'Primary Gemstone'), text: t(v.gemstone.te, v.gemstone.en) } : null,
+        v.gemstoneAlt ? { label: t('ప్రత్యామ్నాయం', 'Alternative'), text: t(v.gemstoneAlt.te, v.gemstoneAlt.en) } : null,
+        v.metal ? { label: t('లోహం', 'Metal'), text: t(v.metal.te, v.metal.en) } : null,
+        v.deity ? { label: t('ఆరాధ్య దేవత', 'Deity'), text: t(v.deity.te, v.deity.en) } : null,
+        v.mantra ? { label: t('మంత్రం', 'Mantra'), text: v.mantra } : null,
+        v.remedy ? { label: t('నివారణ ఉపాయం', 'Remedy'), text: v.remedy } : null,
+      ].filter(Boolean),
+    },
+    navagraha: { personalInfo: [] },
+  };
+  return sections[key] || { personalInfo: [] };
+}
+
+function KeyInfoCard({ label, value, sub, icon, color, valueSize = 20 }) {
   return (
     <View style={[s.keyCard, { borderLeftColor: color }]}>
-      <MaterialCommunityIcons name={icon} size={18} color={color} />
+      <MaterialCommunityIcons name={icon} size={22} color={color} />
       <Text style={s.keyLabel}>{label}</Text>
       <Text style={[s.keyValue, { color, fontSize: valueSize }]}>{value || '—'}</Text>
       {sub && <Text style={s.keySub}>{sub}</Text>}
@@ -979,14 +1226,21 @@ function KeyInfoCard({ label, value, sub, icon, color, valueSize = 18 }) {
   );
 }
 
-function PredictionSection({ icon, title, text }) {
+function PredictionSection({ icon, title, text, detailKey, onReadMore }) {
   if (!text) return null;
   return (
     <View style={s.predRow}>
-      <MaterialCommunityIcons name={icon} size={18} color="#9B6FCF" style={{ marginRight: 10, marginTop: 2 }} />
+      <MaterialCommunityIcons name={icon} size={20} color="#9B6FCF" style={{ marginRight: 10, marginTop: 3 }} />
       <View style={{ flex: 1 }}>
         <Text style={s.predSectionTitle}>{title}</Text>
         <Text style={s.predText}>{text}</Text>
+        {detailKey && onReadMore && (
+          <TouchableOpacity style={s.readMoreBtn} onPress={() => onReadMore(detailKey)}>
+            <MaterialCommunityIcons name="book-open-variant" size={13} color={DarkColors.gold} />
+            <Text style={s.readMoreText}>Read More</Text>
+            <MaterialCommunityIcons name="chevron-right" size={13} color={DarkColors.gold} />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -1081,6 +1335,7 @@ const s = StyleSheet.create({
   },
   clearFormText: { fontSize: 11, fontWeight: '700', color: DarkColors.textMuted },
   field: { marginBottom: 16 },
+  dateTimeRow: { flexDirection: 'row', marginBottom: 0 },
   fieldHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 },
   fieldLabel: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', flex: 1 },
   gpsBtn: {
@@ -1199,61 +1454,62 @@ const s = StyleSheet.create({
 
   // Result
   result: {},
-  resultHeader: { alignItems: 'center', marginBottom: 16 },
+  resultHeader: { alignItems: 'center', marginBottom: 20 },
   resultName: { fontSize: 24, fontWeight: '900', color: '#FFFFFF' },
-  resultBirth: { fontSize: 13, color: '#999999', marginTop: 4 },
-  keyInfoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
+  resultBirth: { fontSize: 14, color: '#BBBBBB', marginTop: 6 },
+  keyInfoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  keyCardTouch: { width: '47%' },
   keyCard: {
-    width: '47%', backgroundColor: '#222222', borderRadius: 14, padding: 12,
+    backgroundColor: '#222222', borderRadius: 14, padding: 14,
     borderLeftWidth: 3, alignItems: 'center',
   },
-  keyLabel: { fontSize: 11, color: '#999999', fontWeight: '600', marginTop: 4 },
-  keyValue: { fontSize: 18, fontWeight: '800', marginTop: 2 },
-  keySub: { fontSize: 11, color: '#C0C0C0', marginTop: 1 },
+  keyLabel: { fontSize: 13, color: '#BBBBBB', fontWeight: '700', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+  keyValue: { fontSize: 20, fontWeight: '900', marginTop: 3 },
+  keySub: { fontSize: 13, color: '#DDDDDD', fontWeight: '500', marginTop: 2 },
 
   // Navagraha
-  navagrahaSection: { marginBottom: 16 },
+  navagrahaSection: { marginBottom: 20 },
   navagrahaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   navagrahaItem: {
-    width: '31%', backgroundColor: '#222222', borderRadius: 10, padding: 8, alignItems: 'center',
+    width: '31%', backgroundColor: '#222222', borderRadius: 10, padding: 10, alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  ngName: { fontSize: 12, fontWeight: '700', color: '#9B6FCF' },
-  ngRashi: { fontSize: 11, color: '#C0C0C0', marginTop: 2 },
-  ngRetro: { fontSize: 9, fontWeight: '700', color: '#C41E3A', marginTop: 1 },
+  ngName: { fontSize: 14, fontWeight: '800', color: '#9B6FCF' },
+  ngRashi: { fontSize: 13, color: '#DDDDDD', fontWeight: '500', marginTop: 2 },
+  ngRetro: { fontSize: 11, fontWeight: '700', color: '#E8495A', marginTop: 2 },
 
-  birthPanchangRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  birthPanchangRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   birthPanchangItem: {
-    flex: 1, backgroundColor: '#222222', borderRadius: 12, padding: 10, alignItems: 'center',
+    flex: 1, backgroundColor: '#222222', borderRadius: 12, padding: 12, alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  bpLabel: { fontSize: 11, color: '#999999', fontWeight: '600' },
-  bpValue: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
+  bpLabel: { fontSize: 13, color: '#BBBBBB', fontWeight: '700' },
+  bpValue: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginTop: 3 },
 
-  predictions: { marginBottom: 16 },
-  predTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginBottom: 12 },
+  predictions: { marginBottom: 20 },
+  predTitle: { fontSize: 19, fontWeight: '900', color: '#FFFFFF', marginBottom: 14 },
   // Vedic info grid
-  vedicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
+  vedicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   vedicItem: {
-    width: '47%', backgroundColor: '#222222', borderRadius: 12, padding: 12, alignItems: 'center',
+    width: '47%', backgroundColor: '#222222', borderRadius: 12, padding: 14, alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 4,
   },
-  vedicLabel: { fontSize: 11, color: '#999999', fontWeight: '600' },
-  vedicValue: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  vedicLabel: { fontSize: 13, color: '#BBBBBB', fontWeight: '700' },
+  vedicValue: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
   predRow: {
     flexDirection: 'row', alignItems: 'flex-start',
-    backgroundColor: '#222222', borderRadius: 14, padding: 14, marginBottom: 10,
+    backgroundColor: '#222222', borderRadius: 14, padding: 16, marginBottom: 12,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  predSectionTitle: { fontSize: 14, fontWeight: '700', color: '#9B6FCF', marginBottom: 4 },
-  predText: { fontSize: 13, color: '#C0C0C0', lineHeight: 20 },
+  predSectionTitle: { fontSize: 16, fontWeight: '800', color: '#9B6FCF', marginBottom: 6 },
+  predText: { fontSize: 15, color: '#DDDDDD', lineHeight: 23, fontWeight: '500' },
 
   dailyBox: {
-    backgroundColor: 'rgba(155,111,207,0.08)', borderRadius: 16, padding: 16, marginBottom: 16,
+    backgroundColor: 'rgba(155,111,207,0.08)', borderRadius: 16, padding: 18, marginBottom: 20,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  dailyTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginBottom: 8 },
-  dailyText: { fontSize: 14, color: '#C0C0C0', lineHeight: 22 },
+  dailyTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginBottom: 10 },
+  dailyText: { fontSize: 15, color: '#DDDDDD', lineHeight: 24, fontWeight: '500' },
 
   actionRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 12 },
   pdfBtn: {
@@ -1276,4 +1532,63 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: DarkColors.gold,
   },
   closeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+
+  // Saved profiles section
+  savedSection: { marginBottom: 16 },
+  savedToggle: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 10, paddingHorizontal: 14,
+    backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  savedToggleText: { flex: 1, fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  savedList: { marginTop: 8 },
+  savedItem: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#1A1A1A', borderRadius: 12,
+    marginBottom: 6, borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  savedItemMain: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
+    padding: 12,
+  },
+  savedName: { fontSize: 15, fontWeight: '800', color: '#FFFFFF' },
+  savedMeta: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
+  savedDeleteBtn: {
+    padding: 12, borderLeftWidth: 1, borderLeftColor: DarkColors.borderCard,
+  },
+
+  // Read More button
+  readMoreBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start',
+    marginTop: 8, paddingVertical: 5, paddingHorizontal: 10,
+    backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 16,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  readMoreText: { fontSize: 12, fontWeight: '700', color: DarkColors.gold },
+
+  // Detail Modal
+  detailOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
+  detailContainer: {
+    backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    maxHeight: '80%', paddingHorizontal: 20, paddingTop: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
+  },
+  detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
+  detailTitle: { flex: 1, fontSize: 20, fontWeight: '900', color: DarkColors.gold },
+  detailCloseBtn: { padding: 6 },
+  detailSection: { marginTop: 16 },
+  detailSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  detailSectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  detailBody: { fontSize: 15, color: DarkColors.silver, lineHeight: 24, fontWeight: '500' },
+  detailHighlight: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  detailSubHighlight: { fontSize: 14, color: DarkColors.goldLight, fontWeight: '600', marginTop: 4 },
+  personalRow: { marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: DarkColors.borderCard },
+  personalLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  personalValue: { fontSize: 15, color: '#FFFFFF', fontWeight: '700', marginTop: 3, lineHeight: 22 },
+  detailDoneBtn: {
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14, paddingVertical: 14,
+    alignItems: 'center', marginTop: 12, borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  detailDoneBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.silver },
 });

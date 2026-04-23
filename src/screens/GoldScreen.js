@@ -3,7 +3,7 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, TextInput, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -15,9 +15,11 @@ import { PageHeader } from '../components/PageHeader';
 import { GoldSilverPriceCard } from '../components/GoldPriceCard';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { AdBannerWidget } from '../components/AdBanner';
+import { ClearableInput } from '../components/ClearableInput';
 import { buildGoldShareText } from '../utils/shareService';
 import { fetchGoldSilverPrices } from '../utils/goldPriceService';
 import { getGoldAlert, setGoldAlert, clearGoldAlert } from '../utils/goldAlertService';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 export function GoldScreen() {
   const { goldSilverPrices, pricesLoading } = useApp();
@@ -26,6 +28,18 @@ export function GoldScreen() {
   const [alert, setAlert] = useState(null);
   const [showAlertForm, setShowAlertForm] = useState(false);
   const [targetPrice, setTargetPrice] = useState('');
+
+  // Load saved draft alert price on mount
+  useEffect(() => {
+    loadForm(FORM_KEYS.goldAlert).then(saved => {
+      if (saved?.targetPrice) setTargetPrice(saved.targetPrice);
+    });
+  }, []);
+
+  // Auto-save draft alert price
+  useEffect(() => {
+    if (targetPrice) saveForm(FORM_KEYS.goldAlert, { targetPrice });
+  }, [targetPrice]);
 
   // Responsive sizing
   const contentPad = usePick({ default: 16, lg: 20, xl: 28, xxl: 32 });
@@ -77,6 +91,7 @@ export function GoldScreen() {
     <View style={s.screen}>
       <PageHeader title={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} />
       <TopTabBar />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         style={s.scroll} contentContainerStyle={[s.scrollContent, { paddingBottom: scrollPadBottom, paddingTop: scrollPadTop }]}
         showsVerticalScrollIndicator={false}
@@ -108,8 +123,9 @@ export function GoldScreen() {
             <View style={s.alertForm}>
               <Text style={[s.alertFormLabel, { fontSize: alertFormLabelSize }]}>{t('ధర తగ్గినప్పుడు అలర్ట్ (₹/గ్రాం)', 'Alert when price drops below (₹/gram)')}</Text>
               <View style={s.alertFormRow}>
-                <TextInput
+                <ClearableInput
                   style={[s.alertInput, { fontSize: alertInputSize, padding: alertInputPad }]}
+                  containerStyle={{ flex: 1 }}
                   value={targetPrice}
                   onChangeText={setTargetPrice}
                   placeholder="e.g. 7000"
@@ -132,6 +148,7 @@ export function GoldScreen() {
         <AdBannerWidget variant="gold" />
         <View style={{ height: bottomSpacer }} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
     </SwipeWrapper>
   );

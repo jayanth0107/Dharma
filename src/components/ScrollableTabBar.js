@@ -3,12 +3,12 @@
 // Shows all 10 main sections as scrollable pills with icons + labels.
 // Auto-scrolls to keep the active tab centered.
 
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Dimensions } from 'react-native';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors } from '../theme';
-import { usePick } from '../theme/responsive';
+import { usePick, useWindow } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { MAIN_SECTIONS } from '../navigation/sections';
 
@@ -16,8 +16,10 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const scrollRef = useRef(null);
+  const scrollNodeRef = useRef(null);
   // Per-pill measured layout: { x, width } keyed by section name
   const pillLayouts = useRef({});
+  const { width: screenW } = useWindow();
 
   // Responsive sizing — bigger pills on tablets, tighter on tiny phones.
   const pillPadH    = usePick({ default: 10, sm: 10, md: 14, lg: 16, xl: 20 });
@@ -29,24 +31,42 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
   // Current active route name
   const activeRouteName = state.routes[state.index]?.name;
 
-  // Auto-center active pill using its REAL measured position so long
-  // labels (దానం, సేవలు, రిమైండర్…) don't get clipped at the edge.
+  // Auto-center active pill using its REAL measured position
   useEffect(() => {
     if (!activeRouteName || !scrollRef.current) return;
     const layout = pillLayouts.current[activeRouteName];
     if (!layout) return;
-    const screenW = Dimensions.get('window').width;
     const targetX = Math.max(0, layout.x - screenW / 2 + layout.width / 2);
     scrollRef.current.scrollTo({ x: targetX, animated: true });
-  }, [activeRouteName]);
+  }, [activeRouteName, screenW]);
+
+  // Enable mouse wheel horizontal scrolling on web
+  const onScrollViewRef = useCallback((node) => {
+    scrollRef.current = node;
+    if (Platform.OS === 'web' && node) {
+      // Get the inner DOM node for wheel event
+      const inner = node.getInnerViewNode?.() || node.getScrollableNode?.();
+      const el = inner || (node._nativeTag ? undefined : node);
+      if (el && el.addEventListener && !scrollNodeRef.current) {
+        scrollNodeRef.current = el;
+        el.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+            e.preventDefault();
+            el.scrollLeft += e.deltaY;
+          }
+        }, { passive: false });
+      }
+    }
+  }, []);
 
   return (
     <View style={[s.bar, { paddingBottom: insets.bottom + 4 }]}>
       <ScrollView
-        ref={scrollRef}
+        ref={onScrollViewRef}
         horizontal
-        showsHorizontalScrollIndicator={false}
+        showsHorizontalScrollIndicator={Platform.OS === 'web'}
         contentContainerStyle={s.content}
+        scrollEventThrottle={16}
       >
         {MAIN_SECTIONS.map((section, idx) => {
           const isActive = section.name === activeRouteName;
@@ -58,7 +78,6 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
                 const { x, width } = e.nativeEvent.layout;
                 pillLayouts.current[section.name] = { x, width };
                 if (isActive && scrollRef.current) {
-                  const screenW = Dimensions.get('window').width;
                   const targetX = Math.max(0, x - screenW / 2 + width / 2);
                   scrollRef.current.scrollTo({ x: targetX, animated: false });
                 }

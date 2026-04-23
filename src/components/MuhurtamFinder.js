@@ -4,7 +4,7 @@
 // Uses panchangam calculations to suggest best dates.
 // Includes PDF generation and WhatsApp/native sharing.
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList, Platform,
   Share, Alert,
@@ -20,6 +20,7 @@ import { SectionShareRow } from './SectionShareRow';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { TimingCard, MuhurthamCard } from './PanchangaCard';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 // Event types with their auspicious conditions
 const EVENT_TYPES = [
@@ -481,6 +482,21 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedResult, setSelectedResult] = useState(null);
+
+  // Load saved event selection on mount
+  useEffect(() => {
+    loadForm(FORM_KEYS.muhurtam).then(saved => {
+      if (saved?.selectedEventId) {
+        const evt = EVENT_TYPES.find(e => e.id === saved.selectedEventId);
+        if (evt) setSelectedEvent(evt);
+      }
+    });
+  }, []);
+
+  // Auto-save selected event
+  useEffect(() => {
+    if (selectedEvent) saveForm(FORM_KEYS.muhurtam, { selectedEventId: selectedEvent.id });
+  }, [selectedEvent]);
 
   // Responsive values
   const headerPadV = usePick({ default: 18, md: 20, xl: 28 });

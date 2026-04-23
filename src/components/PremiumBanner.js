@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
-  Alert, Platform, Linking, Image, ActivityIndicator,
+  Alert, Platform, Linking, Image, ActivityIndicator, KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ import { ModalOrView } from './ModalOrView';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 import { TextInput } from 'react-native';
+import { ClearableInput } from './ClearableInput';
 import { useAuth } from '../context/AuthContext';
 import { redeemClaimCode } from '../utils/premiumService';
 import { FEATURES } from '../config/features';
@@ -394,6 +395,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
             )}
           </LinearGradient>
 
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <ScrollView showsVerticalScrollIndicator={false}>
             {!selectedPlan ? (
               <>
@@ -469,7 +471,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
                   {claimExpanded && (
                     <View style={s.claimBox}>
                       <Text style={[s.claimSub, { fontSize: claimSubFont }]}>{t(TR.claimCodeSub.te, TR.claimCodeSub.en)}</Text>
-                      <TextInput
+                      <ClearableInput
                         style={[s.claimInput, { fontSize: claimInputFont, padding: claimInputPad }]}
                         value={claimCode}
                         onChangeText={(v) => { setClaimCode(v.toUpperCase()); setClaimMsg(null); }}
@@ -618,6 +620,7 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
               <Text style={[s.closeBtnText, { fontSize: closeBtnFont }]}>{t('మూసివేయండి', 'Close')}</Text>
             </TouchableOpacity>
           </ScrollView>
+          </KeyboardAvoidingView>
     </ModalOrView>
   );
 }

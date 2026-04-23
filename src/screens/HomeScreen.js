@@ -22,7 +22,7 @@ import { DrawerMenu } from '../components/DrawerMenu';
 import { LocationPickerModal } from '../components/LocationPickerModal';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { OfflineBanner } from '../components/OfflineBanner';
-import { CalendarPicker } from '../components/CalendarPicker';
+import { BirthDatePicker } from '../components/BirthDatePicker';
 import { useAuth } from '../context/AuthContext';
 import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappShare';
 
@@ -231,18 +231,18 @@ export function HomeScreen({ navigation }) {
       )}
 
       {/* Calendar date picker overlay */}
-      {showDatePicker && (
-        <CalendarPicker
-          selectedDate={selectedDate}
-          title={t('ఏదైనా తేదీ ఎంచుకోండి', 'Pick Any Date')}
-          onSelect={(d) => {
-            setShowDatePicker(false);
-            setSelectedDate(d);
-            navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() });
-          }}
-          onClose={() => setShowDatePicker(false)}
-        />
-      )}
+      <BirthDatePicker
+        visible={showDatePicker}
+        selectedDate={selectedDate}
+        title={t('ఏదైనా తేదీ ఎంచుకోండి', 'Pick Any Date')}
+        lang={lang === 'te' ? 'te' : 'en'}
+        onSelect={(d) => {
+          setShowDatePicker(false);
+          setSelectedDate(d);
+          navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() });
+        }}
+        onClose={() => setShowDatePicker(false)}
+      />
 
       {/* Year warning */}
       {new Date().getFullYear() !== 2026 && (
