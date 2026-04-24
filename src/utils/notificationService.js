@@ -253,6 +253,76 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
         },
       });
     }
+    // Schedule festival reminders — 1 day before each upcoming festival
+    if (settings.festivalReminder) {
+      try {
+        const { FESTIVALS_2026 } = require('../data/festivals');
+        const festList = FESTIVALS_2026 || [];
+        const now = new Date();
+        const upcoming = festList.filter(f => {
+          if (!f.date) return false;
+          const fDate = new Date(f.date + 'T00:00:00');
+          const diff = (fDate - now) / 86400000;
+          return diff >= 0 && diff <= 30; // next 30 days
+        });
+        for (const fest of upcoming.slice(0, 10)) {
+          const fDate = new Date(fest.date + 'T00:00:00');
+          // Schedule for 6 PM the day before
+          const reminderDate = new Date(fDate);
+          reminderDate.setDate(reminderDate.getDate() - 1);
+          reminderDate.setHours(18, 0, 0, 0);
+          if (reminderDate > now) {
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: `🎉 రేపు పండుగ: ${fest.telugu || fest.english}`,
+                body: `${fest.english || ''} — ${fest.description || 'శుభ దినం'}`,
+                data: { type: 'festival_reminder', screen: 'Festivals' },
+              },
+              trigger: {
+                type: 'date',
+                date: reminderDate,
+                ...(channelId && { channelId }),
+              },
+            });
+          }
+        }
+      } catch {}
+    }
+
+    // Schedule ekadashi reminders — 1 day before each upcoming ekadashi
+    if (settings.ekadashiReminder) {
+      try {
+        const { EKADASHI_2026 } = require('../data/ekadashi');
+        const ekList = EKADASHI_2026 || [];
+        const now = new Date();
+        const upcoming = ekList.filter(e => {
+          if (!e.date) return false;
+          const eDate = new Date(e.date + 'T00:00:00');
+          const diff = (eDate - now) / 86400000;
+          return diff >= 0 && diff <= 30;
+        });
+        for (const ek of upcoming.slice(0, 5)) {
+          const eDate = new Date(ek.date + 'T00:00:00');
+          const reminderDate = new Date(eDate);
+          reminderDate.setDate(reminderDate.getDate() - 1);
+          reminderDate.setHours(18, 0, 0, 0);
+          if (reminderDate > now) {
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: `🙏 రేపు ఏకాదశి: ${ek.telugu || ek.name || 'ఏకాదశి'}`,
+                body: `${ek.english || ek.nameEnglish || 'Ekadashi'} — ఉపవాసం ఆచరించండి`,
+                data: { type: 'ekadashi_reminder', screen: 'Festivals' },
+              },
+              trigger: {
+                type: 'date',
+                date: reminderDate,
+                ...(channelId && { channelId }),
+              },
+            });
+          }
+        }
+      } catch {}
+    }
   } catch (e) {
     if (__DEV__) console.warn('Notification setup failed:', e);
   }
