@@ -34,13 +34,21 @@ export function PujaGuideScreen() {
             </View>
           </View>
 
-          {/* Items needed */}
+          {/* Items needed — detailed list */}
           <View style={s.itemsCard}>
             <View style={s.itemsHeader}>
-              <MaterialCommunityIcons name="basket" size={18} color={DarkColors.gold} />
+              <MaterialCommunityIcons name="basket" size={20} color={DarkColors.gold} />
               <Text style={s.itemsTitle}>{t('అవసరమైన సామగ్రి', 'Items Needed')}</Text>
+              <Text style={s.itemsCount}>{Array.isArray(puja.items) ? puja.items.length : 0} {t('వస్తువులు', 'items')}</Text>
             </View>
-            <Text style={s.itemsText}>{t(puja.items.te, puja.items.en)}</Text>
+            {Array.isArray(puja.items) ? puja.items.map((item, ii) => (
+              <View key={ii} style={s.itemRow}>
+                <MaterialCommunityIcons name={item.icon || 'circle-small'} size={18} color={DarkColors.saffron} />
+                <Text style={s.itemText}>{t(item.te, item.en)}</Text>
+              </View>
+            )) : (
+              <Text style={s.itemsTextFallback}>{t(puja.items?.te, puja.items?.en)}</Text>
+            )}
           </View>
 
           {/* Steps */}
@@ -129,7 +137,13 @@ const s = StyleSheet.create({
   },
   itemsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   itemsTitle: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
-  itemsText: { fontSize: 14, color: DarkColors.silver, lineHeight: 22, fontWeight: '500' },
+  itemsCount: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700', marginLeft: 'auto' },
+  itemRow: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: DarkColors.borderCard,
+  },
+  itemText: { flex: 1, fontSize: 15, color: '#FFFFFF', fontWeight: '600', lineHeight: 22 },
+  itemsTextFallback: { fontSize: 14, color: DarkColors.silver, lineHeight: 22, fontWeight: '500' },
 
   // Steps
   stepsTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold, marginBottom: 12 },
