@@ -216,13 +216,15 @@ export function FamilyScreen({ navigation }) {
                     { k: t('గణం', 'Gana'), v: t(p.gana?.te, p.gana?.en), ic: 'emoticon' },
                     { k: t('నాడి', 'Nadi'), v: t(p.nadi?.te, p.nadi?.en), ic: 'pulse' },
                     { k: t('యోని', 'Yoni'), v: t(p.yoni?.te, p.yoni?.en), ic: 'paw' },
-                    { k: t('రాశి అధిపతి', 'Rashi Lord'), v: t(p.rashiLord?.te, p.rashiLord?.en), ic: 'orbit' },
+                    { k: t('రాశి అధిపతి', 'Lord'), v: t(p.rashiLord?.te, p.rashiLord?.en), ic: 'orbit' },
                     { k: t('తత్వం', 'Element'), v: t(p.element?.te, p.element?.en), ic: 'fire' },
                   ].map((attr, ai) => (
                     <View key={ai} style={s.attrItem}>
-                      <MaterialCommunityIcons name={attr.ic} size={12} color={DarkColors.gold} />
-                      <Text style={s.attrLabel}>{attr.k}</Text>
-                      <Text style={s.attrValue}>{attr.v}</Text>
+                      <MaterialCommunityIcons name={attr.ic} size={16} color={DarkColors.gold} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.attrLabel}>{attr.k}</Text>
+                        <Text style={s.attrValue}>{attr.v}</Text>
+                      </View>
                     </View>
                   ))}
                 </View>
@@ -282,14 +284,14 @@ const s = StyleSheet.create({
   memberKeyDivider: { width: 1, height: 36, backgroundColor: DarkColors.borderCard },
   memberKeyLabel: { fontSize: 11, color: '#BBBBBB', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   memberKeyValue: { fontSize: 17, fontWeight: '800', color: DarkColors.gold, textAlign: 'center' },
-  // Vedic attributes grid
-  attrGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  // Vedic attributes grid — 2 columns, readable
+  attrGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   attrItem: {
-    width: '31%', flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: DarkColors.bgElevated, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 8,
+    width: '47%', flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12,
   },
-  attrLabel: { fontSize: 10, color: DarkColors.textMuted, fontWeight: '600' },
-  attrValue: { fontSize: 12, color: '#FFFFFF', fontWeight: '700', flex: 1 },
+  attrLabel: { fontSize: 12, color: '#BBBBBB', fontWeight: '700' },
+  attrValue: { fontSize: 14, color: '#FFFFFF', fontWeight: '800', flex: 1 },
 
   emptyText: { fontSize: 15, color: DarkColors.textMuted, textAlign: 'center', marginTop: 32, fontStyle: 'italic' },
 });
