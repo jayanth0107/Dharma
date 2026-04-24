@@ -94,7 +94,8 @@
       "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f\\\\\"{p['displayName']['text']}  |  rating: {p.get\\('rating','-'\\)}  |  {p['formattedAddress'][:60]}\\\\\"\\) for p in data.get\\('places',[]\\)]\")",
       "Bash(python:*)",
       "Bash(tasklist)",
-      "Bash(taskkill //F //IM node.exe)"
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(taskkill /F /IM node.exe)"
     ]
   }
 }

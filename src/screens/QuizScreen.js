@@ -16,7 +16,7 @@ import { getDailyQuiz, MAX_SETS_PER_DAY } from '../data/quizData';
 import { SectionShareRow } from '../components/SectionShareRow';
 
 const CATEGORY_ICONS = {
-  puranas: 'book-cross',
+  puranas: 'book-open-variant',
   vedas: 'fire',
   upanishads: 'lightbulb-on',
 };

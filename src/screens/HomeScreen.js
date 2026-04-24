@@ -290,7 +290,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />
 
           {/* Row 5 — Puja & Family */}
-          <FeatureTile icon="book-cross" label={t('పూజా గైడ్', 'Puja Guide')} sublabel={t('స్టెప్-బై-స్టెప్ పూజ', 'Step-by-step Puja')} onPress={() => navigation.navigate('PujaGuide')} isNew />
+          <FeatureTile icon="fire" label={t('పూజా గైడ్', 'Puja Guide')} sublabel={t('స్టెప్-బై-స్టెప్ పూజ', 'Step-by-step Puja')} onPress={() => navigation.navigate('PujaGuide')} isNew />
           <FeatureTile icon="account-group" label={t('కుటుంబ జాతకాలు', 'Family Profiles')} sublabel={t('కుటుంబం రాశి నక్షత్రం', 'Family Rashi & Star')} onPress={() => navigation.navigate('Family')} isNew />
 
           {/* Row 6 — Gold, Market, Reminder */}

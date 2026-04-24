@@ -26,7 +26,7 @@ function PramanaCard({ item, onPress, t }) {
   return (
     <TouchableOpacity style={s.pramanaCard} onPress={() => onPress(item)} activeOpacity={0.7}>
       <View style={s.pramanaCardHeader}>
-        <MaterialCommunityIcons name="book-cross" size={22} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="book-open-variant" size={22} color={DarkColors.gold} />
         <Text style={s.pramanaCardTitle}>{t(name.te, name.en)}</Text>
         <MaterialCommunityIcons name="chevron-right" size={20} color={DarkColors.textMuted} />
       </View>

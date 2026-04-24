@@ -46,7 +46,7 @@ const STOTRAS = [
     text: 'ఓం భూర్భువః స్వః\nతత్సవితుర్వరేణ్యం\nభర్గో దేవస్య ధీమహి\nధియో యో నః ప్రచోదయాత్',
     meaning: 'We meditate upon the divine light of that adorable Sun God (Savita). May he stimulate our intellects.',
     source: { te: 'ఋగ్వేదం 3.62.10', en: 'Rig Veda 3.62.10' } },
-  { id: 'mahamrityunjaya', name: { te: 'మహామృత్యుంజయ మంత్రం', en: 'Maha Mrityunjaya Mantra' }, deity: { te: 'శివుడు', en: 'Shiva' }, icon: 'shield-cross', color: '#9B6FCF',
+  { id: 'mahamrityunjaya', name: { te: 'మహామృత్యుంజయ మంత్రం', en: 'Maha Mrityunjaya Mantra' }, deity: { te: 'శివుడు', en: 'Shiva' }, icon: 'shield-star', color: '#9B6FCF',
     text: 'ఓం త్ర్యంబకం యజామహే\nసుగంధిం పుష్టివర్ధనమ్\nఉర్వారుకమివ బంధనాత్\nమృత్యోర్ముక్షీయ మామృతాత్',
     meaning: 'We worship the three-eyed One (Shiva) who is fragrant and nourishes all beings. May he liberate us from death for the sake of immortality, as a cucumber is severed from its creeper.',
     source: { te: 'ఋగ్వేదం 7.59.12', en: 'Rig Veda 7.59.12' } },
