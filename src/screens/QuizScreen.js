@@ -12,30 +12,16 @@ import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
-import { getDailyQuiz } from '../data/quizData';
+import { getDailyQuiz, MAX_SETS_PER_DAY } from '../data/quizData';
 import { SectionShareRow } from '../components/SectionShareRow';
 
 const CATEGORY_ICONS = {
-  mythology: 'book-open-variant',
-  festivals: 'party-popper',
-  astrology: 'zodiac-leo',
-  slokas: 'om',
-  geography: 'temple-hindu',
-  nature: 'leaf',
-  health: 'meditation',
   puranas: 'book-cross',
   vedas: 'fire',
   upanishads: 'lightbulb-on',
 };
 
 const CATEGORY_COLORS = {
-  mythology: DarkColors.saffron,
-  festivals: DarkColors.tulasiGreen,
-  astrology: DarkColors.gold,
-  slokas: '#9B6FCF',
-  geography: '#4A90D9',
-  nature: DarkColors.tulasiGreen,
-  health: '#E8751A',
   puranas: DarkColors.saffron,
   vedas: '#E8751A',
   upanishads: '#9B6FCF',
@@ -44,12 +30,14 @@ const CATEGORY_COLORS = {
 export function QuizScreen() {
   const { t } = useLanguage();
   const today = new Date();
-  const questions = useMemo(() => getDailyQuiz(today), [today.toDateString()]);
+  const [currentSet, setCurrentSet] = useState(0); // 0-4
+  const questions = useMemo(() => getDailyQuiz(today, currentSet), [today.toDateString(), currentSet]);
 
   const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState({}); // { questionIndex: selectedOptionIndex }
+  const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
-  const [revealed, setRevealed] = useState({}); // { questionIndex: true } — answer revealed
+  const [revealed, setRevealed] = useState({});
+  const [completedSets, setCompletedSets] = useState([]); // track completed set numbers
 
   const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
   const qFontSize = usePick({ default: 17, lg: 19, xl: 21 });
@@ -75,6 +63,17 @@ export function QuizScreen() {
   };
 
   const handleRestart = () => {
+    setCurrentQ(0);
+    setAnswers({});
+    setRevealed({});
+    setShowResult(false);
+  };
+
+  const handleNewSet = () => {
+    if (!completedSets.includes(currentSet)) setCompletedSets(prev => [...prev, currentSet]);
+    const nextSet = currentSet + 1;
+    if (nextSet >= MAX_SETS_PER_DAY) return; // max 5
+    setCurrentSet(nextSet);
     setCurrentQ(0);
     setAnswers({});
     setRevealed({});
@@ -140,10 +139,19 @@ export function QuizScreen() {
             );
           })}
 
-          <TouchableOpacity style={s.restartBtn} onPress={handleRestart}>
-            <MaterialCommunityIcons name="refresh" size={20} color={DarkColors.saffron} />
-            <Text style={s.restartBtnText}>{t('మళ్ళీ ప్రయత్నించండి', 'Try Again')}</Text>
-          </TouchableOpacity>
+          <View style={s.resultBtnsRow}>
+            <TouchableOpacity style={s.restartBtn} onPress={handleRestart}>
+              <MaterialCommunityIcons name="refresh" size={18} color={DarkColors.saffron} />
+              <Text style={s.restartBtnText}>{t('మళ్ళీ', 'Retry')}</Text>
+            </TouchableOpacity>
+            {currentSet + 1 < MAX_SETS_PER_DAY && (
+              <TouchableOpacity style={s.newSetBtn} onPress={handleNewSet}>
+                <MaterialCommunityIcons name="arrow-right-bold" size={18} color="#0A0A0A" />
+                <Text style={s.newSetBtnText}>{t(`కొత్త సెట్ (${currentSet + 2}/${MAX_SETS_PER_DAY})`, `New Set (${currentSet + 2}/${MAX_SETS_PER_DAY})`)}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <Text style={s.setIndicator}>{t(`సెట్ ${currentSet + 1} / ${MAX_SETS_PER_DAY}`, `Set ${currentSet + 1} of ${MAX_SETS_PER_DAY}`)}</Text>
 
           <SectionShareRow section="quiz" buildText={() => {
             let text = `🧠 *ధర్మ క్విజ్ — నేటి ఫలితం*\n`;
@@ -175,7 +183,8 @@ export function QuizScreen() {
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} keyboardShouldPersistTaps="handled">
 
-        {/* Progress bar */}
+        {/* Set indicator + Progress bar */}
+        <Text style={s.setIndicator}>{t(`సెట్ ${currentSet + 1} / ${MAX_SETS_PER_DAY}`, `Set ${currentSet + 1} of ${MAX_SETS_PER_DAY}`)}</Text>
         <View style={s.progressRow}>
           <Text style={s.progressText}>{currentQ + 1} / {questions.length}</Text>
           <View style={s.progressBar}>
@@ -361,10 +370,18 @@ const s = StyleSheet.create({
   reviewQ: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', marginBottom: 4 },
   reviewA: { fontSize: 13, fontWeight: '600', marginTop: 2 },
 
+  resultBtnsRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
   restartBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    paddingVertical: 14, borderRadius: 14, marginTop: 12,
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 14, borderRadius: 14,
     backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.saffron,
   },
-  restartBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.saffron },
+  restartBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.saffron },
+  newSetBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 14, borderRadius: 14,
+    backgroundColor: DarkColors.gold,
+  },
+  newSetBtnText: { fontSize: 14, fontWeight: '800', color: '#0A0A0A' },
+  setIndicator: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, textAlign: 'center', marginBottom: 8, letterSpacing: 0.5 },
 });
