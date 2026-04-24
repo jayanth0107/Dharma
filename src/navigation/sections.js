@@ -23,7 +23,10 @@ export const MAIN_SECTIONS = [
   { name: 'Gita',         icon: 'book-open-page-variant', te: 'భగవద్గీత',           en: 'Bhagavad Gita' },
   { name: 'Kids',         icon: 'baby-face-outline',      te: 'పిల్లల కథలు',        en: "Kid's Stories", params: { tab: 'kids' } },
   { name: 'TempleNearby', icon: 'temple-hindu',           te: 'దేవాలయాలు',          en: 'Nearby Temples' },
-  // Row 5 — Prices & Utility
+  // Row 5
+  { name: 'PujaGuide',    icon: 'book-cross',             te: 'పూజా గైడ్',           en: 'Puja Guide' },
+  { name: 'Family',       icon: 'account-group',          te: 'కుటుంబ జాతకాలు',      en: 'Family Profiles' },
+  // Row 6 — Prices & Utility
   { name: 'Gold',         icon: 'gold',                   te: 'బంగారం వెండి ధరలు',   en: 'Gold & Silver Prices' },
   { name: 'Market',       icon: 'chart-line',             te: 'మార్కెట్',           en: 'Market' },
   { name: 'Reminder',     icon: 'bell-plus',              te: 'రిమైండర్',           en: 'Set Reminder' },

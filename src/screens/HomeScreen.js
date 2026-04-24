@@ -289,7 +289,11 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t(TR.kidsSub.en, TR.kidsSub.te)} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
           <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />
 
-          {/* Row 5 — Gold, Market, Reminder */}
+          {/* Row 5 — Puja & Family */}
+          <FeatureTile icon="book-cross" label={t('పూజా గైడ్', 'Puja Guide')} sublabel={t('స్టెప్-బై-స్టెప్ పూజ', 'Step-by-step Puja')} onPress={() => navigation.navigate('PujaGuide')} isNew />
+          <FeatureTile icon="account-group" label={t('కుటుంబ జాతకాలు', 'Family Profiles')} sublabel={t('కుటుంబం రాశి నక్షత్రం', 'Family Rashi & Star')} onPress={() => navigation.navigate('Family')} isNew />
+
+          {/* Row 6 — Gold, Market, Reminder */}
           <FeatureTile icon="gold" label={t(TR.gold.te, TR.gold.en)} sublabel={t(TR.goldSub.en, TR.goldSub.te)} onPress={() => navigation.navigate('Gold')} />
           <FeatureTile icon="chart-line" label={t(TR.market.te, TR.market.en)} sublabel={t(TR.marketSub.en, TR.marketSub.te)} onPress={() => navigation.navigate('Market')} />
           <FeatureTile icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t(TR.reminderSub.en, TR.reminderSub.te)} onPress={() => navigation.navigate('Reminder')} />

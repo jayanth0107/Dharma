@@ -140,6 +140,7 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
 }
 
 export function SlokaCard({ sloka }) {
+  const [speaking, setSpeaking] = useState(false);
   if (!sloka) return null;
   const slokaSize = usePick({ default: 16, lg: 18, xl: 20 });
   const meaningSize = usePick({ default: 13, lg: 14, xl: 15 });
@@ -162,14 +163,23 @@ export function SlokaCard({ sloka }) {
             onPress={() => {
               try {
                 const Speech = require('expo-speech');
-                Speech.speak(sloka.meaning || sloka.sanskrit, { language: 'en', rate: 0.85 });
-              } catch {
-                // TTS not available on this platform
-              }
+                if (speaking) {
+                  Speech.stop();
+                  setSpeaking(false);
+                } else {
+                  setSpeaking(true);
+                  Speech.speak(sloka.meaning || sloka.sanskrit, {
+                    language: 'te-IN',
+                    rate: 0.85,
+                    onDone: () => setSpeaking(false),
+                    onError: () => setSpeaking(false),
+                  });
+                }
+              } catch {}
             }}
-            style={{ backgroundColor: 'rgba(212,160,23,0.12)', padding: 6, borderRadius: 14 }}
+            style={{ backgroundColor: speaking ? DarkColors.saffron : 'rgba(212,160,23,0.12)', padding: 8, borderRadius: 16 }}
           >
-            <MaterialCommunityIcons name="volume-high" size={20} color={DarkColors.gold} />
+            <MaterialCommunityIcons name={speaking ? 'stop-circle' : 'volume-high'} size={20} color={speaking ? '#FFFFFF' : DarkColors.gold} />
           </TouchableOpacity>
         </View>
         <Text style={[styles.slokaText, { fontSize: slokaSize, lineHeight: slokaSize + 12 }]}>{sloka.sanskrit}</Text>
