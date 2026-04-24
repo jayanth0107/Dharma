@@ -267,19 +267,19 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t(TR.matchmakingSub.en, TR.matchmakingSub.te)} isPremium={!premiumActive} onPress={() => navigation.navigate('Matchmaking')} />
           <FeatureTile icon="calendar-star" label={t(TR.muhurtamTile.te, TR.muhurtamTile.en)} sublabel={t(TR.muhurtamSub.en, TR.muhurtamSub.te)} onPress={() => navigation.navigate('Muhurtam')} />
 
-          {/* Row 3 */}
+          {/* Row 3 — Vedic Knowledge */}
           <FeatureTile icon="zodiac-leo" label={t(TR.astro.te, TR.astro.en)} sublabel={t(TR.astroSub.en, TR.astroSub.te)} onPress={() => navigation.navigate('Astro')} />
-          <FeatureTile icon="gold" label={t(TR.gold.te, TR.gold.en)} sublabel={t(TR.goldSub.en, TR.goldSub.te)} onPress={() => navigation.navigate('Gold')} />
-          <FeatureTile icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t(TR.gitaSub.en, TR.gitaSub.te)} onPress={() => navigation.navigate('Gita')} />
-
-          {/* Row 4 — matches nav bar order: Market, Quiz, Pramana */}
-          <FeatureTile icon="chart-line" label={t(TR.market.te, TR.market.en)} sublabel={t(TR.marketSub.en, TR.marketSub.te)} onPress={() => navigation.navigate('Market')} />
           <FeatureTile icon="head-question" label={t('క్విజ్', 'Daily Quiz')} sublabel={t('వేద పురాణ క్విజ్', 'Vedic Quiz')} onPress={() => navigation.navigate('Quiz')} isNew />
           <FeatureTile icon="shield-star" label={t('ధర్మ ప్రమాణం', 'Dharma Pramana')} sublabel={t('శ్రుతి స్మృతి శిష్టాచారం', 'Shruti Smriti Shishtachara')} onPress={() => navigation.navigate('Pramana')} isNew />
 
-          {/* Row 5 — Kids, Temples, Reminder */}
+          {/* Row 4 — Gita, Kids, Temples */}
+          <FeatureTile icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t(TR.gitaSub.en, TR.gitaSub.te)} onPress={() => navigation.navigate('Gita')} />
           <FeatureTile icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t(TR.kidsSub.en, TR.kidsSub.te)} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
           <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />
+
+          {/* Row 5 — Gold, Market, Reminder */}
+          <FeatureTile icon="gold" label={t(TR.gold.te, TR.gold.en)} sublabel={t(TR.goldSub.en, TR.goldSub.te)} onPress={() => navigation.navigate('Gold')} />
+          <FeatureTile icon="chart-line" label={t(TR.market.te, TR.market.en)} sublabel={t(TR.marketSub.en, TR.marketSub.te)} onPress={() => navigation.navigate('Market')} />
           <FeatureTile icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t(TR.reminderSub.en, TR.reminderSub.te)} onPress={() => navigation.navigate('Reminder')} />
 
           {/* Row 6 — Utility */}
