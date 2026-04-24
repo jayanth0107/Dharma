@@ -174,27 +174,17 @@ export function FamilyScreen({ navigation }) {
         {/* Members list */}
         {members.map((m, idx) => {
           const rel = RELATIONS[m.relation] || RELATIONS[8];
+          const dobStr = m.dob ? (() => { const d = new Date(m.dob); return `${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`; })() : '';
+          const p = m.profile || {};
           return (
             <View key={idx} style={s.memberCard}>
-              <View style={s.memberMain}>
-                <MaterialCommunityIcons name={rel.icon} size={28} color={DarkColors.gold} />
-                <View style={{ flex: 1 }}>
+              {/* Header — name, relation, actions */}
+              <View style={s.memberHeader}>
+                <MaterialCommunityIcons name={rel.icon} size={32} color={DarkColors.gold} />
+                <View style={{ flex: 1, marginLeft: 10 }}>
                   <Text style={s.memberName}>{m.name}</Text>
-                  <Text style={s.memberRel}>{t(rel.te, rel.en)}</Text>
-                  <View style={s.memberInfo}>
-                    <Text style={s.memberDetail}>{t('నక్షత్రం', 'Star')}: {t(m.nakshatra?.te, m.nakshatra?.en)}</Text>
-                    <Text style={s.memberDetail}>{t('రాశి', 'Rashi')}: {t(m.rashi?.te, m.rashi?.en)}</Text>
-                  </View>
-                  {m.profile && (
-                    <View style={s.memberChips}>
-                      <Text style={s.chipText}>{t(m.profile.varna?.te, m.profile.varna?.en)}</Text>
-                      <Text style={s.chipText}>{t(m.profile.gana?.te, m.profile.gana?.en)}</Text>
-                      <Text style={s.chipText}>{t(m.profile.nadi?.te, m.profile.nadi?.en)}</Text>
-                    </View>
-                  )}
+                  <Text style={s.memberRel}>{t(rel.te, rel.en)} {dobStr ? `· ${dobStr}` : ''}</Text>
                 </View>
-              </View>
-              <View style={s.memberActions}>
                 <TouchableOpacity onPress={() => editMember(idx)} style={s.actionBtn}>
                   <MaterialCommunityIcons name="pencil" size={16} color={DarkColors.gold} />
                 </TouchableOpacity>
@@ -202,6 +192,41 @@ export function FamilyScreen({ navigation }) {
                   <MaterialCommunityIcons name="delete" size={16} color={DarkColors.kumkum} />
                 </TouchableOpacity>
               </View>
+
+              {/* Key info — Nakshatra + Rashi prominent */}
+              <View style={s.memberKeyRow}>
+                <View style={s.memberKeyItem}>
+                  <MaterialCommunityIcons name="star-four-points" size={16} color={DarkColors.gold} />
+                  <Text style={s.memberKeyLabel}>{t('నక్షత్రం', 'Nakshatra')}</Text>
+                  <Text style={s.memberKeyValue}>{t(m.nakshatra?.te, m.nakshatra?.en)}</Text>
+                </View>
+                <View style={s.memberKeyDivider} />
+                <View style={s.memberKeyItem}>
+                  <MaterialCommunityIcons name="zodiac-aries" size={16} color="#9B6FCF" />
+                  <Text style={s.memberKeyLabel}>{t('రాశి', 'Rashi')}</Text>
+                  <Text style={s.memberKeyValue}>{t(m.rashi?.te, m.rashi?.en)}</Text>
+                </View>
+              </View>
+
+              {/* Vedic attributes grid */}
+              {p.varna && (
+                <View style={s.attrGrid}>
+                  {[
+                    { k: t('వర్ణం', 'Varna'), v: t(p.varna?.te, p.varna?.en), ic: 'account-group' },
+                    { k: t('గణం', 'Gana'), v: t(p.gana?.te, p.gana?.en), ic: 'emoticon' },
+                    { k: t('నాడి', 'Nadi'), v: t(p.nadi?.te, p.nadi?.en), ic: 'pulse' },
+                    { k: t('యోని', 'Yoni'), v: t(p.yoni?.te, p.yoni?.en), ic: 'paw' },
+                    { k: t('రాశి అధిపతి', 'Rashi Lord'), v: t(p.rashiLord?.te, p.rashiLord?.en), ic: 'orbit' },
+                    { k: t('తత్వం', 'Element'), v: t(p.element?.te, p.element?.en), ic: 'fire' },
+                  ].map((attr, ai) => (
+                    <View key={ai} style={s.attrItem}>
+                      <MaterialCommunityIcons name={attr.ic} size={12} color={DarkColors.gold} />
+                      <Text style={s.attrLabel}>{attr.k}</Text>
+                      <Text style={s.attrValue}>{attr.v}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           );
         })}
@@ -245,17 +270,26 @@ const s = StyleSheet.create({
   saveBtn: { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12, backgroundColor: DarkColors.gold },
   saveText: { fontSize: 15, fontWeight: '800', color: '#0A0A0A' },
 
-  // Member card
-  memberCard: { backgroundColor: DarkColors.bgCard, borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: DarkColors.borderCard },
-  memberMain: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  memberName: { fontSize: 17, fontWeight: '800', color: '#FFFFFF' },
-  memberRel: { fontSize: 12, color: DarkColors.gold, fontWeight: '700', marginTop: 2 },
-  memberInfo: { flexDirection: 'row', gap: 12, marginTop: 6 },
-  memberDetail: { fontSize: 13, color: DarkColors.silver, fontWeight: '600' },
-  memberChips: { flexDirection: 'row', gap: 6, marginTop: 6 },
-  chipText: { fontSize: 11, color: DarkColors.textMuted, fontWeight: '600', backgroundColor: DarkColors.bgElevated, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
-  memberActions: { flexDirection: 'row', gap: 8, position: 'absolute', top: 12, right: 12 },
-  actionBtn: { padding: 6, backgroundColor: DarkColors.bgElevated, borderRadius: 10 },
+  // Member card — rich layout
+  memberCard: { backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: DarkColors.borderCard },
+  memberHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
+  memberName: { fontSize: 19, fontWeight: '900', color: '#FFFFFF' },
+  memberRel: { fontSize: 13, color: DarkColors.gold, fontWeight: '700', marginTop: 2 },
+  actionBtn: { padding: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 12, marginLeft: 4 },
+  // Key info row — nakshatra + rashi prominent
+  memberKeyRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  memberKeyItem: { flex: 1, alignItems: 'center', gap: 3 },
+  memberKeyDivider: { width: 1, height: 36, backgroundColor: DarkColors.borderCard },
+  memberKeyLabel: { fontSize: 11, color: '#BBBBBB', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  memberKeyValue: { fontSize: 17, fontWeight: '800', color: DarkColors.gold, textAlign: 'center' },
+  // Vedic attributes grid
+  attrGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  attrItem: {
+    width: '31%', flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 8,
+  },
+  attrLabel: { fontSize: 10, color: DarkColors.textMuted, fontWeight: '600' },
+  attrValue: { fontSize: 12, color: '#FFFFFF', fontWeight: '700', flex: 1 },
 
   emptyText: { fontSize: 15, color: DarkColors.textMuted, textAlign: 'center', marginTop: 32, fontStyle: 'italic' },
 });
