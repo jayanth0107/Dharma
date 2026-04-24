@@ -21,7 +21,7 @@ function getTileWidthPercent(columns) {
   return `${((100 - gapFraction) / columns).toFixed(2)}%`;
 }
 
-export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, disabled, tileHeight, _gridIndex, _gridTotal }) {
+export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, isNew, disabled, tileHeight, _gridIndex, _gridTotal }) {
   const columns = useColumns();
   const gridCtx = useContext(FeatureGridContext);
   const cols = gridCtx?.columns || columns;
@@ -82,6 +82,13 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
         <View style={s.premiumTag}>
           <MaterialCommunityIcons name="crown" size={10} color={DarkColors.gold} />
           <Text style={s.premiumTagText}>PRO</Text>
+        </View>
+      )}
+      {/* New badge */}
+      {isNew && (
+        <View style={s.newTag}>
+          <MaterialCommunityIcons name="star-four-points" size={9} color="#FFFFFF" />
+          <Text style={s.newTagText}>NEW</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -195,6 +202,22 @@ const s = StyleSheet.create({
     fontSize: 9,
     fontWeight: '800',
     color: DarkColors.gold,
+    letterSpacing: 0.5,
+  },
+  newTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 4,
+    backgroundColor: DarkColors.saffron,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  newTagText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
 });

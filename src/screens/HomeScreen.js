@@ -277,7 +277,11 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t(TR.kidsSub.en, TR.kidsSub.te)} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
           <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />
 
-          {/* Row 5 — Utility */}
+          {/* Row 5 — Knowledge & Fun */}
+          <FeatureTile icon="head-question" label={t('క్విజ్', 'Daily Quiz')} sublabel={t('వేద పురాణ క్విజ్', 'Vedic Quiz')} onPress={() => navigation.navigate('Quiz')} isNew />
+          <FeatureTile icon="shield-star" label={t('ధర్మ ప్రమాణం', 'Dharma Pramana')} sublabel={t('శ్రుతి స్మృతి శిష్టాచారం', 'Shruti Smriti Shishtachara')} onPress={() => navigation.navigate('Pramana')} isNew />
+
+          {/* Row 6 — Utility */}
           <FeatureTile icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t(TR.reminderSub.en, TR.reminderSub.te)} onPress={() => navigation.navigate('Reminder')} />
           <FeatureTile icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t(TR.donateSub.en, TR.donateSub.te)} onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
