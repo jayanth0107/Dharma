@@ -111,8 +111,23 @@ const QUIZ_POOL = [
 ];
 
 /**
+ * Deterministic shuffle using a seed — same seed = same shuffle every time
+ */
+function seededShuffle(arr, seed) {
+  const shuffled = [...arr];
+  let s = seed;
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xFFFFFFFF;
+    const j = ((s >>> 0) % (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/**
  * Get 25 unique questions for a given date
- * Rotates through pool — unique for 10 days (250 questions / 25 per day)
+ * Options are shuffled so correct answer lands on A/B/C/D randomly
+ * Shuffle is deterministic per day+question (stable on refresh)
  */
 export function getDailyQuiz(date) {
   const start = new Date(date.getFullYear(), 0, 0);
@@ -122,7 +137,12 @@ export function getDailyQuiz(date) {
   const questions = [];
   for (let i = 0; i < 25; i++) {
     const idx = (startIdx + i) % QUIZ_POOL.length;
-    questions.push({ ...QUIZ_POOL[idx], id: idx });
+    const q = QUIZ_POOL[idx];
+    // Shuffle options with a seed based on day + question index
+    const correctOption = q.options[q.answer];
+    const shuffledOptions = seededShuffle(q.options, dayOfYear * 100 + idx);
+    const newAnswer = shuffledOptions.findIndex(o => o.te === correctOption.te);
+    questions.push({ ...q, options: shuffledOptions, answer: newAnswer, id: idx });
   }
   return questions;
 }

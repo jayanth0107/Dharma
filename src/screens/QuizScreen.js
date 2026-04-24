@@ -230,24 +230,25 @@ export function QuizScreen() {
           </View>
         </View>
 
-        {/* Navigation */}
-        <View style={s.navRow}>
-          <TouchableOpacity style={[s.navBtn, currentQ === 0 && { opacity: 0.3 }]} onPress={handlePrev} disabled={currentQ === 0}>
-            <MaterialCommunityIcons name="chevron-left" size={20} color={DarkColors.silver} />
-            <Text style={s.navBtnText}>{t('ముందు', 'Previous')}</Text>
-          </TouchableOpacity>
-
-          {!isAnswered && (
-            <Text style={s.tapHint}>{t('సమాధానం ఎంచుకోండి', 'Select an answer')}</Text>
-          )}
-
-          <TouchableOpacity style={s.navBtnNext} onPress={handleNext}>
-            <Text style={s.navBtnNextText}>
-              {currentQ === questions.length - 1 ? t('ఫలితం చూడండి', 'See Result') : t('తర్వాత', 'Next')}
-            </Text>
-            <MaterialCommunityIcons name="chevron-right" size={20} color="#0A0A0A" />
-          </TouchableOpacity>
-        </View>
+        {/* Navigation — clear text buttons, no confusing arrows */}
+        {!isAnswered ? (
+          <Text style={s.tapHint}>{t('👆 సమాధానం ఎంచుకోండి', '👆 Tap an option to answer')}</Text>
+        ) : (
+          <View style={s.navRow}>
+            {currentQ > 0 && (
+              <TouchableOpacity style={s.navBtn} onPress={handlePrev}>
+                <Text style={s.navBtnText}>{t('ముందు ప్రశ్న', 'Previous Q')}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={s.navBtnNext} onPress={handleNext}>
+              <Text style={s.navBtnNextText}>
+                {currentQ === questions.length - 1
+                  ? t('🏆 ఫలితం చూడండి', '🏆 See Result')
+                  : t('తర్వాత ప్రశ్న →', 'Next Question →')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Question dots — jump to any question */}
         <View style={s.dotsRow}>
@@ -314,20 +315,18 @@ const s = StyleSheet.create({
   optText: { flex: 1, fontSize: 15, fontWeight: '600', color: DarkColors.silver },
 
   // Navigation
-  navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 16 },
   navBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12,
+    paddingVertical: 12, paddingHorizontal: 18, borderRadius: 14,
     backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  navBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.silver },
+  navBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.silver, textAlign: 'center' },
   navBtnNext: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingVertical: 10, paddingHorizontal: 18, borderRadius: 12,
-    backgroundColor: DarkColors.gold,
+    flex: 1, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14,
+    backgroundColor: DarkColors.gold, alignItems: 'center',
   },
-  navBtnNextText: { fontSize: 14, fontWeight: '800', color: '#0A0A0A' },
-  tapHint: { fontSize: 12, color: DarkColors.textMuted, fontStyle: 'italic' },
+  navBtnNextText: { fontSize: 16, fontWeight: '800', color: '#0A0A0A' },
+  tapHint: { fontSize: 15, color: DarkColors.textMuted, textAlign: 'center', marginBottom: 16, fontWeight: '600' },
 
   // Question dots
   dotsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginBottom: 16 },
