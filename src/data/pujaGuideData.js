@@ -2,6 +2,10 @@
 // Step-by-step visual guides for common pujas
 // Each step has icon, Telugu & English instructions
 
+// Use raw color values since data files shouldn't import theme
+const GOLD = '#D4A017';
+const GREEN = '#4CAF50';
+
 export const PUJA_GUIDES = [
   {
     id: 'satyanarayan',
@@ -28,7 +32,7 @@ export const PUJA_GUIDES = [
     id: 'varalakshmi',
     name: { te: 'వరలక్ష్మీ వ్రతం', en: 'Varalakshmi Vratam' },
     icon: 'star-circle',
-    color: DarkColors.gold,
+    color: GOLD,
     when: { te: 'శ్రావణ మాసం శుక్ల పక్ష శుక్రవారం', en: 'Friday of Shravana Shukla Paksha' },
     duration: { te: '2 గంటలు', en: '2 hours' },
     items: { te: 'కలశం, కొత్త వస్త్రం, తోరం (దారం), పసుపు, కుంకుమ, పూలు, పండ్లు, బెల్లం, నెయ్యి', en: 'Kalasha, new cloth, thread (toram), turmeric, kumkum, flowers, fruits, jaggery, ghee' },
@@ -86,7 +90,7 @@ export const PUJA_GUIDES = [
     id: 'daily_puja',
     name: { te: 'నిత్య పూజ (దైనిక)', en: 'Daily Puja (Nitya)' },
     icon: 'home-heart',
-    color: DarkColors.tulasiGreen,
+    color: GREEN,
     when: { te: 'ప్రతిరోజూ ఉదయం', en: 'Every morning' },
     duration: { te: '15-30 నిమిషాలు', en: '15-30 minutes' },
     items: { te: 'దీపం, అగరబత్తి, పూలు, నీరు, పండ్లు, కుంకుమ', en: 'Lamp, incense, flowers, water, fruits, kumkum' },
