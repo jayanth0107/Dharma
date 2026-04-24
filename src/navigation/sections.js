@@ -24,6 +24,7 @@ export const MAIN_SECTIONS = [
   // Row 4
   { name: 'Market',       icon: 'chart-line',             te: 'మార్కెట్',           en: 'Market' },
   { name: 'Quiz',         icon: 'head-question',          te: 'క్విజ్',             en: 'Daily Quiz' },
+  { name: 'Pramana',     icon: 'shield-star',            te: 'ధర్మ ప్రమాణం',        en: 'Dharma Pramana' },
   { name: 'Kids',         icon: 'baby-face-outline',      te: 'పిల్లల కథలు',        en: "Kid's Stories", params: { tab: 'kids' } },
   { name: 'TempleNearby', icon: 'temple-hindu',           te: 'దేవాలయాలు',          en: 'Nearby Temples' },
   // Row 5 — Utility
