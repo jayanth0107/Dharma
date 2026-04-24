@@ -18,6 +18,7 @@ import { ListSectionHeader } from '../components/ListSectionHeader';
 import { SubTabBar } from '../components/SubTabBar';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { PanchangaCard, TimingCard, MuhurthamCard, SlokaCard } from '../components/PanchangaCard';
+import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 import { UpcomingFestivalItem } from '../components/FestivalCard';
 import { EkadashiSection } from '../components/EkadashiCard';
 import { FilterPills } from '../components/FilterPills';
@@ -95,6 +96,17 @@ export function CalendarScreen({ route }) {
   const { t } = useLanguage();
   const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
   const [activeSubTab, setActiveSubTab] = useState(route?.params?.tab || 'panchang');
+  const [seniorMode, setSeniorMode] = useState(false);
+
+  // Load senior mode preference
+  React.useEffect(() => {
+    loadForm(FORM_KEYS.seniorMode).then(v => { if (v != null) setSeniorMode(v); });
+  }, []);
+  const toggleSeniorMode = () => {
+    const next = !seniorMode;
+    setSeniorMode(next);
+    saveForm(FORM_KEYS.seniorMode, next);
+  };
 
   // Inject visible scrollbar CSS on web — gold-themed thin scrollbars
   useEffect(() => {
@@ -182,6 +194,12 @@ export function CalendarScreen({ route }) {
               </TouchableOpacity>
             </View>
 
+            {/* Senior/Simple View toggle */}
+            <TouchableOpacity style={[s.seniorToggle, seniorMode && s.seniorToggleActive]} onPress={toggleSeniorMode} activeOpacity={0.7}>
+              <MaterialCommunityIcons name={seniorMode ? 'eye' : 'eye-outline'} size={16} color={seniorMode ? '#FFFFFF' : DarkColors.gold} />
+              <Text style={[s.seniorToggleText, seniorMode && { color: '#FFFFFF' }]}>{t('సరళ వీక్షణ', 'Simple View')}</Text>
+            </TouchableOpacity>
+
             <View style={s.separator} />
 
             {/* Festival Banner for selected date */}
@@ -204,6 +222,41 @@ export function CalendarScreen({ route }) {
               );
             })()}
 
+            {/* Senior Mode: simplified large-text summary */}
+            {seniorMode && panchangam && (
+              <View style={s.seniorCard}>
+                <Text style={s.seniorDate}>{panchangam.gregorianDate}</Text>
+                <View style={s.seniorRow}>
+                  <MaterialCommunityIcons name="weather-sunset-up" size={28} color="#E8751A" />
+                  <Text style={s.seniorValue}>{panchangam.sunriseFormatted || panchangam.sunrise}</Text>
+                  <MaterialCommunityIcons name="weather-sunset-down" size={28} color="#9B6FCF" style={{ marginLeft: 20 }} />
+                  <Text style={s.seniorValue}>{panchangam.sunsetFormatted || panchangam.sunset}</Text>
+                </View>
+                <View style={s.seniorDivider} />
+                <Text style={s.seniorLabel}>{t('తిథి', 'Tithi')}</Text>
+                <Text style={s.seniorBigText}>{t(panchangam.tithi.telugu, panchangam.tithi.english || panchangam.tithi.telugu)}</Text>
+                <Text style={s.seniorLabel}>{t('నక్షత్రం', 'Nakshatra')}</Text>
+                <Text style={s.seniorBigText}>{t(panchangam.nakshatra.telugu, panchangam.nakshatra.english || panchangam.nakshatra.telugu)}</Text>
+                <View style={s.seniorDivider} />
+                {panchangam.abhijitMuhurtam && (
+                  <>
+                    <Text style={[s.seniorLabel, { color: DarkColors.tulasiGreen }]}>{t('శుభ సమయం', 'Good Time')}</Text>
+                    <Text style={s.seniorBigText}>{panchangam.abhijitMuhurtam.startFormatted} – {panchangam.abhijitMuhurtam.endFormatted}</Text>
+                  </>
+                )}
+                {panchangam.rahuKalam && (
+                  <>
+                    <Text style={[s.seniorLabel, { color: DarkColors.kumkum }]}>{t('రాహు కాలం (నివారించండి)', 'Rahu Kalam (Avoid)')}</Text>
+                    <Text style={s.seniorBigText}>{panchangam.rahuKalam.startFormatted} – {panchangam.rahuKalam.endFormatted}</Text>
+                  </>
+                )}
+                <View style={s.seniorDivider} />
+                <SlokaCard sloka={panchangam.dailySloka} />
+              </View>
+            )}
+
+            {/* Detailed view (hidden in senior mode) */}
+            {!seniorMode && (<>
             {/* Sunrise / Sunset — prominent banner */}
             {panchangam.sunrise && (
               <View style={s.sunBanner}>
@@ -333,6 +386,7 @@ export function CalendarScreen({ route }) {
               <SlokaCard sloka={panchangam.dailySloka} />
               <SectionShareRow section="panchangam" buildText={() => buildPanchangamShareText(panchangam, selectedDate, locationDisplay)} />
             </View>
+            </>)}
           </>
         )}
 
@@ -640,6 +694,28 @@ const s = StyleSheet.create({
   holidayBadge: { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8 },
   holidayDaysNum: { fontSize: 18, fontWeight: '900', color: DarkColors.gold },
   holidayDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '800', letterSpacing: 0.5 },
+
+  // Senior/Simple View toggle
+  seniorToggle: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center',
+    paddingVertical: 7, paddingHorizontal: 14, borderRadius: 20, marginBottom: 8,
+    backgroundColor: 'rgba(212,160,23,0.06)', borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  seniorToggleActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
+  seniorToggleText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
+
+  // Senior simplified view
+  seniorCard: {
+    marginHorizontal: 16, marginBottom: 16, padding: 20,
+    backgroundColor: DarkColors.bgCard, borderRadius: 16,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  seniorDate: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', marginBottom: 16 },
+  seniorRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 },
+  seniorValue: { fontSize: 22, fontWeight: '900', color: '#FFFFFF' },
+  seniorDivider: { height: 1, backgroundColor: DarkColors.borderCard, marginVertical: 14 },
+  seniorLabel: { fontSize: 14, fontWeight: '700', color: DarkColors.textMuted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
+  seniorBigText: { fontSize: 22, fontWeight: '800', color: DarkColors.gold, marginBottom: 12 },
 
   // Sunrise / Sunset banner
   sunBanner: {

@@ -17,6 +17,9 @@ export const FORM_KEYS = {
   donate:       '@dharma_donate_prefs',
   horoscopeSaved: '@dharma_horoscope_saved',
   matchmakingSaved: '@dharma_matchmaking_saved',
+  kidsMyNakshatra: '@dharma_kids_my_star',
+  teenStudentMode: '@dharma_teen_student_mode',
+  seniorMode:      '@dharma_senior_mode',
 };
 
 export async function loadForm(key) {

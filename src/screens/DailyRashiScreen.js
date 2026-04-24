@@ -12,6 +12,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { PageHeader } from '../components/PageHeader';
 import { BirthDatePicker } from '../components/BirthDatePicker';
 import { getAllDailyRashi, RASHIS } from '../utils/dailyRashiService';
+import { getTeenPrediction } from '../data/teenPredictions';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
@@ -53,6 +54,7 @@ export function DailyRashiScreen() {
   const [expanded, setExpanded] = useState(null);
   const [myRashi, setMyRashi] = useState(null); // { rashiIndex, dob, rashiName }
   const [showDobPicker, setShowDobPicker] = useState(false);
+  const [studentMode, setStudentMode] = useState(false);
 
   // Responsive sizes
   const imgSize = usePick({ default: 48, sm: 48, md: 50, lg: 56, xl: 60 });
@@ -64,6 +66,16 @@ export function DailyRashiScreen() {
   const dateStr = today.toLocaleDateString(lang === 'te' ? 'te-IN' : 'en-IN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
+
+  // Load student mode preference
+  useEffect(() => {
+    loadForm(FORM_KEYS.teenStudentMode).then(v => { if (v != null) setStudentMode(v); });
+  }, []);
+  const toggleStudentMode = () => {
+    const next = !studentMode;
+    setStudentMode(next);
+    saveForm(FORM_KEYS.teenStudentMode, next);
+  };
 
   // Always recalculate rashi from DOB — never trust cached index
   useEffect(() => {
@@ -112,11 +124,18 @@ export function DailyRashiScreen() {
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
-        {/* Date header — prominent */}
+        {/* Date header + Student Mode toggle */}
         <View style={s.dateHeader}>
           <MaterialCommunityIcons name="calendar-today" size={18} color={DarkColors.gold} />
           <Text style={s.dateText}>{dateStr}</Text>
         </View>
+
+        {/* Student Mode toggle */}
+        <TouchableOpacity style={[s.studentToggle, studentMode && s.studentToggleActive]} onPress={toggleStudentMode} activeOpacity={0.7}>
+          <MaterialCommunityIcons name={studentMode ? 'school' : 'school-outline'} size={18} color={studentMode ? '#FFFFFF' : DarkColors.gold} />
+          <Text style={[s.studentToggleText, studentMode && { color: '#FFFFFF' }]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
+          <View style={[s.studentDot, studentMode && s.studentDotActive]} />
+        </TouchableOpacity>
 
         {/* My Rashi Section */}
         {myRashi ? (
@@ -194,38 +213,73 @@ export function DailyRashiScreen() {
 
               {expanded === originalIndex && (
                 <View style={s.details}>
-                  {/* Detail sections — stacked: icon+label on top, value below */}
-                  <View style={s.detailSection}>
-                    <View style={s.detailHeader}>
-                      <MaterialCommunityIcons name="briefcase" size={iconSize} color={DarkColors.gold} />
-                      <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('వృత్తి', 'Career')}</Text>
-                    </View>
-                    <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.career.te, pred.career.en)}</Text>
-                  </View>
+                  {studentMode ? (() => {
+                    const teen = getTeenPrediction(originalIndex, today);
+                    return (
+                      <>
+                        {/* Motivation — top */}
+                        <View style={[s.detailSection, { backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12, padding: 10, marginBottom: 10 }]}>
+                          <Text style={[s.detailText, { fontSize: detailFontSize + 2, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' }]}>{t(teen.motivation.te, teen.motivation.en)}</Text>
+                        </View>
+                        <View style={s.detailSection}>
+                          <View style={s.detailHeader}>
+                            <MaterialCommunityIcons name="book-open-variant" size={iconSize} color="#4A90D9" />
+                            <Text style={[s.detailLabel, { fontSize: detailFontSize, color: '#4A90D9' }]}>{t('చదువులు', 'Studies')}</Text>
+                          </View>
+                          <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(teen.studies.te, teen.studies.en)}</Text>
+                        </View>
+                        <View style={s.detailSection}>
+                          <View style={s.detailHeader}>
+                            <MaterialCommunityIcons name="clipboard-check" size={iconSize} color={DarkColors.tulasiGreen} />
+                            <Text style={[s.detailLabel, { fontSize: detailFontSize, color: DarkColors.tulasiGreen }]}>{t('పరీక్షలు', 'Exams')}</Text>
+                          </View>
+                          <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(teen.exams.te, teen.exams.en)}</Text>
+                        </View>
+                        <View style={s.detailSection}>
+                          <View style={s.detailHeader}>
+                            <MaterialCommunityIcons name="account-group" size={iconSize} color={DarkColors.saffron} />
+                            <Text style={[s.detailLabel, { fontSize: detailFontSize, color: DarkColors.saffron }]}>{t('స్నేహాలు', 'Friendships')}</Text>
+                          </View>
+                          <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(teen.friendships.te, teen.friendships.en)}</Text>
+                        </View>
+                      </>
+                    );
+                  })() : (
+                    <>
+                      {/* Adult predictions — career, finance, health, relations */}
+                      <View style={s.detailSection}>
+                        <View style={s.detailHeader}>
+                          <MaterialCommunityIcons name="briefcase" size={iconSize} color={DarkColors.gold} />
+                          <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('వృత్తి', 'Career')}</Text>
+                        </View>
+                        <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.career.te, pred.career.en)}</Text>
+                      </View>
 
-                  <View style={s.detailSection}>
-                    <View style={s.detailHeader}>
-                      <MaterialCommunityIcons name="cash" size={iconSize} color={DarkColors.gold} />
-                      <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('ఆర్థికం', 'Finance')}</Text>
-                    </View>
-                    <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.finance.te, pred.finance.en)}</Text>
-                  </View>
+                      <View style={s.detailSection}>
+                        <View style={s.detailHeader}>
+                          <MaterialCommunityIcons name="cash" size={iconSize} color={DarkColors.gold} />
+                          <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('ఆర్థికం', 'Finance')}</Text>
+                        </View>
+                        <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.finance.te, pred.finance.en)}</Text>
+                      </View>
 
-                  <View style={s.detailSection}>
-                    <View style={s.detailHeader}>
-                      <MaterialCommunityIcons name="heart-pulse" size={iconSize} color={DarkColors.gold} />
-                      <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('ఆరోగ్యం', 'Health')}</Text>
-                    </View>
-                    <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.health.te, pred.health.en)}</Text>
-                  </View>
+                      <View style={s.detailSection}>
+                        <View style={s.detailHeader}>
+                          <MaterialCommunityIcons name="heart-pulse" size={iconSize} color={DarkColors.gold} />
+                          <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('ఆరోగ్యం', 'Health')}</Text>
+                        </View>
+                        <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.health.te, pred.health.en)}</Text>
+                      </View>
 
-                  <View style={s.detailSection}>
-                    <View style={s.detailHeader}>
-                      <MaterialCommunityIcons name="account-heart" size={iconSize} color={DarkColors.gold} />
-                      <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('సంబంధాలు', 'Relations')}</Text>
-                    </View>
-                    <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.relationship.te, pred.relationship.en)}</Text>
-                  </View>
+                      <View style={s.detailSection}>
+                        <View style={s.detailHeader}>
+                          <MaterialCommunityIcons name="account-heart" size={iconSize} color={DarkColors.gold} />
+                          <Text style={[s.detailLabel, { fontSize: detailFontSize }]}>{t('సంబంధాలు', 'Relations')}</Text>
+                        </View>
+                        <Text style={[s.detailText, { fontSize: detailFontSize + 1 }]}>{t(pred.relationship.te, pred.relationship.en)}</Text>
+                      </View>
+                    </>
+                  )}
 
                   {/* Ruling planet & element */}
                   <View style={s.infoRow}>
@@ -334,6 +388,17 @@ const s = StyleSheet.create({
   },
 
   // Rashi card
+  // Student Mode toggle
+  studentToggle: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
+    paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, marginBottom: 12,
+    backgroundColor: 'rgba(212,160,23,0.06)', borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  studentToggleActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
+  studentToggleText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  studentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: DarkColors.borderGold },
+  studentDotActive: { backgroundColor: '#FFFFFF' },
+
   rashiCard: { paddingVertical: 14, paddingHorizontal: 12, marginBottom: 6, borderRadius: 14, borderWidth: 1, borderColor: DarkColors.borderCard },
   myRashiHighlight: { borderColor: DarkColors.borderGold, borderWidth: 1.5, backgroundColor: 'rgba(212,160,23,0.06)' },
   rashiHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
