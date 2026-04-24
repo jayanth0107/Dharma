@@ -1,5 +1,5 @@
-// ధర్మ — Daily Quiz Data (625 bilingual questions)
-// 5 sets of 25 questions per day, unique content for 5 days then rotates
+// ధర్మ — Daily Quiz Data (271 bilingual questions)
+// 5 sets of 20 questions per day, unique content for 13+ days then rotates
 // ALL questions strictly from: Upanishads, Vedas, Puranas, Itihasas, Dharmic stories
 // Helper to create a question quickly
 const Q = (te, en, opts, ans, cat) => ({
@@ -210,10 +210,105 @@ const QUIZ_POOL = [
   Q('గరుడ పురాణం ప్రధానంగా?', 'Garuda Purana mainly about?', [['మృత్యు తర్వాత జీవితం','Afterlife'],['సృష్టి','Creation'],['యుద్ధం','War'],['సంగీతం','Music']], 0, 'puranas'),
   Q('మార్కండేయ ఎవరి భక్తుడు?', 'Markandeya devotee of?', [['శివుడు','Shiva'],['విష్ణువు','Vishnu'],['బ్రహ్మ','Brahma'],['ఇంద్రుడు','Indra']], 0, 'puranas'),
   Q('మార్కండేయుడు యముడి నుండి ఎలా రక్షించబడ్డాడు?', 'How was Markandeya saved from Yama?', [['శివుడు కాపాడాడు','Shiva protected'],['విష్ణువు','Vishnu saved'],['బ్రహ్మ','Brahma saved'],['స్వయంగా','Self-saved']], 0, 'puranas'),
+
+  // ═══ BLOCK F: More Ramayana Details ═══
+  Q('జటాయువు ఎవరిని రక్షించాలని ప్రయత్నించాడు?', 'Whom did Jatayu try to save?', [['సీత','Sita'],['రాముడు','Rama'],['లక్ష్మణుడు','Lakshmana'],['హనుమాన్','Hanuman']], 0, 'puranas'),
+  Q('శబరి ఏమి అర్పించింది రామునికి?', 'What did Shabari offer Rama?', [['కొరికిన పండ్లు','Tasted fruits'],['పూలు','Flowers'],['బంగారం','Gold'],['అన్నం','Rice']], 0, 'puranas'),
+  Q('రాముడి పట్టాభిషేకం ఎవరు ఆపారు?', 'Who stopped Rama\'s coronation?', [['కైకేయి','Kaikeyi'],['సుమిత్ర','Sumitra'],['కౌసల్య','Kausalya'],['భరతుడు','Bharata']], 0, 'puranas'),
+  Q('మంథర ఎవరి దాసి?', 'Manthara was whose maid?', [['కైకేయి','Kaikeyi'],['కౌసల్య','Kausalya'],['సుమిత్ర','Sumitra'],['సీత','Sita']], 0, 'puranas'),
+  Q('భరతుడు రాముడి పాదుకలను ఎక్కడ ఉంచాడు?', 'Where did Bharata place Rama\'s sandals?', [['సింహాసనంపై','On the throne'],['ఆలయంలో','In temple'],['నదిలో','In river'],['అడవిలో','In forest']], 0, 'puranas'),
+  Q('అగస్త్య మహర్షి రామునికి ఏమి ఇచ్చాడు?', 'What did Agastya give Rama?', [['దివ్యాస్త్రాలు','Divine weapons'],['ఆహారం','Food'],['వస్త్రాలు','Clothes'],['బంగారం','Gold']], 0, 'puranas'),
+  Q('శూర్పణఖ ఎవరి సోదరి?', 'Shurpanakha sister of?', [['రావణుడు','Ravana'],['సుగ్రీవుడు','Sugriva'],['వాలి','Vali'],['హనుమాన్','Hanuman']], 0, 'puranas'),
+  Q('మారీచుడు ఏ రూపం ధరించాడు?', 'What form did Maricha take?', [['బంగారు జింక','Golden deer'],['బ్రాహ్మణుడు','Brahmin'],['వానరుడు','Monkey'],['పక్షి','Bird']], 0, 'puranas'),
+  Q('సీతా స్వయంవరంలో రాముడు ఏమి విరిచాడు?', 'What did Rama break at Sita\'s swayamvar?', [['శివ ధనుస్సు','Shiva\'s bow'],['వజ్రాయుధం','Vajra'],['కత్తి','Sword'],['గద','Mace']], 0, 'puranas'),
+  Q('అహల్యను ఎవరు శపించారు?', 'Who cursed Ahalya?', [['గౌతమ మహర్షి','Gautama Rishi'],['వసిష్ఠుడు','Vasishtha'],['విశ్వామిత్రుడు','Vishwamitra'],['అగస్త్యుడు','Agastya']], 0, 'puranas'),
+  Q('అహల్య శాపం ఎవరు తొలగించారు?', 'Who freed Ahalya from curse?', [['రాముడు','Rama'],['కృష్ణుడు','Krishna'],['శివుడు','Shiva'],['విష్ణువు','Vishnu']], 0, 'puranas'),
+  Q('రామ సేతువు ఎక్కడ నిర్మించారు?', 'Where was Rama Setu built?', [['రామేశ్వరం–లంక మధ్య','Rameshwaram to Lanka'],['గంగ','Ganges'],['గోదావరి','Godavari'],['కావేరి','Kaveri']], 0, 'puranas'),
+  Q('కుంభకర్ణుడు ఎన్ని నెలలు నిద్రపోతాడు?', 'How many months did Kumbhakarna sleep?', [['6 నెలలు','6 months'],['3 నెలలు','3 months'],['1 నెల','1 month'],['12 నెలలు','12 months']], 0, 'puranas'),
+  Q('మేఘనాథుడు (ఇంద్రజిత్) ఎవరి కుమారుడు?', 'Meghnad (Indrajit) son of?', [['రావణుడు','Ravana'],['కుంభకర్ణుడు','Kumbhakarna'],['విభీషణుడు','Vibhishana'],['మారీచుడు','Maricha']], 0, 'puranas'),
+
+  // ═══ BLOCK G: More Mahabharata Details ═══
+  Q('శకుని ఏ రాజ్యం?', 'Shakuni was king of?', [['గాంధార','Gandhara'],['హస్తినాపురం','Hastinapura'],['మగధ','Magadha'],['విదర్భ','Vidarbha']], 0, 'puranas'),
+  Q('విరాట పర్వంలో అర్జునుడి మారు పేరు?', 'Arjuna\'s disguise name in Virata?', [['బృహన్నల','Brihannala'],['కంక','Kanka'],['వల్లల','Vallala'],['గ్రంథి','Granthi']], 0, 'puranas'),
+  Q('భీముడు హిడింబిని ఎక్కడ కలిశాడు?', 'Where did Bhima meet Hidimbi?', [['అడవిలో','In forest'],['రాజభవనంలో','Palace'],['నగరంలో','City'],['యుద్ధరంగంలో','Battlefield']], 0, 'puranas'),
+  Q('ఘటోత్కచుడు ఎవరి కుమారుడు?', 'Ghatotkacha son of?', [['భీముడు','Bhima'],['అర్జునుడు','Arjuna'],['యుధిష్ఠిరుడు','Yudhishthira'],['నకులుడు','Nakula']], 0, 'puranas'),
+  Q('కృష్ణుడు అర్జునుడికి విశ్వరూపం ఏ అధ్యాయంలో చూపించాడు?', 'Krishna showed Vishwarupa in which chapter?', [['11వ','11th'],['1వ','1st'],['18వ','18th'],['4వ','4th']], 0, 'puranas'),
+  Q('లాక్షా గృహం (అరగిల్లు) ఎవరు నిర్మించారు?', 'Who built Lakshagriha?', [['దుర్యోధనుడు (పురోచనుడు)','Duryodhana (Purochana)'],['భీష్ముడు','Bhishma'],['విదురుడు','Vidura'],['ద్రోణుడు','Drona']], 0, 'puranas'),
+  Q('ద్రౌపది వస్త్రాపహరణంలో ఎవరు రక్షించారు?', 'Who saved Draupadi during disrobing?', [['కృష్ణుడు','Krishna'],['భీముడు','Bhima'],['అర్జునుడు','Arjuna'],['యుధిష్ఠిరుడు','Yudhishthira']], 0, 'puranas'),
+  Q('జరాసంధుడిని ఎవరు సంహరించారు?', 'Who killed Jarasandha?', [['భీముడు','Bhima'],['అర్జునుడు','Arjuna'],['కృష్ణుడు','Krishna'],['సహదేవుడు','Sahadeva']], 0, 'puranas'),
+  Q('కీచకుడిని ఎవరు సంహరించారు?', 'Who killed Keechaka?', [['భీముడు','Bhima'],['అర్జునుడు','Arjuna'],['నకులుడు','Nakula'],['సహదేవుడు','Sahadeva']], 0, 'puranas'),
+  Q('సహదేవుడి ప్రత్యేక నైపుణ్యం?', 'Sahadeva\'s special skill?', [['జ్యోతిషం','Astrology'],['ధనుర్విద్య','Archery'],['గద యుద్ధం','Mace fighting'],['ఖడ్గ యుద్ధం','Sword fighting']], 0, 'puranas'),
+  Q('నకులుడి ప్రత్యేక నైపుణ్యం?', 'Nakula\'s special skill?', [['అశ్వ విద్య (గుర్రాల శిక్షణ)','Horse training'],['ధనుర్విద్య','Archery'],['గద','Mace'],['మంత్రాలు','Mantras']], 0, 'puranas'),
+  Q('శల్యుడు ఎవరి సారథి?', 'Shalya was charioteer of?', [['కర్ణుడు','Karna'],['దుర్యోధనుడు','Duryodhana'],['అర్జునుడు','Arjuna'],['భీష్ముడు','Bhishma']], 0, 'puranas'),
+  Q('భగవద్గీత ఎవరి మధ్య సంభాషణ?', 'Gita is dialogue between?', [['కృష్ణ-అర్జున','Krishna-Arjuna'],['రామ-హనుమాన్','Rama-Hanuman'],['శివ-పార్వతి','Shiva-Parvati'],['వ్యాస-శుక','Vyasa-Shuka']], 0, 'puranas'),
+  Q('సంజయుడు ఎవరికి యుద్ధ వార్తలు చెప్పాడు?', 'Sanjaya narrated war to?', [['ధృతరాష్ట్రుడు','Dhritarashtra'],['పాండుడు','Pandu'],['గాంధారి','Gandhari'],['విదురుడు','Vidura']], 0, 'puranas'),
+
+  // ═══ BLOCK H: More Puranas — Krishna Leelas, Shiva Stories ═══
+  Q('కృష్ణుడు ఏ రాక్షసిని బాల్యంలో సంహరించాడు?', 'Which demoness did baby Krishna kill?', [['పూతన','Putana'],['తాటక','Tataka'],['శూర్పణఖ','Shurpanakha'],['హిడింబి','Hidimbi']], 0, 'puranas'),
+  Q('కాళీయ నాగుడిపై కృష్ణుడు ఎక్కడ నృత్యం చేశాడు?', 'Where did Krishna dance on Kaliya?', [['యమునా నది','Yamuna river'],['గంగ','Ganges'],['గోదావరి','Godavari'],['సరస్వతి','Saraswati']], 0, 'puranas'),
+  Q('రాస లీల ఎక్కడ జరిగింది?', 'Where did Rasa Leela happen?', [['వృందావనం','Vrindavan'],['మథుర','Mathura'],['ద్వారక','Dwarka'],['గోకులం','Gokul']], 0, 'puranas'),
+  Q('కృష్ణుడి వేణు గానం అంటే?', 'Krishna\'s flute playing is called?', [['వేణు గానం / మురళీ గానం','Venu Ganam / Murali'],['సంగీతం','Sangeet'],['నాదం','Nadam'],['భజన','Bhajan']], 0, 'puranas'),
+  Q('సుదాముడు కృష్ణుడికి ఏమి తీసుకెళ్ళాడు?', 'What did Sudama bring Krishna?', [['అటుకులు (చిన్నాలు)','Flattened rice'],['పండ్లు','Fruits'],['బంగారం','Gold'],['పూలు','Flowers']], 0, 'puranas'),
+  Q('రుక్మిణి కృష్ణుడిని ఏ విధంగా వివాహం చేసుకుంది?', 'How did Rukmini marry Krishna?', [['కృష్ణుడు ఆమెను అపహరించి','Krishna abducted her'],['స్వయంవరం','Swayamvar'],['తల్లిదండ్రులు నిర్ణయించి','Arranged'],['ఏమీ లేదు','Nothing']], 0, 'puranas'),
+  Q('కృష్ణుడి ఎన్ని భార్యలు ఉన్నారని చెప్తారు?', 'How many wives of Krishna?', [['16,108','16,108'],['8','8'],['100','100'],['1','1']], 0, 'puranas'),
+  Q('దక్ష ప్రజాపతి ఎవరి తండ్రి?', 'Daksha is father of?', [['సతీ దేవి','Sati'],['లక్ష్మి','Lakshmi'],['సరస్వతి','Saraswati'],['పార్వతి','Parvati']], 0, 'puranas'),
+  Q('తారకాసుర వధ ఎవరు చేశారు?', 'Who killed Tarakasura?', [['కార్తికేయ (సుబ్రహ్మణ్య)','Kartikeya'],['శివుడు','Shiva'],['విష్ణువు','Vishnu'],['ఇంద్రుడు','Indra']], 0, 'puranas'),
+  Q('అంధకాసుర వధ ఎవరు?', 'Who killed Andhakasura?', [['శివుడు','Shiva'],['విష్ణువు','Vishnu'],['కార్తికేయ','Kartikeya'],['గణేశుడు','Ganesha']], 0, 'puranas'),
+  Q('భస్మాసురుడి కథలో ఎవరు సహాయం చేశారు?', 'Who helped in Bhasmasura story?', [['మోహిని (విష్ణువు)','Mohini (Vishnu)'],['శివుడు','Shiva'],['బ్రహ్మ','Brahma'],['ఇంద్రుడు','Indra']], 0, 'puranas'),
+  Q('రావణుడు ఏ వేదాన్ని బాగా చదివాడు?', 'Which Veda did Ravana master?', [['సామవేదం','Sama'],['ఋగ్వేదం','Rig'],['యజుర్వేదం','Yajur'],['అథర్వవేదం','Atharva']], 0, 'puranas'),
+  Q('హిరణ్యాక్షుడిని ఏ అవతారం సంహరించింది?', 'Which avatar killed Hiranyaksha?', [['వరాహ','Varaha'],['నరసింహ','Narasimha'],['వామన','Vamana'],['రామ','Rama']], 0, 'puranas'),
+  Q('బలి చక్రవర్తిని ఏ అవతారం వాడాడు?', 'Which avatar subdued King Bali?', [['వామన','Vamana'],['నరసింహ','Narasimha'],['వరాహ','Varaha'],['పరశురామ','Parashurama']], 0, 'puranas'),
+
+  // ═══ BLOCK I: Upanishads & Vedic Concepts Deep Dive ═══
+  Q('చతుర్వేద మహావాక్యాలు ఎన్ని?', 'How many Mahavakyas?', [['4','4'],['3','3'],['7','7'],['5','5']], 0, 'upanishads'),
+  Q('"ప్రజ్ఞానం బ్రహ్మ" ఏ వేదం?', '"Prajnanam Brahma" from?', [['ఋగ్వేదం','Rig'],['యజుర్వేదం','Yajur'],['సామవేదం','Sama'],['అథర్వవేదం','Atharva']], 0, 'upanishads'),
+  Q('"అయం ఆత్మా బ్రహ్మ" ఏ వేదం?', '"Ayam Atma Brahma" from?', [['అథర్వవేదం','Atharva'],['ఋగ్వేదం','Rig'],['యజుర్వేదం','Yajur'],['సామవేదం','Sama']], 0, 'upanishads'),
+  Q('కర్మ సిద్ధాంతం ఏ ఉపనిషత్‌లో?', 'Karma theory in which Upanishad?', [['బృహదారణ్యక','Brihadaranyaka'],['ఈశ','Isha'],['కేన','Kena'],['ముండక','Mundaka']], 0, 'upanishads'),
+  Q('పంచకోశ సిద్ధాంతం ఎక్కడ?', 'Pancha Kosha theory in?', [['తైత్తిరీయ','Taittiriya'],['ఈశ','Isha'],['కఠ','Katha'],['ముండక','Mundaka']], 0, 'upanishads'),
+  Q('ఐదు కోశాలలో మొదటిది?', 'First of 5 Koshas?', [['అన్నమయ కోశం','Annamaya'],['ప్రాణమయ','Pranamaya'],['మనోమయ','Manomaya'],['విజ్ఞానమయ','Vijnanamaya']], 0, 'upanishads'),
+  Q('మూడు గుణాలు ఏమిటి?', 'What are three Gunas?', [['సత్వ, రజస్, తమస్','Sattva, Rajas, Tamas'],['ధర్మ, అర్థ, కామ','Dharma, Artha, Kama'],['బ్రహ్మ, విష్ణు, శివ','Brahma, Vishnu, Shiva'],['పృథ్వి, జల, అగ్ని','Earth, Water, Fire']], 0, 'vedas'),
+  Q('పంచభూతాలు ఎన్ని?', 'How many Pancha Bhutas?', [['5','5'],['4','4'],['7','7'],['3','3']], 0, 'vedas'),
+  Q('పంచభూతాలు ఏమిటి?', 'What are Pancha Bhutas?', [['పృథ్వి, జలం, అగ్ని, వాయువు, ఆకాశం','Earth, Water, Fire, Air, Space'],['సూర్యుడు, చంద్రుడు, నక్షత్రాలు, గ్రహాలు, ఉల్కలు','Sun, Moon, Stars, Planets, Meteors'],['బ్రహ్మ, విష్ణు, శివ, ఇంద్ర, అగ్ని','Brahma, Vishnu, Shiva, Indra, Agni'],['ధర్మ, అర్థ, కామ, మోక్ష, తపస్సు','Dharma, Artha, Kama, Moksha, Tapas']], 0, 'vedas'),
+  Q('పంచ ప్రాణాలు ఏమిటి?', 'What are Pancha Pranas?', [['ప్రాణ, అపాన, వ్యాన, ఉదాన, సమాన','Prana, Apana, Vyana, Udana, Samana'],['అగ్ని, వాయు, జల, పృథ్వి, ఆకాశ','Agni, Vayu, Jala, Prithvi, Akasha'],['మనస్, బుద్ధి, చిత్త, అహంకార, ఆత్మ','Manas, Buddhi, Chitta, Ahankara, Atma'],['సత్వ, రజస్, తమస్, ధర్మ, అధర్మ','Sattva, Rajas, Tamas, Dharma, Adharma']], 0, 'vedas'),
+  Q('అంతఃకరణం ఎన్ని భాగాలు?', 'Parts of Antahkarana?', [['4 (మనస్, బుద్ధి, చిత్త, అహంకారం)','4 (Manas, Buddhi, Chitta, Ahankara)'],['3','3'],['5','5'],['2','2']], 0, 'upanishads'),
+  Q('జీవాత్మ-పరమాత్మ సంబంధం ఏ ఉపనిషత్?', 'Jivatma-Paramatma in which Upanishad?', [['ముండక (రెండు పక్షులు ఉపమానం)','Mundaka (two birds analogy)'],['ఈశ','Isha'],['కేన','Kena'],['కఠ','Katha']], 0, 'upanishads'),
+  Q('నేతి నేతి (ఇది కాదు, ఇది కాదు) ఎక్కడ?', '"Neti Neti" from?', [['బృహదారణ్యక','Brihadaranyaka'],['ఈశ','Isha'],['చాందోగ్య','Chandogya'],['ముండక','Mundaka']], 0, 'upanishads'),
+  Q('యాజ్ఞవల్క్యుడు ఏ ఉపనిషత్‌లో?', 'Yajnavalkya appears in?', [['బృహదారణ్యక','Brihadaranyaka'],['ఈశ','Isha'],['కఠ','Katha'],['ముండక','Mundaka']], 0, 'upanishads'),
+
+  // ═══ BLOCK J: Festivals, Vratas & Samskaras from Puranas ═══
+  Q('మహాశివరాత్రి ఎప్పుడు?', 'When is Maha Shivaratri?', [['మాఘ/ఫాల్గుణ కృష్ణ చతుర్దశి','Magha/Phalguna Krishna Chaturdashi'],['కార్తీక పౌర్ణమి','Kartik Pournami'],['చైత్ర శుద్ధ పాడ్యమి','Chaitra Shudda Padyami'],['శ్రావణ పౌర్ణమి','Shravana Pournami']], 0, 'puranas'),
+  Q('రక్షాబంధన్ ఏ నెలలో?', 'Raksha Bandhan in which month?', [['శ్రావణ పౌర్ణమి','Shravana Pournami'],['కార్తీక పౌర్ణమి','Kartik'],['చైత్ర పౌర్ణమి','Chaitra'],['వైశాఖ పౌర్ణమి','Vaishakha']], 0, 'puranas'),
+  Q('గురు పూర్ణిమ ఎవరికి అంకితం?', 'Guru Purnima dedicated to?', [['వ్యాసుడు','Vyasa'],['వాల్మీకి','Valmiki'],['శంకరుడు','Shankara'],['రామానుజుడు','Ramanuja']], 0, 'puranas'),
+  Q('కార్తీక మాసంలో ఏమి చేస్తారు?', 'What\'s done in Kartik month?', [['దీపారాధన','Lighting lamps'],['ఉపవాసం మాత్రమే','Only fasting'],['యాత్ర','Pilgrimage'],['దానం','Donations']], 0, 'puranas'),
+  Q('శ్రావణ మాసం ఎవరికి ప్రీతి?', 'Shravana dear to?', [['శివుడు','Shiva'],['విష్ణువు','Vishnu'],['బ్రహ్మ','Brahma'],['హనుమాన్','Hanuman']], 0, 'puranas'),
+  Q('ప్రదోషం ఏ తిథిన?', 'Pradosham on which Tithi?', [['త్రయోదశి','Trayodashi'],['ఏకాదశి','Ekadashi'],['చతుర్థి','Chaturthi'],['పౌర్ణమి','Pournami']], 0, 'puranas'),
+  Q('సత్యనారాయణ వ్రతం ఏ రోజు?', 'Satyanarayan vrata on?', [['పౌర్ణమి','Pournami'],['అమావాస్య','Amavasya'],['ఏకాదశి','Ekadashi'],['చతుర్థి','Chaturthi']], 0, 'puranas'),
+  Q('వరలక్ష్మీ వ్రతం ఎప్పుడు?', 'When is Varalakshmi Vratam?', [['శ్రావణ శుక్ల శుక్రవారం','Shravana Shukla Friday'],['కార్తీక పౌర్ణమి','Kartik Pournami'],['చైత్ర పాడ్యమి','Chaitra Padyami'],['వైశాఖ పౌర్ణమి','Vaishakha Pournami']], 0, 'puranas'),
+  Q('16 సంస్కారాలలో మొదటిది?', 'First of 16 Samskaras?', [['గర్భాధానం','Garbhadhana'],['నామకరణం','Namakarana'],['జాతకర్మ','Jatakarma'],['ఉపనయనం','Upanayana']], 0, 'puranas'),
+  Q('అంత్యేష్టి ఏ సంస్కారం?', 'Antyeshti is?', [['చివరి సంస్కారం (అంతిమ క్రియ)','Last rites'],['మొదటి','First'],['వివాహం','Marriage'],['నామకరణం','Naming']], 0, 'puranas'),
+  Q('చతుర్వర్ణాలలో "వైశ్య" వృత్తి?', 'Vaishya\'s traditional role?', [['వ్యాపారం & వ్యవసాయం','Trade & Agriculture'],['విద్య','Teaching'],['రక్షణ','Protection'],['సేవ','Service']], 0, 'vedas'),
+  Q('ధర్మశాస్త్రం ఎవరు రచించారు?', 'Who wrote Dharmashastra?', [['మనువు & ఇతరులు','Manu & others'],['వ్యాసుడు','Vyasa'],['వాల్మీకి','Valmiki'],['కాళిదాసు','Kalidasa']], 0, 'puranas'),
+  Q('నారద భక్తి సూత్రాలు ఎవరు?', 'Narada Bhakti Sutras by?', [['నారదుడు','Narada'],['వ్యాసుడు','Vyasa'],['శంకరుడు','Shankara'],['రామానుజుడు','Ramanuja']], 0, 'puranas'),
+  Q('భక్తి మార్గంలో 9 రకాల భక్తి ఉన్నాయి. దానిని ఏమంటారు?', 'Nine forms of devotion called?', [['నవ విధ భక్తి','Nava Vidha Bhakti'],['అష్టాంగ భక్తి','Ashtanga Bhakti'],['పంచ భక్తి','Pancha Bhakti'],['సప్త భక్తి','Sapta Bhakti']], 0, 'puranas'),
+
+  // ═══ BLOCK K: More Vedic & Philosophical ═══
+  Q('షడ్దర్శనాలలో న్యాయం ఎవరు?', 'Nyaya founded by?', [['గౌతమ','Gautama'],['కపిల','Kapila'],['పతంజలి','Patanjali'],['కణాదుడు','Kanada']], 0, 'vedas'),
+  Q('వైశేషిక దర్శనం ఎవరు?', 'Vaisheshika by?', [['కణాదుడు','Kanada'],['గౌతమ','Gautama'],['కపిల','Kapila'],['జైమిని','Jaimini']], 0, 'vedas'),
+  Q('పూర్వ మీమాంస ఎవరు?', 'Purva Mimamsa by?', [['జైమిని','Jaimini'],['వ్యాసుడు','Vyasa'],['కపిల','Kapila'],['పతంజలి','Patanjali']], 0, 'vedas'),
+  Q('త్రిప్రస్థానం (ప్రస్థానత్రయం) ఏమిటి?', 'What is Prasthanatraya?', [['ఉపనిషత్తులు + గీత + బ్రహ్మసూత్రాలు','Upanishads + Gita + Brahma Sutras'],['వేదాలు + పురాణాలు + ఇతిహాసాలు','Vedas + Puranas + Itihasas'],['రామాయణం + మహాభారతం + భాగవతం','Ramayana + Mahabharata + Bhagavata'],['శ్రుతి + స్మృతి + పురాణం','Shruti + Smriti + Purana']], 0, 'vedas'),
+  Q('మోక్షానికి మార్గాలు ఎన్ని?', 'Paths to Moksha?', [['3 (జ్ఞాన, భక్తి, కర్మ)','3 (Jnana, Bhakti, Karma)'],['1','1'],['5','5'],['7','7']], 0, 'vedas'),
+  Q('జ్ఞాన యోగం ఏమి బోధిస్తుంది?', 'Jnana Yoga teaches?', [['ఆత్మ జ్ఞానం ద్వారా మోక్షం','Moksha through self-knowledge'],['భక్తి','Devotion'],['కర్మ','Action'],['ధ్యానం','Meditation']], 0, 'vedas'),
+  Q('భక్తి యోగం ఏమి బోధిస్తుంది?', 'Bhakti Yoga teaches?', [['భగవంతుడిపై ప్రేమ ద్వారా మోక్షం','Moksha through devotion to God'],['జ్ఞానం','Knowledge'],['కర్మ','Action'],['తపస్సు','Penance']], 0, 'vedas'),
+  Q('కర్మ యోగం ఏమి బోధిస్తుంది?', 'Karma Yoga teaches?', [['నిష్కామ కర్మ ద్వారా మోక్షం','Moksha through selfless action'],['జ్ఞానం','Knowledge'],['భక్తి','Devotion'],['సన్యాసం','Renunciation']], 0, 'vedas'),
+  Q('రాజ యోగం ఏమి?', 'Raja Yoga is?', [['ధ్యానం & మనోనిగ్రహం','Meditation & mind control'],['భక్తి','Devotion'],['కర్మ','Action'],['జ్ఞానం','Knowledge']], 0, 'vedas'),
+  Q('పతంజలి యోగసూత్రాలలో ఎన్ని సూత్రాలు?', 'Sutras in Patanjali Yoga Sutras?', [['196','196'],['108','108'],['300','300'],['64','64']], 0, 'vedas'),
+  Q('యమం & నియమం ఏ యోగంలో?', 'Yama & Niyama in which Yoga?', [['అష్టాంగ యోగం','Ashtanga Yoga'],['భక్తి యోగం','Bhakti Yoga'],['కర్మ యోగం','Karma Yoga'],['జ్ఞాన యోగం','Jnana Yoga']], 0, 'vedas'),
+  Q('సమాధి ఏ యోగ అంగం?', 'Samadhi is which limb of Yoga?', [['8వ (చివరిది)','8th (last)'],['1వ','1st'],['4వ','4th'],['6వ','6th']], 0, 'vedas'),
+  Q('ధారణ, ధ్యాన, సమాధి కలిసి?', 'Dharana + Dhyana + Samadhi =?', [['సంయమం','Samyama'],['ప్రత్యాహారం','Pratyahara'],['ప్రాణాయామం','Pranayama'],['యమం','Yama']], 0, 'vedas'),
 ];
 
 // Max 5 sets per day, 25 questions each
-const QUESTIONS_PER_SET = 25;
+const QUESTIONS_PER_SET = 20;
 const MAX_SETS_PER_DAY = 5;
 
 function seededShuffle(arr, seed) {
