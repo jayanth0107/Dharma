@@ -158,19 +158,19 @@ export function SlokaCard({ sloka }) {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <Text style={styles.slokaDeity}>{sloka.deity}</Text>
-          {Platform.OS !== 'web' && (
-            <TouchableOpacity
-              onPress={() => {
-                try {
-                  const Speech = require('expo-speech');
-                  Speech.speak(sloka.meaning || sloka.sanskrit, { language: 'en', rate: 0.85 });
-                } catch {}
-              }}
-              style={{ padding: 4 }}
-            >
-              <MaterialCommunityIcons name="volume-high" size={18} color={DarkColors.gold} />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            onPress={() => {
+              try {
+                const Speech = require('expo-speech');
+                Speech.speak(sloka.meaning || sloka.sanskrit, { language: 'en', rate: 0.85 });
+              } catch {
+                // TTS not available on this platform
+              }
+            }}
+            style={{ backgroundColor: 'rgba(212,160,23,0.12)', padding: 6, borderRadius: 14 }}
+          >
+            <MaterialCommunityIcons name="volume-high" size={20} color={DarkColors.gold} />
+          </TouchableOpacity>
         </View>
         <Text style={[styles.slokaText, { fontSize: slokaSize, lineHeight: slokaSize + 12 }]}>{sloka.sanskrit}</Text>
         <View style={styles.slokaDivider} />

@@ -34,6 +34,8 @@ import { NotificationScreen } from '../screens/NotificationScreen';
 import { TempleNearbyScreen } from '../screens/TempleNearbyScreen';
 import { QuizScreen } from '../screens/QuizScreen';
 import { PramanaScreen } from '../screens/PramanaScreen';
+import { MeditationScreen } from '../screens/MeditationScreen';
+import { StotraScreen } from '../screens/StotraScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -58,6 +60,8 @@ const SECTION_COMPONENTS = {
   Reminder:     ReminderScreen,
   Quiz:         withErrorBoundary(QuizScreen, 'Quiz'),
   Pramana:      withErrorBoundary(PramanaScreen, 'Pramana'),
+  Stotra:       withErrorBoundary(StotraScreen, 'Stotra'),
+  Meditation:   withErrorBoundary(MeditationScreen, 'Meditation'),
   Kids:         withErrorBoundary(CalendarScreen, 'Kids'),
   TempleNearby: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'),
   Donate:       DonateScreen,

@@ -282,7 +282,9 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="head-question" label={t('క్విజ్', 'Daily Quiz')} sublabel={t('వేద పురాణ క్విజ్', 'Vedic Quiz')} onPress={() => navigation.navigate('Quiz')} isNew />
           <FeatureTile icon="shield-star" label={t('ధర్మ ప్రమాణం', 'Dharma Pramana')} sublabel={t('శ్రుతి స్మృతి శిష్టాచారం', 'Shruti Smriti Shishtachara')} onPress={() => navigation.navigate('Pramana')} isNew />
 
-          {/* Row 4 — Gita, Kids, Temples */}
+          {/* Row 4 — Learning & Practice */}
+          <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు', 'Stotra Library')} sublabel={t('వేద మంత్రాలు & స్తోత్రాలు', 'Vedic Mantras & Stotras')} onPress={() => navigation.navigate('Stotra')} isNew />
+          <FeatureTile icon="meditation" label={t('ధ్యానం', 'Meditation')} sublabel={t('టైమర్ & గైడ్', 'Timer & Guide')} onPress={() => navigation.navigate('Meditation')} isNew />
           <FeatureTile icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t(TR.gitaSub.en, TR.gitaSub.te)} onPress={() => navigation.navigate('Gita')} />
           <FeatureTile icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t(TR.kidsSub.en, TR.kidsSub.te)} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
           <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />

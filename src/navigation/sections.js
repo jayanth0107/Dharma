@@ -17,7 +17,9 @@ export const MAIN_SECTIONS = [
   { name: 'Astro',        icon: 'zodiac-leo',             te: 'వేద విజ్ఞానం',       en: 'Vedic Wisdom' },
   { name: 'Quiz',         icon: 'head-question',          te: 'క్విజ్',             en: 'Daily Quiz' },
   { name: 'Pramana',      icon: 'shield-star',            te: 'ధర్మ ప్రమాణం',        en: 'Dharma Pramana' },
-  // Row 4 — Learning
+  // Row 4 — Learning & Practice
+  { name: 'Stotra',       icon: 'music-note-eighth',      te: 'స్తోత్రాలు',          en: 'Stotra Library' },
+  { name: 'Meditation',   icon: 'meditation',             te: 'ధ్యానం',             en: 'Meditation' },
   { name: 'Gita',         icon: 'book-open-page-variant', te: 'భగవద్గీత',           en: 'Bhagavad Gita' },
   { name: 'Kids',         icon: 'baby-face-outline',      te: 'పిల్లల కథలు',        en: "Kid's Stories", params: { tab: 'kids' } },
   { name: 'TempleNearby', icon: 'temple-hindu',           te: 'దేవాలయాలు',          en: 'Nearby Temples' },
