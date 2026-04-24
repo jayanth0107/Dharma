@@ -32,6 +32,7 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { LocationScreen } from '../screens/LocationScreen';
 import { NotificationScreen } from '../screens/NotificationScreen';
 import { TempleNearbyScreen } from '../screens/TempleNearbyScreen';
+import { QuizScreen } from '../screens/QuizScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -54,6 +55,7 @@ const SECTION_COMPONENTS = {
   Gita:         withErrorBoundary(GitaScreen, 'Gita'),
   Market:       withErrorBoundary(MarketScreen, 'Market'),
   Reminder:     ReminderScreen,
+  Quiz:         withErrorBoundary(QuizScreen, 'Quiz'),
   Kids:         withErrorBoundary(CalendarScreen, 'Kids'),
   TempleNearby: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'),
   Donate:       DonateScreen,
