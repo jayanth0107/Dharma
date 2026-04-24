@@ -158,6 +158,21 @@ export function KidsSection({ dayOfWeek }) {
                 <View style={[st.modalBody, { padding: modalPad }]}>
                   <Text style={[st.modalTitle, { color: activeStory.color, fontSize: modalTitleFs }]}>{t(activeStory.title, activeStory.english)}</Text>
                   <Text style={[st.modalEnglish, { fontSize: modalSubFs }]}>{activeStory.english}</Text>
+                  {Platform.OS !== 'web' && (
+                    <TouchableOpacity
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginTop: 8, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 16, borderWidth: 1, borderColor: DarkColors.borderGold }}
+                      onPress={() => {
+                        try {
+                          const Speech = require('expo-speech');
+                          const text = activeStory.storyEn || activeStory.story;
+                          Speech.speak(text, { language: 'en', rate: 0.8 });
+                        } catch {}
+                      }}
+                    >
+                      <MaterialCommunityIcons name="volume-high" size={16} color={DarkColors.gold} />
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold }}>{t('వినండి', 'Listen')}</Text>
+                    </TouchableOpacity>
+                  )}
                   <View style={st.divider} />
                   <Text style={[st.storyText, { fontSize: storyFs, lineHeight: storyLh }]}>{t(activeStory.story, activeStory.storyEn || activeStory.story)}</Text>
                   <View style={[st.moralBox, { backgroundColor: activeStory.color + '10', borderColor: activeStory.color + '30', padding: moralPad }]}>

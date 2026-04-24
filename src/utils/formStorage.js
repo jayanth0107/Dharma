@@ -20,6 +20,7 @@ export const FORM_KEYS = {
   kidsMyNakshatra: '@dharma_kids_my_star',
   teenStudentMode: '@dharma_teen_student_mode',
   seniorMode:      '@dharma_senior_mode',
+  fontScale:       '@dharma_font_scale',
 };
 
 export async function loadForm(key) {

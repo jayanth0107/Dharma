@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, DarkGradients, Type } from '../theme';
@@ -156,7 +156,22 @@ export function SlokaCard({ sloka }) {
         <View style={styles.slokaDecoTop}>
           <MaterialCommunityIcons name="fleur-de-lis" size={20} color={DarkColors.goldShimmer} />
         </View>
-        <Text style={styles.slokaDeity}>{sloka.deity}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Text style={styles.slokaDeity}>{sloka.deity}</Text>
+          {Platform.OS !== 'web' && (
+            <TouchableOpacity
+              onPress={() => {
+                try {
+                  const Speech = require('expo-speech');
+                  Speech.speak(sloka.meaning || sloka.sanskrit, { language: 'en', rate: 0.85 });
+                } catch {}
+              }}
+              style={{ padding: 4 }}
+            >
+              <MaterialCommunityIcons name="volume-high" size={18} color={DarkColors.gold} />
+            </TouchableOpacity>
+          )}
+        </View>
         <Text style={[styles.slokaText, { fontSize: slokaSize, lineHeight: slokaSize + 12 }]}>{sloka.sanskrit}</Text>
         <View style={styles.slokaDivider} />
         <Text style={[styles.slokaMeaning, { fontSize: meaningSize, lineHeight: meaningSize + 9 }]}>{sloka.meaning}</Text>

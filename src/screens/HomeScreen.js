@@ -3,7 +3,7 @@
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Platform, Image, ScrollView, Linking,
 } from 'react-native';
@@ -23,6 +23,8 @@ import { LocationPickerModal } from '../components/LocationPickerModal';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { BirthDatePicker } from '../components/BirthDatePicker';
+import { TodaySummaryCard } from '../components/TodaySummaryCard';
+import { recordDailyOpen } from '../utils/streakService';
 import { useAuth } from '../context/AuthContext';
 import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappShare';
 
@@ -40,6 +42,12 @@ export function HomeScreen({ navigation }) {
   const [showDrawer, setShowDrawer] = useState(false);
   const [showPanchangamShare, setShowPanchangamShare] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [streak, setStreak] = useState(0);
+
+  // Record daily open and load streak
+  useEffect(() => {
+    recordDailyOpen().then(data => setStreak(data.currentStreak));
+  }, []);
 
   // ── Responsive header sizing — single-row header that fits any phone ──
   // Tiny phones (<360) get smaller icons + flag + smaller subtitle so the
@@ -256,6 +264,8 @@ export function HomeScreen({ navigation }) {
 
       {/* ── Feature Grid (scrollable, single grid) ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
+        <TodaySummaryCard onNavigate={(screen) => navigation.navigate(screen)} streak={streak} />
+
         <FeatureGrid>
           {/* Row 1 — Daily essentials */}
           <FeatureTile icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t(TR.panchangSub.en, TR.panchangSub.te)} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
