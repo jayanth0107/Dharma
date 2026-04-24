@@ -99,13 +99,13 @@ const s = StyleSheet.create({
   infoDivider: { width: 1, height: 32, backgroundColor: DarkColors.borderCard },
   infoLabel: { fontSize: 12, color: '#BBBBBB', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   infoValue: { fontSize: 15, color: '#FFFFFF', fontWeight: '800', textAlign: 'center' },
-  timingsRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  timingsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   timingChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12,
-    borderWidth: 1,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 8, paddingVertical: 5, borderRadius: 10,
+    borderWidth: 1, flexShrink: 1,
   },
-  timingText: { fontSize: 13, fontWeight: '800' },
+  timingText: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
   festivalRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8,
     paddingTop: 10, borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
