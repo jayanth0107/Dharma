@@ -52,14 +52,29 @@ export const EKADASHI_2026 = [
   { date: '2026-12-12', paksha: 'కృష్ణ', pakshaEnglish: 'Krishna', month: 'పుష్యం', name: 'సఫలా ఏకాదశి', nameEnglish: 'Saphala Ekadashi', significance: 'సఫలత ప్రదాయిని. విజయం.', deity: 'శ్రీ మహావిష్ణువు' },
 ];
 
+// Year-aware lookup. Add EKADASHI_2027 etc. and register here when generated;
+// the getters fall back to the closest-available year so the UI never goes
+// silently empty after a year rollover.
+const EKADASHI_BY_YEAR = {
+  2026: EKADASHI_2026,
+};
+const EKADASHI_YEARS = Object.keys(EKADASHI_BY_YEAR).map(Number).sort((a, b) => a - b);
+
+function getEkadashisForYear(year) {
+  if (EKADASHI_BY_YEAR[year]) return EKADASHI_BY_YEAR[year];
+  const closest = EKADASHI_YEARS.filter(y => y <= year).pop() ?? EKADASHI_YEARS[0];
+  if (__DEV__) console.warn(`Ekadashi data for ${year} not loaded — falling back to ${closest}`);
+  return EKADASHI_BY_YEAR[closest] || [];
+}
+
 export function getTodayEkadashi(date = new Date()) {
   const dateStr = date.toISOString().split('T')[0];
-  return EKADASHI_2026.find(e => e.date === dateStr) || null;
+  return getEkadashisForYear(date.getFullYear()).find(e => e.date === dateStr) || null;
 }
 
 export function getUpcomingEkadashis(fromDate = new Date(), count = 3) {
   const dateStr = fromDate.toISOString().split('T')[0];
-  return EKADASHI_2026
+  return getEkadashisForYear(fromDate.getFullYear())
     .filter(e => e.date > dateStr)
     .slice(0, count)
     .map(e => {
@@ -72,7 +87,7 @@ export function getUpcomingEkadashis(fromDate = new Date(), count = 3) {
 
 export function getNextEkadashi(fromDate = new Date()) {
   const dateStr = fromDate.toISOString().split('T')[0];
-  const next = EKADASHI_2026.find(e => e.date >= dateStr);
+  const next = getEkadashisForYear(fromDate.getFullYear()).find(e => e.date >= dateStr);
   if (!next) return null;
   const today = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
   const ekDate = new Date(next.date);

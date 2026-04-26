@@ -24,6 +24,12 @@ export function PujaGuideScreen() {
         <PageHeader title={t(puja.name.te, puja.name.en)} />
         <TopTabBar />
         <ScrollView style={s.scroll} contentContainerStyle={s.content}>
+          {/* Back to all pujas — at top */}
+          <TouchableOpacity style={s.backBtnTop} onPress={() => setSelectedPuja(null)}>
+            <MaterialCommunityIcons name="arrow-left" size={18} color={DarkColors.gold} />
+            <Text style={s.backBtnText}>{t('అన్ని పూజలు', 'All Pujas')}</Text>
+          </TouchableOpacity>
+
           {/* Puja header */}
           <View style={[s.pujaHeader, { borderLeftColor: puja.color }]}>
             <MaterialCommunityIcons name={puja.icon} size={32} color={puja.color} />
@@ -62,12 +68,6 @@ export function PujaGuideScreen() {
               <Text style={s.stepText}>{t(step.te, step.en)}</Text>
             </View>
           ))}
-
-          {/* Back button */}
-          <TouchableOpacity style={s.backBtn} onPress={() => setSelectedPuja(null)}>
-            <MaterialCommunityIcons name="arrow-left" size={18} color={DarkColors.gold} />
-            <Text style={s.backBtnText}>{t('అన్ని పూజలు', 'All Pujas')}</Text>
-          </TouchableOpacity>
 
           <View style={{ height: 30 }} />
         </ScrollView>
@@ -158,10 +158,10 @@ const s = StyleSheet.create({
   stepNumText: { fontSize: 12, fontWeight: '900', color: '#FFFFFF' },
   stepText: { flex: 1, fontSize: 15, color: '#FFFFFF', lineHeight: 22, fontWeight: '600' },
 
-  // Back button
-  backBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
-    paddingVertical: 12, paddingHorizontal: 20, borderRadius: 14, marginTop: 12,
+  // Back button (top)
+  backBtnTop: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start',
+    paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12, marginBottom: 12,
     backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   backBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },

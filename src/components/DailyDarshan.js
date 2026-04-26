@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { ANIMATIONS_ENABLED } from '../utils/deviceCapability';
+import { useLanguage } from '../context/LanguageContext';
 
 const FLOWERS = ['🌸', '🌺', '🌼', '🪷', '💐'];
 const PETAL_COUNT = 8;
@@ -107,43 +108,65 @@ const DEITY_IMAGES = {
 // Friday = Lakshmi, Saturday = Rama/Venkateshwara
 export const DAILY_DEITIES = {
   0: {
-    name: 'శ్రీ సూర్య భగవానుడు', english: 'సప్త అశ్వ రథం — సూర్య దేవుడు',
-    mantra: 'ఓం సూర్యాయ నమః', greeting: 'శుభ ఆదివారం',
+    name: { te: 'శ్రీ సూర్య భగవానుడు', en: 'Lord Surya' },
+    desc: { te: 'సప్త అశ్వ రథం — సూర్య దేవుడు', en: 'Chariot of Seven Horses — The Sun God' },
+    mantra: 'ఓం సూర్యాయ నమః',
+    greeting: { te: 'శుభ ఆదివారం', en: 'Happy Sunday' },
+    significance: { te: 'ఆదివారం సూర్యదేవుని ఆరాధన రోజు. ఆరోగ్యం, తేజస్సు, విజయం కోసం ప్రార్థించండి.', en: 'Sunday is the day to worship Lord Surya. Pray for health, radiance, and success.' },
     icon: 'white-balance-sunny', color: '#E8751A', imageKey: 'surya',
   },
   1: {
-    name: 'శ్రీ శివుడు', english: 'త్రిశూలం & డమరుకం ధారి — మహాదేవుడు',
-    mantra: 'ఓం నమః శివాయ', greeting: 'శుభ సోమవారం',
+    name: { te: 'శ్రీ శివుడు', en: 'Lord Shiva' },
+    desc: { te: 'త్రిశూలం & డమరుకం ధారి — మహాదేవుడు', en: 'Bearer of Trishul & Damru — Mahadeva' },
+    mantra: 'ఓం నమః శివాయ',
+    greeting: { te: 'శుభ సోమవారం', en: 'Happy Monday' },
+    significance: { te: 'సోమవారం శివుని పూజకు అత్యంత శుభదినం. శివలింగాభిషేకం, రుద్రాభిషేకం చేయండి.', en: 'Monday is the most auspicious day for Shiva worship. Perform Shivalinga Abhishekam.' },
     icon: 'om', color: '#4A90D9', imageKey: 'shiva',
   },
   2: {
-    name: 'శ్రీ హనుమంతుడు', english: 'సంజీవని పర్వతధారి — వీర హనుమాన్',
-    mantra: 'ఓం హనుమతే నమః', greeting: 'శుభ మంగళవారం',
+    name: { te: 'శ్రీ హనుమంతుడు', en: 'Lord Hanuman' },
+    desc: { te: 'సంజీవని పర్వతధారి — వీర హనుమాన్', en: 'Bearer of Sanjeevani Mountain — Veer Hanuman' },
+    mantra: 'ఓం హనుమతే నమః',
+    greeting: { te: 'శుభ మంగళవారం', en: 'Happy Tuesday' },
+    significance: { te: 'మంగళవారం హనుమంతుని ఆరాధన రోజు. ధైర్యం, శక్తి, భయ నివారణ కోసం ప్రార్థించండి.', en: 'Tuesday is Hanuman worship day. Pray for courage, strength, and freedom from fear.' },
     icon: 'shield-star', color: '#E8751A', imageKey: 'hanuman',
   },
   3: {
-    name: 'శ్రీ కృష్ణుడు', english: 'సుదర్శన చక్రధారి — గోవిందుడు',
-    mantra: 'ఓం నమో భగవతే వాసుదేవాయ', greeting: 'శుభ బుధవారం',
-    icon: 'music-note', color: '#2E7D32', imageKey: 'krishna',
+    name: { te: 'శ్రీ కృష్ణుడు', en: 'Lord Krishna' },
+    desc: { te: 'సుదర్శన చక్రధారి — గోవిందుడు', en: 'Bearer of Sudarshana Chakra — Govinda' },
+    mantra: 'ఓం నమో భగవతే వాసుదేవాయ',
+    greeting: { te: 'శుభ బుధవారం', en: 'Happy Wednesday' },
+    significance: { te: 'బుధవారం కృష్ణుని/విష్ణువు ఆరాధన రోజు. జ్ఞానం, బుద్ధి, వ్యాపార వృద్ధి కోసం ప్రార్థించండి.', en: 'Wednesday is Krishna/Vishnu worship day. Pray for wisdom, intellect, and prosperity.' },
+    icon: 'music-note', color: '#4CAF50', imageKey: 'krishna',
   },
   4: {
-    name: 'శ్రీ వేంకటేశ్వరుడు', english: 'శంఖ చక్రధారి — బాలాజీ',
-    mantra: 'ఓం నమో వేంకటేశాయ', greeting: 'శుభ గురువారం',
+    name: { te: 'శ్రీ వేంకటేశ్వరుడు', en: 'Lord Venkateswara' },
+    desc: { te: 'శంఖ చక్రధారి — బాలాజీ', en: 'Bearer of Conch & Chakra — Balaji' },
+    mantra: 'ఓం నమో వేంకటేశాయ',
+    greeting: { te: 'శుభ గురువారం', en: 'Happy Thursday' },
+    significance: { te: 'గురువారం వేంకటేశ్వర/విష్ణువు ఆరాధన రోజు. సంపద, గురు ఆశీర్వాదం కోసం ప్రార్థించండి.', en: 'Thursday is Venkateswara/Vishnu worship day. Pray for wealth and Guru blessings.' },
     icon: 'temple-hindu', color: '#D4A017', imageKey: 'venkateswara',
   },
   5: {
-    name: 'శ్రీ లక్ష్మీదేవి', english: 'పద్మాసనా — సంపదల దేవత',
-    mantra: 'ఓం శ్రీ మహాలక్ష్మ్యై నమః', greeting: 'శుభ శుక్రవారం',
-    icon: 'flower-tulip', color: '#C41E3A', imageKey: 'lakshmi',
+    name: { te: 'శ్రీ లక్ష్మీదేవి', en: 'Goddess Lakshmi' },
+    desc: { te: 'పద్మాసనా — సంపదల దేవత', en: 'Seated on Lotus — Goddess of Wealth' },
+    mantra: 'ఓం శ్రీ మహాలక్ష్మ్యై నమః',
+    greeting: { te: 'శుభ శుక్రవారం', en: 'Happy Friday' },
+    significance: { te: 'శుక్రవారం లక్ష్మీదేవి ఆరాధన రోజు. సంపద, సౌభాగ్యం, గృహ శాంతి కోసం ప్రార్థించండి.', en: 'Friday is Lakshmi worship day. Pray for wealth, fortune, and household peace.' },
+    icon: 'flower-tulip', color: '#E8495A', imageKey: 'lakshmi',
   },
   6: {
-    name: 'శ్రీ రామ దర్బారు', english: 'శ్రీరాముడు, సీత, లక్ష్మణుడు & హనుమంతుడు',
-    mantra: 'శ్రీ రామ జయ రామ జయ జయ రామ', greeting: 'శుభ శనివారం',
-    icon: 'bow-arrow', color: '#4A1A6B', imageKey: 'rama',
+    name: { te: 'శ్రీ రామ దర్బారు', en: 'Sri Rama Darbar' },
+    desc: { te: 'శ్రీరాముడు, సీత, లక్ష్మణుడు & హనుమంతుడు', en: 'Sri Rama, Sita, Lakshmana & Hanuman' },
+    mantra: 'శ్రీ రామ జయ రామ జయ జయ రామ',
+    greeting: { te: 'శుభ శనివారం', en: 'Happy Saturday' },
+    significance: { te: 'శనివారం హనుమంతుని/శని దేవుని ఆరాధన రోజు. కష్టాల నుండి విముక్తి, ధర్మ రక్షణ కోసం ప్రార్థించండి.', en: 'Saturday is Hanuman/Shani worship day. Pray for relief from hardships and dharmic protection.' },
+    icon: 'bow-arrow', color: '#9B6FCF', imageKey: 'rama',
   },
 };
 
 export function DailyDarshanCard({ dayOfWeek }) {
+  const { t } = useLanguage();
   const deity = DAILY_DEITIES[dayOfWeek] || DAILY_DEITIES[0];
   const deityImageUri = DEITY_IMAGES[deity.imageKey];
   const [imageFailed, setImageFailed] = React.useState(false);
@@ -170,7 +193,7 @@ export function DailyDarshanCard({ dayOfWeek }) {
   }, []);
 
   const hour = new Date().getHours();
-  const timeGreeting = hour < 5 ? 'శుభ రాత్రి' : hour < 12 ? 'శుభోదయం' : hour < 17 ? 'శుభ మధ్యాహ్నం' : hour < 20 ? 'శుభ సాయంత్రం' : 'శుభ రాత్రి';
+  const timeGreeting = hour < 5 ? t('శుభ రాత్రి', 'Good Night') : hour < 12 ? t('శుభోదయం', 'Good Morning') : hour < 17 ? t('శుభ మధ్యాహ్నం', 'Good Afternoon') : hour < 20 ? t('శుభ సాయంత్రం', 'Good Evening') : t('శుభ రాత్రి', 'Good Night');
 
   return (
     <View style={styles.container}>
@@ -178,7 +201,7 @@ export function DailyDarshanCard({ dayOfWeek }) {
         {/* Greeting row */}
         <View style={styles.greetingRow}>
           <Text style={styles.greeting}>🙏 {timeGreeting}</Text>
-          <Text style={styles.dayGreetingInline}>{deity.greeting}</Text>
+          <Text style={styles.dayGreetingInline}>{t(deity.greeting.te, deity.greeting.en)}</Text>
         </View>
 
         {/* Deity image with icon fallback + falling flowers */}
@@ -196,15 +219,15 @@ export function DailyDarshanCard({ dayOfWeek }) {
                 colors={['transparent', 'rgba(0,0,0,0.65)']}
                 style={styles.imageOverlay}
               >
-                <Text style={styles.overlayName}>{deity.name}</Text>
-                <Text style={styles.overlayEnglish}>{deity.english}</Text>
+                <Text style={styles.overlayName}>{t(deity.name.te, deity.name.en)}</Text>
+                <Text style={styles.overlayEnglish}>{t(deity.desc.te, deity.desc.en)}</Text>
               </LinearGradient>
             </>
           ) : (
             <View style={styles.fallback}>
               <MaterialCommunityIcons name={deity.icon} size={64} color={deity.color} />
-              <Text style={[styles.fallbackName, { color: deity.color }]}>{deity.name}</Text>
-              <Text style={styles.fallbackEnglish}>{deity.english}</Text>
+              <Text style={[styles.fallbackName, { color: deity.color }]}>{t(deity.name.te, deity.name.en)}</Text>
+              <Text style={styles.fallbackEnglish}>{t(deity.desc.te, deity.desc.en)}</Text>
             </View>
           )}
         </View>
@@ -221,7 +244,13 @@ export function DailyDarshanCard({ dayOfWeek }) {
             <MaterialCommunityIcons name="candle" size={18} color={DarkColors.saffron} />
           </Animated.View>
         </View>
-        <Text style={[styles.mantraText, { color: deity.color }]}>{deity.mantra}</Text>
+        <Text style={[styles.mantraText, { color: DarkColors.goldLight || '#F5D77A' }]}>{deity.mantra}</Text>
+
+        {/* Deity significance — highlighting */}
+        <View style={[styles.significanceBox, { borderColor: deity.color + '40' }]}>
+          <MaterialCommunityIcons name="information" size={16} color={deity.color} />
+          <Text style={styles.significanceText}>{t(deity.significance.te, deity.significance.en)}</Text>
+        </View>
 
         {/* Share button inside the card */}
         <SectionShareRow section="darshan" buildText={() => buildDarshanShareText(deity)} />
@@ -343,5 +372,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     letterSpacing: 0.3,
     lineHeight: 26,
+  },
+  significanceBox: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    marginTop: 12, paddingVertical: 10, paddingHorizontal: 14,
+    backgroundColor: 'rgba(212,160,23,0.05)', borderRadius: 12,
+    borderWidth: 1, width: '100%',
+  },
+  significanceText: {
+    flex: 1, fontSize: 13, fontWeight: '600', lineHeight: 20, color: DarkColors.silver,
   },
 });

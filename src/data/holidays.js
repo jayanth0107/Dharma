@@ -26,9 +26,24 @@ export const PUBLIC_HOLIDAYS_2026 = [
   { date: '2026-12-25', telugu: 'క్రిస్మస్', english: 'Christmas', teluguMonth: 'పుష్య' },
 ];
 
+// Year-aware lookup. Add PUBLIC_HOLIDAYS_2027 etc. and register here when
+// generated; the getter falls back to the closest-available year so the UI
+// never goes silently empty after a year rollover.
+const HOLIDAYS_BY_YEAR = {
+  2026: PUBLIC_HOLIDAYS_2026,
+};
+const HOLIDAY_YEARS = Object.keys(HOLIDAYS_BY_YEAR).map(Number).sort((a, b) => a - b);
+
+function getHolidaysForYear(year) {
+  if (HOLIDAYS_BY_YEAR[year]) return HOLIDAYS_BY_YEAR[year];
+  const closest = HOLIDAY_YEARS.filter(y => y <= year).pop() ?? HOLIDAY_YEARS[0];
+  if (__DEV__) console.warn(`Holiday data for ${year} not loaded — falling back to ${closest}`);
+  return HOLIDAYS_BY_YEAR[closest] || [];
+}
+
 export function getUpcomingHolidays(fromDate = new Date(), count = 5) {
   const dateStr = fromDate.toISOString().split('T')[0];
-  return PUBLIC_HOLIDAYS_2026
+  return getHolidaysForYear(fromDate.getFullYear())
     .filter(h => h.date >= dateStr)
     .slice(0, count)
     .map(h => {

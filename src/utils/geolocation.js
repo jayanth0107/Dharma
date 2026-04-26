@@ -13,7 +13,7 @@ export async function getCurrentPosition() {
     const Location = require('expo-location');
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      console.warn('Location permission denied');
+      if (__DEV__) console.warn('Location permission denied');
       return null;
     }
 
@@ -28,7 +28,7 @@ export async function getCurrentPosition() {
       altitude: pos.coords.altitude || 0,
     };
   } catch (e) {
-    console.warn('GPS location failed:', e?.message || e);
+    if (__DEV__) console.warn('GPS location failed:', e?.message || e);
 
     // Fallback: try web geolocation API
     if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -85,7 +85,7 @@ export async function reverseGeocode(latitude, longitude) {
       displayName: area && city ? `${area}, ${city}` : city || state || data.results[0].formatted_address?.split(',')[0] || '',
     };
   } catch (e) {
-    console.warn('Reverse geocoding failed:', e?.message || e);
+    if (__DEV__) console.warn('Reverse geocoding failed:', e?.message || e);
     return null;
   }
 }
@@ -189,7 +189,11 @@ async function getLocationByIP() {
   return null;
 }
 
-// --- Full auto-detect: GPS → IP fallback → Reverse Geocode ---
+// --- Full auto-detect: GPS → Reverse Geocode → IP fallback for city name ---
+// Strategy: prefer GPS coords (accurate) + Google reverse-geocoded city name.
+// If reverse geocoding fails (CORS/quota/network), keep GPS coords but fetch
+// the city name from IP — that is far better than showing "Current Location".
+// If GPS fails entirely, fall through to IP-only.
 export async function autoDetectLocation() {
   // 1. Try GPS
   const coords = await getCurrentPosition();
@@ -197,9 +201,9 @@ export async function autoDetectLocation() {
   // 2. If GPS fails, try IP-based location
   if (!coords) {
     const ipLoc = await getLocationByIP();
-    if (ipLoc) {
+    if (ipLoc && ipLoc.city) {
       return {
-        name: ipLoc.city || 'Current Location',
+        name: ipLoc.city,
         telugu: '',
         displayName: [ipLoc.city, ipLoc.state, ipLoc.country].filter(Boolean).join(', '),
         area: '',
@@ -211,18 +215,39 @@ export async function autoDetectLocation() {
         isAutoDetected: true,
       };
     }
-    return null;
+    return null; // let app use DEFAULT_LOCATION (Hyderabad)
   }
 
+  // 3. GPS succeeded — try Google reverse geocoding for the city name
   const geo = await reverseGeocode(coords.latitude, coords.longitude);
+  let cityName = geo?.city || geo?.area || '';
+  let stateName = geo?.state || '';
+  let countryName = geo?.country || '';
+  let displayName = geo?.displayName || '';
+
+  // 4. If reverse geocoding didn't yield a city, fall back to IP for the name only
+  // (we keep the more-accurate GPS coords for panchangam calculations).
+  if (!cityName) {
+    const ipLoc = await getLocationByIP();
+    if (ipLoc && ipLoc.city) {
+      cityName = ipLoc.city;
+      stateName = stateName || ipLoc.state || '';
+      countryName = countryName || ipLoc.country || '';
+      displayName = displayName || [ipLoc.city, ipLoc.state, ipLoc.country].filter(Boolean).join(', ');
+    }
+  }
+
+  // 5. Still no city — bail so app falls back to DEFAULT_LOCATION (Hyderabad).
+  // Better to show "Hyderabad" than the literal placeholder "Current Location".
+  if (!cityName) return null;
 
   return {
-    name: geo?.city || geo?.area || 'Current Location',
+    name: cityName,
     telugu: '',
-    displayName: geo?.displayName || '',
+    displayName,
     area: geo?.area || '',
-    state: geo?.state || '',
-    country: geo?.country || '',
+    state: stateName,
+    country: countryName,
     latitude: coords.latitude,
     longitude: coords.longitude,
     altitude: coords.altitude || 0,

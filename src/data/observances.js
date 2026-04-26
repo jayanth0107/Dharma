@@ -74,16 +74,32 @@ export const PRADOSHAM_2026 = [
   { date: '2026-12-11', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
 ];
 
+// Year-aware lookup. Add CHATURTHI_2027 etc. and register here when generated;
+// the getter falls back to the closest-available year so the UI never goes
+// silently empty after a year rollover.
+const OBSERVANCES_BY_YEAR = {
+  2026: {
+    chaturthi: CHATURTHI_2026,
+    pournami:  POURNAMI_2026,
+    amavasya:  AMAVASYA_2026,
+    pradosham: PRADOSHAM_2026,
+  },
+};
+const OBSERVANCE_YEARS = Object.keys(OBSERVANCES_BY_YEAR).map(Number).sort((a, b) => a - b);
+
+function getObservancesForYear(type, year) {
+  if (OBSERVANCES_BY_YEAR[year]?.[type]) return OBSERVANCES_BY_YEAR[year][type];
+  const closest = OBSERVANCE_YEARS.filter(y => y <= year).pop() ?? OBSERVANCE_YEARS[0];
+  if (year !== closest && __DEV__) {
+    console.warn(`Observance data for ${year} not loaded — falling back to ${closest}`);
+  }
+  return OBSERVANCES_BY_YEAR[closest]?.[type] || [];
+}
+
 // Get upcoming observances by type
 export function getUpcomingObservances(type, fromDate = new Date(), count = 3) {
-  const lists = {
-    chaturthi: CHATURTHI_2026,
-    pournami: POURNAMI_2026,
-    amavasya: AMAVASYA_2026,
-    pradosham: PRADOSHAM_2026,
-  };
-  const list = lists[type];
-  if (!list) return [];
+  const list = getObservancesForYear(type, fromDate.getFullYear());
+  if (!list.length) return [];
 
   const dateStr = fromDate.toISOString().split('T')[0];
   return list

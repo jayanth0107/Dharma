@@ -92,7 +92,7 @@ async function fetchFromGoldAPICom() {
 
     return buildPriceResult(gold.perGram24k, gold.perGram22k, silverIndian, 'Gold-API.com');
   } catch (error) {
-    console.warn('Gold-API.com fetch failed:', error?.message || error);
+    if (__DEV__) console.warn('Gold-API.com fetch failed:', error?.message || error);
     return null;
   }
 }
@@ -154,7 +154,7 @@ async function fetchFromFrankfurter() {
 
     return buildPriceResult(gold.perGram24k, gold.perGram22k, silverPerGram, 'Frankfurter (est.)');
   } catch (error) {
-    console.warn('Frankfurter fetch failed:', error?.message || error);
+    if (__DEV__) console.warn('Frankfurter fetch failed:', error?.message || error);
     return null;
   }
 }
@@ -207,7 +207,7 @@ export async function fetchGoldSilverPrices() {
 
   // Save successful API fetch to persistent cache
   if (!prices.isFallback) {
-    savePricesToCache(prices).catch(e => console.warn('Cache save failed:', e));
+    savePricesToCache(prices).catch(e => { if (__DEV__) console.warn('Cache save failed:', e); });
   }
 
   memoryCache = prices;

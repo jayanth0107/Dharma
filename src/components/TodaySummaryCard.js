@@ -26,7 +26,7 @@ export function TodaySummaryCard({ onNavigate, streak }) {
         </View>
         {streak > 0 && (
           <View style={s.streakBadge}>
-            <MaterialCommunityIcons name="fire" size={16} color="#FF6B35" />
+            <MaterialCommunityIcons name="fire" size={16} color={DarkColors.saffron} />
             <Text style={s.streakText}>{streak}</Text>
           </View>
         )}
@@ -53,18 +53,22 @@ export function TodaySummaryCard({ onNavigate, streak }) {
         </View>
       </View>
 
-      {/* Timings */}
+      {/* Timings — palette-matched: gold = auspicious, silver = inauspicious shadow.
+          Keeps the chips readable on dark bg without the harsh "success / error
+          toast" feel that pure tulasi-green and kumkum-red produced. */}
       <View style={s.timingsRow}>
         {panchangam.abhijitMuhurtam && (
-          <View style={[s.timingChip, { borderColor: DarkColors.tulasiGreen }]}>
-            <MaterialCommunityIcons name="check-circle" size={12} color={DarkColors.tulasiGreen} />
-            <Text style={[s.timingText, { color: DarkColors.tulasiGreen }]}>{t('శుభం', 'Good')} {panchangam.abhijitMuhurtam.startFormatted}–{panchangam.abhijitMuhurtam.endFormatted}</Text>
+          <View style={[s.timingChip, s.timingChipGood]}>
+            <MaterialCommunityIcons name="check-circle" size={12} color={DarkColors.goldLight} />
+            <Text style={[s.timingLabel, { color: DarkColors.goldLight }]}>{t('శుభ కాలం', 'Good Time')}</Text>
+            <Text style={[s.timingTime, { color: DarkColors.goldLight }]}>{panchangam.abhijitMuhurtam.startFormatted}–{panchangam.abhijitMuhurtam.endFormatted}</Text>
           </View>
         )}
         {panchangam.rahuKalam && (
-          <View style={[s.timingChip, { borderColor: DarkColors.kumkum }]}>
-            <MaterialCommunityIcons name="close-circle" size={12} color={DarkColors.kumkum} />
-            <Text style={[s.timingText, { color: DarkColors.kumkum }]}>{t('రాహు', 'Rahu')} {panchangam.rahuKalam.startFormatted}–{panchangam.rahuKalam.endFormatted}</Text>
+          <View style={[s.timingChip, s.timingChipBad]}>
+            <MaterialCommunityIcons name="close-circle" size={12} color={DarkColors.silverLight} />
+            <Text style={[s.timingLabel, { color: DarkColors.silverLight }]}>{t('రాహు కాలం', 'Rahu Kalam')}</Text>
+            <Text style={[s.timingTime, { color: DarkColors.silverLight }]}>{panchangam.rahuKalam.startFormatted}–{panchangam.rahuKalam.endFormatted}</Text>
           </View>
         )}
       </View>
@@ -91,9 +95,10 @@ const s = StyleSheet.create({
   yearText: { fontSize: 14, color: DarkColors.gold, fontWeight: '700', marginTop: 3 },
   streakBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(255,107,53,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
+    backgroundColor: DarkColors.saffronDim, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
+    borderWidth: 1, borderColor: 'rgba(232,117,26,0.30)',
   },
-  streakText: { fontSize: 18, fontWeight: '900', color: '#FF6B35' },
+  streakText: { fontSize: 18, fontWeight: '900', color: DarkColors.saffron },
   infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   infoItem: { flex: 1, alignItems: 'center', gap: 3 },
   infoDivider: { width: 1, height: 32, backgroundColor: DarkColors.borderCard },
@@ -101,11 +106,22 @@ const s = StyleSheet.create({
   infoValue: { fontSize: 15, color: '#FFFFFF', fontWeight: '800', textAlign: 'center' },
   timingsRow: { flexDirection: 'row', gap: 6, marginBottom: 8 },
   timingChip: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4,
-    paddingHorizontal: 6, paddingVertical: 6, borderRadius: 10,
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3,
+    paddingHorizontal: 6, paddingVertical: 8, borderRadius: 10,
     borderWidth: 1,
   },
-  timingText: { fontSize: 13, fontWeight: '800' },
+  // Auspicious: gold-tinted (sacred warmth)
+  timingChipGood: {
+    borderColor: DarkColors.borderGold,
+    backgroundColor: DarkColors.goldDim,
+  },
+  // Inauspicious: silver-on-shadow (Rahu = shadow planet — dimmed neutral)
+  timingChipBad: {
+    borderColor: 'rgba(192,192,192,0.22)',
+    backgroundColor: 'rgba(192,192,192,0.06)',
+  },
+  timingLabel: { fontSize: 12, fontWeight: '700' },
+  timingTime: { fontSize: 14, fontWeight: '900' },
   festivalRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8,
     paddingTop: 10, borderTopWidth: 1, borderTopColor: DarkColors.borderCard,

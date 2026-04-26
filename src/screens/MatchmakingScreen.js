@@ -263,7 +263,7 @@ export function MatchmakingScreen({ navigation }) {
       <PageHeader title={t(TR.matchmaking.te, TR.matchmaking.en)} />
       <TopTabBar />
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
         {/* BirthDatePicker modal */}

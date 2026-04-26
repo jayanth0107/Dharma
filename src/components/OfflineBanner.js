@@ -39,7 +39,7 @@ export function OfflineBanner() {
 
   return (
     <View style={s.banner}>
-      <MaterialCommunityIcons name="wifi-off" size={14} color="#FFD700" />
+      <MaterialCommunityIcons name="wifi-off" size={14} color={DarkColors.goldShimmer} />
       <Text style={s.text}>{t('ఆఫ్‌లైన్ — కాష్ డేటా చూపిస్తోంది', 'Offline — Showing cached data')}</Text>
     </View>
   );
@@ -51,5 +51,5 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(255,215,0,0.1)', paddingVertical: 6,
     borderBottomWidth: 1, borderBottomColor: 'rgba(255,215,0,0.15)',
   },
-  text: { fontSize: 11, color: '#FFD700', fontWeight: '600' },
+  text: { fontSize: 11, color: DarkColors.goldShimmer, fontWeight: '600' },
 });

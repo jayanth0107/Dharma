@@ -12,8 +12,9 @@ const TILE_GAP = 12;
 
 // Context shares the measured tile width from FeatureGrid down to tiles.
 // When a tile renders outside a FeatureGrid it falls back to percentage
-// widths (legacy path).
-const FeatureGridContext = createContext(null);
+// widths (legacy path). Exported so non-tile decorations (e.g. the
+// KrishnaBlessingBanner) can occupy a precise N-cell span.
+export const FeatureGridContext = createContext(null);
 
 // Fallback for tiles rendered without a FeatureGrid wrapper.
 function getTileWidthPercent(columns) {
@@ -21,14 +22,14 @@ function getTileWidthPercent(columns) {
   return `${((100 - gapFraction) / columns).toFixed(2)}%`;
 }
 
-export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPremium, isNew, disabled, tileHeight, _gridIndex, _gridTotal }) {
+export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, _gridIndex, _gridTotal }) {
   const columns = useColumns();
   const gridCtx = useContext(FeatureGridContext);
   const cols = gridCtx?.columns || columns;
   const iconSize = usePick({ default: 32, md: 34, lg: 36, xl: 40 });
-  const tileMinH = usePick({ default: 110, md: 120, lg: 140, xl: 150 });
-  const labelSize = usePick({ default: 15, md: 16, lg: 17, xl: 18 });
-  const subSize = usePick({ default: 13, md: 14, lg: 15, xl: 16 });
+  const tileMinH = usePick({ default: 116, md: 126, lg: 144, xl: 154 });
+  const labelSize = usePick({ default: 16, md: 17, lg: 18, xl: 19 });
+  const subSize = usePick({ default: 14, md: 15, lg: 16, xl: 17 });
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
   const widthStyle = gridCtx?.tileWidth
@@ -77,20 +78,6 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, isPre
       {/* Sublabel */}
       {sublabel && <Text style={[s.sublabel, { fontSize: subSize }]} numberOfLines={2}>{sublabel}</Text>}
 
-      {/* Premium tag */}
-      {isPremium && (
-        <View style={s.premiumTag}>
-          <MaterialCommunityIcons name="crown" size={10} color={DarkColors.gold} />
-          <Text style={s.premiumTagText}>PRO</Text>
-        </View>
-      )}
-      {/* New badge */}
-      {isNew && (
-        <View style={s.newTag}>
-          <MaterialCommunityIcons name="star-four-points" size={9} color="#FFFFFF" />
-          <Text style={s.newTagText}>NEW</Text>
-        </View>
-      )}
     </TouchableOpacity>
   );
 }
@@ -191,33 +178,5 @@ const s = StyleSheet.create({
     textAlign: 'center',
     marginTop: 2,
     fontWeight: '600',
-  },
-  premiumTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    marginTop: 4,
-  },
-  premiumTagText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: DarkColors.gold,
-    letterSpacing: 0.5,
-  },
-  newTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    marginTop: 4,
-    backgroundColor: DarkColors.saffron,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  newTagText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
   },
 });

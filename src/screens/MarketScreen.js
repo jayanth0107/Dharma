@@ -15,7 +15,7 @@ import { fetchMarketData } from '../utils/marketService';
 function PriceCard({ item, t, sizes }) {
   if (!item) return null;
   const isUp = item.change >= 0;
-  const color = isUp ? DarkColors.tulasiGreen : '#C41E3A';
+  const color = isUp ? DarkColors.tulasiGreen : DarkColors.kumkum;
 
   return (
     <View style={[s.priceCard, { padding: sizes.cardPad, borderRadius: sizes.cardRadius }]}>

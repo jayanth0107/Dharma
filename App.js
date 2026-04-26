@@ -121,7 +121,8 @@ function useOnboarding() {
     })();
   }, []);
   const dismiss = async () => {
-    setShowOnboarding(false);
+    // Persist FIRST so a hard kill in the next 50ms still keeps the user
+    // out of onboarding on the next launch. Then flip the UI flag.
     try {
       if (Platform.OS === 'web') localStorage.setItem('@dharma_onboarded', 'true');
       else {
@@ -129,6 +130,7 @@ function useOnboarding() {
         await AsyncStorage.setItem('@dharma_onboarded', 'true');
       }
     } catch {}
+    setShowOnboarding(false);
   };
   return { showOnboarding, checked, dismiss };
 }

@@ -212,15 +212,32 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
             </View>
           </View>
 
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           {showList ? (
             /* Reminder List */
-            <ScrollView style={[styles.listContainer, { padding: sectionPad }]}>
+            <ScrollView style={[styles.listContainer, { padding: sectionPad }]} keyboardShouldPersistTaps="handled">
               {sortedReminders.length === 0 ? (
                 <View style={[styles.emptyState, { paddingVertical: emptyPadV }]}>
-                  <MaterialCommunityIcons name="bell-sleep" size={emptyIconSize} color={DarkColors.silver} />
-                  <Text style={[styles.emptyText, { fontSize: emptyFont }]}>రిమైండర్లు లేవు</Text>
-                  <Text style={[styles.emptySubtext, { fontSize: emptySubFont }]}>ఇంకా రిమైండర్లు లేవు</Text>
+                  <View style={styles.emptyIconRing}>
+                    <MaterialCommunityIcons name="bell-plus" size={emptyIconSize} color={DarkColors.gold} />
+                  </View>
+                  <Text style={[styles.emptyText, { fontSize: emptyFont }]}>
+                    రిమైండర్లు ఏవీ లేవు / No reminders yet
+                  </Text>
+                  <Text style={[styles.emptySubtext, { fontSize: emptySubFont }]}>
+                    పంచాంగం, పండుగలు, తిథి, పుట్టిన రోజులు — ఏదైనా రిమైండర్ సెట్ చేయండి.{"\n"}
+                    Set reminders for festivals, tithi, birthdays, or any custom date.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setShowList(false)}
+                    style={styles.emptyCta}
+                    activeOpacity={0.85}
+                  >
+                    <MaterialCommunityIcons name="plus-circle" size={20} color="#0A0A0A" />
+                    <Text style={styles.emptyCtaText}>
+                      మొదటి రిమైండర్ సృష్టించండి / Create First Reminder
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 sortedReminders.map((r) => {
@@ -251,7 +268,7 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
             </ScrollView>
           ) : (
             /* New Reminder Form */
-            <ScrollView style={[styles.form, { padding: sectionPad }]}>
+            <ScrollView style={[styles.form, { padding: sectionPad }]} keyboardShouldPersistTaps="handled">
               {/* Date — Calendar Picker */}
               <TouchableOpacity style={[styles.fieldRow, { paddingHorizontal: fieldPadH, paddingVertical: fieldPadV, borderRadius: fieldRadius, marginBottom: fieldMarginB }]} onPress={() => setShowCalendar(true)}>
                 <MaterialCommunityIcons name="calendar" size={fieldIconSize} color={DarkColors.gold} style={{ marginRight: fieldIconMR }} />
@@ -527,16 +544,35 @@ const styles = StyleSheet.create({
   listContainer: {},
   emptyState: {
     alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  emptyIconRing: {
+    width: 88, height: 88, borderRadius: 44,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: DarkColors.goldDim,
+    borderWidth: 1.5, borderColor: DarkColors.borderGold,
+    marginBottom: 16,
   },
   emptyText: {
-    fontWeight: '600',
-    color: DarkColors.textMuted,
-    marginTop: 12,
+    fontWeight: '900',
+    color: DarkColors.gold,
+    marginTop: 4,
+    textAlign: 'center',
   },
   emptySubtext: {
     color: DarkColors.silver,
-    marginTop: 4,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 22,
+    fontWeight: '500',
   },
+  emptyCta: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: DarkColors.gold,
+    paddingVertical: 13, paddingHorizontal: 20, borderRadius: 14,
+    marginTop: 22,
+  },
+  emptyCtaText: { fontSize: 14, fontWeight: '800', color: '#0A0A0A' },
   // reminderItem — padding, margin, radius set inline
   reminderItem: {
     flexDirection: 'row',

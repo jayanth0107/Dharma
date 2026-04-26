@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, DarkGradients, Type } from '../theme';
 import { usePick } from '../theme/responsive';
+import { useLanguage } from '../context/LanguageContext';
+import { useSpeaker } from '../utils/speechService';
 
 // Icon mapping for panchangam elements
 const PANCHANGA_ICONS = {
@@ -140,7 +142,8 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
 }
 
 export function SlokaCard({ sloka }) {
-  const [speaking, setSpeaking] = useState(false);
+  const { lang, t } = useLanguage();
+  const { isSpeaking, toggle: toggleSpeak, speakerIcon, isAvailable } = useSpeaker();
   if (!sloka) return null;
   const slokaSize = usePick({ default: 16, lg: 18, xl: 20 });
   const meaningSize = usePick({ default: 13, lg: 14, xl: 15 });
@@ -159,32 +162,18 @@ export function SlokaCard({ sloka }) {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           <Text style={styles.slokaDeity}>{sloka.deity}</Text>
-          <TouchableOpacity
-            onPress={() => {
-              try {
-                const Speech = require('expo-speech');
-                if (speaking) {
-                  Speech.stop();
-                  setSpeaking(false);
-                } else {
-                  setSpeaking(true);
-                  Speech.speak(sloka.meaning || sloka.sanskrit, {
-                    language: 'te-IN',
-                    rate: 0.85,
-                    onDone: () => setSpeaking(false),
-                    onError: () => setSpeaking(false),
-                  });
-                }
-              } catch {}
-            }}
-            style={{ backgroundColor: speaking ? DarkColors.saffron : 'rgba(212,160,23,0.12)', padding: 8, borderRadius: 16 }}
-          >
-            <MaterialCommunityIcons name={speaking ? 'stop-circle' : 'volume-high'} size={20} color={speaking ? '#FFFFFF' : DarkColors.gold} />
-          </TouchableOpacity>
+          {isAvailable && (
+            <TouchableOpacity
+              onPress={() => toggleSpeak(sloka.meaning || sloka.sanskrit, sloka.meaningEn || sloka.sanskrit, lang)}
+              style={{ backgroundColor: isSpeaking ? DarkColors.saffron : 'rgba(212,160,23,0.12)', padding: 8, borderRadius: 16 }}
+            >
+              <MaterialCommunityIcons name={speakerIcon} size={20} color={isSpeaking ? '#FFFFFF' : DarkColors.gold} />
+            </TouchableOpacity>
+          )}
         </View>
         <Text style={[styles.slokaText, { fontSize: slokaSize, lineHeight: slokaSize + 12 }]}>{sloka.sanskrit}</Text>
         <View style={styles.slokaDivider} />
-        <Text style={[styles.slokaMeaning, { fontSize: meaningSize, lineHeight: meaningSize + 9 }]}>{sloka.meaning}</Text>
+        <Text style={[styles.slokaMeaning, { fontSize: meaningSize, lineHeight: meaningSize + 9 }]}>{t(sloka.meaning, sloka.meaningEn || sloka.meaning)}</Text>
         <View style={styles.slokaDecoBottom}>
           <MaterialCommunityIcons name="fleur-de-lis" size={20} color={DarkColors.goldShimmer} />
         </View>

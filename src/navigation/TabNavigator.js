@@ -38,6 +38,13 @@ import { MeditationScreen } from '../screens/MeditationScreen';
 import { StotraScreen } from '../screens/StotraScreen';
 import { PujaGuideScreen } from '../screens/PujaGuideScreen';
 import { FamilyScreen } from '../screens/FamilyScreen';
+import { RamayanaScreen } from '../screens/RamayanaScreen';
+import { NeethiSuktaScreen } from '../screens/NeethiSuktaScreen';
+import { SanskritWordScreen } from '../screens/SanskritWordScreen';
+import { DharmaPollScreen } from '../screens/DharmaPollScreen';
+import { RashiPersonalityScreen } from '../screens/RashiPersonalityScreen';
+import { MahabharataScreen } from '../screens/MahabharataScreen';
+import { MantraAudioScreen } from '../screens/MantraAudioScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -57,6 +64,12 @@ const SECTION_COMPONENTS = {
   Muhurtam:     withErrorBoundary(MuhurtamScreen, 'Muhurtam'),
   Astro:        withErrorBoundary(AstroScreen, 'Astro'),
   Gold:         withErrorBoundary(GoldScreen, 'Gold'),
+  Ramayana:     withErrorBoundary(RamayanaScreen, 'Ramayana'),
+  NeethiSukta:  withErrorBoundary(NeethiSuktaScreen, 'NeethiSukta'),
+  Mahabharata:  withErrorBoundary(MahabharataScreen, 'Mahabharata'),
+  DharmaPoll:   withErrorBoundary(DharmaPollScreen, 'DharmaPoll'),
+  RashiProfile: withErrorBoundary(RashiPersonalityScreen, 'RashiProfile'),
+  SanskritWord: withErrorBoundary(SanskritWordScreen, 'SanskritWord'),
   Gita:         withErrorBoundary(GitaScreen, 'Gita'),
   Market:       withErrorBoundary(MarketScreen, 'Market'),
   Reminder:     ReminderScreen,
@@ -83,6 +96,9 @@ const UTILITY_SCREENS = [
   // Services screen kept registered (but hidden from nav) — placeholder content,
   // not yet ready for surfacing on Home / nav bars.
   { name: 'Services',      component: ServicesScreen },
+  // MantraAudio is the player view for individual mantras. The Stotra
+  // screen's "Mantras" sub-tab navigates here with preselectId.
+  { name: 'MantraAudio',   component: withErrorBoundary(MantraAudioScreen, 'MantraAudio') },
 ];
 
 const HIDDEN_OPTIONS = {

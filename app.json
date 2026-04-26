@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dharma: Telugu Astro, Calendar & Gold",
     "slug": "DharmaDaily",
-    "version": "2.3.0",
+    "version": "2.4.1",
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
@@ -37,19 +37,20 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 7,
-      "googleServicesFile": "./google-services.json"
+      "versionCode": 9,
+      "googleServicesFile": "./google-services.json",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "name": "Dharma: Telugu Astro, Calendar & Gold",
       "shortName": "Dharma",
       "lang": "te",
-      "description": "Free Telugu Panchangam app with daily Tithi, Nakshatram, Yogam, Karanam, Muhurtam timings, festival calendar, Ekadashi dates, gold prices, and Bhagavad Gita slokas.",
+      "description": "Free Telugu Panchangam, Ramayana, Mahabharata, Bhagavad Gita, Rashi predictions, Mantra audio, Dharma quiz, Neethi Suktalu, Sanskrit words, gold prices, festivals & more.",
       "themeColor": "#E8751A",
       "backgroundColor": "#FFFDF5"
     },
-    "description": "Telugu Panchangam (తెలుగు పంచాంగం) with astronomically accurate Tithi, Nakshatram, Yogam, Karanam, Rahu Kalam, Sunrise/Sunset times. Includes 2026 festival calendar, Ekadashi tracker, Muhurtam finder, gold & silver prices, Bhagavad Gita slokas, kids stories, and daily deity darshan. Based on Drik Ganita astronomical calculations with Lahiri Ayanamsa.",
+    "description": "Telugu Panchangam (తెలుగు పంచాంగం) with Ramayana Daily, Mahabharata Daily, Bhagavad Gita, Neethi Suktalu, Dharma Debate, Rashi Predictions, Mantra Lyrics, Sanskrit Word, Quiz, Stotra Library, Meditation, Puja Guide, Vedic Horoscope, Matchmaking, Muhurtam, Festivals, Ekadashi, Gold Prices, Temple Finder, Kids Stories. Panchangam: Drik Ganita + Lahiri Ayanamsa. Sources: Ramayana based on Valmiki Ramayana (with Sarga references). Mahabharata based on Vyasa Mahabharata (BORI Critical Edition). Gita per Gita Press Gorakhpur. Neethi from Chanakya Niti, Vidura Niti, Subhashitavali. Character portrayals follow original texts, not TV serials. Simplified for brevity — not a substitute for scriptures. Mantras: correct pronunciation under guru guidance required. బాధ్యతా విజ్ఞప్తి: వాల్మీకి రామాయణం, వ్యాస మహాభారతం, గీతా ప్రెస్ భగవద్గీత ఆధారంగా. TV serials కాదు, మూల గ్రంథాల ప్రకారం.",
     "primaryColor": "#E8751A",
     "owner": "jayanth0107",
     "platforms": [

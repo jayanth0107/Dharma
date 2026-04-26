@@ -37,10 +37,9 @@ export function SubTabBar({ tabs, activeTab, onTabChange }) {
 
   const navigateTab = (dir) => {
     const currentIdx = tabs.findIndex(t => t.id === activeTab);
-    const nextIdx = currentIdx + dir;
-    if (nextIdx >= 0 && nextIdx < tabs.length) {
-      onTabChange(tabs[nextIdx].id);
-    }
+    // Wrap around: last → first, first → last
+    const nextIdx = (currentIdx + dir + tabs.length) % tabs.length;
+    onTabChange(tabs[nextIdx].id);
   };
 
   // Auto-scroll to active tab

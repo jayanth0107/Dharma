@@ -132,7 +132,7 @@ export function CalendarScreen({ route }) {
   // Festivals + GoodTimes: show sub-tabs so user can jump to Ekadashi / etc.
   const routeName = route?.name;
   const screenTitle =
-    routeName === 'Panchang'  ? t('నేటి దినం', "Today's Date") :
+    routeName === 'Panchang'  ? t('నేటి పంచాంగం', "Today's Panchangam") :
     routeName === 'Festivals' ? t('పండుగలు', 'Festivals') :
     routeName === 'GoodTimes' ? t('శుభ సమయాలు', 'Auspicious Times') :
     routeName === 'Kids'      ? t('పిల్లల కథలు', "Kid's Stories") :
@@ -227,7 +227,7 @@ export function CalendarScreen({ route }) {
               <View style={s.seniorCard}>
                 <Text style={s.seniorDate}>{panchangam.gregorianDate}</Text>
                 <View style={s.seniorRow}>
-                  <MaterialCommunityIcons name="weather-sunset-up" size={28} color="#E8751A" />
+                  <MaterialCommunityIcons name="weather-sunset-up" size={28} color={DarkColors.saffron} />
                   <Text style={s.seniorValue}>{panchangam.sunriseFormatted || panchangam.sunrise}</Text>
                   <MaterialCommunityIcons name="weather-sunset-down" size={28} color="#9B6FCF" style={{ marginLeft: 20 }} />
                   <Text style={s.seniorValue}>{panchangam.sunsetFormatted || panchangam.sunset}</Text>
@@ -261,7 +261,7 @@ export function CalendarScreen({ route }) {
             {panchangam.sunrise && (
               <View style={s.sunBanner}>
                 <View style={s.sunItem}>
-                  <MaterialCommunityIcons name="weather-sunset-up" size={22} color="#E8751A" />
+                  <MaterialCommunityIcons name="weather-sunset-up" size={22} color={DarkColors.saffron} />
                   <View>
                     <Text style={s.sunLabel}>{t('సూర్యోదయం', 'Sunrise')}</Text>
                     <Text style={s.sunTime}>{panchangam.sunriseFormatted || panchangam.sunrise}</Text>
@@ -325,8 +325,8 @@ export function CalendarScreen({ route }) {
                   </View>
                 )}
                 {panchangam.yamaGanda && (
-                  <View style={[s.timingQuickItem, { borderLeftColor: '#E8751A' }]}>
-                    <MaterialCommunityIcons name="alert-circle" size={16} color="#E8751A" />
+                  <View style={[s.timingQuickItem, { borderLeftColor: DarkColors.saffron }]}>
+                    <MaterialCommunityIcons name="alert-circle" size={16} color={DarkColors.saffron} />
                     <View style={{ flex: 1 }}>
                       <Text style={s.timingQuickLabel}>{t('యమగండ కాలం', 'Yama Gandam')}</Text>
                       <Text style={s.timingQuickValue}>{panchangam.yamaGanda.startFormatted} – {panchangam.yamaGanda.endFormatted}</Text>
@@ -461,7 +461,7 @@ export function CalendarScreen({ route }) {
                                                 'weather-night'
               }
               iconColor={
-                activeSubTab === 'chaturthi' ? '#C41E3A' :
+                activeSubTab === 'chaturthi' ? DarkColors.kumkum :
                 activeSubTab === 'pournami'  ? '#B8860B' :
                 activeSubTab === 'amavasya'  ? '#9B6FCF' :
                                                 '#4A90D9'

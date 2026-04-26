@@ -30,7 +30,7 @@ export function TodayEkadashiBanner({ ekadashi }) {
       >
         <MaterialCommunityIcons name="hands-pray" size={bannerIconSize} color="#E0B0FF" />
         <View style={styles.bannerContent}>
-          <Text style={[styles.bannerLabel, { fontSize: bannerLabelSize }]}>నేడు ఏకాదశి</Text>
+          <Text style={[styles.bannerLabel, { fontSize: bannerLabelSize }]}>{t('నేడు ఏకాదశి', 'Today is Ekadashi')}</Text>
           <Text style={[styles.bannerTitle, { fontSize: bannerTitleSize }]}>{ekadashi.name}</Text>
           <Text style={[styles.bannerEnglish, { fontSize: bannerEnglishSize }]}>{ekadashi.nameEnglish}</Text>
         </View>
@@ -44,6 +44,7 @@ export function TodayEkadashiBanner({ ekadashi }) {
 }
 
 export function UpcomingEkadashiItem({ ekadashi }) {
+  const { t } = useLanguage();
   const d = new Date(ekadashi.date);
   const isPast = ekadashi.isPast;
   const daysLeft = ekadashi.daysLeft;
@@ -96,7 +97,7 @@ export function UpcomingEkadashiItem({ ekadashi }) {
         <View style={[styles.ekadashiBadge, { paddingHorizontal: badgePadH, paddingVertical: badgePadV }]}>
           <Text style={[styles.ekadashiDaysNum, { fontSize: badgeNumSize }]}>{Math.abs(daysLeft)}</Text>
           <Text style={[styles.ekadashiDaysLabel, { fontSize: badgeLabelSize }]}>
-            {daysLeft === 0 ? 'నేడు' : isPast ? 'గతం' : 'రోజులు'}
+            {daysLeft === 0 ? t('నేడు', 'Today') : isPast ? t('గతం', 'Past') : t('రోజులు', 'days')}
           </Text>
         </View>
       )}
@@ -165,8 +166,8 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
           <View style={styles.modalContent}>
             <View style={[styles.modalHeader, { position: 'relative', paddingVertical: modalHeaderPadV }]}>
               <MaterialCommunityIcons name="calendar-star" size={modalHeaderIconSize} color={DarkColors.goldLight} />
-              <Text style={[styles.modalTitle, { fontSize: modalTitleSize }]}> 2026 ఏకాదశి దినాలు</Text>
-              <Text style={[styles.modalSubtitle, { fontSize: modalSubtitleSize }]}>మొత్తం 24 ఏకాదశి దినాలు</Text>
+              <Text style={[styles.modalTitle, { fontSize: modalTitleSize }]}>{t(' 2026 ఏకాదశి దినాలు', ' 2026 Ekadashi Days')}</Text>
+              <Text style={[styles.modalSubtitle, { fontSize: modalSubtitleSize }]}>{t('మొత్తం 24 ఏకాదశి దినాలు', 'Total 24 Ekadashi Days')}</Text>
               <TouchableOpacity
                 style={{ position: 'absolute', top: 14, right: 16, width: modalCloseBtnSize, height: modalCloseBtnSize, borderRadius: modalCloseBtnSize / 2, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}
                 onPress={() => setShowAllModal(false)}
@@ -199,7 +200,7 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
                       {isToday && (
                         <View style={styles.todayTagContainer}>
                           <MaterialCommunityIcons name="check-circle" size={allEkMoonSize} color={DarkColors.goldLight} />
-                          <Text style={[styles.todayTag, { fontSize: todayTagSize }]}> నేడు</Text>
+                          <Text style={[styles.todayTag, { fontSize: todayTagSize }]}> {t('నేడు', 'Today')}</Text>
                         </View>
                       )}
                     </View>

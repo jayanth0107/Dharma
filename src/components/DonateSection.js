@@ -199,7 +199,7 @@ export function DonateCard({ onExpand }) {
       >
         <View style={styles.cardRow}>
           <View style={[styles.cardIconWrap, { width: cardIconWrapSize, height: cardIconWrapSize, borderRadius: cardIconWrapSize / 2 }]}>
-            <MaterialCommunityIcons name="hand-heart" size={cardIconSize} color="#FFD700" />
+            <MaterialCommunityIcons name="hand-heart" size={cardIconSize} color={DarkColors.goldShimmer} />
           </View>
           <View style={styles.cardContent}>
             <Text style={[styles.cardTitle, { fontSize: cardTitleSize }]}>{t(TR.donateTitleCard.te, TR.donateTitleCard.en)}</Text>
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   modalHeader: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16 },
   modalHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   modalHeaderTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
-  modalQuote: { fontSize: 15, fontWeight: '700', color: '#FFD700', textAlign: 'center', marginTop: 6, fontStyle: 'italic' },
+  modalQuote: { fontSize: 15, fontWeight: '700', color: DarkColors.goldShimmer, textAlign: 'center', marginTop: 6, fontStyle: 'italic' },
   modalQuoteEn: { fontSize: 12, color: 'rgba(255,255,255,0.8)', textAlign: 'center', marginTop: 2 },
   modalBody: { padding: 20 },
   modalMessage: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 8 },

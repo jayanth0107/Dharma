@@ -395,8 +395,8 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
             )}
           </LinearGradient>
 
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {!selectedPlan ? (
               <>
                 {/* Perks */}
@@ -780,7 +780,7 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
   claimMsg: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
-  claimMsgErr: { color: '#C41E3A' },
+  claimMsgErr: { color: DarkColors.kumkum },
   claimMsgOk: { color: DarkColors.tulasiGreen },
   claimBtn: {
     backgroundColor: DarkColors.saffron, borderRadius: 10, paddingVertical: 12,

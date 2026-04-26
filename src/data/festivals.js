@@ -89,28 +89,53 @@ export const FESTIVALS_2026 = [
   { date: '2026-12-25', telugu: 'వైకుంఠ ఏకాదశి', english: 'Vaikunta Ekadashi', description: 'మార్గశిర శుక్ల ఏకాదశి. వైకుంఠ ద్వారం తెరుచుకునే రోజు. ముక్తి ప్రదాయిని. తిరుమల, శ్రీరంగం విశేష దర్శనం.' },
 ];
 
+// Year-aware lookup. Add FESTIVALS_2027 etc. and register here when generated;
+// the getters fall back to the closest-available year so the UI never goes
+// silently empty after a year rollover.
+const FESTIVALS_BY_YEAR = {
+  2026: FESTIVALS_2026,
+};
+
+const SUPPORTED_YEARS = Object.keys(FESTIVALS_BY_YEAR).map(Number).sort((a, b) => a - b);
+
+export function isFestivalDataAvailable(year) {
+  return Object.prototype.hasOwnProperty.call(FESTIVALS_BY_YEAR, year);
+}
+
+function getFestivalsForYear(year) {
+  if (FESTIVALS_BY_YEAR[year]) return FESTIVALS_BY_YEAR[year];
+  // Fallback: closest year ≤ requested (so 2027 falls back to 2026).
+  const closest = SUPPORTED_YEARS.filter(y => y <= year).pop() ?? SUPPORTED_YEARS[0];
+  if (__DEV__) console.warn(`Festival data for ${year} not loaded — falling back to ${closest}`);
+  return FESTIVALS_BY_YEAR[closest] || [];
+}
+
 // Get upcoming festivals from today
 export function getUpcomingFestivals(fromDate = new Date(), count = 3) {
   const dateStr = fromDate.toISOString().split('T')[0];
-  return FESTIVALS_2026.filter(f => f.date >= dateStr).slice(0, count);
+  const list = getFestivalsForYear(fromDate.getFullYear());
+  return list.filter(f => f.date >= dateStr).slice(0, count);
 }
 
 // Get today's festival (if any)
 export function getTodayFestival(date = new Date()) {
   const dateStr = date.toISOString().split('T')[0];
-  return FESTIVALS_2026.find(f => f.date === dateStr) || null;
+  const list = getFestivalsForYear(date.getFullYear());
+  return list.find(f => f.date === dateStr) || null;
 }
 
 // Get all festivals for today (may be multiple)
 export function getTodayFestivals(date = new Date()) {
   const dateStr = date.toISOString().split('T')[0];
-  return FESTIVALS_2026.filter(f => f.date === dateStr);
+  const list = getFestivalsForYear(date.getFullYear());
+  return list.filter(f => f.date === dateStr);
 }
 
 // Days until next festival
 export function daysUntilNextFestival(fromDate = new Date()) {
   const dateStr = fromDate.toISOString().split('T')[0];
-  const next = FESTIVALS_2026.find(f => f.date >= dateStr);
+  const list = getFestivalsForYear(fromDate.getFullYear());
+  const next = list.find(f => f.date >= dateStr);
   if (!next) return null;
   const today = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
   const festDate = new Date(next.date);

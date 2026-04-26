@@ -5,7 +5,7 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu Panchangam & Vedic Astrology mobile app. It provides astronomically accurate daily panchangam (Tithi, Nakshatra, Yoga, Karana), auspicious/inauspicious timings, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, Vedic horoscope (జాతకం), matchmaking, daily rashi predictions, live gold/silver prices, Indian market indices, and nearby temple finder — for Telugu-speaking users.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.3.0 (versionCode 7)
+**Version:** 2.4.0 (versionCode 8)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 

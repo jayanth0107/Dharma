@@ -201,10 +201,10 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
   });
 
   const ratingColorMap = {
-    excellent: '#2E7D32',
-    good: '#E8751A',
-    fair: '#E8751A',
-    avoid: '#C41E3A',
+    excellent: DarkColors.tulasiGreen,
+    good:      DarkColors.saffron,
+    fair:      DarkColors.saffron,
+    avoid:     DarkColors.kumkum,
   };
 
   const dateRows = results.map((item, idx) => {

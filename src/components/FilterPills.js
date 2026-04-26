@@ -26,11 +26,11 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 // Ekadashi removed — it has its own dedicated top-level tab in CalendarScreen.
 const FILTERS = [
-  { id: 'all', label: 'అన్నీ', icon: 'calendar-star', color: '#E8751A' },
-  { id: 'chaturthi', label: 'సంకష్టహర చతుర్థి', icon: 'elephant', color: '#C41E3A' },
-  { id: 'pournami', label: 'పౌర్ణమి', icon: 'moon-full', color: '#B8860B' },
-  { id: 'amavasya', label: 'అమావాస్య', icon: 'moon-new', color: '#4A1A6B' },
-  { id: 'pradosham', label: 'ప్రదోషం', icon: 'weather-night', color: '#4A90D9' },
+  { id: 'all',       label: 'అన్నీ',                icon: 'calendar-star',  color: DarkColors.saffron },
+  { id: 'chaturthi', label: 'సంకష్టహర చతుర్థి',     icon: 'elephant',       color: DarkColors.kumkum },
+  { id: 'pournami',  label: 'పౌర్ణమి',              icon: 'moon-full',      color: '#B8860B' },
+  { id: 'amavasya',  label: 'అమావాస్య',             icon: 'moon-new',       color: '#9B6FCF' },
+  { id: 'pradosham', label: 'ప్రదోషం',              icon: 'weather-night',  color: '#4A90D9' },
 ];
 
 export function FilterPills({ activeFilter, onFilterChange }) {

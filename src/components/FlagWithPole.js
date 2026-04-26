@@ -1,10 +1,12 @@
-// ధర్మ — Flag with pole + gentle wave animation
+// ధర్మ — Flag with pole + visible flutter animation
 //
 // Renders the saffron Bhagwa Dhwaj on a thin vertical pole.
-// Adds a subtle bob animation (transform: translateY) using the native driver
-// so it runs on the UI thread — works smoothly even on low-end phones.
-// Animation is auto-disabled on detected low-end devices via
-// ANIMATIONS_ENABLED from src/utils/deviceCapability.js.
+// Three-axis flutter using the native driver (UI thread, low cost):
+//   • skewX  — primary ripple, looks like wind catching the cloth
+//   • scaleX — secondary fold/unfold, gives 3D depth
+//   • translateY — subtle bob, mimics gravity tugging the cloth
+// Anchored to the pole side so the flutter radiates outward.
+// Auto-disabled on detected low-end devices via ANIMATIONS_ENABLED.
 
 import React, { useEffect, useRef } from 'react';
 import { View, Image, Animated, Easing, StyleSheet } from 'react-native';
@@ -12,36 +14,41 @@ import { DarkColors } from '../theme';
 import { ANIMATIONS_ENABLED } from '../utils/deviceCapability';
 
 export function FlagWithPole({ size = 38 }) {
-  const flagWidth = Math.round(size * 30 / 38);   // keep flag aspect ratio (cloth)
-  const poleWidth = 2;
-  const poleHeight = size + 6;                    // pole protrudes slightly above + below
+  const flagWidth  = Math.round(size * 30 / 38);    // keep flag aspect ratio (cloth)
+  const poleWidth  = 2;
+  const poleHeight = size + 6;                      // pole protrudes slightly above + below
 
-  const bob = useRef(new Animated.Value(0)).current;
+  const flutter = useRef(new Animated.Value(0)).current;
+  const bob     = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!ANIMATIONS_ENABLED) return;              // skip entirely on low-end
-    const loop = Animated.loop(
+    if (!ANIMATIONS_ENABLED) return;
+
+    // Fast horizontal flutter — primary visible motion (~1.4s round trip).
+    const flutterLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(bob, {
-          toValue: 1,
-          duration: 1800,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,                  // runs on UI thread — cheap
-        }),
-        Animated.timing(bob, {
-          toValue: 0,
-          duration: 1800,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
+        Animated.timing(flutter, { toValue:  1, duration: 700, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(flutter, { toValue: -1, duration: 700, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(flutter, { toValue:  0, duration: 350, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       ])
     );
-    loop.start();
-    return () => loop.stop();
-  }, [bob]);
 
-  // Subtle 0 ↔ -2px vertical bob mimics a flag catching breeze
-  const translateY = bob.interpolate({ inputRange: [0, 1], outputRange: [0, -2] });
+    // Slower vertical bob — keeps movement organic (~3.6s round trip).
+    const bobLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bob, { toValue: 1, duration: 1800, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(bob, { toValue: 0, duration: 1800, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ])
+    );
+
+    flutterLoop.start();
+    bobLoop.start();
+    return () => { flutterLoop.stop(); bobLoop.stop(); };
+  }, [flutter, bob]);
+
+  const skewX     = flutter.interpolate({ inputRange: [-1, 0, 1], outputRange: ['-7deg',  '0deg', '7deg'] });
+  const scaleX    = flutter.interpolate({ inputRange: [-1, 0, 1], outputRange: [0.94, 1, 0.94] });
+  const translateY = bob.interpolate({   inputRange: [ 0,    1], outputRange: [0, -3] });
 
   return (
     <View style={[s.wrap, { height: poleHeight }]}>
@@ -49,11 +56,17 @@ export function FlagWithPole({ size = 38 }) {
       <View style={[s.pole, { width: poleWidth, height: poleHeight }]} />
       {/* Pole tip ornament */}
       <View style={[s.tip, { left: -2 }]} />
-      {/* Flag cloth */}
+      {/* Flag cloth — anchored to pole side via marginLeft so the flutter
+          radiates outward (skewX + scaleX naturally pivot from the start edge
+          when the cloth element has a small width relative to its parent). */}
       <Animated.View
         style={{
           marginLeft: 1,
-          transform: [{ translateY }],
+          transform: [
+            { translateY },
+            { skewX },
+            { scaleX },
+          ],
         }}
       >
         <Image
@@ -74,10 +87,8 @@ const s = StyleSheet.create({
   pole: {
     backgroundColor: DarkColors.gold,
     borderRadius: 1,
-    // Subtle metallic glint
     opacity: 0.85,
   },
-  // Small gold sphere at the top of the pole
   tip: {
     position: 'absolute',
     top: 0,

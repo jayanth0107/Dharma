@@ -20,7 +20,7 @@ const CONSULTATION_SERVICES = [
     price: '₹499', duration: '30 min',
   },
   {
-    icon: 'heart-multiple', color: '#C41E3A',
+    icon: 'heart-multiple', color: DarkColors.kumkum,
     te: 'జాతక పొందిక సంప్రదింపు', en: 'Matchmaking Consultation',
     descTe: 'వివాహ అనుకూలత గురించి నిపుణుల సలహా', descEn: 'Expert advice on marriage compatibility',
     price: '₹699', duration: '45 min',
@@ -42,7 +42,7 @@ const CONSULTATION_SERVICES = [
 const PUJA_ITEMS = [
   { icon: 'necklace', te: 'రుద్రాక్ష', en: 'Rudraksha', price: '₹199+', color: '#B8860B' },
   { icon: 'diamond-stone', te: 'రత్నాలు', en: 'Gemstones', price: '₹499+', color: '#4A90D9' },
-  { icon: 'flower-tulip', te: 'పూజ సామగ్రి', en: 'Puja Items', price: '₹149+', color: '#C41E3A' },
+  { icon: 'flower-tulip', te: 'పూజ సామగ్రి', en: 'Puja Items', price: '₹149+', color: DarkColors.kumkum },
   { icon: 'candle', te: 'అగరబత్తీలు & దీపాలు', en: 'Incense & Diyas', price: '₹99+', color: DarkColors.saffron },
   { icon: 'book-open-variant', te: 'ధార్మిక పుస్తకాలు', en: 'Religious Books', price: '₹199+', color: '#2E7D32' },
   { icon: 'image-frame', te: 'దేవత విగ్రహాలు', en: 'Deity Idols', price: '₹299+', color: DarkColors.gold },

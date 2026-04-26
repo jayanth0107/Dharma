@@ -224,10 +224,13 @@ export function buildSlokaShareText(sloka) {
 
 export function buildDarshanShareText(deity) {
   if (!deity) return '';
+  const name = deity.name?.te || deity.name;
+  const desc = deity.desc?.te || deity.english || '';
+  const greet = deity.greeting?.te || deity.greeting || '';
   return `🙏 ధర్మ Daily — నేటి దర్శనం\n\n` +
-    `🙏 ${deity.name}\n${deity.english}\n\n` +
+    `🙏 ${name}\n${desc}\n\n` +
     `🕉️ మంత్రం: ${deity.mantra}\n\n` +
-    `${deity.greeting}\n\n` + FOOTER;
+    `${greet}\n\n` + FOOTER;
 }
 
 export function buildKidsStoryShareText(story) {

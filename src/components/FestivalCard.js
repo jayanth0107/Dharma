@@ -18,7 +18,7 @@ export function TodayFestivalBanner({ festival }) {
   return (
     <View style={[styles.bannerContainer, { marginHorizontal: bannerMx }]}>
       <LinearGradient
-        colors={['#D4A017', '#E8751A', '#C41E3A']}
+        colors={[DarkColors.gold, DarkColors.saffron, DarkColors.kumkumDark]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={[styles.bannerGradient, { paddingVertical: bannerPadV, paddingHorizontal: bannerPadH }]}
@@ -28,7 +28,7 @@ export function TodayFestivalBanner({ festival }) {
           <Text style={[styles.bannerTitle, { fontSize: bannerTitleSize }]}>{t(festival.telugu, festival.english)}</Text>
           <Text style={[styles.bannerEnglish, { fontSize: bannerEnglishSize }]}>{t(festival.english, festival.telugu)}</Text>
         </View>
-        <MaterialCommunityIcons name="candle" size={bannerIconSize} color="#FFD700" />
+        <MaterialCommunityIcons name="candle" size={bannerIconSize} color={DarkColors.goldShimmer} />
       </LinearGradient>
     </View>
   );
@@ -91,7 +91,7 @@ export function UpcomingFestivalItem({ festival, daysLeft }) {
         {/* Days left badge */}
         <View style={[styles.festivalDaysBadge, { paddingHorizontal: badgePadH, paddingVertical: badgePadV }]}>
           <Text style={[styles.festivalDaysNum, { fontSize: badgeNumSize }]}>{daysLeft}</Text>
-          <Text style={[styles.festivalDaysLabel, { fontSize: badgeLabelSize }]}>రోజులు</Text>
+          <Text style={[styles.festivalDaysLabel, { fontSize: badgeLabelSize }]}>{t('రోజులు', 'days')}</Text>
         </View>
       </TouchableOpacity>
 
@@ -115,9 +115,9 @@ export function UpcomingFestivalItem({ festival, daysLeft }) {
               <Text style={[styles.detailDateText, { fontSize: detailDateSize }]}> {dateDisplay}</Text>
             </View>
             <View style={styles.detailDivider} />
-            <Text style={[styles.detailDesc, { fontSize: detailDescSize }]}>{festival.description}</Text>
+            <Text style={[styles.detailDesc, { fontSize: detailDescSize }]}>{t(festival.description, festival.description)}</Text>
             {daysLeft > 0 && (
-              <Text style={[styles.detailCountdown, { fontSize: detailCountdownSize }]}>ఇంకా {daysLeft} రోజులు మిగిలి ఉన్నాయి</Text>
+              <Text style={[styles.detailCountdown, { fontSize: detailCountdownSize }]}>{t(`ఇంకా ${daysLeft} రోజులు మిగిలి ఉన్నాయి`, `${daysLeft} days remaining`)}</Text>
             )}
             <TouchableOpacity style={styles.detailClose} onPress={() => setShowDetail(false)}>
               <Text style={[styles.detailCloseText, { fontSize: detailCloseSize }]}>{t('మూసివేయండి', 'Close')}</Text>

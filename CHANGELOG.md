@@ -6,6 +6,82 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.4.1] — 2026-04-26
+
+Closed-testing readiness pass. Polish, cleanup, and architecture
+hardening — no new features, focused on shippability.
+
+### Added
+
+- **`isFestivalDataAvailable(year)`** export — UI components can ask whether they have real data for a year before rendering banners.
+- **Empty states** for `FamilyScreen` and `ReminderModal` — proper icon + bilingual title + description + CTA button replacing the previous one-line "no items" text.
+
+### Changed
+
+- **Year-aware data getters** — `festivals.js`, `ekadashi.js`, `holidays.js`, and `observances.js` now use a `*_BY_YEAR` map and fall back to the closest available year on rollover instead of silently returning empty arrays. Adding 2027 data is now a one-line registration in each file.
+- **Onboarding refresh** — 4 pages (was 3): Daily Habit → Sacred Stories → Youth & Engagement → Everything Free. Reflects the current feature set including Ramayana, Mahabharata, Quiz, Dharma Debate, Sanskrit Word, Mantras.
+- **Onboarding fonts** bumped one notch — title 26→28, desc 15→16, descEn 13→14 + larger lineHeights.
+- **Onboarding dismiss persistence** — now writes the `@dharma_onboarded` flag *before* flipping the UI state, so a hard kill within 50 ms of completion no longer re-shows the screen on next launch.
+- **Theme tokens** — replaced ~30 hardcoded hex codes (`#FFD700`, `#C41E3A`, `#FF6B35`, etc.) across CalendarScreen, LoginScreen, GoldScreen, MarketScreen, ServicesScreen, TempleNearbyScreen, DonateSection, FestivalCard, GoldPriceCard, FilterPills, MuhurtamFinder, PremiumBanner, SettingsModal, OfflineBanner, and HoroscopeFeature with `DarkColors.goldShimmer` / `DarkColors.kumkum` / `DarkColors.saffron`. Side-effect: AA contrast improved (kumkum 3.4:1 → 5.2:1).
+- **TodaySummaryCard palette** — Good Time tulasi-green → goldLight, Rahu Kalam kumkum-red → silverLight (Rahu is the shadow planet, not an alarm), streak `#FF6B35` → `saffron`. Reads as "auspicious / shadow / engagement" instead of "success-toast / error-toast / random".
+
+### Removed
+
+- **Premium PRO crown badges** stripped from FeatureTile entirely (rendering, prop, styles) and from all call sites: HomeScreen Horoscope/Matchmaking tiles + MoreScreen Premium tile. All features are now free with no "locked" visual indicators.
+
+### Fixed
+
+- **Console spam in production** — wrapped 9 unconditional `console.warn` calls in `premiumService.js`, `goldPriceService.js`, and `geolocation.js` behind `__DEV__` guards.
+- **Location auto-detect cascade** — when GPS succeeds but Google reverse-geocoding fails (CORS / quota), the IP-based city lookup now provides the city name as a second-line defense instead of falling through to the literal placeholder string `'Current Location'`.
+
+### Cleanup
+
+- Deleted `src/components/GitaCard.js` (replaced by inline rendering in `GitaScreen`).
+- Removed `isNew` prop and "NEW" badge rendering from `FeatureTile`.
+
+---
+
+## [2.4.0] — 2026-04-25
+
+Major content expansion for Indian youth. 8 new features, keyboard fixes, bilingual
+translations, speaker/TTS overhaul, and tile reordering by engagement priority.
+
+### Added
+
+- **Ramayana Daily** — 30 episodes covering all 7 kandas with moral, "Did You Know?" facts, bilingual Telugu/English, speaker, share
+- **Mahabharata Daily** — 30 episodes across all 18 parvas with dramatic storytelling, character studies, life lessons
+- **Neethi Suktalu** — 30 daily wisdom quotes from Chanakya, Vidura, Bhartrihari, Subhashitas, Thirukkural, Panchatantra with "Apply Today" action tips
+- **Dharma Debate (ధర్మ చర్చ)** — 30 thought-provoking questions (Was Karna right? Is Karma fatalistic? Social media = Maya?) with vote + community results
+- **Rashi Personality** — Vedic personality profiles for all 12 rashis with traits, strengths, weaknesses, career suggestions, compatibility, famous people, youth tips
+- **Sanskrit Word of the Day** — 30 words with Devanagari, root etymology, usage quotes, fun facts connecting ancient Sanskrit to modern culture
+- **Mantra Audio with Lyrics** — 15 popular mantras (Gayatri, Hanuman Chalisa, Vishnu Sahasranama, etc.) with karaoke-style lyric highlighting during TTS playback
+- **Shared TTS service** (`speechService.js`) — centralized speak/stop hook used across all screens, language-aware (Telugu voice for te, English for en), Web Speech API fallback
+- **Deity significance** in Daily Darshan — each day's deity now shows why they are worshipped on that day
+- **DailyRashi dual mode** — Student Mode (15-25 years) and Senior Mode (25+) with visible mode indicator showing what predictions are displayed
+
+### Changed
+
+- **Home tile order** — sorted by current Indian trend: daily habit (Rashi, Panchangam, Festivals, Gold) → daily content (epics, Gita) → engagement (debate, quiz, personality) → learning → premium → explore → utility
+- **Nav bars** (top + bottom) follow the same priority order as home tiles
+- **Summary card** — time shown on separate bottom line, "కాలం" added to శుభ/రాహు labels
+- **"నేటి దినం" → "నేటి పంచాంగం"** — Panchang tab title updated
+- **DailyDarshan** — fully bilingual with English translations for all 7 deity names, descriptions, greetings, significance
+- **FestivalCard / EkadashiCard** — hardcoded Telugu strings (రోజులు, నేడు, గతం) wrapped in t() with English equivalents
+- **Speaker button** moved to card header in Bhagavad Gita for always-visible access
+- **Stotra speaker** — now has start/stop toggle, language-aware
+- **Kids Stories speaker** — prominent button with start/stop in modal, speaker badge on tiles
+
+### Fixed
+
+- **Keyboard handling** — KeyboardAvoidingView + keyboardShouldPersistTaps added to 10+ screens/components (Horoscope, Reminder, Settings, Family, Astro, Gold, Temple, Login, Matchmaking, Premium, Location)
+- **Android keyboard** — `softwareKeyboardLayoutMode: "resize"` in app.json
+- **iOS keyboard offset** — `keyboardVerticalOffset={80}` on all KeyboardAvoidingViews
+- **Puja Guide back button** — moved from bottom (hidden) to top (visible)
+- **Web Speech API** — proper voice selection for Telugu/English, Chrome 15-second pause workaround, fallback to English text when no Telugu voice available
+- **Location auto-detect** — proper error logging instead of silent catch
+
+---
+
 ## [2.3.0] — 2026-04-23
 
 Major matchmaking overhaul, form persistence, accurate astronomical calculations,

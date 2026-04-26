@@ -162,7 +162,7 @@ export function LoginScreen({ navigation }) {
     <View style={s.screen}>
       <PageHeader title={t('లాగిన్', 'Login')} />
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <ScrollView contentContainerStyle={[s.content, { padding: contentPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* reCAPTCHA container for web */}
         {Platform.OS === 'web' && <View nativeID="recaptcha-container" />}
@@ -230,7 +230,7 @@ export function LoginScreen({ navigation }) {
               <MaterialCommunityIcons
                 name="account-check"
                 size={avatarIconSize}
-                color={premiumActive ? '#FFD700' : DarkColors.tulasiGreen}
+                color={premiumActive ? DarkColors.goldShimmer : DarkColors.tulasiGreen}
               />
               {premiumActive && (
                 <View style={[s.profileCrown, { width: crownBadgeSize, height: crownBadgeSize, borderRadius: crownBadgeSize / 2 }]}>
@@ -244,7 +244,7 @@ export function LoginScreen({ navigation }) {
               <MaterialCommunityIcons
                 name={premiumActive ? 'crown' : 'account'}
                 size={tierFontSize + 3}
-                color={premiumActive ? '#FFD700' : '#4A90D9'}
+                color={premiumActive ? DarkColors.goldShimmer : '#4A90D9'}
               />
               <Text style={[s.tierText, { fontSize: tierFontSize }, premiumActive ? s.tierTextPremium : s.tierTextFree]}>
                 {premiumActive ? t(TR.premiumUser.te, TR.premiumUser.en) : t(TR.freeUser.te, TR.freeUser.en)}
@@ -280,13 +280,13 @@ export function LoginScreen({ navigation }) {
             {/* Upgrade to Premium */}
             {!premiumActive && (
               <TouchableOpacity style={[s.upgradeBtn, { paddingVertical: upgradePadV }]} onPress={() => navigation.navigate('Premium')}>
-                <MaterialCommunityIcons name="crown" size={18} color="#FFD700" />
+                <MaterialCommunityIcons name="crown" size={18} color={DarkColors.goldShimmer} />
                 <Text style={[s.upgradeText, { fontSize: secondaryFontSize }]}>{t(TR.upgradePremium.te, TR.upgradePremium.en)}</Text>
               </TouchableOpacity>
             )}
 
             <TouchableOpacity style={[s.logoutBtn, { paddingVertical: logoutPadV }]} onPress={handleLogout}>
-              <MaterialCommunityIcons name="logout" size={18} color="#C41E3A" />
+              <MaterialCommunityIcons name="logout" size={18} color={DarkColors.kumkum} />
               <Text style={[s.logoutText, { fontSize: secondaryFontSize }]}>{t(TR.logout.te, TR.logout.en)}</Text>
             </TouchableOpacity>
           </View>
@@ -312,7 +312,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard, outlineStyle: 'none',
   },
   otpInput: { fontWeight: '800', letterSpacing: 8 },
-  error: { color: '#C41E3A', textAlign: 'center', marginBottom: 10 },
+  error: { color: DarkColors.kumkum, textAlign: 'center', marginBottom: 10 },
   btn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     backgroundColor: DarkColors.saffron, borderRadius: 14, marginTop: 8,
@@ -337,7 +337,7 @@ const s = StyleSheet.create({
   tierPremium: { backgroundColor: 'rgba(255,215,0,0.12)', borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)' },
   tierFree: { backgroundColor: 'rgba(74,144,217,0.12)', borderWidth: 1, borderColor: 'rgba(74,144,217,0.3)' },
   tierText: { fontWeight: '900', letterSpacing: 1 },
-  tierTextPremium: { color: '#FFD700' },
+  tierTextPremium: { color: DarkColors.goldShimmer },
   tierTextFree: { color: '#4A90D9' },
   infoRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -351,11 +351,11 @@ const s = StyleSheet.create({
     marginTop: 12, borderRadius: 12,
     backgroundColor: 'rgba(255,215,0,0.08)', borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)',
   },
-  upgradeText: { fontWeight: '800', color: '#FFD700' },
+  upgradeText: { fontWeight: '800', color: DarkColors.goldShimmer },
   logoutBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     marginTop: 12, borderRadius: 12,
-    borderWidth: 1, borderColor: '#C41E3A',
+    borderWidth: 1, borderColor: DarkColors.kumkum,
   },
-  logoutText: { fontWeight: '700', color: '#C41E3A' },
+  logoutText: { fontWeight: '700', color: DarkColors.kumkum },
 });

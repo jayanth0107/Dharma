@@ -91,10 +91,10 @@ export function GoldScreen() {
     <View style={s.screen}>
       <PageHeader title={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} />
       <TopTabBar />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <ScrollView
         style={s.scroll} contentContainerStyle={[s.scrollContent, { paddingBottom: scrollPadBottom, paddingTop: scrollPadTop }]}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DarkColors.gold} colors={[DarkColors.gold]} />}
       >
         <View style={[s.card, { marginHorizontal: cardMarginH, padding: cardPad, borderRadius: cardRadius }]}>
@@ -115,7 +115,7 @@ export function GoldScreen() {
                 {t('అలర్ట్ సెట్:', 'Alert set:')} ₹{alert.targetPrice}/g {t('కంటే తక్కువైనప్పుడు', 'when price drops below')}
               </Text>
               <TouchableOpacity style={s.alertClearBtn} onPress={handleClearAlert}>
-                <MaterialCommunityIcons name="close-circle" size={clearIconSize} color="#C41E3A" />
+                <MaterialCommunityIcons name="close-circle" size={clearIconSize} color={DarkColors.kumkum} />
                 <Text style={[s.alertClearText, { fontSize: alertClearTextSize }]}>{t('రద్దు', 'Clear')}</Text>
               </TouchableOpacity>
             </View>
@@ -177,7 +177,7 @@ const s = StyleSheet.create({
   },
   alertActiveText: { fontWeight: '700', color: DarkColors.goldLight, flex: 1 },
   alertClearBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 6 },
-  alertClearText: { fontWeight: '700', color: '#C41E3A' },
+  alertClearText: { fontWeight: '700', color: DarkColors.kumkum },
   alertForm: {},
   alertFormLabel: { color: DarkColors.textSecondary, marginBottom: 10 },
   alertFormRow: { flexDirection: 'row', gap: 10 },

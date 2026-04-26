@@ -31,7 +31,7 @@ function Sparkle({ delay, left, top }) {
   const opacity = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] });
   return (
     <Animated.View style={{ position: 'absolute', left, top, opacity, transform: [{ scale }], zIndex: 5 }}>
-      <MaterialCommunityIcons name="star-four-points" size={12} color="#FFD700" />
+      <MaterialCommunityIcons name="star-four-points" size={12} color={DarkColors.goldShimmer} />
     </Animated.View>
   );
 }

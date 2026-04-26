@@ -257,8 +257,8 @@ export function TempleNearbyScreen() {
     <View style={s.screen}>
       <PageHeader title={t('దేవాలయాలు', 'Nearby Temples')} />
       <TopTabBar />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
+      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
         {/* Location indicator */}
         <View style={s.locationRow}>
@@ -314,7 +314,7 @@ export function TempleNearbyScreen() {
           {[
             { icon: 'om', label: t('శివ', 'Shiva'), q: 'Shiva temple near me', color: '#4A90D9' },
             { icon: 'temple-hindu', label: t('విష్ణు', 'Vishnu'), q: 'Vishnu temple near me', color: DarkColors.saffron },
-            { icon: 'elephant', label: t('గణేష్', 'Ganesh'), q: 'Ganesh temple near me', color: '#C41E3A' },
+            { icon: 'elephant', label: t('గణేష్', 'Ganesh'), q: 'Ganesh temple near me', color: DarkColors.kumkum },
             { icon: 'shield-star', label: t('హనుమాన్', 'Hanuman'), q: 'Hanuman temple near me', color: DarkColors.tulasiGreen },
           ].map((d, i) => (
             <TouchableOpacity key={i} style={s.deityBtn} onPress={() => searchMapsFor(d.q, usedLat, usedLon)}>

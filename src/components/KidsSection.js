@@ -7,6 +7,7 @@ import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { KIDS_STORIES, getStoriesForDay } from '../data/kidsStories';
 import { KIDS_SLOKAS, getSlokasForDay } from '../data/kidsSlokas';
+import { useSpeaker } from '../utils/speechService';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -52,6 +53,10 @@ function StoryTile({ story, onPress, wide }) {
         <View style={st.tileReadRow}>
           <Text style={[st.tileRead, { color: DarkColors.gold, fontSize: subFs }]}>{t('చదవండి', 'Read')}</Text>
           <MaterialCommunityIcons name="arrow-right" size={badgeIcon} color={DarkColors.gold} />
+          <View style={st.tileSpeakerBadge}>
+            <MaterialCommunityIcons name="volume-high" size={14} color={DarkColors.gold} />
+            <Text style={st.tileSpeakerText}>{t('వినండి', 'Listen')}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -83,9 +88,10 @@ function SlokaCard({ sloka }) {
 }
 
 export function KidsSection({ dayOfWeek }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [activeStory, setActiveStory] = useState(null);
   const [modalImgFailed, setModalImgFailed] = useState(false);
+  const { isSpeaking, toggle: toggleSpeak, speakerIcon, stop: stopSpeak, isAvailable } = useSpeaker();
 
   const slokaLabelFs = usePick({ default: 16, md: 18, xl: 20 });
   const slokaLabelMt = usePick({ default: 12, md: 14, xl: 18 });
@@ -138,12 +144,12 @@ export function KidsSection({ dayOfWeek }) {
 
       {/* Story detail modal */}
       {activeStory && (
-        <Modal visible={true} animationType="slide" transparent onRequestClose={() => setActiveStory(null)}>
+        <Modal visible={true} animationType="slide" transparent onRequestClose={() => { stopSpeak(); setActiveStory(null); }}>
           <View style={st.modalOverlay}>
             <View style={st.modalContent}>
               <TouchableOpacity
                 style={st.modalCloseX}
-                onPress={() => setActiveStory(null)}
+                onPress={() => { stopSpeak(); setActiveStory(null); }}
               >
                 <Ionicons name="close" size={closeIconSize} color="#FFF" />
               </TouchableOpacity>
@@ -158,19 +164,13 @@ export function KidsSection({ dayOfWeek }) {
                 <View style={[st.modalBody, { padding: modalPad }]}>
                   <Text style={[st.modalTitle, { color: activeStory.color, fontSize: modalTitleFs }]}>{t(activeStory.title, activeStory.english)}</Text>
                   <Text style={[st.modalEnglish, { fontSize: modalSubFs }]}>{activeStory.english}</Text>
-                  {Platform.OS !== 'web' && (
+                  {isAvailable && (
                     <TouchableOpacity
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginTop: 8, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 16, borderWidth: 1, borderColor: DarkColors.borderGold }}
-                      onPress={() => {
-                        try {
-                          const Speech = require('expo-speech');
-                          const text = activeStory.storyEn || activeStory.story;
-                          Speech.speak(text, { language: 'en', rate: 0.8 });
-                        } catch {}
-                      }}
+                      style={[st.modalSpeakerBtn, isSpeaking && st.modalSpeakerBtnActive]}
+                      onPress={() => toggleSpeak(activeStory.story, activeStory.storyEn || activeStory.story, lang)}
                     >
-                      <MaterialCommunityIcons name="volume-high" size={16} color={DarkColors.gold} />
-                      <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold }}>{t('వినండి', 'Listen')}</Text>
+                      <MaterialCommunityIcons name={speakerIcon} size={18} color={isSpeaking ? '#FFFFFF' : DarkColors.gold} />
+                      <Text style={[st.modalSpeakerText, isSpeaking && { color: '#FFFFFF' }]}>{isSpeaking ? t('ఆపు', 'Stop') : t('వినండి', 'Listen')}</Text>
                     </TouchableOpacity>
                   )}
                   <View style={st.divider} />
@@ -181,7 +181,7 @@ export function KidsSection({ dayOfWeek }) {
                   </View>
                 </View>
               </ScrollView>
-              <TouchableOpacity style={[st.closeBtn, { borderColor: DarkColors.gold, paddingVertical: closeBtnPad, marginHorizontal: closeBtnMx }]} onPress={() => setActiveStory(null)}>
+              <TouchableOpacity style={[st.closeBtn, { borderColor: DarkColors.gold, paddingVertical: closeBtnPad, marginHorizontal: closeBtnMx }]} onPress={() => { stopSpeak(); setActiveStory(null); }}>
                 <Text style={[st.closeBtnText, { fontSize: closeBtnFs }]}>{t('మూసివేయండి', 'Close')}</Text>
               </TouchableOpacity>
             </View>
@@ -224,6 +224,12 @@ const st = StyleSheet.create({
   tileEnglish: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   tileReadRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
   tileRead: { fontSize: 12, fontWeight: '700' },
+  tileSpeakerBadge: {
+    marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 3,
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10,
+    backgroundColor: 'rgba(212,160,23,0.12)', borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  tileSpeakerText: { fontSize: 10, fontWeight: '700', color: DarkColors.gold },
 
   // Slokas
   slokaSectionLabel: {
@@ -252,6 +258,14 @@ const st = StyleSheet.create({
   modalImage: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   modalImageFallback: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24, alignItems: 'center', justifyContent: 'center' },
   modalBody: { padding: 20 },
+  modalSpeakerBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start',
+    marginTop: 10, paddingVertical: 8, paddingHorizontal: 14,
+    backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 16,
+    borderWidth: 1.5, borderColor: DarkColors.borderGold,
+  },
+  modalSpeakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
+  modalSpeakerText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
   modalTitle: { fontSize: 24, fontWeight: '800' },
   modalEnglish: { fontSize: 14, color: DarkColors.textMuted, marginTop: 2 },
   divider: { height: 1, backgroundColor: DarkColors.gold, opacity: 0.2, marginVertical: 16 },

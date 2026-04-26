@@ -2,7 +2,7 @@
 // Manage family members' horoscope profiles in one place
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -106,6 +106,7 @@ export function FamilyScreen({ navigation }) {
     <View style={s.screen}>
       <PageHeader title={t('కుటుంబ జాతకాలు', 'Family Profiles')} />
       <TopTabBar />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
 
         {/* Header */}
@@ -234,11 +235,25 @@ export function FamilyScreen({ navigation }) {
         })}
 
         {members.length === 0 && !showForm && (
-          <Text style={s.emptyText}>{t('ఇంకా సభ్యులు లేరు. "జోడించండి" నొక్కండి.', 'No members yet. Tap "Add Member".')}</Text>
+          <View style={s.emptyState}>
+            <View style={s.emptyIconWrap}>
+              <MaterialCommunityIcons name="account-multiple-plus" size={42} color={DarkColors.gold} />
+            </View>
+            <Text style={s.emptyTitle}>{t('మీ కుటుంబాన్ని జోడించండి', 'Build Your Family Profile')}</Text>
+            <Text style={s.emptyDesc}>
+              {t('మీ తల్లిదండ్రులు, భాగస్వామి, పిల్లల పుట్టిన తేదీలతో రాశి, నక్షత్రం, జన్మ నక్షత్ర దోషాలు ఒకే చోట చూడండి.',
+                 "Add your parents, partner, kids — see their Rashi, Nakshatra, and birth-star compatibility all in one place.")}
+            </Text>
+            <TouchableOpacity style={s.emptyCta} onPress={() => setShowForm(true)} activeOpacity={0.85}>
+              <MaterialCommunityIcons name="plus-circle" size={20} color="#0A0A0A" />
+              <Text style={s.emptyCtaText}>{t('మొదటి సభ్యుడిని జోడించండి', 'Add Your First Member')}</Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         <View style={{ height: 30 }} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
     </SwipeWrapper>
   );
@@ -294,4 +309,25 @@ const s = StyleSheet.create({
   attrValue: { fontSize: 14, color: '#FFFFFF', fontWeight: '800', flex: 1 },
 
   emptyText: { fontSize: 15, color: DarkColors.textMuted, textAlign: 'center', marginTop: 32, fontStyle: 'italic' },
+  emptyState: {
+    alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  emptyIconWrap: {
+    width: 88, height: 88, borderRadius: 44,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: DarkColors.goldDim,
+    borderWidth: 1.5, borderColor: DarkColors.borderGold,
+    marginBottom: 18,
+  },
+  emptyTitle: { fontSize: 18, fontWeight: '900', color: DarkColors.gold, textAlign: 'center', marginBottom: 8 },
+  emptyDesc: {
+    fontSize: 14, fontWeight: '500', color: DarkColors.silver, textAlign: 'center', lineHeight: 22, marginBottom: 22,
+  },
+  emptyCta: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: DarkColors.gold,
+    paddingVertical: 13, paddingHorizontal: 22, borderRadius: 14,
+  },
+  emptyCtaText: { fontSize: 15, fontWeight: '800', color: '#0A0A0A' },
 });

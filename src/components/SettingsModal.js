@@ -116,7 +116,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
             <Text style={s.subtitle}>{t(TR.settings.en, TR.settings.te)}</Text>
           </View>
 
-          <ScrollView style={[s.body, { paddingHorizontal: bodyPadH }]} showsVerticalScrollIndicator={false}>
+          <ScrollView style={[s.body, { paddingHorizontal: bodyPadH }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {/* Notifications Section */}
             <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t(TR.notifications.te, TR.notifications.en)}</Text>
 
@@ -189,7 +189,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                   iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
                 <View style={[s.settingRow, { padding: settingRowPad }]}>
-                  <MaterialCommunityIcons name="crown" size={settingIconSize} color="#FFD700" style={{ marginRight: 12 }} />
+                  <MaterialCommunityIcons name="crown" size={settingIconSize} color={DarkColors.goldShimmer} style={{ marginRight: 12 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{isPremium ? t(TR.premiumActive.te, TR.premiumActive.en) : `Premium ${t(TR.premiumInactive.te, TR.premiumInactive.en)}`}</Text>
                     <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{isPremium ? t(TR.premiumUnlocked.te, TR.premiumUnlocked.en) : t(TR.premiumLocked.te, TR.premiumLocked.en)}</Text>
@@ -202,8 +202,8 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                       if (v) setAdConfig({ isPremium: true, enabled: false });
                       else setAdConfig({ isPremium: false });
                     }}
-                    trackColor={{ false: '#ddd', true: '#FFD70060' }}
-                    thumbColor={isPremium ? '#FFD700' : '#ccc'}
+                    trackColor={{ false: '#ddd', true: 'rgba(255,215,0,0.4)' }}
+                    thumbColor={isPremium ? DarkColors.goldShimmer : '#ccc'}
                   />
                 </View>
 
@@ -501,7 +501,7 @@ const s = StyleSheet.create({
     fontSize: 15, color: DarkColors.textPrimary, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   adminError: {
-    fontSize: 12, color: '#C41E3A', fontWeight: '600', marginTop: 6,
+    fontSize: 12, color: DarkColors.kumkum, fontWeight: '600', marginTop: 6,
   },
   adminBtn: {
     backgroundColor: DarkColors.saffron, borderRadius: 10, paddingVertical: 10,

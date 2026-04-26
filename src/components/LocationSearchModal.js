@@ -165,6 +165,7 @@ export function LocationSearchModal({
       <KeyboardAvoidingView
         style={ls.screen}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
       >
         {/* Header */}
         <View style={[ls.header, { paddingHorizontal: pad }]}>

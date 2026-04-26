@@ -130,12 +130,41 @@ export function DailyRashiScreen() {
           <Text style={s.dateText}>{dateStr}</Text>
         </View>
 
-        {/* Student Mode toggle */}
-        <TouchableOpacity style={[s.studentToggle, studentMode && s.studentToggleActive]} onPress={toggleStudentMode} activeOpacity={0.7}>
-          <MaterialCommunityIcons name={studentMode ? 'school' : 'school-outline'} size={18} color={studentMode ? '#FFFFFF' : DarkColors.gold} />
-          <Text style={[s.studentToggleText, studentMode && { color: '#FFFFFF' }]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
-          <View style={[s.studentDot, studentMode && s.studentDotActive]} />
-        </TouchableOpacity>
+        {/* Mode selector — Student / Senior */}
+        <View style={s.modeSelectorRow}>
+          <TouchableOpacity
+            style={[s.modeBtn, !studentMode && s.modeBtnActive]}
+            onPress={() => { if (studentMode) toggleStudentMode(); }}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons name="account-tie" size={18} color={!studentMode ? '#FFFFFF' : DarkColors.gold} />
+            <View>
+              <Text style={[s.modeBtnText, !studentMode && s.modeBtnTextActive]}>{t('సీనియర్ మోడ్', 'Senior Mode')}</Text>
+              <Text style={[s.modeBtnAge, !studentMode && s.modeBtnAgeActive]}>{t('25+ సంవత్సరాలు', '25+ years')}</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[s.modeBtn, studentMode && s.modeBtnActiveStudent]}
+            onPress={() => { if (!studentMode) toggleStudentMode(); }}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons name="school" size={18} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
+            <View>
+              <Text style={[s.modeBtnText, { color: '#4A90D9' }, studentMode && s.modeBtnTextActive]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
+              <Text style={[s.modeBtnAge, studentMode && s.modeBtnAgeActive]}>{t('15–25 సంవత్సరాలు', '15–25 years')}</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Active mode indicator */}
+        <View style={[s.modeIndicator, studentMode ? { backgroundColor: 'rgba(74,144,217,0.08)', borderColor: 'rgba(74,144,217,0.3)' } : { backgroundColor: 'rgba(212,160,23,0.06)', borderColor: DarkColors.borderGold }]}>
+          <MaterialCommunityIcons name={studentMode ? 'school' : 'account-tie'} size={16} color={studentMode ? '#4A90D9' : DarkColors.gold} />
+          <Text style={[s.modeIndicatorText, { color: studentMode ? '#4A90D9' : DarkColors.gold }]}>
+            {studentMode
+              ? t('చదువులు, పరీక్షలు & స్నేహాల ఫలాలు చూపిస్తున్నాము', 'Showing Studies, Exams & Friendships predictions')
+              : t('వృత్తి, ఆర్థికం, ఆరోగ్యం & సంబంధాల ఫలాలు చూపిస్తున్నాము', 'Showing Career, Finance, Health & Relationship predictions')}
+          </Text>
+        </View>
 
         {/* My Rashi Section */}
         {myRashi ? (
@@ -387,46 +416,56 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  // Rashi card
-  // Student Mode toggle
-  studentToggle: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'center',
-    paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, marginBottom: 12,
-    backgroundColor: 'rgba(212,160,23,0.06)', borderWidth: 1, borderColor: DarkColors.borderGold,
+  // Mode selector — Student / Senior
+  modeSelectorRow: {
+    flexDirection: 'row', gap: 8, marginBottom: 8,
   },
-  studentToggleActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
-  studentToggleText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
-  studentDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: DarkColors.borderGold },
-  studentDotActive: { backgroundColor: '#FFFFFF' },
+  modeBtn: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 10, paddingHorizontal: 14, borderRadius: 14,
+    backgroundColor: 'rgba(212,160,23,0.04)', borderWidth: 1.5, borderColor: DarkColors.borderCard,
+  },
+  modeBtnActive: { backgroundColor: DarkColors.gold, borderColor: DarkColors.gold },
+  modeBtnActiveStudent: { backgroundColor: '#4A90D9', borderColor: '#4A90D9' },
+  modeBtnText: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
+  modeBtnTextActive: { color: '#FFFFFF' },
+  modeBtnAge: { fontSize: 13, fontWeight: '600', color: DarkColors.silver, marginTop: 2 },
+  modeBtnAgeActive: { color: 'rgba(255,255,255,0.85)' },
+  modeIndicator: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, marginBottom: 12,
+    borderWidth: 1,
+  },
+  modeIndicatorText: { fontSize: 14, fontWeight: '700', flex: 1, lineHeight: 20 },
 
   rashiCard: { paddingVertical: 14, paddingHorizontal: 12, marginBottom: 6, borderRadius: 14, borderWidth: 1, borderColor: DarkColors.borderCard },
   myRashiHighlight: { borderColor: DarkColors.borderGold, borderWidth: 1.5, backgroundColor: 'rgba(212,160,23,0.06)' },
   rashiHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   rashiName: { fontSize: 19, fontWeight: '800', color: DarkColors.silver },
-  rashiMeta: { fontSize: 13, color: DarkColors.textMuted, marginTop: 3 },
-  myBadgeText: { fontSize: 12, fontWeight: '800', color: DarkColors.gold },
+  rashiMeta: { fontSize: 14, color: DarkColors.silver, marginTop: 4, fontWeight: '600' },
+  myBadgeText: { fontSize: 13, fontWeight: '800', color: DarkColors.gold },
   starsRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 5 },
-  scoreText: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '700', marginLeft: 6 },
-  overallText: { fontSize: 15, color: DarkColors.silver, marginTop: 10, fontStyle: 'italic', lineHeight: 22 },
+  scoreText: { fontSize: 14, color: DarkColors.silver, fontWeight: '700', marginLeft: 6 },
+  overallText: { fontSize: 16, color: DarkColors.silver, marginTop: 10, fontStyle: 'italic', lineHeight: 24, fontWeight: '500' },
 
   // Expanded details
   details: { marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
 
   // Each detail — stacked: icon+label on top, value text below
-  detailSection: { marginBottom: 14 },
-  detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  detailLabel: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
-  detailText: { fontSize: 16, color: DarkColors.silver, fontWeight: '600', lineHeight: 24, paddingLeft: 28 },
+  detailSection: { marginBottom: 16 },
+  detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  detailLabel: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  detailText: { fontSize: 17, color: DarkColors.silver, fontWeight: '600', lineHeight: 26, paddingLeft: 28 },
 
   // Ruler & element row
   infoRow: { flexDirection: 'row', gap: 20, marginTop: 6, marginBottom: 10 },
   infoItem: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600' },
-  infoValue: { fontSize: 15, color: DarkColors.silver, fontWeight: '700' },
+  infoLabel: { fontSize: 13, color: DarkColors.silver, fontWeight: '600' },
+  infoValue: { fontSize: 16, color: DarkColors.silver, fontWeight: '700' },
 
   // Lucky row
   luckyRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
   luckyItem: { flex: 1, alignItems: 'center', gap: 4 },
-  luckyLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '600' },
+  luckyLabel: { fontSize: 14, color: DarkColors.silver, fontWeight: '600' },
   luckyValue: { fontSize: 17, fontWeight: '800', color: DarkColors.gold },
 });

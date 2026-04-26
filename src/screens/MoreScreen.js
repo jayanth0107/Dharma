@@ -38,7 +38,7 @@ export function MoreScreen({ navigation }) {
       <View style={[s.gridContainer, { paddingHorizontal: gridPaddingH, paddingTop: gridPaddingV, paddingBottom: gridPaddingV }]}>
         <FeatureGrid gap={gridGap} rows={gridRows}>
           {/* Row 1 — Most important actions */}
-          <FeatureTile icon="crown" label={t(T.premium.te, T.premium.en)} sublabel={t('Premium', 'ప్రీమియం')} onPress={() => navigation.navigate('Premium')} accentColor={DarkColors.gold} isPremium={!premiumActive} />
+          <FeatureTile icon="crown" label={t(T.premium.te, T.premium.en)} sublabel={t('Premium', 'ప్రీమియం')} onPress={() => navigation.navigate('Premium')} accentColor={DarkColors.gold} />
           <FeatureTile icon="account-circle" label={t(T.login.te, T.login.en)} sublabel={t('Profile', 'ప్రొఫైల్')} onPress={() => navigation.navigate('Login')} accentColor={DarkColors.saffron} />
           <FeatureTile icon="cog" label={t(T.settings.te, T.settings.en)} sublabel={t('Settings', 'సెట్టింగ్స్')} onPress={() => navigation.navigate('Settings')} accentColor={DarkColors.silver} />
           {/* Row 2 — Engagement (Kids tile moved to Home) */}

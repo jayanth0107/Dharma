@@ -110,16 +110,20 @@ export function AppProvider({ children }) {
 
   // All async init — single mount effect
   useEffect(() => {
-    // Location detection
+    // Location detection — try GPS → IP fallback → default Hyderabad
     setLocationDetecting(true);
     autoDetectLocation()
       .then((detected) => {
-        if (detected) {
+        if (detected && detected.name) {
           setLocation(detected);
           trackEvent('location_auto_detected', { city: detected.name, country: detected.country });
+        } else {
+          console.warn('Location detection returned empty, using default');
         }
       })
-      .catch(() => {})
+      .catch((e) => {
+        console.warn('Location auto-detect failed:', e?.message || e);
+      })
       .finally(() => setLocationDetecting(false));
 
     // Analytics, rate prompt, ads, notifications

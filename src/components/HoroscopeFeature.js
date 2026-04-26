@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   TextInput, Platform, Alert, ActivityIndicator, Image, Linking, Modal,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -345,6 +346,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
             <Text style={s.title}>{t('వేద జాతకం', 'Vedic Horoscope')}</Text>
           </View>
 
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             {step === 'locked' && (
               <View style={s.lockedWrap}>
@@ -362,7 +364,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   activeOpacity={0.8}
                 >
                   <LinearGradient colors={['#4A1A6B', '#2D1B4E']} style={s.lockedBtnGradient}>
-                    <MaterialCommunityIcons name="crown" size={20} color="#FFD700" />
+                    <MaterialCommunityIcons name="crown" size={20} color={DarkColors.goldShimmer} />
                     <Text style={s.lockedBtnText}>Premium అప్‌గ్రేడ్ చేయండి</Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -935,6 +937,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
               </View>
             )}
           </ScrollView>
+          </KeyboardAvoidingView>
 
           {/* Fixed close — only in modal mode (embedded screens use PageHeader back) */}
           {!embedded && (
@@ -1318,7 +1321,7 @@ const s = StyleSheet.create({
     paddingVertical: 14, gap: 8,
   },
   lockedBtnText: {
-    fontSize: 16, fontWeight: '800', color: '#FFD700',
+    fontSize: 16, fontWeight: '800', color: DarkColors.goldShimmer,
   },
   lockedCancel: {
     fontSize: 13, color: '#999999', fontWeight: '600',
@@ -1431,7 +1434,7 @@ const s = StyleSheet.create({
   planCardSelected: { borderColor: '#9B6FCF', backgroundColor: 'rgba(155,111,207,0.1)' },
   planCardBest: { borderColor: '#9B6FCF', borderWidth: 2 },
   bestTag: { position: 'absolute', top: -8, right: 12, backgroundColor: '#4A1A6B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  bestTagText: { fontSize: 8, fontWeight: '800', color: '#FFD700' },
+  bestTagText: { fontSize: 8, fontWeight: '800', color: DarkColors.goldShimmer },
   planEmoji: { fontSize: 24 },
   planName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   planDesc: { fontSize: 11, color: '#999999', marginTop: 2 },
@@ -1517,7 +1520,7 @@ const s = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 24, borderRadius: 16,
     backgroundColor: '#222222', borderWidth: 1.5, borderColor: '#C41E3A30',
   },
-  pdfBtnText: { fontSize: 14, fontWeight: '700', color: '#C41E3A' },
+  pdfBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.kumkum },
   shareResultBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 12, paddingHorizontal: 24, borderRadius: 16,

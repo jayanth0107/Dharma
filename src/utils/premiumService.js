@@ -113,10 +113,10 @@ async function loadState() {
         _premiumState = parsed;
         return _premiumState;
       }
-      console.warn('Premium: primary storage integrity check failed, trying backup');
+      if (__DEV__) console.warn('Premium: primary storage integrity check failed, trying backup');
     }
   } catch {
-    console.warn('Premium: primary storage read failed');
+    if (__DEV__) console.warn('Premium: primary storage read failed');
   }
 
   // Fallback to backup storage
@@ -133,7 +133,7 @@ async function loadState() {
       }
     }
   } catch {
-    console.warn('Premium: backup storage read failed');
+    if (__DEV__) console.warn('Premium: backup storage read failed');
   }
 
   // Nothing valid — start fresh
@@ -152,7 +152,7 @@ async function saveState() {
     await store.setItem(STORAGE_KEY, data);
     await store.setItem(BACKUP_KEY, data);
   } catch {
-    console.warn('Premium: save failed');
+    if (__DEV__) console.warn('Premium: save failed');
   }
 }
 
