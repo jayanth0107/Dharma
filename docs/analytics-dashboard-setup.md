@@ -45,7 +45,47 @@ Defined in `src/utils/analyticsSync.js` → `CLOUD_EVENTS` (all on by default in
 
 ---
 
-## Step-by-step setup
+## Three viable paths — pick by user scale
+
+| Path | What you see | Setup time | Best for |
+|---|---|---|---|
+| **A. In-app + Firestore Console** | Top-events bar chart on test device · raw event browse · auto Firebase Analytics for web users | 0 min — already wired | **Closed testing (≤ 50 testers, 3 months)** |
+| **B. Looker Studio + Firestore connector** | Cross-platform aggregated dashboard via the community Firestore connector | ~20 min | 50–1,000 daily users |
+| **C. Looker Studio + BigQuery export** | Full SQL access, fastest queries, advanced charts | ~30 min + first-time GCP IAM setup | 1,000+ daily users, long-term |
+
+Recommended: **start with path A**, upgrade to B at 50+ testers, upgrade to C only after 1,000 DAU.
+
+---
+
+## Path A — zero-setup (already shipped)
+
+Three sources, all live today:
+
+1. **In-app admin view** — Settings → tap version 5× → admin passcode → "Usage Analytics / వినియోగ గణాంకాలు". Top events as horizontal bars + last-7-days opens. Local-device data only — useful for QA / your own device.
+
+2. **Firestore Console** — open [console.firebase.google.com](https://console.firebase.google.com) → your project → Firestore → `analytics_events` collection. Use the **Query** tab to filter by `event` field; the `+ Build query` UI counts hits. Cross-user, all platforms.
+
+3. **Firebase Analytics dashboard** — auto-built for **web users only** (native uses the Firestore writer instead). Same Firebase Console → Analytics. Shows DAU, retention, demographics graphs without any setup.
+
+That's enough signal for closed testing. Skip the rest of this doc until you outgrow it.
+
+---
+
+## Path B — Looker Studio, no BigQuery (~20 min)
+
+For aggregated cross-platform charts without dealing with BigQuery + GCP IAM:
+
+1. Go to [lookerstudio.google.com](https://lookerstudio.google.com)
+2. **Create → Data source → search connectors → "Firebase Firestore"** (the community connector by Google). Authorize.
+3. Pick your project (`dharmadaily-1fa89`) → collection `analytics_events`
+4. Build the 7 charts described later in this doc — Looker auto-flattens `params.*` fields
+5. **Schedule weekly digest:** File → Settings → Email delivery
+
+Limitations: queries are slower than BigQuery (Firestore wasn't designed for analytics). Works smoothly up to ~50K events.
+
+---
+
+## Path C — Looker Studio with BigQuery export (~30 min, more powerful)
 
 ### 1. Install BigQuery Firestore export (one-time, ~5 min)
 
@@ -173,7 +213,12 @@ This shows **only your test device's** data — useful for QA, not for cross-use
 
 | Symptom | Fix |
 |---|---|
-| BigQuery dataset is empty after install | Wait 10–20 minutes for the first sync. Check `Firebase Console → Extensions → Logs` for errors. |
+| **`PERMISSION_DENIED` on Cloud Build service account `<numeric-id>` during install** | Cloud Build service agent not yet provisioned. **Enable these APIs explicitly** before retrying: [Cloud Build](https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com), [Cloud Functions](https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com), [Cloud Run](https://console.cloud.google.com/apis/library/run.googleapis.com), [Eventarc](https://console.cloud.google.com/apis/library/eventarc.googleapis.com), [Pub/Sub](https://console.cloud.google.com/apis/library/pubsub.googleapis.com), [BigQuery](https://console.cloud.google.com/apis/library/bigquery.googleapis.com). **Wait 10 minutes** for IAM propagation. Delete the failed extension install. Retry. |
+| **`Permission denied while using the Eventarc Service Agent`** | Same root cause as above. Wait for IAM propagation after enabling APIs. If error persists after 30 min, manually grant the role: IAM → find `service-PROJECT_NUMBER@gcp-sa-eventarc.iam.gserviceaccount.com` → grant `roles/eventarc.serviceAgent`. |
+| **Mixed regions in error (e.g. functions in `us-central1`, trigger in `asia-south1`)** | Firestore database region must match Cloud Functions location. Find your Firestore region in Firebase Console → Firestore (top-right). During extension install, set **both** "Cloud Functions location" AND "BigQuery dataset location" to the same region as Firestore. Indian projects: pick `asia-south1` consistently. |
+| **Extension install hangs > 10 min** | Cancel and retry. Firebase Extensions sometimes time out on first install in a fresh project. |
+| **Falling back?** | Use **Path A or B above** — neither requires the BigQuery extension. The data is identical; only the queryability differs. |
+| BigQuery dataset is empty after successful install | Wait 10–20 minutes for the first sync. Check `Firebase Console → Extensions → Logs` for errors. |
 | Native devices not appearing in Looker | Confirm `firebase` is installed and `isConfigured` returns true. Check `analytics_events` collection in Firestore Console — if events are flowing there, they will appear in BigQuery. |
 | Quiz `correct` field showing as text | In Looker, edit the data source → change `params.correct` type to Boolean. |
 | Looker showing "0 records" | Date filter likely excludes recent events because BigQuery export has ~1-min delay. Set filter to "last 7 days" minimum. |
