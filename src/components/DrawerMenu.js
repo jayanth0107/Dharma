@@ -10,7 +10,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors, Type } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useAuth } from '../context/AuthContext';
-import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 
@@ -34,7 +33,6 @@ const MENU_ITEMS = [
 export function DrawerMenu({ visible, onClose, onAction }) {
   const insets = useSafeAreaInsets();
   const { isLoggedIn, profile } = useAuth();
-  const { premiumActive } = useApp();
   const { t } = useLanguage();
   const drawerWidth = usePick({ default: 270, md: 300, xl: 360 });
   const profilePaddingH = usePick({ default: 16, md: 20, xl: 28 });
@@ -72,37 +70,24 @@ export function DrawerMenu({ visible, onClose, onAction }) {
 
         {/* Drawer panel */}
         <View style={[s.drawer, { width: drawerWidth, paddingTop: Math.max(insets.top, 10) + 10 }]}>
-          {/* Profile header — Guest / Free / Premium */}
+          {/* Profile header — two states only: guest vs logged-in.
+              Premium badge / crown removed since premium tier is disabled
+              at launch (see drawer Premium item — "Coming Soon"). */}
           <TouchableOpacity style={[s.profileSection, { paddingHorizontal: profilePaddingH }]} onPress={() => handlePress('login')} activeOpacity={0.7}>
-            <View style={[s.avatar, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }, isLoggedIn && s.avatarLoggedIn, premiumActive && s.avatarPremium]}>
+            <View style={[s.avatar, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }, isLoggedIn && s.avatarLoggedIn]}>
               <MaterialCommunityIcons
-                name={isLoggedIn ? 'account-check' : 'account-circle'}
+                name={isLoggedIn ? 'account-check' : 'account-circle-outline'}
                 size={avatarIconSize}
-                color={premiumActive ? DarkColors.gold : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
+                color={isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
               />
-              {premiumActive && (
-                <View style={[s.premiumCrown, { width: crownCircle, height: crownCircle, borderRadius: crownCircle / 2 }]}>
-                  <MaterialCommunityIcons name="crown" size={crownSize} color="#fff" />
-                </View>
-              )}
             </View>
             <View style={s.profileInfo}>
               {isLoggedIn ? (
                 <>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={[s.profileName, { fontSize: profileNameSize }]}>{profile?.name || profile?.phone || 'User'}</Text>
-                    {premiumActive && (
-                      <View style={s.premiumBadge}>
-                        <Text style={[s.premiumBadgeText, { fontSize: badgeFontSize }]}>PREMIUM</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[s.profilePhone, { fontSize: profileSubSize }]}>{profile?.phone || ''}</Text>
-                  {!premiumActive && (
-                    <View style={s.freeBadge}>
-                      <Text style={[s.freeBadgeText, { fontSize: badgeFontSize }]}>FREE</Text>
-                    </View>
-                  )}
+                  <Text style={[s.profileName, { fontSize: profileNameSize }]}>{profile?.name || profile?.phone || 'User'}</Text>
+                  {profile?.phone ? (
+                    <Text style={[s.profilePhone, { fontSize: profileSubSize }]}>{profile.phone}</Text>
+                  ) : null}
                 </>
               ) : (
                 <>
@@ -216,29 +201,6 @@ const s = StyleSheet.create({
   avatarLoggedIn: {
     borderColor: DarkColors.tulasiGreen,
     backgroundColor: 'rgba(46,125,50,0.08)',
-  },
-  avatarPremium: {
-    borderColor: DarkColors.gold,
-    backgroundColor: 'rgba(255,215,0,0.08)',
-  },
-  premiumCrown: {
-    position: 'absolute', bottom: -2, right: -2,
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: '#B8860B', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: DarkColors.bgElevated,
-  },
-  premiumBadge: {
-    backgroundColor: '#B8860B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6,
-  },
-  premiumBadgeText: {
-    fontSize: 9, fontWeight: '900', color: '#fff', letterSpacing: 0.5,
-  },
-  freeBadge: {
-    backgroundColor: 'rgba(74,144,217,0.15)', paddingHorizontal: 8, paddingVertical: 2,
-    borderRadius: 6, alignSelf: 'flex-start', marginTop: 4,
-  },
-  freeBadgeText: {
-    fontSize: 9, fontWeight: '900', color: DarkColors.saffron, letterSpacing: 0.5,
   },
   guestBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6,

@@ -50,8 +50,7 @@ function SectionHeader({ te, en, sub_te, sub_en, icon }) {
 export function HomeScreen({ navigation }) {
   const {
     panchangam, selectedDate, setSelectedDate, location, locationDetecting,
-    setShowLocationPicker, premiumActive, trialAvailable,
-    handlePremiumActivated, handleTogglePremium,
+    setShowLocationPicker,
   } = useApp();
 
   const insets = useSafeAreaInsets();
@@ -180,19 +179,17 @@ export function HomeScreen({ navigation }) {
           <TouchableOpacity
             style={[s.headerSlot, { height: headerSlotSize, minWidth: headerSlotSize }]}
             onPress={() => navigation.navigate('Login')}
-            accessibilityLabel="Profile"
+            accessibilityLabel={isLoggedIn ? 'Profile' : 'Login'}
           >
-            <View style={[s.userAvatar, isLoggedIn && s.userAvatarLoggedIn, premiumActive && s.userAvatarPremium]}>
+            {/* Two clear visual states — no premium crown until that tier exists.
+                Logged out: outline circle in muted grey.
+                Logged in:  filled circle with check, tulasi-green ring. */}
+            <View style={[s.userAvatar, isLoggedIn && s.userAvatarLoggedIn]}>
               <MaterialCommunityIcons
                 name={isLoggedIn ? 'account-check' : 'account-circle-outline'}
                 size={20}
-                color={premiumActive ? DarkColors.gold : isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
+                color={isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
               />
-              {premiumActive && (
-                <View style={s.userCrown}>
-                  <MaterialCommunityIcons name="crown" size={8} color="#fff" />
-                </View>
-              )}
             </View>
           </TouchableOpacity>
         </View>
@@ -394,16 +391,6 @@ const s = StyleSheet.create({
   userAvatarLoggedIn: {
     borderColor: DarkColors.tulasiGreen,
     backgroundColor: 'rgba(46,125,50,0.1)',
-  },
-  userAvatarPremium: {
-    borderColor: DarkColors.gold,
-    backgroundColor: 'rgba(255,215,0,0.1)',
-  },
-  userCrown: {
-    position: 'absolute', bottom: -3, right: -3,
-    width: 14, height: 14, borderRadius: 7,
-    backgroundColor: '#B8860B', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: DarkColors.bg,
   },
   userGreeting: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
