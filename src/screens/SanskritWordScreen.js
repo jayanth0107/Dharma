@@ -1,8 +1,9 @@
 // ధర్మ — Sanskrit Word of the Day (సంస్కృత పదం)
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { trackEvent } from '../utils/analytics';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
@@ -20,6 +21,12 @@ export function SanskritWordScreen() {
   const today = getTodaySanskritWord(new Date());
   const [showAll, setShowAll] = useState(false);
   const { isSpeaking, toggle: toggleSpeak, speakerIcon } = useSpeaker();
+
+  useEffect(() => {
+    if (today?.id != null) {
+      trackEvent('sanskrit_word_view', { word_id: today.id, word: today.word?.devanagari });
+    }
+  }, [today?.id]);
 
   const wordFs = usePick({ default: 42, md: 48, xl: 56 });
 

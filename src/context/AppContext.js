@@ -14,6 +14,7 @@ import { checkRatePrompt } from '../utils/ratePrompt';
 import { initPremium, isPremium as checkIsPremium, getTierInfo } from '../utils/premiumService';
 import { loadNotifSettings, setupDailyNotifications } from '../utils/notificationService';
 import { loadInterstitialAd, setAdConfig } from '../components/AdBanner';
+import { useLanguage } from './LanguageContext';
 
 const AppContext = createContext();
 
@@ -22,6 +23,10 @@ export function useApp() {
 }
 
 export function AppProvider({ children }) {
+  // Read current language so notification text re-renders when user toggles
+  // language via the header switch — see effect that depends on `lang` below.
+  const { lang } = useLanguage();
+
   // Core state
   const [panchangam, setPanchangam] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -69,7 +74,9 @@ export function AppProvider({ children }) {
     setUpcomingHolidays(getUpcomingHolidays(selectedDate, 5));
   }, [selectedDate, location]);
 
-  // Schedule notifications with real panchangam data after location is available
+  // Schedule notifications with real panchangam data. Re-fires whenever
+  // location OR language changes, so toggling EN/TE in the header
+  // re-renders notification copy in the new language without an app restart.
   useEffect(() => {
     if (!location?.latitude) return;
     const loc = { latitude: location.latitude, longitude: location.longitude, altitude: location.altitude || 0 };
@@ -90,7 +97,7 @@ export function AppProvider({ children }) {
       const rashiIndex = await loadRashi();
       setupDailyNotifications(s, loc, rashiIndex);
     }).catch(() => {});
-  }, [location?.latitude]);
+  }, [location?.latitude, lang]);
 
   // Ad config sync + analytics user property
   useEffect(() => {

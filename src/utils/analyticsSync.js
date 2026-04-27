@@ -9,7 +9,10 @@
 //   - All failures are silent — analytics MUST NOT break the app
 
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { db, isConfigured } from '../config/firebase';
+
+const APP_VERSION = Constants.expoConfig?.version || Constants.manifest?.version || 'unknown';
 
 let firestoreReady = false;
 let addDocFn = null;
@@ -59,7 +62,7 @@ async function getDeviceId() {
 // ── User properties — set once, attached to every event ────────────
 let userProps = {
   platform: Platform.OS,          // 'web' | 'ios' | 'android'
-  appVersion: '2.0.0',            // keep in sync with package.json
+  appVersion: APP_VERSION,        // pulled from app.json at boot — never stale
   premium: false,                 // updated when premium state changes
   loggedIn: false,
   lang: 'te',                     // 'te' | 'en'
@@ -115,6 +118,22 @@ const CLOUD_EVENTS = new Set([
   'market_view',
   'referral_share',
   'referral_redeemed',
+
+  // Sacred-content engagement (added in v2.4.x for 3-month usage analysis)
+  'ramayana_episode_view',
+  'mahabharata_episode_view',
+  'gita_sloka_view',
+  'neethi_sukta_view',
+  'sanskrit_word_view',
+  'rashi_personality_view',
+  'stotra_open',
+  'mantra_youtube_open',
+  'meditation_started',
+  'meditation_completed',
+  'quiz_answered',
+  'dharma_poll_voted',
+  'puja_guide_open',
+  'kids_story_open',
 
   // Location & data
   'location_auto_detected',

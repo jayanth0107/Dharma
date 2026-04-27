@@ -8,6 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { KIDS_STORIES, getStoriesForDay } from '../data/kidsStories';
 import { KIDS_SLOKAS, getSlokasForDay } from '../data/kidsSlokas';
 import { useSpeaker } from '../utils/speechService';
+import { trackEvent } from '../utils/analytics';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -124,14 +125,14 @@ export function KidsSection({ dayOfWeek }) {
         // Web: 2x2 tile grid
         <View style={[st.webGrid, { gap: webGridGap }]}>
           {visibleStories.map((story) => (
-            <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); }} wide={true} />
+            <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); trackEvent('kids_story_open', { id: story.id }); }} wide={true} />
           ))}
         </View>
       ) : (
         // Mobile: Horizontal scrollable carousel
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={st.carousel}>
           {visibleStories.map((story) => (
-            <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); }} wide={false} />
+            <StoryTile key={story.id} story={story} onPress={() => { setModalImgFailed(false); setActiveStory(story); trackEvent('kids_story_open', { id: story.id }); }} wide={false} />
           ))}
         </ScrollView>
       )}

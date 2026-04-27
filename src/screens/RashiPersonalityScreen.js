@@ -17,6 +17,7 @@ import { getRashiPersonality, RASHI_PERSONALITIES } from '../data/rashiPersonali
 import { RASHIS } from '../utils/dailyRashiService';
 import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
+import { trackEvent } from '../utils/analytics';
 
 const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
 
@@ -71,6 +72,17 @@ export function RashiPersonalityScreen() {
   const displayIndex = browseRashiIndex != null ? browseRashiIndex : rashiIndex;
   const personality = displayIndex != null ? getRashiPersonality(displayIndex) : null;
   const rashi = displayIndex != null ? RASHIS[displayIndex] : null;
+
+  // Track which rashi profile users actually open (browse from grid OR own rashi)
+  useEffect(() => {
+    if (displayIndex != null) {
+      trackEvent('rashi_personality_view', {
+        rashi_index: displayIndex,
+        rashi: RASHIS[displayIndex]?.en,
+        is_own: browseRashiIndex == null,
+      });
+    }
+  }, [displayIndex, browseRashiIndex]);
 
   const buildShareText = (p, r) => {
     return `🙏 *ధర్మ — వేద రాశి వ్యక్తిత్వం*\n\n` +

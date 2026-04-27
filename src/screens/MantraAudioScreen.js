@@ -13,6 +13,7 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { MANTRAS } from '../data/mantraData';
+import { trackEvent } from '../utils/analytics';
 
 const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
 
@@ -104,7 +105,10 @@ export function MantraAudioScreen({ route }) {
           {/* 🎵 Listen to Authentic Recording — YouTube */}
           <TouchableOpacity
             style={s.youtubeBtn}
-            onPress={() => openYouTube(m.youtubeQuery || m.name.en + ' vedic chanting')}
+            onPress={() => {
+              trackEvent('mantra_youtube_open', { mantra_id: m.id, mantra: m.name?.en });
+              openYouTube(m.youtubeQuery || m.name.en + ' vedic chanting');
+            }}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons name="youtube" size={24} color="#FF0000" />

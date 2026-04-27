@@ -1,8 +1,9 @@
 // ధర్మ — Ramayana Daily Screen (రామాయణం)
 // One episode per day, rotating 30 episodes by day-of-month
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { trackEvent } from '../utils/analytics';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -22,6 +23,13 @@ export function RamayanaScreen() {
   const episode = getTodayRamayanaEpisode(new Date());
   const [showAll, setShowAll] = useState(false);
   const { isSpeaking, toggle: toggleSpeak, speakerIcon, fallbackNote, dismissFallbackNote } = useSpeaker();
+
+  // Engagement signal — which Ramayana episode users actually open
+  useEffect(() => {
+    if (episode?.id != null) {
+      trackEvent('ramayana_episode_view', { episode_id: episode.id, kanda: episode.kanda?.en });
+    }
+  }, [episode?.id]);
 
   const titleFs = usePick({ default: 20, md: 22, xl: 26 });
   const storyFs = usePick({ default: 16, md: 17, xl: 19 });

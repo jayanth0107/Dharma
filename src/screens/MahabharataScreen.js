@@ -1,9 +1,10 @@
 // ధర్మ — Mahabharata Daily Screen (మహాభారతం)
 // One episode per day, rotating 30 episodes by day-of-month
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { trackEvent } from '../utils/analytics';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
@@ -22,6 +23,13 @@ export function MahabharataScreen() {
   const episode = getTodayMahabharataEpisode(new Date());
   const [showAll, setShowAll] = useState(false);
   const { isSpeaking, toggle: toggleSpeak, speakerIcon, fallbackNote, dismissFallbackNote } = useSpeaker();
+
+  // Engagement signal — which Mahabharata episode users actually open
+  useEffect(() => {
+    if (episode?.id != null) {
+      trackEvent('mahabharata_episode_view', { episode_id: episode.id, parva: episode.parva?.en });
+    }
+  }, [episode?.id]);
 
   const titleFs = usePick({ default: 20, md: 22, xl: 26 });
   const storyFs = usePick({ default: 16, md: 17, xl: 19 });

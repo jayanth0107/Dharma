@@ -11,6 +11,7 @@ import { PageHeader } from '../components/PageHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { PUJA_GUIDES } from '../data/pujaGuideData';
+import { trackEvent } from '../utils/analytics';
 
 export function PujaGuideScreen() {
   const { t } = useLanguage();
@@ -87,7 +88,7 @@ export function PujaGuideScreen() {
         </Text>
 
         {PUJA_GUIDES.map(puja => (
-          <TouchableOpacity key={puja.id} style={[s.pujaCard, { borderLeftColor: puja.color }]} onPress={() => setSelectedPuja(puja)} activeOpacity={0.7}>
+          <TouchableOpacity key={puja.id} style={[s.pujaCard, { borderLeftColor: puja.color }]} onPress={() => { trackEvent('puja_guide_open', { id: puja.id }); setSelectedPuja(puja); }} activeOpacity={0.7}>
             <MaterialCommunityIcons name={puja.icon} size={28} color={puja.color} />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={s.pujaCardName}>{t(puja.name.te, puja.name.en)}</Text>

@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.4.2] — 2026-04-27
+
+Onboarding redesign + notification overhaul + analytics instrumentation +
+public copy reframe. Sets up the app for closed testing with the data
+infrastructure to know what's working.
+
+### Added
+
+- **Language picker on first launch** — OnboardingScreen rewritten from 4 paginated feature pages to 2 screens: language picker (తెలుగు / English) + welcome with 6 highlight tiles. The chosen language is persisted to `@dharma_lang` so the app boots in the user's language across cold starts.
+- **`setLanguage(lang)` exported from `LanguageContext`** alongside the existing `toggleLang`. Persistence is now handled inside the provider on every change.
+- **In-app Usage Analytics view** in `SettingsModal` admin section: top events as horizontal bars, headline session/event/active-day numbers, last-7-days bar chart.
+- **`docs/analytics-dashboard-setup.md`** — step-by-step Looker Studio guide for cross-platform usage dashboards (BigQuery Firestore export → Looker → 7 prebuilt charts).
+- **14 new whitelisted CLOUD_EVENTS** for sacred-content engagement tracking: `ramayana_episode_view`, `mahabharata_episode_view`, `gita_sloka_view`, `neethi_sukta_view`, `sanskrit_word_view`, `rashi_personality_view`, `stotra_open`, `mantra_youtube_open`, `meditation_started`, `meditation_completed`, `quiz_answered`, `dharma_poll_voted`, `puja_guide_open`, `kids_story_open`.
+- **Mount-time + action `trackEvent` calls** wired across 11 content surfaces: Ramayana, Mahabharata, Gita, Neethi Suktalu, Sanskrit Word, Rashi Personality, Stotra, MantraAudio, Meditation, Dharma Poll, Quiz, Puja Guide, Kids Stories.
+- **Today's Neethi Sukta inside the morning notification** — sourced from `getTodayNeethiSukta()` (replaces the hardcoded inline `DAILY_QUOTES` array).
+
+### Changed
+
+- **Notification service** — full rewrite. Bilingual via `@dharma_lang` (notifications now respect the user's chosen language). Year-aware via the new `*_BY_YEAR` data getters (no more direct `FESTIVALS_2026` references). Master-toggle off cancels every scheduled item via `cancelAllScheduledNotificationsAsync()`. Triggers re-fire on language switch through a new `lang` dependency in `AppContext`'s notification effect.
+- **Drawer + More menu de-duplicated** — every item that appeared in two surfaces was removed from one. Drawer is now "personal + frequent" (Premium · Notifications · Change Location · Settings + profile section). More is now "growth + legal" (Share App · Rate App · Feedback · Privacy · Terms · About). Reminder and Donate stay only in Home (Utility / Devotion sections). Premium drawer item is **disabled** with a "Coming Soon / త్వరలో" badge — all features free at launch.
+- **Public copy reframe** across `app.json` description, OnboardingScreen welcome page, and `docs/play-store-listing.md`. Replaced the defensive "TV serials కాదు" framing with inviting language: *"Rediscover the wisdom your grandparents knew."* Source citations remain as a trust signal, not a defense.
+- **School/syllabus angle** added to onboarding tagline + Play Store listing dedicated section. Play Store category changed from `Lifestyle` → `Education`. Keywords expanded with `sanskrit class 10`, `indian history textbook`, `dharma values`.
+- **`appVersion` in analytics no longer hardcoded** — pulled live from `app.json` via `Constants.expoConfig?.version`. Fixes the analytics property that was permanently reporting `2.0.0`.
+- **`OnboardingScreen` font sizes** bumped one notch for readability.
+- **`OnboardingScreen` dismiss persistence** — now writes `@dharma_onboarded` BEFORE flipping the UI flag, eliminating a 50ms race where a hard kill could re-show onboarding.
+- **`dailyQuote` translation labels** — "Daily Quote" → "Daily Neethi Sukta", subtitle now mentions Chanakya / Vidura / Thirukkural sources.
+
+### Removed
+
+- **`isPremium` PRO crown badge rendering from FeatureTile** — prop, JSX, and styles. All features free, so a "locked" visual indicator was misleading. Stripped from HomeScreen Horoscope/Matchmaking tiles + MoreScreen Premium tile.
+- **Drawer items that duplicated More**: Login (covered by profile section) · Remove Ads · Share App · Rate App · Donate · Feedback · Privacy · Terms · About.
+- **More tiles that duplicated other surfaces**: Reminder (Home Utility) · Donate (Home Devotion) · Premium (Drawer) · Login (Drawer profile) · Settings (Drawer).
+- **~30 lines of dead drawer-action handlers** in HomeScreen.
+
+### Fixed
+
+- **9 unconditional `console.warn` calls** in `premiumService.js`, `goldPriceService.js`, and `geolocation.js` are now guarded behind `__DEV__`.
+- **Stale `v1.1.0` version footer** in MoreScreen → live version.
+
+---
+
 ## [2.4.1] — 2026-04-26
 
 Closed-testing readiness pass. Polish, cleanup, and architecture

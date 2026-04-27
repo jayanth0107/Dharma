@@ -14,27 +14,21 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 
+// Drawer is for "personal + frequent" — account and quick-toggles only.
+// Growth (share/rate/feedback) and legal (privacy/terms/about) live on
+// the More screen so the surfaces don't overlap. Profile / Login is
+// reachable via the profile section header above the menu list.
+//
+// Premium is shown but disabled at initial rollout: every feature is
+// free, so a working "Upgrade" button would be misleading. The item
+// stays in the menu so users see the future tier exists, with a
+// "Coming Soon" badge to set expectations.
 const MENU_ITEMS = [
-  // Account & Premium (most important)
-  { id: 'login', icon: 'account-circle-outline', label: 'ప్రొఫైల్ / లాగిన్', labelEn: 'Profile / Login' },
-  { id: 'premium', icon: 'crown', label: 'ప్రీమియం అప్‌గ్రేడ్', labelEn: 'Upgrade to Premium', accent: DarkColors.gold },
-  { id: 'removeAds', icon: 'advertisements-off', label: 'ప్రకటనలు తొలగించు', labelEn: 'Remove Ads', accent: DarkColors.tulasiGreen },
+  { id: 'premium',       icon: 'crown',                 label: 'ప్రీమియం',           labelEn: 'Premium', accent: DarkColors.gold, disabled: true, badgeTe: 'త్వరలో', badgeEn: 'Coming Soon' },
   { id: 'divider1' },
-  // App settings
-  { id: 'notifications', icon: 'bell-outline', label: 'నోటిఫికేషన్స్', labelEn: 'Notifications' },
-  { id: 'settings', icon: 'cog-outline', label: 'సెట్టింగ్స్', labelEn: 'Settings' },
-  { id: 'location', icon: 'map-marker-outline', label: 'ప్రదేశం మార్చు', labelEn: 'Change Location' },
-  { id: 'divider3' },
-  // Engagement & growth
-  { id: 'share', icon: 'share-variant', label: 'యాప్ షేర్', labelEn: 'Share App' },
-  { id: 'rate', icon: 'star-outline', label: 'యాప్ రేట్ చేయండి', labelEn: 'Rate Dharma' },
-  { id: 'donate', icon: 'hand-heart', label: 'దానం', labelEn: 'Donate' },
-  { id: 'feedback', icon: 'message-text-outline', label: 'అభిప్రాయం', labelEn: 'Feedback' },
-  { id: 'divider4' },
-  // Legal & info
-  { id: 'privacy', icon: 'shield-check-outline', label: 'గోప్యతా విధానం', labelEn: 'Privacy Policy' },
-  { id: 'terms', icon: 'file-document-outline', label: 'నిబంధనలు', labelEn: 'Terms & Conditions' },
-  { id: 'about', icon: 'information-outline', label: 'గురించి', labelEn: 'About Dharma' },
+  { id: 'notifications', icon: 'bell-outline',          label: 'నోటిఫికేషన్స్',     labelEn: 'Notifications' },
+  { id: 'location',      icon: 'map-marker-outline',    label: 'ప్రదేశం మార్చు',     labelEn: 'Change Location' },
+  { id: 'settings',      icon: 'cog-outline',           label: 'సెట్టింగ్స్',         labelEn: 'Settings' },
 ];
 
 export function DrawerMenu({ visible, onClose, onAction }) {
@@ -132,22 +126,43 @@ export function DrawerMenu({ visible, onClose, onAction }) {
               if (item.id.startsWith('divider')) {
                 return <View key={item.id} style={[s.menuDivider, { marginHorizontal: menuItemPaddingH }]} />;
               }
+              const isDisabled = !!item.disabled;
               return (
                 <TouchableOpacity
                   key={item.id}
-                  style={[s.menuItem, { paddingVertical: menuItemPaddingV, paddingHorizontal: menuItemPaddingH }]}
-                  onPress={() => handlePress(item.id)}
-                  activeOpacity={0.6}
+                  style={[
+                    s.menuItem,
+                    { paddingVertical: menuItemPaddingV, paddingHorizontal: menuItemPaddingH },
+                    isDisabled && s.menuItemDisabled,
+                  ]}
+                  onPress={() => { if (!isDisabled) handlePress(item.id); }}
+                  activeOpacity={isDisabled ? 1 : 0.6}
+                  disabled={isDisabled}
+                  accessibilityState={{ disabled: isDisabled }}
                 >
                   <MaterialCommunityIcons
                     name={item.icon}
                     size={menuIconSize}
-                    color={item.accent || DarkColors.silver}
+                    color={isDisabled ? DarkColors.textMuted : (item.accent || DarkColors.silver)}
                     style={[s.menuIcon, { width: menuIconWidth }]}
                   />
                   <View style={s.menuTextBlock}>
-                    <Text style={[s.menuLabel, { fontSize: menuLabelSize }, item.accent && { color: item.accent }]}>{t(item.label, item.labelEn)}</Text>
+                    <Text
+                      style={[
+                        s.menuLabel,
+                        { fontSize: menuLabelSize },
+                        item.accent && !isDisabled && { color: item.accent },
+                        isDisabled && s.menuLabelDisabled,
+                      ]}
+                    >
+                      {t(item.label, item.labelEn)}
+                    </Text>
                   </View>
+                  {item.badgeTe && (
+                    <View style={s.comingSoonBadge}>
+                      <Text style={s.comingSoonText}>{t(item.badgeTe, item.badgeEn)}</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -268,6 +283,7 @@ const s = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
   },
+  menuItemDisabled: { opacity: 0.55 },
   menuIcon: {
     width: 28,
     marginRight: 16,
@@ -279,6 +295,16 @@ const s = StyleSheet.create({
     ...Type.title,
     fontSize: 17,
     color: DarkColors.textPrimary,
+  },
+  menuLabelDisabled: { color: DarkColors.textMuted },
+  comingSoonBadge: {
+    backgroundColor: DarkColors.goldDim,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8,
+    marginLeft: 8,
+  },
+  comingSoonText: {
+    fontSize: 11, fontWeight: '800', color: DarkColors.gold, letterSpacing: 0.4,
   },
   menuDivider: {
     height: 1,

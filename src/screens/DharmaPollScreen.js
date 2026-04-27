@@ -14,6 +14,7 @@ import { SectionShareRow } from '../components/SectionShareRow';
 import { useSpeaker } from '../utils/speechService';
 import { getTodayDharmaPoll, DHARMA_POLLS } from '../data/dharmaPollData';
 import { loadForm, saveForm } from '../utils/formStorage';
+import { trackEvent } from '../utils/analytics';
 
 const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
 const VOTE_KEY_PREFIX = '@dharma_poll_vote_';
@@ -62,6 +63,7 @@ export function DharmaPollScreen() {
     }
     setAllVotes(prev => ({ ...prev, [pollId]: side }));
     await saveForm(VOTE_KEY_PREFIX + pollId, side);
+    trackEvent('dharma_poll_voted', { poll_id: pollId, side });
   };
 
   const buildShareText = (poll, userVote) => {

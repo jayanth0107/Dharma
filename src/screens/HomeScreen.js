@@ -95,31 +95,13 @@ export function HomeScreen({ navigation }) {
     else Linking.openURL(url);
   };
 
+  // Drawer is now "personal + frequent" only. Growth/legal items moved to More.
   const handleDrawerAction = (id) => {
-    if (id === 'settings') { navigation.navigate('Settings'); return; }
+    if (id === 'login')         { navigation.navigate('Login');        return; }
+    if (id === 'premium')       { navigation.navigate('Premium');      return; }
     if (id === 'notifications') { navigation.navigate('Notifications'); return; }
-    if (id === 'location') { navigation.navigate('Location'); return; }
-    if (id === 'premium' || id === 'removeAds') { navigation.navigate('Premium'); return; }
-    if (id === 'donate') { navigation.navigate('Donate'); return; }
-    if (id === 'reminder') { navigation.navigate('Reminder'); return; }
-    if (id === 'muhurtam') { navigation.navigate('Muhurtam'); return; }
-    if (id === 'matchmaking') { navigation.navigate('Matchmaking'); return; }
-    if (id === 'share') {
-      const msg = t(TR.shareMessage.te, TR.shareMessage.en);
-      if (Platform.OS === 'web') {
-        if (navigator.share) navigator.share({ text: msg }).catch(() => {});
-        else if (navigator.clipboard) { navigator.clipboard.writeText(msg); alert(t('కాపీ అయింది!', 'Copied to clipboard!')); }
-      } else {
-        Share.share({ message: msg, title: 'Dharma' }).catch(() => {});
-      }
-      return;
-    }
-    if (id === 'rate') { navigation.navigate('InfoPage', { pageId: 'rate' }); return; }
-    if (id === 'feedback') { navigation.navigate('InfoPage', { pageId: 'feedback' }); return; }
-    if (id === 'privacy') { navigation.navigate('InfoPage', { pageId: 'privacy' }); return; }
-    if (id === 'terms') { navigation.navigate('InfoPage', { pageId: 'terms' }); return; }
-    if (id === 'about') { navigation.navigate('InfoPage', { pageId: 'about' }); return; }
-    if (id === 'login') { navigation.navigate('Login'); return; }
+    if (id === 'location')      { navigation.navigate('Location');     return; }
+    if (id === 'settings')      { navigation.navigate('Settings');     return; }
   };
 
   if (!panchangam) {

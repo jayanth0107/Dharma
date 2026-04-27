@@ -14,6 +14,7 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { useSpeaker } from '../utils/speechService';
 import { MANTRAS } from '../data/mantraData';
+import { trackEvent } from '../utils/analytics';
 
 const STOTRAS = [
   { id: 'vishnu_sahasranama', name: { te: 'విష్ణు సహస్రనామం', en: 'Vishnu Sahasranama' }, deity: { te: 'విష్ణువు', en: 'Vishnu' }, icon: 'account-star', color: '#4A90D9',
@@ -105,7 +106,10 @@ export function StotraScreen({ navigation }) {
                 <TouchableOpacity
                   key={stotra.id}
                   style={s.card}
-                  onPress={() => setSelected(stotra)}
+                  onPress={() => {
+                    setSelected(stotra);
+                    trackEvent('stotra_open', { id: stotra.id });
+                  }}
                   activeOpacity={0.7}
                 >
                   <View style={[s.iconWrap, { backgroundColor: stotra.color + '22' }]}>

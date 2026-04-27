@@ -3,9 +3,10 @@
 // today's sloka featured + browse-all toggle for the remaining 29.
 // Each card is sharable + printable to PDF via SectionShareRow.
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { trackEvent } from '../utils/analytics';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
@@ -25,6 +26,12 @@ export function GitaScreen() {
   const today = getTodayGitaSloka(new Date());
   const [showAll, setShowAll] = useState(false);
   const { isSpeaking, toggle: toggleSpeak, speakerIcon, fallbackNote, dismissFallbackNote } = useSpeaker();
+
+  useEffect(() => {
+    if (today?.id != null) {
+      trackEvent('gita_sloka_view', { sloka_id: today.id, chapter: today.chapter, verse: today.verse });
+    }
+  }, [today?.id]);
 
   const titleFs       = usePick({ default: 20, md: 22, xl: 26 });
   const sanskritFs    = usePick({ default: 18, md: 20, xl: 22 });

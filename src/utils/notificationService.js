@@ -1,232 +1,292 @@
-// Dharma Daily — Daily Notification Service
-// Sends daily panchangam summary + inspirational quote at user's preferred time
-// Uses expo-notifications for local scheduled notifications
+// Dharma Daily — Notification Service
+//
+// Design principle: less is more. With 27+ features, we deliberately ship
+// only TWO daily notifications by default + two event-driven reminders.
+// Push is for "open the app for X" — not a feature catalogue.
+//
+//   1. Morning Briefing  (~6 AM, default ON)
+//      Title:  🙏 Dharma — Today's Panchangam (with festival/ekadashi badge)
+//      Body:   Tithi · Nakshatra · Yoga · Sunrise · Sunset · Muhurtams
+//              + Today's festival/ekadashi if any
+//              + Today's Neethi Sukta (one-line wisdom)
+//              + User's rashi prediction if set
+//
+//   2. Daily Neethi Sukta  (~12 PM, default ON)
+//      Lunch-time wisdom nudge — full sukta with meaning.
+//
+//   3. Festival reminder   (1 day before, 6 PM)  — event-driven
+//   4. Ekadashi reminder   (1 day before, 6 PM)  — event-driven
+//
+// All notifications are bilingual — content is rendered in the user's
+// chosen language (read from @dharma_lang at schedule time). Switching
+// language in Settings re-runs setupDailyNotifications, which cancels
+// every scheduled item and reschedules from scratch.
+//
+// Master toggle in SettingsModal — one tap turns everything off.
 
 import { Platform } from 'react-native';
-
-// Daily quotes — rotate by day of year
-const DAILY_QUOTES = [
-  'ధర్మో రక్షతి రక్షితః — ధర్మాన్ని రక్షించేవారిని ధర్మమే రక్షిస్తుంది',
-  'సత్యమేవ జయతే — సత్యమే విజయం సాధిస్తుంది',
-  'అహింసా పరమో ధర్మః — అహింసే అత్యున్నత ధర్మం',
-  'వసుధైవ కుటుంబకం — ప్రపంచమంతా ఒక కుటుంబం',
-  'కర్మణ్యేవాధికారస్తే మా ఫలేషు కదాచన — కర్మలో మాత్రమే నీ అధికారం',
-  'యోగః కర్మసు కౌశలమ్ — కర్మలో నైపుణ్యమే యోగం',
-  'తమసో మా జ్యోతిర్గమయ — చీకటి నుండి వెలుగుకు నన్ను నడిపించు',
-  'శ్రద్ధావాన్ లభతే జ్ఞానమ్ — శ్రద్ధ ఉన్నవాడు జ్ఞానం పొందుతాడు',
-  'ఆత్మానం విద్ధి — నిన్ను నువ్వు తెలుసుకో',
-  'సర్వే జనాః సుఖినో భవంతు — అందరూ సుఖంగా ఉండాలి',
-  'న హి జ్ఞానేన సదృశం పవిత్రమిహ విద్యతే — జ్ఞానంతో సమానమైన పవిత్రత లేదు',
-  'ఉద్యమేన హి సిద్ధ్యంతి కార్యాణి న మనోరథైః — కార్యాలు ప్రయత్నంతో సిద్ధిస్తాయి',
-  'విద్యా దదాతి వినయమ్ — విద్య వినయాన్ని ఇస్తుంది',
-  'మాతృ దేవో భవ — తల్లిని దేవతగా భావించు',
-  'పితృ దేవో భవ — తండ్రిని దేవతగా భావించు',
-  'ఆచార్య దేవో భవ — గురువును దేవతగా భావించు',
-  'దానం పరమో ధర్మః — దానమే పరమ ధర్మం',
-  'శాంతి శాంతి శాంతిః — ఓం శాంతి',
-  'ఓం నమః శివాయ — శివునికి నమస్కారం',
-  'ఓం నమో నారాయణాయ — నారాయణునికి నమస్కారం',
-  'ఓం శ్రీ గణేశాయ నమః — గణేశునికి నమస్కారం',
-  'లోకా సమస్తా సుఖినో భవంతు — ప్రపంచమంతా సుఖంగా ఉండాలి',
-  'అన్నదానం మహాదానం — అన్నదానమే గొప్ప దానం',
-  'గురుర్బ్రహ్మా గురుర్విష్ణుః — గురువే బ్రహ్మ, గురువే విష్ణువు',
-  'ఓం భూర్భువస్సువః — గాయత్రీ మంత్రం',
-  'సంఘం శరణం గచ్ఛామి — సంఘాన్ని శరణు వేడుతాను',
-  'ధైర్యం సర్వత్ర సాధనమ్ — ధైర్యం అన్నింటికీ సాధనం',
-  'పరోపకారః పుణ్యాయ — పరోపకారం పుణ్యం',
-  'క్షమా వీరస్య భూషణమ్ — క్షమ వీరుని ఆభరణం',
-  'సత్సంగత్వే నిస్సంగత్వమ్ — మంచి సాంగత్యం వల్ల బంధాలు తొలగుతాయి',
-];
-
-/**
- * Get today's quote (rotates by day of year)
- */
-export function getTodayQuote() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((now - start) / 86400000);
-  return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
-}
+import { getTodayNeethiSukta } from '../data/neethiSuktaData';
+import { getTodayFestival, getTodayFestivals, getUpcomingFestivals } from '../data/festivals';
+import { getTodayEkadashi, getUpcomingEkadashis } from '../data/ekadashi';
+import { getUpcomingHolidays } from '../data/holidays';
+import { getUpcomingObservances } from '../data/observances';
 
 // Storage keys
 const NOTIF_SETTINGS_KEY = '@dharma_notif_settings';
+const LANG_KEY = '@dharma_lang';
 
-// Default settings
+// Default settings — all daily notifications ON, master toggle off in one tap.
 const DEFAULT_SETTINGS = {
   enabled: true,
-  dailyPanchangam: true,      // Daily panchangam summary at sunrise
-  dailyQuote: true,           // Daily inspirational quote
-  festivalReminder: true,     // Reminder 1 day before festivals
-  ekadashiReminder: true,     // Reminder 1 day before ekadashi
-  notifHour: 6,               // Default: 6 AM
+  dailyPanchangam: true,      // Morning briefing
+  dailyQuote: true,           // Daily Neethi Sukta at noon
+  festivalReminder: true,     // 1 day before festivals
+  ekadashiReminder: true,     // 1 day before ekadashi
+  notifHour: 6,               // Morning briefing time
   notifMinute: 0,
 };
 
-/**
- * Load notification settings from storage
- */
-export async function loadNotifSettings() {
+// ─────────────────────────────────────────────────────────────────────────
+// Storage helpers
+// ─────────────────────────────────────────────────────────────────────────
+
+async function readKey(key) {
   try {
     if (Platform.OS === 'web') {
-      const raw = localStorage.getItem(NOTIF_SETTINGS_KEY);
-      return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
+      return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
     }
     const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    const raw = await AsyncStorage.getItem(NOTIF_SETTINGS_KEY);
-    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
+    return await AsyncStorage.getItem(key);
+  } catch { return null; }
 }
 
-/**
- * Save notification settings
- */
-export async function saveNotifSettings(settings) {
+async function writeKey(key, value) {
   try {
-    const data = JSON.stringify(settings);
     if (Platform.OS === 'web') {
-      localStorage.setItem(NOTIF_SETTINGS_KEY, data);
+      if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
       return;
     }
     const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-    await AsyncStorage.setItem(NOTIF_SETTINGS_KEY, data);
-  } catch { /* ignore */ }
+    await AsyncStorage.setItem(key, value);
+  } catch {}
 }
 
-/**
- * Build rich notification title — includes festival/ekadashi if today is special
- */
-function buildNotifTitle(today) {
-  try {
-    const { getTodayFestivals } = require('../data/festivals');
-    const { getTodayEkadashi } = require('../data/ekadashi');
-    const festivals = getTodayFestivals(today);
-    const ekadashi = getTodayEkadashi(today);
+export async function loadNotifSettings() {
+  const raw = await readKey(NOTIF_SETTINGS_KEY);
+  if (!raw) return DEFAULT_SETTINGS;
+  try { return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }; }
+  catch { return DEFAULT_SETTINGS; }
+}
 
-    if (festivals.length > 0) {
-      return `🎉 ${festivals[0].telugu} — నేటి పంచాంగం`;
-    }
-    if (ekadashi) {
-      return `🙏 ${ekadashi.telugu || ekadashi.name} — నేటి పంచాంగం`;
-    }
-    return '🙏 ధర్మ — నేటి పంచాంగం';
-  } catch {
-    return '🙏 ధర్మ — నేటి పంచాంగం';
+export async function saveNotifSettings(settings) {
+  await writeKey(NOTIF_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+async function getStoredLang() {
+  const v = await readKey(LANG_KEY);
+  return v === 'en' ? 'en' : 'te';   // default Telugu
+}
+
+// Bilingual picker
+function pickL(lang, te, en) {
+  return lang === 'en' ? (en || te || '') : (te || en || '');
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Notification body builders
+// ─────────────────────────────────────────────────────────────────────────
+
+// Title — includes festival/ekadashi badge when applicable.
+function buildMorningTitle(today, lang) {
+  const fests = getTodayFestivals(today);
+  if (fests.length > 0) {
+    const f = fests[0];
+    return pickL(lang,
+      `🎉 ${f.telugu} — నేటి పంచాంగం`,
+      `🎉 ${f.english} — Today's Panchangam`,
+    );
   }
+  const ek = getTodayEkadashi(today);
+  if (ek) {
+    return pickL(lang,
+      `🙏 ${ek.telugu || ek.name} — నేటి పంచాంగం`,
+      `🙏 ${ek.english || ek.nameEnglish || 'Ekadashi'} — Today's Panchangam`,
+    );
+  }
+  return pickL(lang, '🙏 ధర్మ — నేటి పంచాంగం', "🙏 Dharma — Today's Panchangam");
 }
 
-/**
- * Build rich notification body with panchangam + special days + rashi
- */
-function buildNotifBody(location, rashiIndex) {
-  const today = new Date();
+// Body — multi-line: panchangam + special days + Neethi Sukta + rashi.
+function buildMorningBody(today, lang, location, rashiIndex) {
   const lines = [];
+  const SEP = '━━━━━━━━━━━━━━━━';
 
   // ── Panchangam ──
   try {
     const { getDailyPanchangam } = require('./panchangamCalculator');
     const p = getDailyPanchangam(today, location);
     if (p?.tithi?.telugu) {
-      lines.push(`━━━━━━━━━━━━━━━━`);
-      lines.push(`🌙 ${p.tithi.telugu}  ⭐ ${p.nakshatra.telugu}`);
-      lines.push(`🔮 ${p.yoga.telugu}  📿 ${p.vaaram?.telugu || ''}`);
-      lines.push(`🌅 ${p.sunriseFormatted}  🌇 ${p.sunsetFormatted}`);
-      lines.push(`✅ అభిజిత్: ${p.abhijitMuhurtam?.startFormatted}-${p.abhijitMuhurtam?.endFormatted}`);
-      lines.push(`❌ రాహు: ${p.rahuKalam?.startFormatted}-${p.rahuKalam?.endFormatted}`);
+      const tithi    = pickL(lang, p.tithi.telugu,    p.tithi.english    || p.tithi.telugu);
+      const naksh    = pickL(lang, p.nakshatra.telugu, p.nakshatra.english || p.nakshatra.telugu);
+      const yoga     = pickL(lang, p.yoga.telugu,     p.yoga.english     || p.yoga.telugu);
+      const vaaram   = pickL(lang, p.vaaram?.telugu || '', p.vaaram?.english || '');
+      const sunLabel = pickL(lang, '🌅', '🌅');
+      const setLabel = pickL(lang, '🌇', '🌇');
+      lines.push(`🌙 ${tithi}  ⭐ ${naksh}`);
+      lines.push(`🔮 ${yoga}  📿 ${vaaram}`);
+      lines.push(`${sunLabel} ${p.sunriseFormatted}  ${setLabel} ${p.sunsetFormatted}`);
+      lines.push(pickL(lang,
+        `✅ అభిజిత్: ${p.abhijitMuhurtam?.startFormatted}-${p.abhijitMuhurtam?.endFormatted}`,
+        `✅ Abhijit: ${p.abhijitMuhurtam?.startFormatted}-${p.abhijitMuhurtam?.endFormatted}`,
+      ));
+      lines.push(pickL(lang,
+        `❌ రాహు: ${p.rahuKalam?.startFormatted}-${p.rahuKalam?.endFormatted}`,
+        `❌ Rahu: ${p.rahuKalam?.startFormatted}-${p.rahuKalam?.endFormatted}`,
+      ));
     }
   } catch {}
 
-  // ── Festivals ──
+  // ── Festivals + Ekadashi + Holidays + Observances on today ──
+  const specialLines = [];
   try {
-    const { getTodayFestivals } = require('../data/festivals');
-    const festivals = getTodayFestivals(today);
-    if (festivals.length > 0) {
-      lines.push(`━━━━━━━━━━━━━━━━`);
-      festivals.forEach(f => {
-        lines.push(`🎊 పండుగ: ${f.telugu} (${f.english})`);
-      });
+    const fests = getTodayFestivals(today);
+    fests.forEach(f => {
+      specialLines.push(pickL(lang, `🎊 పండుగ: ${f.telugu}`, `🎊 Festival: ${f.english}`));
+    });
+  } catch {}
+  try {
+    const ek = getTodayEkadashi(today);
+    if (ek) {
+      specialLines.push(pickL(lang,
+        `🙏 ఏకాదశి: ${ek.telugu || ek.name}`,
+        `🙏 Ekadashi: ${ek.english || ek.nameEnglish || 'Ekadashi'}`,
+      ));
     }
   } catch {}
-
-  // ── Ekadashi ──
   try {
-    const { getTodayEkadashi } = require('../data/ekadashi');
-    const ekadashi = getTodayEkadashi(today);
-    if (ekadashi) {
-      lines.push(`🙏 ఏకాదశి: ${ekadashi.telugu || ekadashi.name} (${ekadashi.english || ekadashi.nameEnglish})`);
-    }
-  } catch {}
-
-  // ── Public Holidays ──
-  try {
-    const { PUBLIC_HOLIDAYS_2026 } = require('../data/holidays');
     const dateStr = today.toISOString().split('T')[0];
-    const holiday = PUBLIC_HOLIDAYS_2026.find(h => h.date === dateStr);
-    if (holiday) {
-      lines.push(`🏛️ సెలవు: ${holiday.telugu || holiday.english}`);
+    // Today-only holiday check via the upcoming-getter (filters by date >= today).
+    const todays = getUpcomingHolidays(today, 1).filter(h => h.date === dateStr);
+    todays.forEach(h => {
+      specialLines.push(pickL(lang,
+        `🏛️ సెలవు: ${h.telugu}`,
+        `🏛️ Holiday: ${h.english}`,
+      ));
+    });
+  } catch {}
+  try {
+    const dateStr = today.toISOString().split('T')[0];
+    ['pournami', 'amavasya', 'chaturthi', 'pradosham'].forEach(type => {
+      const list = getUpcomingObservances(type, today, 1);
+      if (list[0]?.date === dateStr) {
+        const labels = {
+          pournami:  pickL(lang, '🌕 నేడు పౌర్ణమి',           '🌕 Pournami today'),
+          amavasya:  pickL(lang, '🌑 నేడు అమావాస్య',          '🌑 Amavasya today'),
+          chaturthi: pickL(lang, '🙏 నేడు సంకష్ట చతుర్థి',     '🙏 Sankashti Chaturthi today'),
+          pradosham: pickL(lang, '🔱 నేడు ప్రదోషం',            '🔱 Pradosham today'),
+        };
+        specialLines.push(labels[type]);
+      }
+    });
+  } catch {}
+  if (specialLines.length) {
+    lines.push(SEP);
+    specialLines.forEach(l => lines.push(l));
+  }
+
+  // ── Today's Neethi Sukta (one-liner — full text in the noon notification) ──
+  try {
+    const sukta = getTodayNeethiSukta(today);
+    if (sukta) {
+      lines.push(SEP);
+      const meaning = pickL(lang, sukta.meaning.te, sukta.meaning.en);
+      const source  = pickL(lang, sukta.source.te,  sukta.source.en);
+      lines.push(pickL(lang, `💡 నేటి నీతి (${source})`, `💡 Today's Wisdom (${source})`));
+      // Trim long meanings to keep notification readable
+      lines.push(meaning.length > 140 ? meaning.slice(0, 138) + '…' : meaning);
     }
   } catch {}
 
-  // ── Observances (Chaturthi, Pournami, Amavasya, Pradosham) ──
-  try {
-    const { CHATURTHI_2026, POURNAMI_2026, AMAVASYA_2026, PRADOSHAM_2026 } = require('../data/observances');
-    const dateStr = today.toISOString().split('T')[0];
-    if (POURNAMI_2026.some(d => d.date === dateStr)) lines.push(`🌕 నేడు పౌర్ణమి`);
-    if (AMAVASYA_2026.some(d => d.date === dateStr)) lines.push(`🌑 నేడు అమావాస్య`);
-    if (CHATURTHI_2026.some(d => d.date === dateStr)) lines.push(`🙏 నేడు సంకష్ట చతుర్థి`);
-    if (PRADOSHAM_2026.some(d => d.date === dateStr)) lines.push(`🔱 నేడు ప్రదోషం`);
-  } catch {}
-
-  // ── Rashi prediction ──
+  // ── User's rashi prediction (if set) ──
   try {
     const { getAllDailyRashi, RASHIS } = require('./dailyRashiService');
     if (rashiIndex != null && rashiIndex >= 0 && rashiIndex <= 11) {
       const pred = getAllDailyRashi(today)[rashiIndex];
       if (pred) {
-        lines.push(`━━━━━━━━━━━━━━━━`);
-        lines.push(`🌟 ${RASHIS[rashiIndex].te}: ${pred.overall.te}`);
+        lines.push(SEP);
+        const rashiName = pickL(lang, RASHIS[rashiIndex].te, RASHIS[rashiIndex].en);
+        const overall   = pickL(lang, pred.overall.te,       pred.overall.en);
+        lines.push(`🌟 ${rashiName}: ${overall}`);
       }
     }
   } catch {}
 
-  if (lines.length === 0) return getTodayQuote();
+  if (!lines.length) {
+    // Absolute fallback — should never fire in practice.
+    return pickL(lang,
+      'ఈరోజు మీ పంచాంగం చూడటానికి యాప్ తెరవండి.',
+      'Open the app to see your panchangam for today.',
+    );
+  }
   return lines.join('\n');
 }
 
+// Noon notification — full Neethi Sukta with quote + meaning + apply tip.
+function buildSuktaNotif(today, lang) {
+  const sukta = getTodayNeethiSukta(today);
+  if (!sukta) {
+    return {
+      title: pickL(lang, '🕉️ నేటి సూక్తం', '🕉️ Wisdom for Today'),
+      body:  pickL(lang, 'యాప్ తెరిచి నేటి నీతి సూక్తం చదవండి.', 'Open the app to read today\'s wisdom.'),
+    };
+  }
+  const source = pickL(lang, sukta.source.te,  sukta.source.en);
+  const quote  = pickL(lang, sukta.quote.te,   sukta.quote.en);
+  const apply  = pickL(lang, sukta.applyToday.te, sukta.applyToday.en);
+  const title  = pickL(lang,
+    `📜 ${source} — నేటి సూక్తం`,
+    `📜 ${source} — Today's Wisdom`,
+  );
+  const body = `${quote}\n\n${pickL(lang, '💡 నేడు ఆచరించండి', '💡 Apply today')}: ${apply}`;
+  return { title, body };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Schedulers
+// ─────────────────────────────────────────────────────────────────────────
+
 /**
- * Request notification permissions and schedule daily notifications
- * Call on app start and when settings change
+ * Cancel all scheduled notifications and reschedule per current settings.
+ * Called on app start, on settings change, and on language change.
+ *
  * @param {object} settings — notification settings
  * @param {object} location — { latitude, longitude, altitude } for panchangam
- * @param {number|null} myRashiIndex — user's saved rashi index (0-11) or null
+ * @param {number|null} myRashiIndex — user's saved rashi index (0–11) or null
  */
 export async function setupDailyNotifications(settings, location, myRashiIndex) {
-  if (Platform.OS === 'web') return; // No push on web
+  if (Platform.OS === 'web') return;   // No push on web
 
   try {
     const Notifications = require('expo-notifications');
 
-    // Request permissions
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== 'granted') return;
 
-    // Cancel all existing scheduled notifications
+    // Hard reset — start fresh each time so toggle-off truly turns everything off.
     await Notifications.cancelAllScheduledNotificationsAsync();
-
     if (!settings.enabled) return;
 
+    const lang = await getStoredLang();
     const today = new Date();
-
     const channelId = Platform.OS === 'android' ? 'dharma-daily' : undefined;
 
-    // Schedule daily panchangam notification with real tithi/nakshatra/festivals
+    // ── Morning briefing ──
     if (settings.dailyPanchangam) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: buildNotifTitle(today),
-          body: buildNotifBody(location, myRashiIndex),
-          data: { type: 'daily_panchangam', screen: 'Panchang' },
+          title: buildMorningTitle(today, lang),
+          body:  buildMorningBody(today, lang, location, myRashiIndex),
+          data:  { type: 'daily_panchangam', screen: 'Panchang' },
         },
         trigger: {
           type: 'daily',
@@ -237,13 +297,14 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
       });
     }
 
-    // Schedule daily quote at noon
+    // ── Daily Neethi Sukta at noon ──
     if (settings.dailyQuote) {
+      const { title, body } = buildSuktaNotif(today, lang);
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '🕉️ నేటి సుభాషితం',
-          body: getTodayQuote(),
-          data: { type: 'daily_quote', screen: 'Gita' },
+          title,
+          body,
+          data: { type: 'daily_sukta', screen: 'NeethiSukta' },
         },
         trigger: {
           type: 'daily',
@@ -253,71 +314,59 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
         },
       });
     }
-    // Schedule festival reminders — 1 day before each upcoming festival
+
+    // ── Festival reminders — 1 day before, 6 PM ──
     if (settings.festivalReminder) {
       try {
-        const { FESTIVALS_2026 } = require('../data/festivals');
-        const festList = FESTIVALS_2026 || [];
-        const now = new Date();
-        const upcoming = festList.filter(f => {
-          if (!f.date) return false;
-          const fDate = new Date(f.date + 'T00:00:00');
-          const diff = (fDate - now) / 86400000;
-          return diff >= 0 && diff <= 30; // next 30 days
-        });
-        for (const fest of upcoming.slice(0, 10)) {
+        const upcoming = getUpcomingFestivals(today, 10);
+        for (const fest of upcoming) {
           const fDate = new Date(fest.date + 'T00:00:00');
-          // Schedule for 6 PM the day before
-          const reminderDate = new Date(fDate);
-          reminderDate.setDate(reminderDate.getDate() - 1);
-          reminderDate.setHours(18, 0, 0, 0);
-          if (reminderDate > now) {
+          const reminder = new Date(fDate);
+          reminder.setDate(reminder.getDate() - 1);
+          reminder.setHours(18, 0, 0, 0);
+          if (reminder > today) {
             await Notifications.scheduleNotificationAsync({
               content: {
-                title: `🎉 రేపు పండుగ: ${fest.telugu || fest.english}`,
-                body: `${fest.english || ''} — ${fest.description || 'శుభ దినం'}`,
+                title: pickL(lang,
+                  `🎉 రేపు పండుగ: ${fest.telugu || fest.english}`,
+                  `🎉 Tomorrow: ${fest.english || fest.telugu}`,
+                ),
+                body: pickL(lang,
+                  `${fest.english || ''} — ${fest.description || 'శుభ దినం'}`,
+                  `${fest.telugu || ''} — ${fest.description || 'Auspicious day'}`,
+                ),
                 data: { type: 'festival_reminder', screen: 'Festivals' },
               },
-              trigger: {
-                type: 'date',
-                date: reminderDate,
-                ...(channelId && { channelId }),
-              },
+              trigger: { type: 'date', date: reminder, ...(channelId && { channelId }) },
             });
           }
         }
       } catch {}
     }
 
-    // Schedule ekadashi reminders — 1 day before each upcoming ekadashi
+    // ── Ekadashi reminders — 1 day before, 6 PM ──
     if (settings.ekadashiReminder) {
       try {
-        const { EKADASHI_2026 } = require('../data/ekadashi');
-        const ekList = EKADASHI_2026 || [];
-        const now = new Date();
-        const upcoming = ekList.filter(e => {
-          if (!e.date) return false;
-          const eDate = new Date(e.date + 'T00:00:00');
-          const diff = (eDate - now) / 86400000;
-          return diff >= 0 && diff <= 30;
-        });
-        for (const ek of upcoming.slice(0, 5)) {
+        const upcoming = getUpcomingEkadashis(today, 5);
+        for (const ek of upcoming) {
           const eDate = new Date(ek.date + 'T00:00:00');
-          const reminderDate = new Date(eDate);
-          reminderDate.setDate(reminderDate.getDate() - 1);
-          reminderDate.setHours(18, 0, 0, 0);
-          if (reminderDate > now) {
+          const reminder = new Date(eDate);
+          reminder.setDate(reminder.getDate() - 1);
+          reminder.setHours(18, 0, 0, 0);
+          if (reminder > today) {
             await Notifications.scheduleNotificationAsync({
               content: {
-                title: `🙏 రేపు ఏకాదశి: ${ek.telugu || ek.name || 'ఏకాదశి'}`,
-                body: `${ek.english || ek.nameEnglish || 'Ekadashi'} — ఉపవాసం ఆచరించండి`,
+                title: pickL(lang,
+                  `🙏 రేపు ఏకాదశి: ${ek.telugu || ek.name || 'ఏకాదశి'}`,
+                  `🙏 Tomorrow: ${ek.english || ek.nameEnglish || 'Ekadashi'}`,
+                ),
+                body: pickL(lang,
+                  `${ek.english || ek.nameEnglish || 'Ekadashi'} — ఉపవాసం ఆచరించండి`,
+                  `${ek.telugu || ek.name || 'Ekadashi'} — Observe the fast`,
+                ),
                 data: { type: 'ekadashi_reminder', screen: 'Festivals' },
               },
-              trigger: {
-                type: 'date',
-                date: reminderDate,
-                ...(channelId && { channelId }),
-              },
+              trigger: { type: 'date', date: reminder, ...(channelId && { channelId }) },
             });
           }
         }
@@ -326,4 +375,30 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
   } catch (e) {
     if (__DEV__) console.warn('Notification setup failed:', e);
   }
+}
+
+/**
+ * One-shot kill switch — used by the master "Notifications" toggle in
+ * Settings when the user flips it off. Cancels every scheduled item
+ * immediately, regardless of the persisted settings.
+ */
+export async function disableAllNotifications() {
+  if (Platform.OS === 'web') return;
+  try {
+    const Notifications = require('expo-notifications');
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {}
+}
+
+/**
+ * Today's Neethi Sukta as a short bilingual string — used by the in-app
+ * Today Summary card / share copy. Re-exported for convenience.
+ */
+export function getTodayQuote() {
+  // Backwards-compatible alias kept so any old imports don't break.
+  // Returns Telugu meaning (most pleasant single line on the home card).
+  try {
+    const sukta = getTodayNeethiSukta(new Date());
+    return sukta?.meaning?.te || '';
+  } catch { return ''; }
 }

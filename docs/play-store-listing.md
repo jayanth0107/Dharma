@@ -1,115 +1,85 @@
-# Google Play Store Listing — Dharma v2.3
+# Google Play Store Listing — Dharma v2.4.1
 
 ## App Name (30 chars max)
-Dharma: Telugu Astro, Calendar & Gold
+Dharma: Sacred Stories Daily
 
 ## Short Description (80 chars max)
-Telugu Panchangam, Horoscope, Matchmaking, Muhurtam, Rashi Predictions & Gold 🙏
+Daily Ramayana, Mahabharata, Gita, Panchangam — Telugu & English. Free.
 
 ## Full Description (4000 chars max)
 --- COPY BELOW ---
 
-🙏 ధర్మ 2.3 — India's Most Complete Telugu Panchangam & Vedic Astrology App!
+🙏 ధర్మ — Rediscover the wisdom your grandparents knew.
 
-ప్రతిరోజూ NASA-grade ఖగోళ గణనలతో ఖచ్చితమైన పంచాంగం — తిథి, నక్షత్రం, యోగం, కరణం, శుభ ముహూర్తాలు, జాతకం, జాతక పొందిక, రాశి ఫలాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో! తెలుగు & English రెండు భాషల్లో!
+ధర్మ is a daily Telugu companion for sacred stories, panchangam, and timeless values. One curated story or sloka every day — from the original texts your school syllabus only briefly touches. For families, students, parents, and anyone curious about Sanatana wisdom.
+
+Free for everyone. Bilingual Telugu / English. No ads on launch.
 
 ━━━━━━━━━━━━━━━━
 
-📿 నేటి పంచాంగం (Today's Panchangam)
-• తిథి, నక్షత్రం, యోగం, కరణం — Drik Ganita ఖగోళ గణనలు
-• సూర్యోదయం & సూర్యాస్తమయం — మీ నగరానికి ఖచ్చితంగా
-• శుక్ల/కృష్ణ పక్షం, తెలుగు సంవత్సరం, మాసం
-• నేటి విశేషం — చంద్ర దశ, నక్షత్ర దేవత, వారపూజ సూచన
-• బ్రహ్మ ముహూర్తం సమయం — ధ్యానానికి ఉత్తమ సమయం
+📖 Sacred Stories, Every Day
+• Ramayana Daily — 30 episodes covering all 7 kandas, with moral, "Did You Know?" facts, characters, and the exact Sarga reference from Valmiki Ramayana
+• Mahabharata Daily — 30 stories across all 18 parvas with character studies and life lessons (Vyasa Mahabharata, BORI Critical Edition)
+• Bhagavad Gita — 30 selected slokas in Sanskrit + Telugu + English meaning, with theme + per-card share + PDF (Gita Press Gorakhpur Edition)
+• Neethi Suktas — 30 daily wisdom quotes from Chanakya Niti, Vidura Niti, Bhartrihari, Subhashitas, Thirukkural, Panchatantra — with "Apply Today" tip
+• Stotras & Mantras — Vishnu Sahasranama, Lalita Sahasranama, Hanuman Chalisa, Sri Rudram, Ganapati Atharva Shirsha, Aditya Hridayam, Sri Sukta, Bhaja Govindam, Gayatri, Maha Mrityunjaya — read along with authentic pandit recordings via YouTube
+• Kids Stories — 50 simple moral stories for children (Ganesha, Hanuman, Dhruva, Prahlada…) + 30 easy slokas
 
-⏰ శుభ & అశుభ సమయాలు (Auspicious Timings)
-• అభిజిత్ ముహూర్తం, అమృత కాలం, బ్రహ్మ ముహూర్తం
-• రాహు కాలం, యమగండ కాలం, గుళిక కాలం, దుర్ముహూర్తం
-• ప్రస్తుతం ఏ సమయం నడుస్తోందో ప్రత్యక్ష సూచన
-• 13+ నగరాలకు GPS ఆధారిత గణనలు
+🎓 School-friendly
+Every story cites the source — chapter, sarga, parva, verse. Aligned to Class 6–12 Sanskrit and Indian History learning. Character portrayals follow the original scriptures, not TV serials or movies. A genuine resource for students and parents who want context beyond textbooks.
 
-💕 అష్టకూట జాతక పొందిక (Matchmaking) ★ NEW
-• 8 కూటాల అష్టకూట కుండలి మిలన్ (36 పాయింట్ల స్కోర్)
-• వరుడు & వధువు వేద లక్షణాలు — వర్ణం, గణం, నాడి, యోని, రాశి అధిపతి
-• రాశి కుండలి చార్ట్‌లు (North Indian diamond style)
-• మంగళ దోష విశ్లేషణ + నివారణ ఉపాయాలు
-• ప్రతి కూటానికి "Read More" — వివరణాత్మక వివరణ + ఉపాయాలు
-• PDF రిపోర్ట్ డౌన్‌లోడ్ & WhatsApp షేర్ — పూర్తి వివరాలతో
-• 5 జంటలు సేవ్ — తిరిగి టైప్ చేయాల్సిన అవసరం లేదు!
+🎯 Built for Youth
+• Daily Quiz — Vedic and Puranic questions
+• Dharma Debate — vote on dilemmas like "Was Karna right?", "Is Karma fatalistic?", "Social media = Maya?"
+• Sanskrit Word of the Day — Devanagari + root etymology + how the word lives in modern Telugu
+• Rashi Personality — Vedic personality profile for all 12 rashis
+• Meditation — animated breathing circle, mantra picker, 4-2-6 inhale-hold-exhale guide
 
-♌ వేద జాతకం (Vedic Horoscope) ★ ENHANCED
-• చంద్ర రాశి, లగ్నం, నక్షత్రం, సూర్య రాశి — ఖచ్చితమైన గణనం
-• నవగ్రహ స్థానాలు (VedAstro API + astronomy-engine)
-• వ్యక్తిత్వం, వృత్తి, ఆరోగ్యం, సంబంధాలు, ఆధ్యాత్మికత — విస్తృత ఫలాలు
-• రత్నాలు, లోహాలు, శుభ రంగులు, దేవతా ఆరాధన — వేద ఉపాయాలు
-• ప్రతి విభాగానికి "Read More" — మీ వ్యక్తిగత వివరాలతో వివరణ
-• 5 ప్రొఫైల్స్ సేవ్ — కుటుంబ సభ్యుల జాతకం చూడండి
-• తెలుగు & English రెండు భాషల్లో పూర్తి ఫలాలు!
+📿 Today's Panchangam
+• Drik Ganita + Lahiri Ayanamsa — the same astronomical method used by traditional Telugu panchangams
+• Tithi · Nakshatra · Yoga · Karana · Vaaram
+• Brahma Muhurtam · Abhijit Muhurtam · Amrit Kalam (auspicious)
+• Rahu Kalam · Yama Ganda · Gulika Kalam · Durmuhurtam (inauspicious)
+• Sunrise & sunset for your exact location
 
-⭐ రాశి ఫలాలు (Daily Rashi Predictions)
-• 12 రాశులకు రోజువారీ ఫలాలు — వృత్తి, ఆర్థికం, ఆరోగ్యం, సంబంధాలు
-• మీ రాశి ఆటోమేటిగ్గా గుర్తింపు — పుట్టిన తేదీ నమోదు చేయండి
-• అదృష్ట సంఖ్య, రంగు, దిక్కు
-• WhatsApp షేర్
+🎉 Festivals · Ekadashi · Holidays
+• 50+ Telugu festivals with descriptions
+• 24 Ekadashi dates with significance
+• Sankashti Chaturthi · Pournami · Amavasya · Pradosham
+• 27 public holidays
+• Reminder 1 day before each festival/Ekadashi
 
-⭐ ముహూర్తం ఫైండర్ (Auspicious Date Finder)
-• వివాహం, గృహ ప్రవేశం, ప్రయాణం, వ్యాపారం, వాహనం, విద్య — 7 రకాల ఈవెంట్లు
-• 90 రోజుల్లో శుభ దినాలు — స్కోరు ఆధారంగా ర్యాంక్
-• PDF డౌన్‌లోడ్ & WhatsApp షేర్
+♌ Vedic Astrology
+• Vedic horoscope — Moon Rashi, Lagna, Nakshatra
+• 8-Kuta Ashtakoot matchmaking with PDF report
+• Muhurtam Finder — auspicious dates for marriage, griha pravesh, travel, business
+• Daily Rashi predictions in two modes: Senior (career, finance, health, relationships) and Student (studies, exams, friendships)
+• North Indian Kundli charts
 
-🎉 పండుగలు & వ్రతాలు (Festivals & Observances)
-• 30+ పండుగలు — తెలుగు & English వివరణతో
-• 24 ఏకాదశి దినాలు — ప్రాముఖ్యత & దేవత సహితం
-• సంకష్టహర చతుర్థి, పౌర్ణమి, అమావాస్య, ప్రదోషం
-• 22+ ప్రభుత్వ సెలవులు + ఫిల్టర్ చేయండి
+💰 Practical · Daily
+• Live gold and silver prices (3-API fallback + offline cache)
+• Set price alerts
+• Find nearby temples by deity
+• 12 step-by-step Puja guides — Satyanarayan, Varalakshmi, Vinayaka Chavithi, Saraswati, Hanuman, Shiva Pradosham, Krishna Janmashtami, Durga Navaratri, Rama Navami, Griha Pravesh, daily Nitya Puja
+• Daily Darshan — deity of the day with mantra and significance
 
-💰 బంగారం & వెండి ధరలు (Gold & Silver Prices)
-• రోజువారీ 22K, 24K బంగారం & వెండి ధరలు
-• ధర అలర్ట్ — మీ టార్గెట్ ధరకు నోటిఫికేషన్
-• 3 API ల ద్వారా ఖచ్చితమైన ధరలు + ఆఫ్‌లైన్ కాష్
+🔬 Why ధర్మ is different
+• Source-first: every story names its sarga / parva / verse — no "TV serial" embellishments
+• Bilingual end-to-end: every word switches Telugu ↔ English with one tap
+• Astronomically accurate panchangam — not table-lookup; computed from your exact location
+• Beautiful dark theme designed for daily use
+• Zero ads, zero paywalls at launch — sustained by donations, not by gating sacred content
 
-📖 భగవద్గీత (Bhagavad Gita)
-• 30 శ్లోకాలు — సంస్కృతం, తెలుగు, ఆంగ్లం
-• రోజువారీ శ్లోకం + థీమ్ ఆధారిత బ్రౌజింగ్
-
-🔮 వేద విజ్ఞానం (Vedic Wisdom)
-• న్యూమరాలజీ — జన్మ తేదీ ఆధారిత జీవిత మార్గం
-• పేరు అనుకూలత — రెండు పేర్ల మధ్య స్కోరు
-• నేటి అదృష్టం — రంగు, దిక్కు, దేవత
-• వాస్తు చిట్కాలు + ధ్యాన మార్గదర్శకాలు
-
-🛕 సమీపంలోని దేవాలయాలు (Nearby Temples)
-• Google Places API — GPS ఆధారిత దేవాలయ శోధన
-• రేటింగ్, దూరం, Google Maps నావిగేషన్
-
-👶 పిల్లల విభాగం (Kids Section)
-• 50 నీతి కథలు — తెలుగులో (గణేశుడు, హనుమంతుడు, ధ్రువుడు...)
-• 30 శ్లోకాలు — సంస్కృతం + అర్థంతో
-
-📊 మార్కెట్ (Indian Markets)
-• NSE/BSE ఇండెక్స్‌లు, ETFలు — Yahoo Finance ద్వారా
-
-🔬 ఖగోళ శాస్త్రం ఆధారంగా (Astronomical Accuracy)
-Drik Ganita + Lahiri Ayanamsa + astronomy-engine లైబ్రరీ.
-NASA-grade ఖచ్చితత్వం — మీ జన్మ సమయం & స్థలం ఆధారంగా ఖచ్చితమైన గణనలు.
-
-🌗 ప్రత్యేక లక్షణాలు
-• తెలుగు & English — ఒక్క నొక్కుతో భాష మారుస్తుంది
-• డార్క్ థీమ్ — కళ్ళకు హాయిగా, WCAG AAA ప్రామాణికత
-• ఫారం డేటా గుర్తుంచుకుంటుంది — తిరిగి టైప్ అవసరం లేదు
-• రోజువారీ నోటిఫికేషన్ — పంచాంగం & శ్లోకం
-• PDF రిపోర్ట్ & WhatsApp షేర్ — అన్ని విభాగాల్లో
-
-ధర్మ — ప్రతిరోజూ మీ ఆధ్యాత్మిక సహచరుడు! 🙏
+ధర్మ — sacred stories, daily.
 సర్వే జనాః సుఖినో భవంతు
 
 --- END ---
 
 ## Keywords (comma separated)
-telugu panchangam, తెలుగు పంచాంగం, tithi today, nakshatram today, rahu kalam today, today panchangam telugu, gold price today india, ekadashi 2026, telugu calendar 2026, muhurtham, festival calendar telugu, panchang today, hindu calendar 2026, sunrise sunset time, bhagavad gita telugu, rashi phalam telugu, jathakam telugu, vedic horoscope, telugu jathakam, రాశి ఫలం, matchmaking telugu, kundali milan, ashtakoot matching, jaataka pondika
+ramayana telugu, mahabharata telugu, bhagavad gita telugu, telugu panchangam, తెలుగు పంచాంగం, neethi suktalu, chanakya niti telugu, vidura niti, sanskrit word, dharma debate, hanuman chalisa, vishnu sahasranama, gayatri mantra, sacred stories, daily sloka, hindu mythology kids, sanskrit class 10, indian history textbook, tithi today, nakshatram today, rahu kalam, festival calendar telugu, ekadashi 2026, gold price today india, vedic horoscope, telugu jathakam, kundali milan, matchmaking telugu, muhurtham, daily quiz hindu, dharma values
 
 ## Category
-Lifestyle
+Education
 
 ## Secondary Category
 Books & Reference
@@ -118,13 +88,13 @@ Books & Reference
 Everyone
 
 ## Contains Ads
-Yes (Google AdMob)
+No (free at launch — supported by donations)
 
 ## In-app Purchases
-Yes (Premium — Weekly ₹29, Monthly ₹99, Yearly ₹499, Lifetime ₹999)
+None at launch (premium tier planned for future release)
 
 ## Target Audience
-All ages
+All ages — special focus on students (Class 6–12), parents, and young adults
 
 ## Target Countries (priority order)
 1. India
@@ -134,3 +104,5 @@ All ages
 5. Australia
 6. UAE
 7. Singapore
+8. New Zealand
+9. Malaysia

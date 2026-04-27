@@ -18,6 +18,7 @@ import { PageHeader } from '../components/PageHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { ANIMATIONS_ENABLED } from '../utils/deviceCapability';
+import { trackEvent } from '../utils/analytics';
 
 const DURATIONS = [5, 10, 15, 20, 30]; // minutes
 
@@ -103,6 +104,7 @@ export function MeditationScreen() {
             clearInterval(intervalRef.current);
             setIsRunning(false);
             setCompleted(true);
+            trackEvent('meditation_completed', { duration_minutes: duration, mantra: mantra.id });
             try { const Speech = require('expo-speech'); Speech.speak('Om Shanti Shanti Shanti', { language: 'en', rate: 0.7 }); } catch {}
             return 0;
           }
@@ -117,6 +119,7 @@ export function MeditationScreen() {
     setTimeLeft(duration * 60);
     setIsRunning(true);
     setCompleted(false);
+    trackEvent('meditation_started', { duration_minutes: duration, mantra: mantra.id });
     try { const Speech = require('expo-speech'); Speech.speak('Om', { language: 'en', rate: 0.5 }); } catch {}
   };
 

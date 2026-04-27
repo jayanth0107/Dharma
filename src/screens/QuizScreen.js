@@ -14,6 +14,7 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { getDailyQuiz, MAX_SETS_PER_DAY } from '../data/quizData';
 import { SectionShareRow } from '../components/SectionShareRow';
+import { trackEvent } from '../utils/analytics';
 
 const CATEGORY_ICONS = {
   puranas: 'book-open-variant',
@@ -51,6 +52,14 @@ export function QuizScreen() {
     if (revealed[qIdx]) return; // already answered
     setAnswers(prev => ({ ...prev, [qIdx]: optIdx }));
     setRevealed(prev => ({ ...prev, [qIdx]: true }));
+    const q = questions[qIdx];
+    if (q) {
+      trackEvent('quiz_answered', {
+        category: q.category,
+        correct: q.answer === optIdx,
+        set: currentSet,
+      });
+    }
   };
 
   const handleNext = () => {

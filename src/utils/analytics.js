@@ -4,7 +4,13 @@
 // All data is anonymous — no personal information is collected.
 
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { logEventToCloud, setUserProperties } from './analyticsSync';
+
+// Pull the live version out of app.json so analytics never lies about
+// which version a user is on. Falls back to a sentinel if Constants
+// fails (extremely rare — happens only in some test harnesses).
+const APP_VERSION = Constants.expoConfig?.version || Constants.manifest?.version || 'unknown';
 
 // Re-export so callers have one import for analytics
 export { setUserProperties, getUserProperties, isCloudEvent } from './analyticsSync';
@@ -127,7 +133,7 @@ export async function initAnalytics() {
   // Set static user properties — dynamic ones (premium/login/lang) are set by contexts
   setUserProperties({
     platform: Platform.OS,
-    appVersion: '2.0.0',
+    appVersion: APP_VERSION,
   });
 
   await saveAnalytics();

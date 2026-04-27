@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dharma: Telugu Astro, Calendar & Gold",
     "slug": "DharmaDaily",
-    "version": "2.4.1",
+    "version": "2.4.2",
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
@@ -37,7 +37,7 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 9,
+      "versionCode": 10,
       "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize"
     },
@@ -50,7 +50,7 @@
       "themeColor": "#E8751A",
       "backgroundColor": "#FFFDF5"
     },
-    "description": "Telugu Panchangam (తెలుగు పంచాంగం) with Ramayana Daily, Mahabharata Daily, Bhagavad Gita, Neethi Suktalu, Dharma Debate, Rashi Predictions, Mantra Lyrics, Sanskrit Word, Quiz, Stotra Library, Meditation, Puja Guide, Vedic Horoscope, Matchmaking, Muhurtam, Festivals, Ekadashi, Gold Prices, Temple Finder, Kids Stories. Panchangam: Drik Ganita + Lahiri Ayanamsa. Sources: Ramayana based on Valmiki Ramayana (with Sarga references). Mahabharata based on Vyasa Mahabharata (BORI Critical Edition). Gita per Gita Press Gorakhpur. Neethi from Chanakya Niti, Vidura Niti, Subhashitavali. Character portrayals follow original texts, not TV serials. Simplified for brevity — not a substitute for scriptures. Mantras: correct pronunciation under guru guidance required. బాధ్యతా విజ్ఞప్తి: వాల్మీకి రామాయణం, వ్యాస మహాభారతం, గీతా ప్రెస్ భగవద్గీత ఆధారంగా. TV serials కాదు, మూల గ్రంథాల ప్రకారం.",
+    "description": "Rediscover the wisdom your grandparents knew. ధర్మ is a daily Telugu companion for sacred stories, panchangam, and timeless values — for families, students, and seekers. One story every day from Valmiki Ramayana and Vyasa Mahabharata. The Bhagavad Gita, Neethi Suktas from Chanakya · Vidura · Thirukkural, Stotras and Mantras, Sanskrit word of the day, Dharma Debate, daily Quiz, and Kids Stories. Plus accurate Drik-Ganita panchangam, festival and Ekadashi calendar, Vedic horoscope, matchmaking, muhurtam finder, daily Rashi predictions, live gold/silver prices, and nearby temple finder. Aligned to school Sanskrit and Indian History learning — every story cites its source (Valmiki Sarga, Vyasa BORI Critical Edition, Gita Press Gorakhpur). Character portrayals follow the original scriptures, not TV serials or movies. Bilingual Telugu / English. Free for everyone. మూల గ్రంథాల ఆధారంగా రోజువారీ కథలు, శ్లోకాలు, నీతి సూక్తాలు — తల్లిదండ్రుల నుండి విద్యార్థుల వరకు అందరికీ. వాల్మీకి రామాయణం, వ్యాస మహాభారతం (BORI Critical Edition), గీతా ప్రెస్ భగవద్గీత ఆధారంగా.",
     "primaryColor": "#E8751A",
     "owner": "jayanth0107",
     "platforms": [

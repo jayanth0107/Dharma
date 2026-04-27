@@ -10,6 +10,7 @@ import { ModalOrView } from './ModalOrView';
 import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '../utils/notificationService';
 import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
 import { getPaymentStats } from '../utils/paymentSync';
+import { getAnalyticsSummary } from '../utils/analytics';
 import { setAdConfig } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
@@ -51,6 +52,8 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
   const [tapCount, setTapCount] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [analyticsSummary, setAnalyticsSummary] = useState(null);
   const [adminInput, setAdminInput] = useState('');
   const [adminError, setAdminError] = useState(false);
   const [paymentRecords, setPaymentRecords] = useState([]);
@@ -340,6 +343,96 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                         </Text>
                       </>
                     )}
+                  </View>
+                )}
+
+                {/* ── Usage Analytics — top features in the last 3 months ── */}
+                <TouchableOpacity
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: settingRowPad }]}
+                  onPress={async () => {
+                    if (!showAnalytics) {
+                      const summary = await getAnalyticsSummary();
+                      setAnalyticsSummary(summary);
+                    }
+                    setShowAnalytics(!showAnalytics);
+                  }}
+                >
+                  <MaterialCommunityIcons name="chart-bar" size={settingIconSize} color={DarkColors.gold} style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{t('వినియోగ గణాంకాలు', 'Usage Analytics')}</Text>
+                    <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{t('ఏ ఫీచర్లు ఎక్కువ వాడుతున్నారు', 'Which features are most used')}</Text>
+                  </View>
+                  <MaterialCommunityIcons name={showAnalytics ? 'chevron-up' : 'chevron-down'} size={20} color={DarkColors.textMuted} />
+                </TouchableOpacity>
+
+                {showAnalytics && analyticsSummary && (
+                  <View style={{ marginTop: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: DarkColors.borderCard }}>
+                    {/* Headline numbers */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard }}>
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: DarkColors.gold }}>{analyticsSummary.totalSessions}</Text>
+                        <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600' }}>{t('సెషన్లు', 'Sessions')}</Text>
+                      </View>
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: DarkColors.gold }}>{analyticsSummary.totalEvents}</Text>
+                        <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600' }}>{t('ఈవెంట్లు', 'Events')}</Text>
+                      </View>
+                      <View style={{ alignItems: 'center' }}>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: DarkColors.gold }}>{analyticsSummary.activeDays}</Text>
+                        <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600' }}>{t('సక్రియ రోజులు', 'Active Days')}</Text>
+                      </View>
+                    </View>
+
+                    {/* Top events — what users actually do */}
+                    {analyticsSummary.topEvents.length > 0 && (
+                      <View style={{ marginTop: 12 }}>
+                        <Text style={{ fontSize: 13, fontWeight: '800', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                          {t('అత్యధికంగా వాడిన ఫీచర్లు', 'Top Features')}
+                        </Text>
+                        {analyticsSummary.topEvents.slice(0, 8).map(([name, count], i) => {
+                          const max = analyticsSummary.topEvents[0][1] || 1;
+                          const pct = (count / max) * 100;
+                          return (
+                            <View key={i} style={{ marginBottom: 6 }}>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+                                <Text style={{ fontSize: 12, color: DarkColors.silver, fontWeight: '600' }} numberOfLines={1}>{name}</Text>
+                                <Text style={{ fontSize: 12, color: DarkColors.gold, fontWeight: '800' }}>{count}</Text>
+                              </View>
+                              <View style={{ height: 4, backgroundColor: DarkColors.bgCard, borderRadius: 2, overflow: 'hidden' }}>
+                                <View style={{ width: `${pct}%`, height: 4, backgroundColor: DarkColors.gold, borderRadius: 2 }} />
+                              </View>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+
+                    {/* Last 7 days — daily-open bar chart */}
+                    {analyticsSummary.last7Days && (
+                      <View style={{ marginTop: 16 }}>
+                        <Text style={{ fontSize: 13, fontWeight: '800', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                          {t('గత 7 రోజులు', 'Last 7 Days')}
+                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 60, gap: 4 }}>
+                          {Object.entries(analyticsSummary.last7Days).map(([day, count]) => {
+                            const max = Math.max(...Object.values(analyticsSummary.last7Days), 1);
+                            const h = Math.max(4, (count / max) * 50);
+                            return (
+                              <View key={day} style={{ flex: 1, alignItems: 'center' }}>
+                                <Text style={{ fontSize: 9, color: DarkColors.silver, fontWeight: '700' }}>{count}</Text>
+                                <View style={{ width: '100%', height: h, backgroundColor: DarkColors.gold, borderRadius: 2, marginTop: 2 }} />
+                                <Text style={{ fontSize: 8, color: DarkColors.textMuted, marginTop: 2 }}>{day.slice(8)}</Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    )}
+
+                    <Text style={{ fontSize: 10, color: DarkColors.textMuted, textAlign: 'center', marginTop: 12, lineHeight: 14 }}>
+                      {t('ఇది ఈ పరికరం యొక్క స్థానిక డేటా. క్రాస్-యూజర్ గణాంకాలు Firebase Console లో.',
+                         'Local data on this device only. Cross-user analytics in Firebase Console.')}
+                    </Text>
                   </View>
                 )}
               </>

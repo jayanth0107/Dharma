@@ -1,9 +1,10 @@
 // ధర్మ — Neethi Suktalu Screen (నీతి సూక్తాలు)
 // Daily wisdom quotes from Chanakya, Vidura, Subhashitas, etc.
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { trackEvent } from '../utils/analytics';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
@@ -22,6 +23,12 @@ export function NeethiSuktaScreen() {
   const today = getTodayNeethiSukta(new Date());
   const [showAll, setShowAll] = useState(false);
   const { isSpeaking, toggle: toggleSpeak, speakerIcon } = useSpeaker();
+
+  useEffect(() => {
+    if (today?.id != null) {
+      trackEvent('neethi_sukta_view', { sukta_id: today.id, source: today.source?.en });
+    }
+  }, [today?.id]);
 
   const quoteFs = usePick({ default: 18, md: 20, xl: 22 });
   const quoteLh = usePick({ default: 30, md: 32, xl: 36 });
