@@ -26,9 +26,11 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
   const columns = useColumns();
   const gridCtx = useContext(FeatureGridContext);
   const cols = gridCtx?.columns || columns;
-  const iconSize = usePick({ default: 32, md: 34, lg: 36, xl: 40 });
-  const tileMinH = usePick({ default: 116, md: 126, lg: 144, xl: 154 });
-  const labelSize = usePick({ default: 16, md: 17, lg: 18, xl: 19 });
+  // Tile sizing — sublabel-less tiles are ~30 px shorter, icon takes
+  // more visual weight since label is now a single word.
+  const iconSize = usePick({ default: 36, md: 40, lg: 44, xl: 50 });
+  const tileMinH = usePick({ default: 90, md: 100, lg: 116, xl: 128 });
+  const labelSize = usePick({ default: 14, md: 15, lg: 16, xl: 18 });
   const subSize = usePick({ default: 14, md: 15, lg: 16, xl: 17 });
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.

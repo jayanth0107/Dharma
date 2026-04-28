@@ -28,21 +28,19 @@ import { recordDailyOpen } from '../utils/streakService';
 import { useAuth } from '../context/AuthContext';
 import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappShare';
 
-// Section divider with icon + bilingual title — used between Home grid groups.
-function SectionHeader({ te, en, sub_te, sub_en, icon }) {
-  const { t } = useLanguage();
+// Slim icon-only divider between Home tile groups. Per user feedback,
+// the previous text section headers ("Daily Habit / Sacred Stories" etc.)
+// added vertical content that forced more scrolling. Replaced with a
+// minimal gold rule + small category icon — preserves the grouping
+// signal without consuming label real-estate.
+function SectionDivider({ icon }) {
   return (
-    <View style={s.sectionHeader}>
-      <View style={s.sectionIconWrap}>
-        <MaterialCommunityIcons name={icon} size={20} color={DarkColors.gold} />
+    <View style={s.sectionDivider}>
+      <View style={s.dividerLine} />
+      <View style={s.dividerIconWrap}>
+        <MaterialCommunityIcons name={icon} size={14} color={DarkColors.gold} />
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={s.sectionTitle}>{t(te, en)}</Text>
-        {(sub_te || sub_en) && (
-          <Text style={s.sectionSub}>{t(sub_te || '', sub_en || '')}</Text>
-        )}
-      </View>
-      <View style={s.sectionRule} />
+      <View style={s.dividerLine} />
     </View>
   );
 }
@@ -260,64 +258,69 @@ export function HomeScreen({ navigation }) {
         </View>
       )}
 
-      {/* ── Feature Grid (scrollable, single grid) ── */}
+      {/* ── Feature Grid — compact: one-word labels, no sublabels,
+            slim icon-only dividers between categories ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
         <TodaySummaryCard onNavigate={(screen) => navigation.navigate(screen)} streak={streak} />
 
-        {/* ── 1. Daily Habit (everyone — every morning) ── */}
-        <SectionHeader te="రోజువారీ" en="Daily Habit" sub_te="ప్రతి ఉదయం" sub_en="Every morning" icon="calendar-clock" />
+        {/* 1. Daily Habit */}
         <FeatureGrid>
-          <FeatureTile icon="pot-mix" label={t(TR.panchang.te, TR.panchang.en)} sublabel={t(TR.panchangSub.en, TR.panchangSub.te)} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
-          <FeatureTile icon="party-popper" label={t(TR.festivals.te, TR.festivals.en)} sublabel={t(TR.festivalsSub.en, TR.festivalsSub.te)} onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
-          <FeatureTile icon="star-circle" label={t(TR.dailyRashi.te, TR.dailyRashi.en)} sublabel={t(TR.dailyRashiSub.en, TR.dailyRashiSub.te)} onPress={() => navigation.navigate('DailyRashi')} />
-          <FeatureTile icon="gold" label={t(TR.gold.te, TR.gold.en)} sublabel={t(TR.goldSub.en, TR.goldSub.te)} onPress={() => navigation.navigate('Gold')} />
+          <FeatureTile icon="pot-mix"      label={t('పంచాంగం', 'Panchangam')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
+          <FeatureTile icon="party-popper" label={t('పండుగలు', 'Festivals')}  onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
+          <FeatureTile icon="star-circle"  label={t('రాశి', 'Rashi')}        onPress={() => navigation.navigate('DailyRashi')} />
+          <FeatureTile icon="gold"         label={t('బంగారం', 'Gold')}        onPress={() => navigation.navigate('Gold')} />
         </FeatureGrid>
 
-        {/* ── 2. Sacred Stories (kids + adults) ── */}
-        <SectionHeader te="పవిత్ర కథలు" en="Sacred Stories" sub_te="మూల గ్రంథాల ఆధారంగా" sub_en="From original scriptures" icon="book-open-page-variant" />
+        <SectionDivider icon="book-open-page-variant" />
+
+        {/* 2. Sacred Stories */}
         <FeatureGrid>
-          <FeatureTile icon="bow-arrow" label={t('రామాయణం', 'Ramayana')} sublabel={t('ప్రతి రోజు ఒక కథ', 'Daily story')} onPress={() => navigation.navigate('Ramayana')} />
-          <FeatureTile icon="sword-cross" label={t('మహాభారతం', 'Mahabharata')} sublabel={t('ప్రతి రోజు ఒక కథ', 'Daily story')} onPress={() => navigation.navigate('Mahabharata')} />
-          <FeatureTile icon="book-open-page-variant" label={t(TR.gita.te, TR.gita.en)} sublabel={t(TR.gitaSub.en, TR.gitaSub.te)} onPress={() => navigation.navigate('Gita')} />
-          <FeatureTile icon="baby-face-outline" label={t(TR.kids.te, TR.kids.en)} sublabel={t(TR.kidsSub.en, TR.kidsSub.te)} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
-          <FeatureTile icon="shield-star" label={t('ధర్మ ప్రమాణం', 'Dharma Pramana')} sublabel={t('శ్రుతి స్మృతి', 'Shruti Smriti')} onPress={() => navigation.navigate('Pramana')} />
+          <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    onPress={() => navigation.navigate('Ramayana')} />
+          <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} onPress={() => navigation.navigate('Mahabharata')} />
+          <FeatureTile icon="book-open-page-variant" label={t('గీత', 'Gita')}            onPress={() => navigation.navigate('Gita')} />
+          <FeatureTile icon="baby-face-outline"      label={t('పిల్లలు', 'Kids')}        onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
+          <FeatureTile icon="shield-star"            label={t('ప్రమాణం', 'Pramana')}     onPress={() => navigation.navigate('Pramana')} />
         </FeatureGrid>
 
-        {/* ── 3. Youth & Learning (15–25 — interactive, bite-size) ── */}
-        <SectionHeader te="యువత & విజ్ఞానం" en="Youth & Learning" sub_te="15–25 సంవత్సరాలు" sub_en="Interactive · 15–25 yrs" icon="rocket-launch" />
+        <SectionDivider icon="rocket-launch" />
+
+        {/* 3. Youth & Learning */}
         <FeatureGrid>
-          <FeatureTile icon="vote" label={t('ధర్మ చర్చ', 'Dharma Debate')} sublabel={t('నేటి చర్చ & ఓటు', 'Vote & debate')} onPress={() => navigation.navigate('DharmaPoll')} />
-          <FeatureTile icon="head-question" label={t('క్విజ్', 'Daily Quiz')} sublabel={t('వేద పురాణ క్విజ్', 'Vedic Quiz')} onPress={() => navigation.navigate('Quiz')} />
-          <FeatureTile icon="alpha-s-circle" label={t('సంస్కృత పదం', 'Sanskrit Word')} sublabel={t('రోజుకో పదం', 'Word a day')} onPress={() => navigation.navigate('SanskritWord')} />
-          <FeatureTile icon="account-circle" label={t('రాశి వ్యక్తిత్వం', 'Rashi Personality')} sublabel={t('వేద వ్యక్తిత్వ ప్రొఫైల్', 'Vedic profile')} onPress={() => navigation.navigate('RashiProfile')} />
-          <FeatureTile icon="script-text" label={t('నీతి సూక్తాలు', 'Neethi Suktalu')} sublabel={t('జీవిత పాఠాలు', 'Life lessons')} onPress={() => navigation.navigate('NeethiSukta')} />
-          <FeatureTile icon="zodiac-leo" label={t(TR.astro.te, TR.astro.en)} sublabel={t(TR.astroSub.en, TR.astroSub.te)} onPress={() => navigation.navigate('Astro')} />
+          <FeatureTile icon="vote"             label={t('చర్చ', 'Debate')}        onPress={() => navigation.navigate('DharmaPoll')} />
+          <FeatureTile icon="head-question"    label={t('క్విజ్', 'Quiz')}         onPress={() => navigation.navigate('Quiz')} />
+          <FeatureTile icon="alpha-s-circle"   label={t('సంస్కృతం', 'Sanskrit')}   onPress={() => navigation.navigate('SanskritWord')} />
+          <FeatureTile icon="account-circle"   label={t('వ్యక్తిత్వం', 'Personality')} onPress={() => navigation.navigate('RashiProfile')} />
+          <FeatureTile icon="script-text"      label={t('నీతి', 'Neethi')}         onPress={() => navigation.navigate('NeethiSukta')} />
+          <FeatureTile icon="zodiac-leo"       label={t('విజ్ఞానం', 'Wisdom')}      onPress={() => navigation.navigate('Astro')} />
         </FeatureGrid>
 
-        {/* ── 4. Life Decisions (adults — premium astrology) ── */}
-        <SectionHeader te="జీవిత నిర్ణయాలు" en="Life Decisions" sub_te="వేద జ్యోతిషం" sub_en="Vedic astrology" icon="account-star" />
+        <SectionDivider icon="account-star" />
+
+        {/* 4. Life Decisions */}
         <FeatureGrid>
-          <FeatureTile icon="account-star" label={t(TR.jaatakam.te, TR.jaatakam.en)} sublabel={t(TR.jaatakamSub.en, TR.jaatakamSub.te)} onPress={() => navigation.navigate('Horoscope')} />
-          <FeatureTile icon="heart-multiple" label={t(TR.matchmaking.te, TR.matchmaking.en)} sublabel={t(TR.matchmakingSub.en, TR.matchmakingSub.te)} onPress={() => navigation.navigate('Matchmaking')} />
-          <FeatureTile icon="calendar-star" label={t(TR.muhurtamTile.te, TR.muhurtamTile.en)} sublabel={t(TR.muhurtamSub.en, TR.muhurtamSub.te)} onPress={() => navigation.navigate('Muhurtam')} />
-          <FeatureTile icon="account-group" label={t('కుటుంబం', 'Family')} sublabel={t('రాశి నక్షత్రం', 'Rashi & Star')} onPress={() => navigation.navigate('Family')} />
+          <FeatureTile icon="account-star"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
+          <FeatureTile icon="heart-multiple" label={t('పొందిక', 'Match')}     onPress={() => navigation.navigate('Matchmaking')} />
+          <FeatureTile icon="calendar-star"  label={t('ముహూర్తం', 'Muhurtam')} onPress={() => navigation.navigate('Muhurtam')} />
+          <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family')}    onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
 
-        {/* ── 5. Devotion & Service (elders — deeper practice) ── */}
-        <SectionHeader te="భక్తి & సేవ" en="Devotion & Service" sub_te="ఆధ్యాత్మిక సాధన" sub_en="Spiritual practice" icon="hand-heart" />
+        <SectionDivider icon="hand-heart" />
+
+        {/* 5. Devotion & Service */}
         <FeatureGrid>
-          <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు & మంత్రాలు', 'Stotras & Mantras')} sublabel={t('పవిత్ర పఠనాలు', 'Sacred recitations')} onPress={() => navigation.navigate('Stotra')} />
-          <FeatureTile icon="meditation" label={t('ధ్యానం', 'Meditation')} sublabel={t('టైమర్ & గైడ్', 'Timer & Guide')} onPress={() => navigation.navigate('Meditation')} />
-          <FeatureTile icon="fire" label={t('పూజా గైడ్', 'Puja Guide')} sublabel={t('స్టెప్-బై-స్టెప్', 'Step-by-step')} onPress={() => navigation.navigate('PujaGuide')} />
-          <FeatureTile icon="temple-hindu" label={t(TR.temples.te, TR.temples.en)} sublabel={t(TR.templesSub.en, TR.templesSub.te)} onPress={() => navigation.navigate('TempleNearby')} />
-          <FeatureTile icon="hand-heart" label={t(TR.donate.te, TR.donate.en)} sublabel={t(TR.donateSub.en, TR.donateSub.te)} onPress={() => navigation.navigate('Donate')} />
+          <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు', 'Stotras')}    onPress={() => navigation.navigate('Stotra')} />
+          <FeatureTile icon="meditation"        label={t('ధ్యానం', 'Meditation')}    onPress={() => navigation.navigate('Meditation')} />
+          <FeatureTile icon="fire"              label={t('పూజ', 'Puja')}            onPress={() => navigation.navigate('PujaGuide')} />
+          <FeatureTile icon="temple-hindu"      label={t('దేవాలయాలు', 'Temples')}    onPress={() => navigation.navigate('TempleNearby')} />
+          <FeatureTile icon="hand-heart"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
 
-        {/* ── Utility tail ── */}
-        <SectionHeader te="ఉపయుక్త" en="Utilities" icon="tools" />
+        <SectionDivider icon="tools" />
+
+        {/* Utility tail */}
         <FeatureGrid>
-          <FeatureTile icon="chart-line" label={t(TR.market.te, TR.market.en)} sublabel={t(TR.marketSub.en, TR.marketSub.te)} onPress={() => navigation.navigate('Market')} />
-          <FeatureTile icon="bell-plus" label={t(TR.reminder.te, TR.reminder.en)} sublabel={t(TR.reminderSub.en, TR.reminderSub.te)} onPress={() => navigation.navigate('Reminder')} />
+          <FeatureTile icon="chart-line" label={t('మార్కెట్', 'Market')}    onPress={() => navigation.navigate('Market')} />
+          <FeatureTile icon="bell-plus"  label={t('రిమైండర్', 'Reminder')}  onPress={() => navigation.navigate('Reminder')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />
       </ScrollView>
@@ -491,18 +494,22 @@ const s = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  // Section header between Home category grids
-  sectionHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    marginTop: 22, marginBottom: 12, paddingHorizontal: 4,
+  // Slim icon-only divider between Home tile groups (replaces the
+  // earlier text section headers — saves ~140 px of vertical scroll
+  // across the 6 categories combined).
+  sectionDivider: {
+    flexDirection: 'row', alignItems: 'center',
+    marginTop: 10, marginBottom: 6,
+    paddingHorizontal: 8,
   },
-  sectionIconWrap: {
-    width: 34, height: 34, borderRadius: 17,
+  dividerLine: {
+    flex: 1, height: 1, backgroundColor: DarkColors.borderGold,
+  },
+  dividerIconWrap: {
+    width: 26, height: 26, borderRadius: 13,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(212,160,23,0.12)',
+    backgroundColor: 'rgba(212,160,23,0.10)',
     borderWidth: 1, borderColor: DarkColors.borderGold,
+    marginHorizontal: 8,
   },
-  sectionTitle: { fontSize: 18, fontWeight: '900', color: DarkColors.gold, letterSpacing: 0.5 },
-  sectionSub: { fontSize: 14, fontWeight: '600', color: DarkColors.silver, marginTop: 2 },
-  sectionRule: { width: 44, height: 2, backgroundColor: DarkColors.borderGold, borderRadius: 1 },
 });
