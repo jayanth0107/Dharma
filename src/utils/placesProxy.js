@@ -149,8 +149,8 @@ export async function googlePlaceDetails(placeId) {
 // All functions return the same shape: { name, displayName, description,
 // latitude, longitude, isCustom, source }. No placeId → the modal's
 // handleSelectResult skips its detailsFn fetch and uses lat/lon inline.
-const GEOAPIFY_API_KEY = '';        // ← paste your Geoapify free key here
-const LOCATIONIQ_API_KEY = '';      // ← paste your LocationIQ free key here
+const GEOAPIFY_API_KEY = '51a29ff1f5924b8ab72894715136f8d6';
+const LOCATIONIQ_API_KEY = 'pk.125b796d34b3ed9d58ac416d7cd738c4';
 
 export async function geoapifySearch(input) {
   if (!input || input.length < 2) return [];
