@@ -28,17 +28,18 @@ import { recordDailyOpen } from '../utils/streakService';
 import { useAuth } from '../context/AuthContext';
 import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappShare';
 
-// Slim icon-only divider between Home tile groups. Per user feedback,
-// the previous text section headers ("Daily Habit / Sacred Stories" etc.)
-// added vertical content that forced more scrolling. Replaced with a
-// minimal gold rule + small category icon — preserves the grouping
-// signal without consuming label real-estate.
-function SectionDivider({ icon }) {
+// Slim divider between Home tile groups: gold rule + a small badge
+// containing an icon and a single-word category label. Keeps the
+// grouping cue visible (testers confused by icon-only) while still
+// taking far less space than the original 28-px text headers.
+function SectionDivider({ icon, te, en }) {
+  const { t } = useLanguage();
   return (
     <View style={s.sectionDivider}>
       <View style={s.dividerLine} />
-      <View style={s.dividerIconWrap}>
-        <MaterialCommunityIcons name={icon} size={14} color={DarkColors.gold} />
+      <View style={s.dividerBadge}>
+        <MaterialCommunityIcons name={icon} size={13} color={DarkColors.gold} />
+        <Text style={s.dividerText}>{t(te, en)}</Text>
       </View>
       <View style={s.dividerLine} />
     </View>
@@ -263,6 +264,8 @@ export function HomeScreen({ navigation }) {
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
         <TodaySummaryCard onNavigate={(screen) => navigation.navigate(screen)} streak={streak} />
 
+        <SectionDivider icon="calendar-clock" te="రోజువారీ" en="Daily" />
+
         {/* 1. Daily Habit */}
         <FeatureGrid>
           <FeatureTile icon="pot-mix"      label={t('పంచాంగం', 'Panchangam')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
@@ -271,7 +274,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="gold"         label={t('బంగారం', 'Gold')}        onPress={() => navigation.navigate('Gold')} />
         </FeatureGrid>
 
-        <SectionDivider icon="book-open-page-variant" />
+        <SectionDivider icon="book-open-page-variant" te="కథలు" en="Stories" />
 
         {/* 2. Sacred Stories */}
         <FeatureGrid>
@@ -282,7 +285,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="shield-star"            label={t('ప్రమాణం', 'Pramana')}     onPress={() => navigation.navigate('Pramana')} />
         </FeatureGrid>
 
-        <SectionDivider icon="rocket-launch" />
+        <SectionDivider icon="rocket-launch" te="యువత" en="Youth" />
 
         {/* 3. Youth & Learning */}
         <FeatureGrid>
@@ -294,7 +297,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="zodiac-leo"       label={t('విజ్ఞానం', 'Wisdom')}      onPress={() => navigation.navigate('Astro')} />
         </FeatureGrid>
 
-        <SectionDivider icon="account-star" />
+        <SectionDivider icon="account-star" te="జ్యోతిష్యం" en="Astrology" />
 
         {/* 4. Life Decisions */}
         <FeatureGrid>
@@ -304,7 +307,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family')}    onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
 
-        <SectionDivider icon="hand-heart" />
+        <SectionDivider icon="hand-heart" te="భక్తి" en="Devotion" />
 
         {/* 5. Devotion & Service */}
         <FeatureGrid>
@@ -315,7 +318,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="hand-heart"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
 
-        <SectionDivider icon="tools" />
+        <SectionDivider icon="tools" te="ఉపయుక్త" en="Utility" />
 
         {/* Utility tail */}
         <FeatureGrid>
@@ -494,22 +497,25 @@ const s = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  // Slim icon-only divider between Home tile groups (replaces the
-  // earlier text section headers — saves ~140 px of vertical scroll
-  // across the 6 categories combined).
+  // Divider between Home tile groups: thin gold rule + a small pill
+  // badge with the category icon and a single-word label.
   sectionDivider: {
     flexDirection: 'row', alignItems: 'center',
-    marginTop: 10, marginBottom: 6,
-    paddingHorizontal: 8,
+    marginTop: 12, marginBottom: 6,
+    paddingHorizontal: 4,
   },
   dividerLine: {
     flex: 1, height: 1, backgroundColor: DarkColors.borderGold,
   },
-  dividerIconWrap: {
-    width: 26, height: 26, borderRadius: 13,
-    alignItems: 'center', justifyContent: 'center',
+  dividerBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
     backgroundColor: 'rgba(212,160,23,0.10)',
     borderWidth: 1, borderColor: DarkColors.borderGold,
     marginHorizontal: 8,
+  },
+  dividerText: {
+    fontSize: 12, fontWeight: '800', color: DarkColors.gold,
+    letterSpacing: 0.4,
   },
 });

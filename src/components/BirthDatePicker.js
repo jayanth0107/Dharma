@@ -1,14 +1,11 @@
 // ధర్మ — BirthDatePicker (combined date + time picker)
 //
-// Two ways to enter the value, both stay in sync:
-//   1. Separate fixed-width boxes — DD - MM - YYYY  /  HH : MM  AM/PM.
-//      Each box accepts only its own field, max length is enforced,
-//      and focus auto-advances to the next box when full. There's no
-//      shared mask or cursor-preservation logic, so backspace never
-//      "moves" digits and the input order is always what the user
-//      typed (fixes the "type 86, see 68" bug).
-//   2. Scroll wheels (Day/Month/Year + Hour/Minute/AM-PM)
-//      Native snap behaviour, no manual debounce.
+// Wheel-only interaction. The boxes at the top — DD - MM - YYYY and
+// HH : MM AM/PM — are *read-only display chips* that mirror the
+// current selection. Users change the value by scrolling the wheels
+// below. There is no keyboard, no typing, no mask logic, no cursor
+// management — those were the source of every bug we hit on Android
+// Pixel testing.
 //
 // API (unchanged from earlier versions, all 7 call sites work as-is):
 //   visible, selectedDate, selectedTime?, showTime?, lang, title,
@@ -17,7 +14,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView,
-  Platform, TextInput, KeyboardAvoidingView, Keyboard,
+  Platform, KeyboardAvoidingView,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
@@ -42,7 +39,7 @@ const pad2 = (n) => String(n).padStart(2, '0');
 const getDaysInMonth = (m, y) => new Date(y, m + 1, 0).getDate();
 
 // ── WheelColumn ────────────────────────────────────────────────────
-function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }) {
+function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, highlight }) {
   const scrollRef = useRef(null);
   const lastSnapped = useRef(selectedIndex);
   const isFirstMount = useRef(true);
@@ -81,7 +78,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
   return (
     <View style={[ws.column, { width: width || 80 }]}>
       {label ? <Text style={ws.columnLabel}>{label}</Text> : null}
-      <View style={[ws.wheelContainer, { height: PICKER_HEIGHT }]}>
+      <View style={[ws.wheelContainer, { height: PICKER_HEIGHT }, highlight && ws.wheelContainerHighlight]}>
         <View style={ws.selectionHighlight} pointerEvents="none" />
         <ScrollView
           ref={scrollRef}
@@ -122,6 +119,20 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
   );
 }
 
+// ── Display chip — shows current value, taps highlight the wheel below ──
+function ValueChip({ value, sublabel, onPress, isFocus }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={[ws.chip, isFocus && ws.chipFocus]}
+    >
+      <Text style={[ws.chipValue, isFocus && ws.chipValueFocus]}>{value}</Text>
+      {sublabel ? <Text style={ws.chipSub}>{sublabel}</Text> : null}
+    </TouchableOpacity>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────
 export function BirthDatePicker({
   selectedDate,
@@ -154,6 +165,10 @@ export function BirthDatePicker({
   const [minute, setMinute] = useState(() => (mInit || 0));
   const [isPm, setIsPm] = useState(() => (h24Init || 6) >= 12);
 
+  // Which chip the user last tapped — used as a visual highlight to
+  // tell them which wheel to scroll. Pure UX feedback, no logic.
+  const [focusField, setFocusField] = useState(null);
+
   useEffect(() => {
     if (selectedDate) {
       setDay(selectedDate.getDate());
@@ -184,198 +199,6 @@ export function BirthDatePicker({
     ? `${pad2(hour12)}:${pad2(minute % 60)} ${isPm ? 'PM' : 'AM'}`
     : '';
 
-  // ── Input box state ──
-  // Each field has its own TextInput. No shared mask, no cursor logic —
-  // each box is just a numeric string with a maxLength. The "isTyping*"
-  // flags + 600 ms timers stop wheel-scroll updates from yanking text
-  // out of a field while the user is typing into it.
-  const [dayInput, setDayInput] = useState(pad2(effectiveDay));
-  const [monthInput, setMonthInput] = useState(pad2(month + 1));
-  const [yearInput, setYearInput] = useState(String(year));
-  const [hourInput, setHourInput] = useState(pad2(hour12));
-  const [minuteInput, setMinuteInput] = useState(pad2(minute % 60));
-  const [inputError, setInputError] = useState('');
-
-  const dayRef = useRef(null);
-  const monthRef = useRef(null);
-  const yearRef = useRef(null);
-  const hourRef = useRef(null);
-  const minuteRef = useRef(null);
-
-  const isTypingDay = useRef(false);
-  const isTypingMonth = useRef(false);
-  const isTypingYear = useRef(false);
-  const isTypingHour = useRef(false);
-  const isTypingMinute = useRef(false);
-
-  const dayTimer = useRef(null);
-  const monthTimer = useRef(null);
-  const yearTimer = useRef(null);
-  const hourTimer = useRef(null);
-  const minuteTimer = useRef(null);
-
-  // Sync inputs from wheels/state — only when user isn't typing in that field
-  useEffect(() => {
-    if (!isTypingDay.current) setDayInput(pad2(effectiveDay));
-  }, [effectiveDay]);
-  useEffect(() => {
-    if (!isTypingMonth.current) setMonthInput(pad2(month + 1));
-  }, [month]);
-  useEffect(() => {
-    if (!isTypingYear.current) setYearInput(String(year));
-  }, [year]);
-  useEffect(() => {
-    if (!isTypingHour.current) setHourInput(pad2(hour12));
-  }, [hour12]);
-  useEffect(() => {
-    if (!isTypingMinute.current) setMinuteInput(pad2(minute % 60));
-  }, [minute]);
-
-  // Cleanup timers
-  useEffect(() => () => {
-    [dayTimer, monthTimer, yearTimer, hourTimer, minuteTimer]
-      .forEach(t => { if (t.current) clearTimeout(t.current); });
-  }, []);
-
-  // ── Per-field handlers — auto-advance focus when full ──
-  const startTyping = (flag, timer) => {
-    flag.current = true;
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => { flag.current = false; }, 600);
-  };
-
-  const handleDayChange = (text) => {
-    const d = text.replace(/\D/g, '').slice(0, 2);
-    setDayInput(d);
-    startTyping(isTypingDay, dayTimer);
-    setInputError('');
-    const n = parseInt(d, 10);
-    if (d.length >= 2 && !isNaN(n) && n >= 1 && n <= 31) {
-      const maxD = getDaysInMonth(month, year);
-      setDay(Math.min(n, maxD));
-      // Auto-advance to month
-      monthRef.current?.focus();
-    } else if (d.length === 1 && n >= 4) {
-      // 4-9 can only be the start of a single-digit day; advance early
-      setDay(n);
-      monthRef.current?.focus();
-    } else if (!isNaN(n) && n >= 1 && n <= 31) {
-      setDay(n);
-    }
-  };
-
-  const handleMonthChange = (text) => {
-    const m = text.replace(/\D/g, '').slice(0, 2);
-    setMonthInput(m);
-    startTyping(isTypingMonth, monthTimer);
-    setInputError('');
-    const n = parseInt(m, 10);
-    if (m.length >= 2 && !isNaN(n) && n >= 1 && n <= 12) {
-      setMonth(n - 1);
-      const maxD = getDaysInMonth(n - 1, year);
-      if (day > maxD) setDay(maxD);
-      yearRef.current?.focus();
-    } else if (m.length === 1 && n >= 2) {
-      // 2-9 can only be a single-digit month; advance early
-      setMonth(n - 1);
-      yearRef.current?.focus();
-    } else if (!isNaN(n) && n >= 1 && n <= 12) {
-      setMonth(n - 1);
-    }
-  };
-
-  const handleYearChange = (text) => {
-    const y = text.replace(/\D/g, '').slice(0, 4);
-    setYearInput(y);
-    startTyping(isTypingYear, yearTimer);
-    setInputError('');
-    if (y.length === 4) {
-      const n = parseInt(y, 10);
-      if (n >= 1920 && n <= CURRENT_YEAR) {
-        setYear(n);
-        const maxD = getDaysInMonth(month, n);
-        if (day > maxD) setDay(maxD);
-        // Last field — dismiss keyboard
-        Keyboard.dismiss();
-      } else {
-        setInputError(lang === 'te' ? `${1920}–${CURRENT_YEAR} మధ్య సంవత్సరం` : `Year must be ${1920}–${CURRENT_YEAR}`);
-      }
-    }
-  };
-
-  const handleHourChange = (text) => {
-    const h = text.replace(/\D/g, '').slice(0, 2);
-    setHourInput(h);
-    startTyping(isTypingHour, hourTimer);
-    setInputError('');
-    const n = parseInt(h, 10);
-    if (h.length >= 2 && !isNaN(n) && n >= 1 && n <= 12) {
-      setHour12(n);
-      minuteRef.current?.focus();
-    } else if (h.length === 1 && n >= 2) {
-      setHour12(n);
-      minuteRef.current?.focus();
-    } else if (!isNaN(n) && n >= 1 && n <= 12) {
-      setHour12(n);
-    }
-  };
-
-  const handleMinuteChange = (text) => {
-    const m = text.replace(/\D/g, '').slice(0, 2);
-    setMinuteInput(m);
-    startTyping(isTypingMinute, minuteTimer);
-    setInputError('');
-    const n = parseInt(m, 10);
-    if (m.length >= 2 && !isNaN(n) && n >= 0 && n <= 59) {
-      setMinute(n);
-      Keyboard.dismiss();
-    } else if (!isNaN(n) && n >= 0 && n <= 59) {
-      setMinute(n);
-    }
-  };
-
-  // ── Blur handlers — pad single-digit entries to 2 digits ──
-  const handleDayBlur = () => {
-    isTypingDay.current = false;
-    if (dayInput.length === 1) {
-      const n = parseInt(dayInput, 10);
-      if (!isNaN(n) && n >= 1 && n <= 31) {
-        setDayInput(pad2(n));
-        setDay(Math.min(n, getDaysInMonth(month, year)));
-      }
-    }
-  };
-  const handleMonthBlur = () => {
-    isTypingMonth.current = false;
-    if (monthInput.length === 1) {
-      const n = parseInt(monthInput, 10);
-      if (!isNaN(n) && n >= 1 && n <= 12) {
-        setMonthInput(pad2(n));
-        setMonth(n - 1);
-      }
-    }
-  };
-  const handleHourBlur = () => {
-    isTypingHour.current = false;
-    if (hourInput.length === 1) {
-      const n = parseInt(hourInput, 10);
-      if (!isNaN(n) && n >= 1 && n <= 12) {
-        setHourInput(pad2(n));
-        setHour12(n);
-      }
-    }
-  };
-  const handleMinuteBlur = () => {
-    isTypingMinute.current = false;
-    if (minuteInput.length === 1) {
-      const n = parseInt(minuteInput, 10);
-      if (!isNaN(n) && n >= 0 && n <= 59) {
-        setMinuteInput(pad2(n));
-        setMinute(n);
-      }
-    }
-  };
-
   const handleConfirm = () => {
     const d = new Date(year, month, effectiveDay);
     if (showTime) {
@@ -389,257 +212,206 @@ export function BirthDatePicker({
     }
   };
 
-  const [kbVisible, setKbVisible] = useState(false);
-  useEffect(() => {
-    const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKbVisible(true));
-    const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKbVisible(false));
-    return () => { showSub.remove(); hideSub.remove(); };
-  }, []);
-
   if (!visible) return null;
 
   return (
     <Modal transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={ws.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => Keyboard.dismiss()} />
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
         <View style={ws.container}>
-          {/* Header */}
-          <View style={ws.header}>
-            <TouchableOpacity onPress={onClose} style={ws.closeBtn}>
-              <MaterialCommunityIcons name="close" size={22} color={DarkColors.textMuted} />
-            </TouchableOpacity>
-            <Text style={[ws.title, { fontSize: titleSize }]}>
-              {title || (lang === 'te' ? 'జన్మ తేదీ ఎంచుకోండి' : 'Select Date of Birth')}
-            </Text>
-          </View>
-
-          {/* Live preview */}
-          <View style={ws.preview}>
-            <MaterialCommunityIcons name="calendar-star" size={20} color={DarkColors.gold} />
-            <Text style={ws.previewText}>
-              {pad2(effectiveDay)} {MONTHS[month]} {year}
-              {showTime ? `  ·  ${timeDisplay}` : ''}
-            </Text>
-          </View>
-
-          {/* ── Date entry — three separate boxes with hyphen separators ── */}
-          <View style={ws.fieldsBlock}>
-            <Text style={ws.blockLabel}>{lang === 'te' ? 'తేదీ' : 'Date'}</Text>
-            <View style={ws.boxRow}>
-              <View style={ws.miniGroup}>
-                <Text style={ws.miniLabel}>{lang === 'te' ? 'రోజు' : 'DD'}</Text>
-                <TextInput
-                  ref={dayRef}
-                  style={ws.miniBox}
-                  value={dayInput}
-                  onChangeText={handleDayChange}
-                  onBlur={handleDayBlur}
-                  placeholder="DD"
-                  placeholderTextColor="rgba(255,255,255,0.25)"
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  selectTextOnFocus
-                  returnKeyType="next"
-                />
-              </View>
-              <Text style={ws.sepText}>−</Text>
-              <View style={ws.miniGroup}>
-                <Text style={ws.miniLabel}>{lang === 'te' ? 'నెల' : 'MM'}</Text>
-                <TextInput
-                  ref={monthRef}
-                  style={ws.miniBox}
-                  value={monthInput}
-                  onChangeText={handleMonthChange}
-                  onBlur={handleMonthBlur}
-                  placeholder="MM"
-                  placeholderTextColor="rgba(255,255,255,0.25)"
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  selectTextOnFocus
-                  returnKeyType="next"
-                />
-              </View>
-              <Text style={ws.sepText}>−</Text>
-              <View style={ws.miniGroupWide}>
-                <Text style={ws.miniLabel}>{lang === 'te' ? 'సంవత్సరం' : 'YYYY'}</Text>
-                <TextInput
-                  ref={yearRef}
-                  style={ws.miniBoxWide}
-                  value={yearInput}
-                  onChangeText={handleYearChange}
-                  placeholder="YYYY"
-                  placeholderTextColor="rgba(255,255,255,0.25)"
-                  keyboardType="number-pad"
-                  maxLength={4}
-                  selectTextOnFocus
-                  returnKeyType="done"
-                />
-              </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={ws.scrollContent}
+          >
+            {/* Header */}
+            <View style={ws.header}>
+              <TouchableOpacity onPress={onClose} style={ws.closeBtn}>
+                <MaterialCommunityIcons name="close" size={22} color={DarkColors.textMuted} />
+              </TouchableOpacity>
+              <Text style={[ws.title, { fontSize: titleSize }]}>
+                {title || (lang === 'te' ? 'జన్మ తేదీ ఎంచుకోండి' : 'Select Date of Birth')}
+              </Text>
             </View>
-          </View>
 
-          {/* ── Time entry — HH : MM with AM/PM toggle ── */}
-          {showTime && (
+            {/* Live preview */}
+            <View style={ws.preview}>
+              <MaterialCommunityIcons name="calendar-star" size={20} color={DarkColors.gold} />
+              <Text style={ws.previewText}>
+                {pad2(effectiveDay)} {MONTHS[month]} {year}
+                {showTime ? `  ·  ${timeDisplay}` : ''}
+              </Text>
+            </View>
+
+            {/* ── Date display chips — DD - MM - YYYY ── */}
             <View style={ws.fieldsBlock}>
-              <Text style={ws.blockLabel}>{lang === 'te' ? 'సమయం' : 'Time'}</Text>
-              <View style={ws.boxRow}>
-                <View style={ws.miniGroup}>
-                  <Text style={ws.miniLabel}>{lang === 'te' ? 'గంట' : 'HH'}</Text>
-                  <TextInput
-                    ref={hourRef}
-                    style={ws.miniBox}
-                    value={hourInput}
-                    onChangeText={handleHourChange}
-                    onBlur={handleHourBlur}
-                    placeholder="HH"
-                    placeholderTextColor="rgba(255,255,255,0.25)"
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    selectTextOnFocus
-                    returnKeyType="next"
+              <Text style={ws.blockLabel}>{lang === 'te' ? 'తేదీ' : 'Date'}</Text>
+              <View style={ws.chipRow}>
+                <ValueChip
+                  value={pad2(effectiveDay)}
+                  sublabel={lang === 'te' ? 'రోజు' : 'Day'}
+                  onPress={() => setFocusField('day')}
+                  isFocus={focusField === 'day'}
+                />
+                <Text style={ws.sepText}>−</Text>
+                <ValueChip
+                  value={pad2(month + 1)}
+                  sublabel={lang === 'te' ? 'నెల' : 'Month'}
+                  onPress={() => setFocusField('month')}
+                  isFocus={focusField === 'month'}
+                />
+                <Text style={ws.sepText}>−</Text>
+                <View style={ws.chipWide}>
+                  <ValueChip
+                    value={String(year)}
+                    sublabel={lang === 'te' ? 'సంవత్సరం' : 'Year'}
+                    onPress={() => setFocusField('year')}
+                    isFocus={focusField === 'year'}
                   />
-                </View>
-                <Text style={ws.sepText}>:</Text>
-                <View style={ws.miniGroup}>
-                  <Text style={ws.miniLabel}>{lang === 'te' ? 'నిమి' : 'MM'}</Text>
-                  <TextInput
-                    ref={minuteRef}
-                    style={ws.miniBox}
-                    value={minuteInput}
-                    onChangeText={handleMinuteChange}
-                    onBlur={handleMinuteBlur}
-                    placeholder="MM"
-                    placeholderTextColor="rgba(255,255,255,0.25)"
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    selectTextOnFocus
-                    returnKeyType="done"
-                  />
-                </View>
-                <View style={ws.amPmGroup}>
-                  <Text style={ws.miniLabel}>{lang === 'te' ? 'కాలం' : 'AM/PM'}</Text>
-                  <View style={ws.amPmRow}>
-                    <TouchableOpacity
-                      style={[ws.amPmBtn, !isPm && ws.amPmBtnActive]}
-                      onPress={() => setIsPm(false)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[ws.amPmText, !isPm && ws.amPmTextActive]}>AM</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[ws.amPmBtn, isPm && ws.amPmBtnActive]}
-                      onPress={() => setIsPm(true)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[ws.amPmText, isPm && ws.amPmTextActive]}>PM</Text>
-                    </TouchableOpacity>
-                  </View>
                 </View>
               </View>
+              <Text style={ws.scrollHint}>
+                {lang === 'te' ? '↓ క్రింద చక్రాలు స్క్రోల్ చేయండి' : '↓ Scroll the wheels below to change'}
+              </Text>
             </View>
-          )}
 
-          {inputError ? <Text style={ws.inputError}>{inputError}</Text> : null}
-
-          {/* Scroll wheels — hidden when keyboard is open to save space */}
-          {!kbVisible && (
-            <View>
-              <View style={ws.wheelsRow}>
-                <WheelColumn
-                  data={Array.from({ length: maxDays }, (_, i) => i + 1)}
-                  selectedIndex={dayIndex}
-                  onSelect={(i) => setDay(i + 1)}
-                  label={lang === 'te' ? 'రోజు' : 'Day'}
-                  renderItem={(d) => pad2(d)}
-                  width={dayColWidth}
-                />
-                <WheelColumn
-                  data={MONTHS}
-                  selectedIndex={month}
-                  onSelect={(i) => {
-                    setMonth(i);
-                    const newMax = getDaysInMonth(i, year);
-                    if (day > newMax) setDay(newMax);
-                  }}
-                  label={lang === 'te' ? 'నెల' : 'Month'}
-                  renderItem={(m) => m}
-                  width={monthColWidth}
-                />
-                <WheelColumn
-                  data={YEARS}
-                  selectedIndex={yearIndex >= 0 ? yearIndex : YEARS.length - 31}
-                  onSelect={(i) => {
-                    setYear(YEARS[i]);
-                    const newMax = getDaysInMonth(month, YEARS[i]);
-                    if (day > newMax) setDay(newMax);
-                  }}
-                  label={lang === 'te' ? 'సంవత్సరం' : 'Year'}
-                  renderItem={(y) => String(y)}
-                  width={yearColWidth}
-                />
-              </View>
-
-              {showTime && (
-                <>
-                  <View style={ws.timeDivider}>
-                    <View style={ws.timeDividerLine} />
-                    <View style={ws.timeDividerBadge}>
-                      <MaterialCommunityIcons name="clock-outline" size={16} color={DarkColors.gold} />
-                      <Text style={ws.timeDividerText}>{lang === 'te' ? 'జన్మ సమయం' : 'Birth Time'}</Text>
+            {/* ── Time display chips — HH : MM  AM/PM ── */}
+            {showTime && (
+              <View style={ws.fieldsBlock}>
+                <Text style={ws.blockLabel}>{lang === 'te' ? 'సమయం' : 'Time'}</Text>
+                <View style={ws.chipRow}>
+                  <ValueChip
+                    value={pad2(hour12)}
+                    sublabel={lang === 'te' ? 'గంట' : 'Hour'}
+                    onPress={() => setFocusField('hour')}
+                    isFocus={focusField === 'hour'}
+                  />
+                  <Text style={ws.sepText}>:</Text>
+                  <ValueChip
+                    value={pad2(minute % 60)}
+                    sublabel={lang === 'te' ? 'నిమిషం' : 'Min'}
+                    onPress={() => setFocusField('minute')}
+                    isFocus={focusField === 'minute'}
+                  />
+                  <View style={ws.amPmGroup}>
+                    <Text style={ws.miniLabel}>{lang === 'te' ? 'కాలం' : 'AM/PM'}</Text>
+                    <View style={ws.amPmRow}>
+                      <TouchableOpacity
+                        style={[ws.amPmBtn, !isPm && ws.amPmBtnActive]}
+                        onPress={() => setIsPm(false)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[ws.amPmText, !isPm && ws.amPmTextActive]}>AM</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[ws.amPmBtn, isPm && ws.amPmBtnActive]}
+                        onPress={() => setIsPm(true)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[ws.amPmText, isPm && ws.amPmTextActive]}>PM</Text>
+                      </TouchableOpacity>
                     </View>
-                    <View style={ws.timeDividerLine} />
                   </View>
-                  <View style={ws.wheelsRow}>
-                    <WheelColumn
-                      data={HOURS_12}
-                      selectedIndex={hourIndex >= 0 ? hourIndex : 5}
-                      onSelect={(i) => setHour12(HOURS_12[i])}
-                      label={lang === 'te' ? 'గంట' : 'Hour'}
-                      renderItem={(h) => pad2(h)}
-                      width={timeColWidth}
-                    />
-                    <Text style={ws.colonText}>:</Text>
-                    <WheelColumn
-                      data={MINUTES_ALL}
-                      selectedIndex={minuteIndex >= 0 ? minuteIndex : 0}
-                      onSelect={(i) => setMinute(MINUTES_ALL[i])}
-                      label={lang === 'te' ? 'నిమిషం' : 'Min'}
-                      renderItem={(m) => pad2(m)}
-                      width={timeColWidth}
-                    />
-                    <WheelColumn
-                      data={PERIODS}
-                      selectedIndex={periodIndex}
-                      onSelect={(i) => setIsPm(i === 1)}
-                      label={lang === 'te' ? 'కాలం' : 'Period'}
-                      width={timeColWidth}
-                    />
-                  </View>
-                </>
-              )}
+                </View>
+              </View>
+            )}
+
+            {/* ── Date wheels ── */}
+            <View style={ws.wheelsRow}>
+              <WheelColumn
+                data={Array.from({ length: maxDays }, (_, i) => i + 1)}
+                selectedIndex={dayIndex}
+                onSelect={(i) => { setDay(i + 1); setFocusField('day'); }}
+                label={lang === 'te' ? 'రోజు' : 'Day'}
+                renderItem={(d) => pad2(d)}
+                width={dayColWidth}
+                highlight={focusField === 'day'}
+              />
+              <WheelColumn
+                data={MONTHS}
+                selectedIndex={month}
+                onSelect={(i) => {
+                  setMonth(i);
+                  const newMax = getDaysInMonth(i, year);
+                  if (day > newMax) setDay(newMax);
+                  setFocusField('month');
+                }}
+                label={lang === 'te' ? 'నెల' : 'Month'}
+                renderItem={(m) => m}
+                width={monthColWidth}
+                highlight={focusField === 'month'}
+              />
+              <WheelColumn
+                data={YEARS}
+                selectedIndex={yearIndex >= 0 ? yearIndex : YEARS.length - 31}
+                onSelect={(i) => {
+                  setYear(YEARS[i]);
+                  const newMax = getDaysInMonth(month, YEARS[i]);
+                  if (day > newMax) setDay(newMax);
+                  setFocusField('year');
+                }}
+                label={lang === 'te' ? 'సంవత్సరం' : 'Year'}
+                renderItem={(y) => String(y)}
+                width={yearColWidth}
+                highlight={focusField === 'year'}
+              />
             </View>
-          )}
 
-          {kbVisible && (
-            <Text style={ws.kbHint}>
-              {lang === 'te'
-                ? 'తేదీ టైప్ చేయండి. కీబోర్డ్ మూసిన తర్వాత స్క్రోల్ వీల్స్ తెరవవచ్చు.'
-                : 'Type the date. Scroll wheels appear after closing keyboard.'}
-            </Text>
-          )}
+            {/* ── Time wheels ── */}
+            {showTime && (
+              <>
+                <View style={ws.timeDivider}>
+                  <View style={ws.timeDividerLine} />
+                  <View style={ws.timeDividerBadge}>
+                    <MaterialCommunityIcons name="clock-outline" size={16} color={DarkColors.gold} />
+                    <Text style={ws.timeDividerText}>{lang === 'te' ? 'జన్మ సమయం' : 'Birth Time'}</Text>
+                  </View>
+                  <View style={ws.timeDividerLine} />
+                </View>
+                <View style={ws.wheelsRow}>
+                  <WheelColumn
+                    data={HOURS_12}
+                    selectedIndex={hourIndex >= 0 ? hourIndex : 5}
+                    onSelect={(i) => { setHour12(HOURS_12[i]); setFocusField('hour'); }}
+                    label={lang === 'te' ? 'గంట' : 'Hour'}
+                    renderItem={(h) => pad2(h)}
+                    width={timeColWidth}
+                    highlight={focusField === 'hour'}
+                  />
+                  <Text style={ws.colonText}>:</Text>
+                  <WheelColumn
+                    data={MINUTES_ALL}
+                    selectedIndex={minuteIndex >= 0 ? minuteIndex : 0}
+                    onSelect={(i) => { setMinute(MINUTES_ALL[i]); setFocusField('minute'); }}
+                    label={lang === 'te' ? 'నిమిషం' : 'Min'}
+                    renderItem={(m) => pad2(m)}
+                    width={timeColWidth}
+                    highlight={focusField === 'minute'}
+                  />
+                  <WheelColumn
+                    data={PERIODS}
+                    selectedIndex={periodIndex}
+                    onSelect={(i) => setIsPm(i === 1)}
+                    label={lang === 'te' ? 'కాలం' : 'Period'}
+                    width={timeColWidth}
+                  />
+                </View>
+              </>
+            )}
 
-          <View style={ws.actions}>
-            <TouchableOpacity style={ws.cancelBtn} onPress={onClose}>
-              <Text style={ws.cancelText}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[ws.confirmBtn, { paddingVertical: btnPadV }]}
-              onPress={handleConfirm}
-            >
-              <MaterialCommunityIcons name="check" size={20} color="#0A0A0A" />
-              <Text style={ws.confirmText}>{lang === 'te' ? 'ఎంచుకోండి' : 'Select'}</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={ws.actions}>
+              <TouchableOpacity style={ws.cancelBtn} onPress={onClose}>
+                <Text style={ws.cancelText}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[ws.confirmBtn, { paddingVertical: btnPadV }]}
+                onPress={handleConfirm}
+              >
+                <MaterialCommunityIcons name="check" size={20} color="#0A0A0A" />
+                <Text style={ws.confirmText}>{lang === 'te' ? 'ఎంచుకోండి' : 'Select'}</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -651,9 +423,10 @@ const ws = StyleSheet.create({
   container: {
     backgroundColor: DarkColors.bgCard,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
     maxHeight: '92%',
   },
+  scrollContent: { paddingBottom: 8 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 16, paddingHorizontal: 16,
@@ -669,38 +442,46 @@ const ws = StyleSheet.create({
   },
   previewText: { fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1 },
 
-  // ── Field blocks (date / time) ──
+  // Field blocks (date / time)
   fieldsBlock: { paddingHorizontal: 20, paddingTop: 14 },
   blockLabel: {
     fontSize: 12, fontWeight: '800', color: DarkColors.silver,
     textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8,
   },
-  boxRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6 },
-  miniGroup: { alignItems: 'center', flex: 1 },
-  miniGroupWide: { alignItems: 'center', flex: 2 },
+  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  chipWide: { flex: 1.6 },
+  chip: {
+    flex: 1,
+    backgroundColor: DarkColors.bgElevated,
+    borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8,
+    borderWidth: 1.5, borderColor: DarkColors.borderCard,
+    alignItems: 'center',
+  },
+  chipFocus: {
+    borderColor: DarkColors.gold,
+    backgroundColor: DarkColors.goldDim,
+  },
+  chipValue: {
+    fontSize: 22, fontWeight: '900', color: '#FFFFFF',
+    letterSpacing: 1,
+  },
+  chipValueFocus: { color: DarkColors.goldLight },
+  chipSub: {
+    fontSize: 10, fontWeight: '700', color: DarkColors.silver,
+    marginTop: 2, letterSpacing: 0.5, textTransform: 'uppercase',
+  },
+  scrollHint: {
+    fontSize: 12, color: DarkColors.silver, fontWeight: '600',
+    textAlign: 'center', marginTop: 8, fontStyle: 'italic',
+  },
+
+  sepText: {
+    fontSize: 22, fontWeight: '900', color: DarkColors.gold,
+    paddingHorizontal: 2, paddingTop: 6,
+  },
   miniLabel: {
     fontSize: 10, fontWeight: '700', color: DarkColors.silver,
     marginBottom: 4, letterSpacing: 0.5,
-  },
-  miniBox: {
-    width: '100%',
-    backgroundColor: DarkColors.bgElevated,
-    borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8,
-    fontSize: 22, fontWeight: '900', color: '#FFFFFF',
-    textAlign: 'center', letterSpacing: 1,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
-  },
-  miniBoxWide: {
-    width: '100%',
-    backgroundColor: DarkColors.bgElevated,
-    borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8,
-    fontSize: 22, fontWeight: '900', color: '#FFFFFF',
-    textAlign: 'center', letterSpacing: 1,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
-  },
-  sepText: {
-    fontSize: 24, fontWeight: '900', color: DarkColors.gold,
-    paddingHorizontal: 2, paddingBottom: 10,
   },
   amPmGroup: { alignItems: 'center', flex: 1.4 },
   amPmRow: {
@@ -710,22 +491,12 @@ const ws = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   amPmBtn: {
-    flex: 1, paddingVertical: 10, borderRadius: 7,
+    flex: 1, paddingVertical: 9, borderRadius: 7,
     alignItems: 'center', justifyContent: 'center',
   },
   amPmBtnActive: { backgroundColor: DarkColors.gold },
-  amPmText: { fontSize: 14, fontWeight: '800', color: DarkColors.silver, letterSpacing: 0.5 },
+  amPmText: { fontSize: 13, fontWeight: '800', color: DarkColors.silver, letterSpacing: 0.5 },
   amPmTextActive: { color: '#0A0A0A' },
-
-  inputError: {
-    fontSize: 12, color: DarkColors.kumkum,
-    textAlign: 'center', marginTop: 8, fontWeight: '600',
-    marginHorizontal: 20,
-  },
-  kbHint: {
-    fontSize: 13, color: DarkColors.silver, textAlign: 'center',
-    paddingVertical: 24, paddingHorizontal: 24, fontStyle: 'italic',
-  },
 
   wheelsRow: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start',
@@ -756,6 +527,10 @@ const ws = StyleSheet.create({
     backgroundColor: DarkColors.bgElevated,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
+  wheelContainerHighlight: {
+    borderColor: DarkColors.gold,
+    borderWidth: 1.5,
+  },
   selectionHighlight: {
     position: 'absolute',
     top: ITEM_HEIGHT * CENTER_OFFSET,
@@ -769,7 +544,10 @@ const ws = StyleSheet.create({
   itemText: { fontSize: 20, fontWeight: '600', color: DarkColors.textPrimary },
   itemTextSelected: { fontSize: 26, fontWeight: '900', color: DarkColors.gold },
   itemTextDim: { color: DarkColors.silver, fontSize: 17 },
-  actions: { flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingTop: 12 },
+  actions: {
+    flexDirection: 'row', gap: 12,
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8,
+  },
   cancelBtn: {
     flex: 1, alignItems: 'center', justifyContent: 'center',
     paddingVertical: 14, borderRadius: 14,
