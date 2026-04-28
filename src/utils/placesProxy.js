@@ -133,40 +133,88 @@ export async function googlePlaceDetails(placeId) {
   } catch { return null; }
 }
 
-// ── Photon (OSM-backed, free, no API key) ──
-// Used as a fallback when Google Places fails — common cause is the
-// Cloud Console API key being restricted to specific Android SHA-1
-// fingerprints, so it works in dev/web but not on a release APK.
-// Photon is the same backend Komoot uses; covers Indian cities and
-// villages well. No rate limit for casual use.
+// ── Fallback geocoders — Geoapify + LocationIQ ──
+// Used when Google Places fails (most commonly because the Cloud
+// Console API key is restricted to specific Android SHA-1 fingerprints,
+// so the key works on web/dev but is blocked on a release APK).
 //
-// Returns the same shape as googlePlacesAutocomplete + already
-// includes lat/lon (no separate details call needed). The modal's
-// handleSelectResult auto-detects this (no placeId → skips details).
-export async function photonSearch(input) {
+// Both providers have generous free tiers:
+//   • Geoapify     — 3,000 req/day. Sign up: https://www.geoapify.com
+//   • LocationIQ   — 5,000 req/day, 60/min. Sign up: https://locationiq.com
+//
+// Paste each free API key into the constants below. An empty key
+// makes that provider a silent no-op so search still works as long
+// as at least ONE provider (Google primary or any fallback) succeeds.
+//
+// All functions return the same shape: { name, displayName, description,
+// latitude, longitude, isCustom, source }. No placeId → the modal's
+// handleSelectResult skips its detailsFn fetch and uses lat/lon inline.
+const GEOAPIFY_API_KEY = '';        // ← paste your Geoapify free key here
+const LOCATIONIQ_API_KEY = '';      // ← paste your LocationIQ free key here
+
+export async function geoapifySearch(input) {
   if (!input || input.length < 2) return [];
+  if (!GEOAPIFY_API_KEY) return [];
   try {
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=12&lang=en`;
+    const url = `https://api.geoapify.com/v1/geocode/autocomplete`
+      + `?text=${encodeURIComponent(input)}`
+      + `&filter=countrycode:in`
+      + `&format=json&limit=10`
+      + `&apiKey=${GEOAPIFY_API_KEY}`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!resp.ok) return [];
     const data = await resp.json();
-    return (data.features || [])
-      .filter(f => f.geometry?.coordinates && f.properties?.name)
-      .map(f => {
-        const p = f.properties;
-        const [lon, lat] = f.geometry.coordinates;
-        const parts = [p.city || p.name, p.state, p.country].filter(Boolean);
-        const description = [p.state, p.country].filter(Boolean).join(', ');
-        return {
-          name: p.name,
-          displayName: parts.join(', '),
-          description,
-          latitude: lat,
-          longitude: lon,
-          source: 'photon',
-        };
-      });
+    return (data.results || [])
+      .filter(p => p.lat != null && p.lon != null)
+      .map(p => ({
+        name: p.name || p.city || p.county || (p.formatted || '').split(',')[0] || '',
+        displayName: p.formatted || '',
+        description: [p.state, p.country].filter(Boolean).join(', '),
+        latitude: p.lat,
+        longitude: p.lon,
+        altitude: 0,
+        isCustom: true,
+        source: 'geoapify',
+      }));
   } catch { return []; }
+}
+
+export async function locationIQSearch(input) {
+  if (!input || input.length < 2) return [];
+  if (!LOCATIONIQ_API_KEY) return [];
+  try {
+    const url = `https://api.locationiq.com/v1/autocomplete`
+      + `?key=${LOCATIONIQ_API_KEY}`
+      + `&q=${encodeURIComponent(input)}`
+      + `&countrycodes=in&limit=10&dedupe=1&format=json`;
+    const resp = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    if (!Array.isArray(data)) return [];
+    return data
+      .filter(p => p.lat && p.lon)
+      .map(p => ({
+        name: p.display_place || p.address?.name || p.address?.city || (p.display_name || '').split(',')[0] || '',
+        displayName: p.display_name || '',
+        description: p.display_address || [p.address?.state, p.address?.country].filter(Boolean).join(', '),
+        latitude: parseFloat(p.lat),
+        longitude: parseFloat(p.lon),
+        altitude: 0,
+        isCustom: true,
+        source: 'locationiq',
+      }));
+  } catch { return []; }
+}
+
+// Cascade: Geoapify → LocationIQ. First non-empty result wins.
+// Returns [] only if BOTH providers are keyless OR both fail.
+export async function fallbackSearch(input) {
+  const geo = await geoapifySearch(input);
+  if (geo.length) return geo;
+  return await locationIQSearch(input);
 }
 
 // ── Legacy Places API (native only — no CORS needed) ──

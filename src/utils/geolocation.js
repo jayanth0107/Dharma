@@ -94,35 +94,9 @@ export async function reverseGeocode(latitude, longitude) {
 // --- Search locations by name (for typing custom location) ---
 // Uses Google Places API (Autocomplete + Details) for reliable global coverage
 
-// Free OSM-backed fallback. Used when Google Places returns nothing —
-// usually means the API key is restricted to specific Android SHA-1
-// fingerprints in Cloud Console (key works on web/dev, fails on a
-// release APK signed with a different cert). Photon needs no key
-// and covers Indian cities + villages well.
-async function photonFallback(input) {
-  try {
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=12&lang=en`;
-    const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    return (data.features || [])
-      .filter(f => f.geometry?.coordinates && f.properties?.name)
-      .map(f => {
-        const p = f.properties;
-        const [lon, lat] = f.geometry.coordinates;
-        const parts = [p.city || p.name, p.state, p.country].filter(Boolean);
-        return {
-          name: p.name,
-          displayName: parts.join(', '),
-          latitude: lat,
-          longitude: lon,
-          altitude: 0,
-          isCustom: true,
-          source: 'photon',
-        };
-      });
-  } catch { return []; }
-}
+// Geoapify + LocationIQ fallback chain. See src/utils/placesProxy.js
+// for API keys / signup links. If both keys are empty, fallback is a
+// no-op — search just returns Google's result (or [] if Google fails).
 
 export async function searchLocation(query) {
   if (!query || query.trim().length < 2) return [];
@@ -186,10 +160,11 @@ export async function searchLocation(query) {
     if (__DEV__) console.warn('Google Places search failed:', e?.message);
   }
 
-  // Fall back to Photon if Google returned nothing (or threw)
+  // Fall back to Geoapify → LocationIQ if Google returned nothing.
   if (places.length === 0) {
-    if (__DEV__) console.warn('Google Places empty — falling back to Photon for', sanitized);
-    return await photonFallback(sanitized);
+    if (__DEV__) console.warn('Google Places empty — falling back for', sanitized);
+    const { fallbackSearch } = require('./placesProxy');
+    return await fallbackSearch(sanitized);
   }
   return places;
 }

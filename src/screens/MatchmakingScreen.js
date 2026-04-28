@@ -21,7 +21,7 @@ import { SectionShareRow } from '../components/SectionShareRow';
 import { SimpleKundliChart } from '../components/KundliChart';
 import { ClearableInput } from '../components/ClearableInput';
 import { calculateMatchmaking, getNakshatraRashiFromDate, NAKSHATRAS, NAKSHATRAS_EN, RASHIS, RASHIS_EN, KUTA_EXTENDED_DETAILS } from '../utils/matchmakingCalculator';
-import { googlePlacesAutocomplete, googlePlaceDetails, photonSearch } from '../utils/placesProxy';
+import { googlePlacesAutocomplete, googlePlaceDetails, fallbackSearch } from '../utils/placesProxy';
 import { generateMatchmakingPdf } from '../utils/matchmakingReport';
 import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
 
@@ -310,7 +310,7 @@ export function MatchmakingScreen({ navigation }) {
           lang={t('te', 'en') === 'te' ? 'te' : 'en'}
           searchFn={googlePlacesAutocomplete}
           detailsFn={googlePlaceDetails}
-          fallbackSearchFn={photonSearch}
+          fallbackSearchFn={fallbackSearch}
         />
 
         {!result ? (

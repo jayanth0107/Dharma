@@ -12,7 +12,7 @@ import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
-import { googlePlacesAutocomplete, googlePlaceDetails, photonSearch } from '../utils/placesProxy';
+import { googlePlacesAutocomplete, googlePlaceDetails, fallbackSearch } from '../utils/placesProxy';
 import { SectionShareRow } from './SectionShareRow';
 import { BirthDatePicker } from './BirthDatePicker';
 // BirthTimePicker merged into BirthDatePicker (showTime prop)
@@ -531,7 +531,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   lang={lang}
                   searchFn={googlePlacesAutocomplete}
                   detailsFn={googlePlaceDetails}
-                  fallbackSearchFn={photonSearch}
+                  fallbackSearchFn={fallbackSearch}
                 />
 
                 {/* Generate Button */}
