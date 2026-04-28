@@ -94,12 +94,43 @@ export async function reverseGeocode(latitude, longitude) {
 // --- Search locations by name (for typing custom location) ---
 // Uses Google Places API (Autocomplete + Details) for reliable global coverage
 
+// Free OSM-backed fallback. Used when Google Places returns nothing —
+// usually means the API key is restricted to specific Android SHA-1
+// fingerprints in Cloud Console (key works on web/dev, fails on a
+// release APK signed with a different cert). Photon needs no key
+// and covers Indian cities + villages well.
+async function photonFallback(input) {
+  try {
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=12&lang=en`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return (data.features || [])
+      .filter(f => f.geometry?.coordinates && f.properties?.name)
+      .map(f => {
+        const p = f.properties;
+        const [lon, lat] = f.geometry.coordinates;
+        const parts = [p.city || p.name, p.state, p.country].filter(Boolean);
+        return {
+          name: p.name,
+          displayName: parts.join(', '),
+          latitude: lat,
+          longitude: lon,
+          altitude: 0,
+          isCustom: true,
+          source: 'photon',
+        };
+      });
+  } catch { return []; }
+}
+
 export async function searchLocation(query) {
   if (!query || query.trim().length < 2) return [];
   const sanitized = query.trim().slice(0, 100).replace(/[\x00-\x1f]/g, '');
 
+  // Try Google Places first
+  let places = [];
   try {
-    // Google Places Autocomplete (New API — works on web + native)
     const resp = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
       method: 'POST',
       headers: {
@@ -113,51 +144,54 @@ export async function searchLocation(query) {
       }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    const suggestions = (data.suggestions || []).filter(s => s.placePrediction);
 
-    // Fetch details (lat/lng) for each suggestion in parallel (max 8)
-    const places = await Promise.all(
-      suggestions.slice(0, 8).map(async (s) => {
-        const p = s.placePrediction;
-        const placeId = p.placeId;
-        const name = p.structuredFormat?.mainText?.text || '';
-        const description = p.structuredFormat?.secondaryText?.text || '';
-        const displayName = p.text?.text || '';
+    if (resp.ok) {
+      const data = await resp.json();
+      const suggestions = (data.suggestions || []).filter(s => s.placePrediction);
 
-        // Fetch coordinates
-        try {
-          const detailResp = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-            headers: {
-              'X-Goog-Api-Key': GOOGLE_API_KEY_REV,
-              'X-Goog-FieldMask': 'displayName,location,formattedAddress',
-            },
-            signal: AbortSignal.timeout(6000),
-          });
-          if (!detailResp.ok) return null;
-          const detail = await detailResp.json();
-          return {
-            name: name || detail.displayName?.text || '',
-            displayName: displayName || detail.formattedAddress || '',
-            latitude: detail.location?.latitude || 0,
-            longitude: detail.location?.longitude || 0,
-            altitude: 0,
-            placeId,
-            isCustom: true,
-          };
-        } catch {
-          // Return without coordinates — consumer can use detailsFn
-          return { name, displayName, description, placeId, isCustom: true };
-        }
-      })
-    );
-
-    return places.filter(p => p && p.name);
+      places = await Promise.all(
+        suggestions.slice(0, 8).map(async (s) => {
+          const p = s.placePrediction;
+          const placeId = p.placeId;
+          const name = p.structuredFormat?.mainText?.text || '';
+          const description = p.structuredFormat?.secondaryText?.text || '';
+          const displayName = p.text?.text || '';
+          try {
+            const detailResp = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+              headers: {
+                'X-Goog-Api-Key': GOOGLE_API_KEY_REV,
+                'X-Goog-FieldMask': 'displayName,location,formattedAddress',
+              },
+              signal: AbortSignal.timeout(6000),
+            });
+            if (!detailResp.ok) return null;
+            const detail = await detailResp.json();
+            return {
+              name: name || detail.displayName?.text || '',
+              displayName: displayName || detail.formattedAddress || '',
+              latitude: detail.location?.latitude || 0,
+              longitude: detail.location?.longitude || 0,
+              altitude: 0,
+              placeId,
+              isCustom: true,
+            };
+          } catch {
+            return { name, displayName, description, placeId, isCustom: true };
+          }
+        })
+      );
+      places = places.filter(p => p && p.name);
+    }
   } catch (e) {
     if (__DEV__) console.warn('Google Places search failed:', e?.message);
-    return [];
   }
+
+  // Fall back to Photon if Google returned nothing (or threw)
+  if (places.length === 0) {
+    if (__DEV__) console.warn('Google Places empty — falling back to Photon for', sanitized);
+    return await photonFallback(sanitized);
+  }
+  return places;
 }
 
 // --- IP-based location fallback (no GPS needed, instant) ---

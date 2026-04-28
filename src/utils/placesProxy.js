@@ -133,6 +133,42 @@ export async function googlePlaceDetails(placeId) {
   } catch { return null; }
 }
 
+// ── Photon (OSM-backed, free, no API key) ──
+// Used as a fallback when Google Places fails — common cause is the
+// Cloud Console API key being restricted to specific Android SHA-1
+// fingerprints, so it works in dev/web but not on a release APK.
+// Photon is the same backend Komoot uses; covers Indian cities and
+// villages well. No rate limit for casual use.
+//
+// Returns the same shape as googlePlacesAutocomplete + already
+// includes lat/lon (no separate details call needed). The modal's
+// handleSelectResult auto-detects this (no placeId → skips details).
+export async function photonSearch(input) {
+  if (!input || input.length < 2) return [];
+  try {
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=12&lang=en`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return (data.features || [])
+      .filter(f => f.geometry?.coordinates && f.properties?.name)
+      .map(f => {
+        const p = f.properties;
+        const [lon, lat] = f.geometry.coordinates;
+        const parts = [p.city || p.name, p.state, p.country].filter(Boolean);
+        const description = [p.state, p.country].filter(Boolean).join(', ');
+        return {
+          name: p.name,
+          displayName: parts.join(', '),
+          description,
+          latitude: lat,
+          longitude: lon,
+          source: 'photon',
+        };
+      });
+  } catch { return []; }
+}
+
 // ── Legacy Places API (native only — no CORS needed) ──
 
 export async function googlePlacesNearby(lat, lon, keyword = 'hindu temple', radius = 10000) {
