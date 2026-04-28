@@ -16,20 +16,23 @@ export const CHATURTHI_2026 = [
   { date: '2026-12-13', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
 ];
 
+// Validated against drikpanchang.com (Hyderabad timezone) on 2026-04-28.
+// 2026 is an Adhika-Masa year — extra Jyeshtha month between regular
+// Vaishakha and Jyeshtha — so 13 Pournamis instead of the usual 12.
 export const POURNAMI_2026 = [
-  { date: '2026-01-07', name: 'పుష్య పౌర్ణమి', nameEnglish: 'Pushya Pournami' },
-  { date: '2026-02-05', name: 'మాఘ పౌర్ణమి', nameEnglish: 'Magha Pournami' },
-  { date: '2026-03-07', name: 'ఫాల్గుణ పౌర్ణమి', nameEnglish: 'Phalguna Pournami' },
-  { date: '2026-04-05', name: 'చైత్ర పౌర్ణమి', nameEnglish: 'Chaitra Pournami' },
-  { date: '2026-05-04', name: 'వైశాఖ పౌర్ణమి', nameEnglish: 'Vaishakha Pournami' },
-  { date: '2026-06-03', name: 'జ్యేష్ఠ పౌర్ణమి', nameEnglish: 'Jyeshtha Pournami' },
-  { date: '2026-07-02', name: 'ఆషాఢ పౌర్ణమి', nameEnglish: 'Ashadha Pournami' },
-  { date: '2026-08-01', name: 'శ్రావణ పౌర్ణమి', nameEnglish: 'Shravana Pournami' },
-  { date: '2026-08-30', name: 'భాద్రపద పౌర్ణమి', nameEnglish: 'Bhadrapada Pournami' },
-  { date: '2026-09-29', name: 'ఆశ్వయుజ పౌర్ణమి', nameEnglish: 'Ashwayuja Pournami' },
-  { date: '2026-10-28', name: 'కార్తీక పౌర్ణమి', nameEnglish: 'Karthika Pournami' },
-  { date: '2026-11-27', name: 'మార్గశిర పౌర్ణమి', nameEnglish: 'Margashira Pournami' },
-  { date: '2026-12-27', name: 'పుష్య పౌర్ణమి', nameEnglish: 'Pushya Pournami' },
+  { date: '2026-01-03', name: 'పుష్య పౌర్ణమి',           nameEnglish: 'Pushya Pournami' },
+  { date: '2026-02-01', name: 'మాఘ పౌర్ణమి',             nameEnglish: 'Magha Pournami' },
+  { date: '2026-03-03', name: 'ఫాల్గుణ పౌర్ణమి',         nameEnglish: 'Phalguna Pournami' },
+  { date: '2026-04-01', name: 'చైత్ర పౌర్ణమి',           nameEnglish: 'Chaitra Pournami' },
+  { date: '2026-05-01', name: 'వైశాఖ పౌర్ణమి',           nameEnglish: 'Vaishakha Pournami' },
+  { date: '2026-05-30', name: 'జ్యేష్ఠ అధిక పౌర్ణమి',    nameEnglish: 'Jyeshtha Adhika Pournami' },
+  { date: '2026-06-29', name: 'జ్యేష్ఠ పౌర్ణమి',         nameEnglish: 'Jyeshtha Pournami' },
+  { date: '2026-07-29', name: 'ఆషాఢ పౌర్ణమి',            nameEnglish: 'Ashadha Pournami' },
+  { date: '2026-08-27', name: 'శ్రావణ పౌర్ణమి',          nameEnglish: 'Shravana Pournami' },
+  { date: '2026-09-26', name: 'భాద్రపద పౌర్ణమి',         nameEnglish: 'Bhadrapada Pournami' },
+  { date: '2026-10-25', name: 'ఆశ్వయుజ పౌర్ణమి',         nameEnglish: 'Ashwayuja Pournami' },
+  { date: '2026-11-24', name: 'కార్తీక పౌర్ణమి',         nameEnglish: 'Karthika Pournami' },
+  { date: '2026-12-23', name: 'మార్గశిర పౌర్ణమి',        nameEnglish: 'Margashira Pournami' },
 ];
 
 export const AMAVASYA_2026 = [
