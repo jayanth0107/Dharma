@@ -30,7 +30,11 @@ const VISIBLE_ITEMS = 3;
 const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: CURRENT_YEAR - 1919 }, (_, i) => 1920 + i);
+// Year range — wide enough to cover elders for Family / Matchmaking
+// flows (~age 86) without going to centenarian territory.
+// To narrow to a strict "1990 onwards" set, change YEAR_START to 1990.
+const YEAR_START = 1940;
+const YEARS = Array.from({ length: CURRENT_YEAR - YEAR_START + 1 }, (_, i) => YEAR_START + i);
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 const MINUTES_ALL = Array.from({ length: 60 }, (_, i) => i);
 const PERIODS = ['AM', 'PM'];
@@ -48,6 +52,16 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
     if (isFirstMount.current) {
       isFirstMount.current = false;
       lastSnapped.current = selectedIndex;
+      // contentOffset is iOS-only — on Android the wheel would mount
+      // at y=0 (= first item in array) regardless of selectedIndex.
+      // Force the initial position via scrollTo on the next frame so
+      // the wheel matches the chip / current value on every platform.
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({
+          y: selectedIndex * ITEM_HEIGHT,
+          animated: false,
+        });
+      });
       return;
     }
     if (selectedIndex !== lastSnapped.current && scrollRef.current) {
