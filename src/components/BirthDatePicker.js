@@ -30,10 +30,9 @@ const VISIBLE_ITEMS = 3;
 const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CURRENT_YEAR = new Date().getFullYear();
-// Year range — wide enough to cover elders for Family / Matchmaking
-// flows (~age 86) without going to centenarian territory.
-// To narrow to a strict "1990 onwards" set, change YEAR_START to 1990.
-const YEAR_START = 1940;
+// Year range — covers everyone including centenarian elders
+// for Family / Matchmaking flows.
+const YEAR_START = 1923;
 const YEARS = Array.from({ length: CURRENT_YEAR - YEAR_START + 1 }, (_, i) => YEAR_START + i);
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 const MINUTES_ALL = Array.from({ length: 60 }, (_, i) => i);
