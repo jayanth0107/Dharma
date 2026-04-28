@@ -32,7 +32,12 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 const ITEM_HEIGHT = 44;
-const VISIBLE_ITEMS = 5;
+// 3 visible items (centre = selected, one above, one below) — keeps the
+// modal compact enough that on showTime=true layouts (date wheels +
+// time wheels + inputs + actions) we don't need an outer ScrollView,
+// which was eating wheel-scroll gestures on Android.
+const VISIBLE_ITEMS = 3;
+const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);    // rows above/below the centre
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1919 }, (_, i) => 1920 + i);
@@ -137,8 +142,8 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
           onMomentumScrollEnd={handleSnapEnd}
           onScrollEndDrag={handleSnapEnd}
           contentContainerStyle={{
-            paddingTop: ITEM_HEIGHT * 2,
-            paddingBottom: ITEM_HEIGHT * 2,
+            paddingTop: ITEM_HEIGHT * CENTER_OFFSET,
+            paddingBottom: ITEM_HEIGHT * CENTER_OFFSET,
           }}
         >
           {data.map((item, i) => (
@@ -233,24 +238,38 @@ export function BirthDatePicker({
   // and cursor-jumping bug. After 600 ms of typing inactivity, the
   // wheels become the source of truth again and the field shows the
   // canonical formatted value.
+  //
+  // We also explicitly track + restore the cursor position (`selection`)
+  // because RN's TextInput resets the cursor to the end whenever the
+  // controlled `value` prop changes from a programmatic source. The
+  // mask logic below counts digits-before-cursor in the user's text,
+  // then places the cursor at the same digit count in the masked text
+  // — so a backspace in the middle of "01-02-1990" stays in the middle.
   const [dateInput, setDateInput] = useState(dateDisplay);
   const [timeInput, setTimeInput] = useState(timeDisplay);
+  const [dateSelection, setDateSelection] = useState(undefined);
+  const [timeSelection, setTimeSelection] = useState(undefined);
   const [inputError, setInputError] = useState('');
   const dateTypingTimer = useRef(null);
   const timeTypingTimer = useRef(null);
   const isTypingDate = useRef(false);
   const isTypingTime = useRef(false);
+  // Cached cursor position from onSelectionChange (for next onChangeText)
+  const dateCursor = useRef(dateDisplay.length);
+  const timeCursor = useRef(timeDisplay.length);
 
   // Sync input ↓ from wheels — only when user isn't actively typing.
   useEffect(() => {
     if (isTypingDate.current) return;
     setDateInput(dateDisplay);
+    setDateSelection(undefined);          // let cursor follow text content
   }, [dateDisplay]);
 
   useEffect(() => {
     if (!showTime) return;
     if (isTypingTime.current) return;
     setTimeInput(timeDisplay);
+    setTimeSelection(undefined);
   }, [timeDisplay, showTime]);
 
   // Cleanup timers on unmount
@@ -299,20 +318,42 @@ export function BirthDatePicker({
     return true;
   };
 
+  // ── Cursor-preserving mask helpers ──
+  // Place cursor in the new (masked) text at the same DIGIT-count
+  // position as where the user was in the old text. Hyphens/colons
+  // get skipped, so backspace mid-string stays mid-string.
+  function nextCursor(oldText, oldCursorPos, newMasked) {
+    const digitsBefore = (oldText.slice(0, oldCursorPos).match(/\d/g) || []).length;
+    let pos = 0, count = 0;
+    while (pos < newMasked.length && count < digitsBefore) {
+      if (/\d/.test(newMasked[pos])) count++;
+      pos++;
+    }
+    return pos;
+  }
+
   // ── Input handlers ──
   const handleDateChange = (text) => {
+    const oldText = dateInput;
+    const oldPos = dateCursor.current ?? oldText.length;
     const masked = maskDate(text);
+    const newPos = nextCursor(text, oldPos, masked);
     isTypingDate.current = true;
     setDateInput(masked);
+    setDateSelection({ start: newPos, end: newPos });
     if (dateTypingTimer.current) clearTimeout(dateTypingTimer.current);
     dateTypingTimer.current = setTimeout(() => { isTypingDate.current = false; }, 600);
     if (masked.length === 10) tryParseDate(masked);
   };
 
   const handleTimeChange = (text) => {
+    const oldText = timeInput;
+    const oldPos = timeCursor.current ?? oldText.length;
     const masked = maskTime(text);
+    const newPos = nextCursor(text, oldPos, masked);
     isTypingTime.current = true;
     setTimeInput(masked);
+    setTimeSelection({ start: newPos, end: newPos });
     if (timeTypingTimer.current) clearTimeout(timeTypingTimer.current);
     timeTypingTimer.current = setTimeout(() => { isTypingTime.current = false; }, 600);
     tryParseTime(masked);
@@ -396,6 +437,10 @@ export function BirthDatePicker({
                 value={dateInput}
                 onChangeText={handleDateChange}
                 onBlur={handleDateBlur}
+                selection={dateSelection}
+                onSelectionChange={(e) => {
+                  dateCursor.current = e.nativeEvent.selection.start;
+                }}
                 placeholder="DD-MM-YYYY"
                 placeholderTextColor="rgba(255,255,255,0.25)"
                 keyboardType="number-pad"
@@ -411,6 +456,10 @@ export function BirthDatePicker({
                   value={timeInput}
                   onChangeText={handleTimeChange}
                   onBlur={handleTimeBlur}
+                  selection={timeSelection}
+                  onSelectionChange={(e) => {
+                    timeCursor.current = e.nativeEvent.selection.start;
+                  }}
                   placeholder="HH:MM AM"
                   placeholderTextColor="rgba(255,255,255,0.25)"
                   // Allow letters for AM/PM but keep numeric prominence
@@ -424,13 +473,13 @@ export function BirthDatePicker({
           </View>
           {inputError ? <Text style={ws.inputError}>{inputError}</Text> : null}
 
-          {/* Scroll wheels — hidden when keyboard is open to save space */}
+          {/* Scroll wheels — hidden when keyboard is open to save space.
+              No outer ScrollView wrapper here: it was capturing wheel-
+              scroll gestures on Android (page-scrolls-instead-of-wheel
+              bug). With VISIBLE_ITEMS=3 the entire layout fits inside
+              the modal's maxHeight on every supported screen size. */}
           {!kbVisible && (
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingBottom: 4 }}
-            >
+            <View>
               <View style={ws.wheelsRow}>
                 <WheelColumn
                   data={Array.from({ length: maxDays }, (_, i) => i + 1)}
@@ -509,7 +558,7 @@ export function BirthDatePicker({
                   </Text>
                 </>
               )}
-            </ScrollView>
+            </View>
           )}
 
           {kbVisible && (
@@ -638,7 +687,7 @@ const ws = StyleSheet.create({
   },
   selectionHighlight: {
     position: 'absolute',
-    top: ITEM_HEIGHT * 2,
+    top: ITEM_HEIGHT * CENTER_OFFSET,
     left: 0, right: 0,
     height: ITEM_HEIGHT,
     backgroundColor: DarkColors.goldDim,
