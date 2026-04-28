@@ -56,14 +56,33 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
     }
   }, [selectedIndex]);
 
-  const handleSnapEnd = useCallback((e) => {
-    const y = e.nativeEvent.contentOffset.y;
-    const idx = Math.max(0, Math.min(Math.round(y / ITEM_HEIGHT), data.length - 1));
+  // Compute index from a given scroll Y, clamped to data bounds.
+  const indexFromY = useCallback((y) => (
+    Math.max(0, Math.min(Math.round(y / ITEM_HEIGHT), data.length - 1))
+  ), [data.length]);
+
+  // Live update: fires while the user is actively dragging or
+  // momentum-scrolling. We only call onSelect when the centred item
+  // *changes* (lastSnapped dedupe), so the parent re-renders ~5–10
+  // times per long scroll, not 60. Keeps the upper display chips in
+  // sync with the wheel position in real time.
+  const handleScroll = useCallback((e) => {
+    const idx = indexFromY(e.nativeEvent.contentOffset.y);
     if (idx !== lastSnapped.current) {
       lastSnapped.current = idx;
       onSelect(idx);
     }
-  }, [data.length, onSelect]);
+  }, [indexFromY, onSelect]);
+
+  // Final snap when momentum/drag ends — same logic, also a safety
+  // net in case the last onScroll event landed off-grid.
+  const handleSnapEnd = useCallback((e) => {
+    const idx = indexFromY(e.nativeEvent.contentOffset.y);
+    if (idx !== lastSnapped.current) {
+      lastSnapped.current = idx;
+      onSelect(idx);
+    }
+  }, [indexFromY, onSelect]);
 
   const handleItemTap = (i) => {
     if (scrollRef.current) {
@@ -90,6 +109,8 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
           bounces={false}
           nestedScrollEnabled
           contentOffset={{ x: 0, y: selectedIndex * ITEM_HEIGHT }}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           onMomentumScrollEnd={handleSnapEnd}
           onScrollEndDrag={handleSnapEnd}
           contentContainerStyle={{
