@@ -1,19 +1,25 @@
 // ధర్మ — Recurring Monthly Observances 2026
 // Sankashti Chaturthi, Pournami, Amavasya, Pradosham dates
 
+// Validated against drikpanchang.com (Hyderabad timezone) on 2026-04-28.
+// Previously: dates were on Shukla Paksha Chaturthi (Vinayaka Chaturthi)
+// — wrong observance entirely. Sankashti Chaturthi is the Krishna Paksha
+// 4th, 4 days after each Pournami. 13 entries in 2026 because of the
+// Adhika Jyeshtha month giving one extra Krishna Chaturthi.
 export const CHATURTHI_2026 = [
-  { date: '2026-01-22', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-02-21', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-03-22', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-04-21', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-05-20', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-06-19', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-07-18', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-08-17', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-09-16', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-10-15', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-11-14', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
-  { date: '2026-12-13', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-01-06', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-02-05', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-03-06', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-04-05', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-05-05', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-06-03', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-07-03', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-08-02', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-08-31', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-09-29', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-10-29', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-11-27', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
+  { date: '2026-12-26', name: 'సంకష్టహర చతుర్థి', nameEnglish: 'Sankashti Chaturthi' },
 ];
 
 // Validated against drikpanchang.com (Hyderabad timezone) on 2026-04-28.
@@ -35,46 +41,56 @@ export const POURNAMI_2026 = [
   { date: '2026-12-23', name: 'మార్గశిర పౌర్ణమి',        nameEnglish: 'Margashira Pournami' },
 ];
 
+// Validated against drikpanchang.com (Hyderabad timezone) on 2026-04-28.
+// 12 Amavasyas in 2026 (one per lunar month), including the Adhika
+// Jyeshtha Amavasya in June. Pushya Amavasya 2025 fell in Dec 2025
+// and Pushya Amavasya 2026 falls in Jan 2027 — neither is in this
+// calendar year.
 export const AMAVASYA_2026 = [
-  { date: '2026-01-22', name: 'పుష్య అమావాస్య', nameEnglish: 'Pushya Amavasya' },
-  { date: '2026-02-20', name: 'మాఘ అమావాస్య', nameEnglish: 'Magha Amavasya' },
-  { date: '2026-03-22', name: 'ఫాల్గుణ అమావాస్య', nameEnglish: 'Phalguna Amavasya' },
-  { date: '2026-04-20', name: 'చైత్ర అమావాస్య', nameEnglish: 'Chaitra Amavasya' },
-  { date: '2026-05-20', name: 'వైశాఖ అమావాస్య', nameEnglish: 'Vaishakha Amavasya' },
-  { date: '2026-06-18', name: 'జ్యేష్ఠ అమావాస్య', nameEnglish: 'Jyeshtha Amavasya' },
-  { date: '2026-07-18', name: 'ఆషాఢ అమావాస్య', nameEnglish: 'Ashadha Amavasya' },
-  { date: '2026-08-16', name: 'శ్రావణ అమావాస్య', nameEnglish: 'Shravana Amavasya' },
-  { date: '2026-09-15', name: 'భాద్రపద అమావాస్య', nameEnglish: 'Bhadrapada Amavasya' },
-  { date: '2026-10-14', name: 'ఆశ్వయుజ అమావాస్య', nameEnglish: 'Ashwayuja Amavasya' },
-  { date: '2026-11-13', name: 'కార్తీక అమావాస్య', nameEnglish: 'Karthika Amavasya' },
-  { date: '2026-12-12', name: 'మార్గశిర అమావాస్య', nameEnglish: 'Margashira Amavasya' },
+  { date: '2026-01-18', name: 'మాఘ అమావాస్య',          nameEnglish: 'Magha Amavasya' },
+  { date: '2026-02-17', name: 'ఫాల్గుణ అమావాస్య',       nameEnglish: 'Phalguna Amavasya' },
+  { date: '2026-03-19', name: 'చైత్ర అమావాస్య',         nameEnglish: 'Chaitra Amavasya' },
+  { date: '2026-04-17', name: 'వైశాఖ అమావాస్య',         nameEnglish: 'Vaishakha Amavasya' },
+  { date: '2026-05-16', name: 'జ్యేష్ఠ అమావాస్య',       nameEnglish: 'Jyeshtha Amavasya' },
+  { date: '2026-06-15', name: 'జ్యేష్ఠ అధిక అమావాస్య',  nameEnglish: 'Jyeshtha Adhika Amavasya' },
+  { date: '2026-07-14', name: 'ఆషాఢ అమావాస్య',          nameEnglish: 'Ashadha Amavasya' },
+  { date: '2026-08-12', name: 'శ్రావణ అమావాస్య',        nameEnglish: 'Shravana Amavasya' },
+  { date: '2026-09-11', name: 'భాద్రపద అమావాస్య',       nameEnglish: 'Bhadrapada Amavasya' },
+  { date: '2026-10-10', name: 'ఆశ్వయుజ అమావాస్య',       nameEnglish: 'Ashwayuja Amavasya' },
+  { date: '2026-11-09', name: 'కార్తీక అమావాస్య',       nameEnglish: 'Karthika Amavasya' },
+  { date: '2026-12-08', name: 'మార్గశిర అమావాస్య',      nameEnglish: 'Margashira Amavasya' },
 ];
 
+// Validated against drikpanchang.com (Hyderabad timezone) on 2026-04-28.
+// 25 Pradoshams in 2026 (the year starts with Shukla Pradosham on
+// Jan 1 from the previous month's cycle and ends with Shukla on
+// Dec 21). Adhika Masa contributes the additional pair in May/June.
 export const PRADOSHAM_2026 = [
-  { date: '2026-01-05', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-01-19', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-02-04', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-02-18', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-03-05', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-03-20', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-04-04', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-04-18', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-05-03', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-05-18', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-06-02', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-06-16', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-07-01', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-07-16', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-07-31', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-08-14', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-08-29', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-09-13', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-09-28', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-10-12', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-10-27', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-11-11', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
-  { date: '2026-11-26', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
-  { date: '2026-12-11', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-01-01', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-01-16', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-01-30', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-02-14', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-03-01', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-03-16', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-03-30', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-04-15', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-04-28', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-05-14', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-05-28', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-06-12', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-06-27', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-07-12', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-07-26', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-08-10', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-08-25', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-09-08', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-09-24', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-10-08', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-10-23', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-11-06', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-11-22', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
+  { date: '2026-12-06', name: 'కృష్ణ ప్రదోషం', nameEnglish: 'Krishna Pradosham' },
+  { date: '2026-12-21', name: 'శుక్ల ప్రదోషం', nameEnglish: 'Shukla Pradosham' },
 ];
 
 // Year-aware lookup. Add CHATURTHI_2027 etc. and register here when generated;
