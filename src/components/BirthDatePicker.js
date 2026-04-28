@@ -1,21 +1,18 @@
 // ధర్మ — BirthDatePicker (combined date + time picker)
 //
 // Two ways to enter the value, both stay in sync:
-//   1. Text input fields with auto-formatting masks
-//      • Date: digits-only typing auto-inserts hyphens — DD-MM-YYYY
-//      • Time: digits-only typing auto-inserts colon — HH:MM AM/PM
-//      Hyphens / colons are part of the mask, so they never "disappear"
-//      while the user types.
+//   1. Separate fixed-width boxes — DD - MM - YYYY  /  HH : MM  AM/PM.
+//      Each box accepts only its own field, max length is enforced,
+//      and focus auto-advances to the next box when full. There's no
+//      shared mask or cursor-preservation logic, so backspace never
+//      "moves" digits and the input order is always what the user
+//      typed (fixes the "type 86, see 68" bug).
 //   2. Scroll wheels (Day/Month/Year + Hour/Minute/AM-PM)
-//      Native snap behaviour — no manual debounce, no fighting the
-//      user during a drag.
+//      Native snap behaviour, no manual debounce.
 //
 // API (unchanged from earlier versions, all 7 call sites work as-is):
 //   visible, selectedDate, selectedTime?, showTime?, lang, title,
 //   onSelect(date) | onSelect(date, "HH:MM"), onClose
-//
-// API contract: onSelect receives a Date object; with showTime it also
-// passes a 24-hour "HH:MM" time string.
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
@@ -32,12 +29,8 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 const ITEM_HEIGHT = 44;
-// 3 visible items (centre = selected, one above, one below) — keeps the
-// modal compact enough that on showTime=true layouts (date wheels +
-// time wheels + inputs + actions) we don't need an outer ScrollView,
-// which was eating wheel-scroll gestures on Android.
 const VISIBLE_ITEMS = 3;
-const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);    // rows above/below the centre
+const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 1919 }, (_, i) => 1920 + i);
@@ -48,47 +41,12 @@ const PERIODS = ['AM', 'PM'];
 const pad2 = (n) => String(n).padStart(2, '0');
 const getDaysInMonth = (m, y) => new Date(y, m + 1, 0).getDate();
 
-// ── Auto-format masks ──────────────────────────────────────────────
-// DD-MM-YYYY: keep at most 8 digits, auto-insert hyphens at positions 2 and 4.
-// User can type "01021990" and see "01-02-1990" — or paste any format
-// containing those digits and it normalises identically. Hyphens never
-// "disappear" because we always re-derive them from the digit count.
-function maskDate(text) {
-  const d = (text || '').replace(/\D/g, '').slice(0, 8);
-  if (d.length <= 2) return d;
-  if (d.length <= 4) return `${d.slice(0, 2)}-${d.slice(2)}`;
-  return `${d.slice(0, 2)}-${d.slice(2, 4)}-${d.slice(4)}`;
-}
-
-// HH:MM AM/PM: digits + optional period letter. Examples that all
-// round-trip cleanly: "0630AM" → "06:30 AM", "6:30PM" → "06:30 PM",
-// "12:00" → "12:00".
-function maskTime(text) {
-  const upper = (text || '').toUpperCase();
-  const digits = upper.replace(/\D/g, '').slice(0, 4);
-  let timePart = digits.slice(0, 2);
-  if (digits.length > 2) timePart = `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
-  // Pull out an A/P/AM/PM token if present
-  const apMatch = upper.match(/A(?:M)?|P(?:M)?/);
-  if (apMatch) {
-    const ap = apMatch[0].length === 1 ? `${apMatch[0]}M` : apMatch[0];
-    return `${timePart} ${ap}`.trim();
-  }
-  return timePart;
-}
-
 // ── WheelColumn ────────────────────────────────────────────────────
-// Smooth scroll wheel using native snap behaviour only. No manual
-// debounce, no scroll-to during user drag — just initial position and
-// a snap on momentum/drag end.
 function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }) {
   const scrollRef = useRef(null);
   const lastSnapped = useRef(selectedIndex);
   const isFirstMount = useRef(true);
 
-  // Sync wheel scroll position when selectedIndex changes from OUTSIDE
-  // (e.g. user types in the input field, or another wheel's clamp).
-  // Skip first mount — the initial position is set via contentOffset.
   useEffect(() => {
     if (isFirstMount.current) {
       isFirstMount.current = false;
@@ -96,10 +54,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
       return;
     }
     if (selectedIndex !== lastSnapped.current && scrollRef.current) {
-      scrollRef.current.scrollTo({
-        y: selectedIndex * ITEM_HEIGHT,
-        animated: true,
-      });
+      scrollRef.current.scrollTo({ y: selectedIndex * ITEM_HEIGHT, animated: true });
       lastSnapped.current = selectedIndex;
     }
   }, [selectedIndex]);
@@ -137,7 +92,6 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
           disableIntervalMomentum
           bounces={false}
           nestedScrollEnabled
-          // Initial position only — subsequent updates go through useEffect.
           contentOffset={{ x: 0, y: selectedIndex * ITEM_HEIGHT }}
           onMomentumScrollEnd={handleSnapEnd}
           onScrollEndDrag={handleSnapEnd}
@@ -171,7 +125,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
 // ── Main component ────────────────────────────────────────────────
 export function BirthDatePicker({
   selectedDate,
-  selectedTime,                  // "HH:MM" 24h string (used when showTime=true)
+  selectedTime,
   onSelect,
   onClose,
   title,
@@ -200,7 +154,6 @@ export function BirthDatePicker({
   const [minute, setMinute] = useState(() => (mInit || 0));
   const [isPm, setIsPm] = useState(() => (h24Init || 6) >= 12);
 
-  // Keep state in sync if the parent supplies new selectedDate / selectedTime.
   useEffect(() => {
     if (selectedDate) {
       setDay(selectedDate.getDate());
@@ -230,153 +183,196 @@ export function BirthDatePicker({
   const timeDisplay = showTime
     ? `${pad2(hour12)}:${pad2(minute % 60)} ${isPm ? 'PM' : 'AM'}`
     : '';
-  const dateDisplay = `${pad2(effectiveDay)}-${pad2(month + 1)}-${year}`;
 
-  // ── Input field state ──
-  // We DON'T overwrite the input from wheel state while the user is
-  // actively typing — that was the cause of the hyphen-disappearing
-  // and cursor-jumping bug. After 600 ms of typing inactivity, the
-  // wheels become the source of truth again and the field shows the
-  // canonical formatted value.
-  //
-  // We also explicitly track + restore the cursor position (`selection`)
-  // because RN's TextInput resets the cursor to the end whenever the
-  // controlled `value` prop changes from a programmatic source. The
-  // mask logic below counts digits-before-cursor in the user's text,
-  // then places the cursor at the same digit count in the masked text
-  // — so a backspace in the middle of "01-02-1990" stays in the middle.
-  const [dateInput, setDateInput] = useState(dateDisplay);
-  const [timeInput, setTimeInput] = useState(timeDisplay);
-  const [dateSelection, setDateSelection] = useState(undefined);
-  const [timeSelection, setTimeSelection] = useState(undefined);
+  // ── Input box state ──
+  // Each field has its own TextInput. No shared mask, no cursor logic —
+  // each box is just a numeric string with a maxLength. The "isTyping*"
+  // flags + 600 ms timers stop wheel-scroll updates from yanking text
+  // out of a field while the user is typing into it.
+  const [dayInput, setDayInput] = useState(pad2(effectiveDay));
+  const [monthInput, setMonthInput] = useState(pad2(month + 1));
+  const [yearInput, setYearInput] = useState(String(year));
+  const [hourInput, setHourInput] = useState(pad2(hour12));
+  const [minuteInput, setMinuteInput] = useState(pad2(minute % 60));
   const [inputError, setInputError] = useState('');
-  const dateTypingTimer = useRef(null);
-  const timeTypingTimer = useRef(null);
-  const isTypingDate = useRef(false);
-  const isTypingTime = useRef(false);
-  // Cached cursor position from onSelectionChange (for next onChangeText)
-  const dateCursor = useRef(dateDisplay.length);
-  const timeCursor = useRef(timeDisplay.length);
 
-  // Sync input ↓ from wheels — only when user isn't actively typing.
+  const dayRef = useRef(null);
+  const monthRef = useRef(null);
+  const yearRef = useRef(null);
+  const hourRef = useRef(null);
+  const minuteRef = useRef(null);
+
+  const isTypingDay = useRef(false);
+  const isTypingMonth = useRef(false);
+  const isTypingYear = useRef(false);
+  const isTypingHour = useRef(false);
+  const isTypingMinute = useRef(false);
+
+  const dayTimer = useRef(null);
+  const monthTimer = useRef(null);
+  const yearTimer = useRef(null);
+  const hourTimer = useRef(null);
+  const minuteTimer = useRef(null);
+
+  // Sync inputs from wheels/state — only when user isn't typing in that field
   useEffect(() => {
-    if (isTypingDate.current) return;
-    setDateInput(dateDisplay);
-    setDateSelection(undefined);          // let cursor follow text content
-  }, [dateDisplay]);
-
+    if (!isTypingDay.current) setDayInput(pad2(effectiveDay));
+  }, [effectiveDay]);
   useEffect(() => {
-    if (!showTime) return;
-    if (isTypingTime.current) return;
-    setTimeInput(timeDisplay);
-    setTimeSelection(undefined);
-  }, [timeDisplay, showTime]);
+    if (!isTypingMonth.current) setMonthInput(pad2(month + 1));
+  }, [month]);
+  useEffect(() => {
+    if (!isTypingYear.current) setYearInput(String(year));
+  }, [year]);
+  useEffect(() => {
+    if (!isTypingHour.current) setHourInput(pad2(hour12));
+  }, [hour12]);
+  useEffect(() => {
+    if (!isTypingMinute.current) setMinuteInput(pad2(minute % 60));
+  }, [minute]);
 
-  // Cleanup timers on unmount
+  // Cleanup timers
   useEffect(() => () => {
-    if (dateTypingTimer.current) clearTimeout(dateTypingTimer.current);
-    if (timeTypingTimer.current) clearTimeout(timeTypingTimer.current);
+    [dayTimer, monthTimer, yearTimer, hourTimer, minuteTimer]
+      .forEach(t => { if (t.current) clearTimeout(t.current); });
   }, []);
 
-  // ── Parsers ──
-  const tryParseDate = (formatted) => {
-    // formatted is always DD-MM-YYYY (from the mask) or a partial.
-    if (formatted.length !== 10) return false;
-    const [dd, mm, yyyy] = formatted.split('-').map(Number);
-    if (!dd || !mm || !yyyy) return false;
-    if (dd < 1 || dd > 31 || mm < 1 || mm > 12) return false;
-    if (yyyy < 1920 || yyyy > CURRENT_YEAR) return false;
-    const maxD = getDaysInMonth(mm - 1, yyyy);
-    setDay(Math.min(dd, maxD));
-    setMonth(mm - 1);
-    setYear(yyyy);
+  // ── Per-field handlers — auto-advance focus when full ──
+  const startTyping = (flag, timer) => {
+    flag.current = true;
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => { flag.current = false; }, 600);
+  };
+
+  const handleDayChange = (text) => {
+    const d = text.replace(/\D/g, '').slice(0, 2);
+    setDayInput(d);
+    startTyping(isTypingDay, dayTimer);
     setInputError('');
-    return true;
+    const n = parseInt(d, 10);
+    if (d.length >= 2 && !isNaN(n) && n >= 1 && n <= 31) {
+      const maxD = getDaysInMonth(month, year);
+      setDay(Math.min(n, maxD));
+      // Auto-advance to month
+      monthRef.current?.focus();
+    } else if (d.length === 1 && n >= 4) {
+      // 4-9 can only be the start of a single-digit day; advance early
+      setDay(n);
+      monthRef.current?.focus();
+    } else if (!isNaN(n) && n >= 1 && n <= 31) {
+      setDay(n);
+    }
   };
 
-  const tryParseTime = (text) => {
-    if (!showTime) return false;
-    const upper = (text || '').toUpperCase().trim();
-    const m = upper.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
-    if (!m) return false;
-    const h = parseInt(m[1], 10);
-    const min = parseInt(m[2], 10);
-    const period = m[3];
-    if (min < 0 || min > 59) return false;
-    if (period) {
-      if (h < 1 || h > 12) return false;
-      setHour12(h);
-      setMinute(min);
-      setIsPm(period === 'PM');
-    } else {
-      if (h < 0 || h > 23) return false;
-      setHour12(h % 12 || 12);
-      setMinute(min);
-      setIsPm(h >= 12);
-    }
+  const handleMonthChange = (text) => {
+    const m = text.replace(/\D/g, '').slice(0, 2);
+    setMonthInput(m);
+    startTyping(isTypingMonth, monthTimer);
     setInputError('');
-    return true;
-  };
-
-  // ── Cursor-preserving mask helpers ──
-  // Place cursor in the new (masked) text at the same DIGIT-count
-  // position as where the user was in the old text. Hyphens/colons
-  // get skipped, so backspace mid-string stays mid-string.
-  function nextCursor(oldText, oldCursorPos, newMasked) {
-    const digitsBefore = (oldText.slice(0, oldCursorPos).match(/\d/g) || []).length;
-    let pos = 0, count = 0;
-    while (pos < newMasked.length && count < digitsBefore) {
-      if (/\d/.test(newMasked[pos])) count++;
-      pos++;
-    }
-    return pos;
-  }
-
-  // ── Input handlers ──
-  const handleDateChange = (text) => {
-    const oldText = dateInput;
-    const oldPos = dateCursor.current ?? oldText.length;
-    const masked = maskDate(text);
-    const newPos = nextCursor(text, oldPos, masked);
-    isTypingDate.current = true;
-    setDateInput(masked);
-    setDateSelection({ start: newPos, end: newPos });
-    if (dateTypingTimer.current) clearTimeout(dateTypingTimer.current);
-    dateTypingTimer.current = setTimeout(() => { isTypingDate.current = false; }, 600);
-    if (masked.length === 10) tryParseDate(masked);
-  };
-
-  const handleTimeChange = (text) => {
-    const oldText = timeInput;
-    const oldPos = timeCursor.current ?? oldText.length;
-    const masked = maskTime(text);
-    const newPos = nextCursor(text, oldPos, masked);
-    isTypingTime.current = true;
-    setTimeInput(masked);
-    setTimeSelection({ start: newPos, end: newPos });
-    if (timeTypingTimer.current) clearTimeout(timeTypingTimer.current);
-    timeTypingTimer.current = setTimeout(() => { isTypingTime.current = false; }, 600);
-    tryParseTime(masked);
-  };
-
-  const handleDateBlur = () => {
-    isTypingDate.current = false;
-    if (!tryParseDate(dateInput)) {
-      if (dateInput && dateInput.length > 0) {
-        setInputError(lang === 'te' ? 'DD-MM-YYYY ఫార్మాట్‌లో నమోదు చేయండి' : 'Use DD-MM-YYYY format');
-      }
-      // Snap field back to wheel state on invalid blur
-      setDateInput(dateDisplay);
+    const n = parseInt(m, 10);
+    if (m.length >= 2 && !isNaN(n) && n >= 1 && n <= 12) {
+      setMonth(n - 1);
+      const maxD = getDaysInMonth(n - 1, year);
+      if (day > maxD) setDay(maxD);
+      yearRef.current?.focus();
+    } else if (m.length === 1 && n >= 2) {
+      // 2-9 can only be a single-digit month; advance early
+      setMonth(n - 1);
+      yearRef.current?.focus();
+    } else if (!isNaN(n) && n >= 1 && n <= 12) {
+      setMonth(n - 1);
     }
   };
 
-  const handleTimeBlur = () => {
-    isTypingTime.current = false;
-    if (showTime && !tryParseTime(timeInput)) {
-      if (timeInput && timeInput.length > 0) {
-        setInputError(lang === 'te' ? 'HH:MM AM/PM ఫార్మాట్‌లో నమోదు చేయండి' : 'Use HH:MM AM/PM format');
+  const handleYearChange = (text) => {
+    const y = text.replace(/\D/g, '').slice(0, 4);
+    setYearInput(y);
+    startTyping(isTypingYear, yearTimer);
+    setInputError('');
+    if (y.length === 4) {
+      const n = parseInt(y, 10);
+      if (n >= 1920 && n <= CURRENT_YEAR) {
+        setYear(n);
+        const maxD = getDaysInMonth(month, n);
+        if (day > maxD) setDay(maxD);
+        // Last field — dismiss keyboard
+        Keyboard.dismiss();
+      } else {
+        setInputError(lang === 'te' ? `${1920}–${CURRENT_YEAR} మధ్య సంవత్సరం` : `Year must be ${1920}–${CURRENT_YEAR}`);
       }
-      setTimeInput(timeDisplay);
+    }
+  };
+
+  const handleHourChange = (text) => {
+    const h = text.replace(/\D/g, '').slice(0, 2);
+    setHourInput(h);
+    startTyping(isTypingHour, hourTimer);
+    setInputError('');
+    const n = parseInt(h, 10);
+    if (h.length >= 2 && !isNaN(n) && n >= 1 && n <= 12) {
+      setHour12(n);
+      minuteRef.current?.focus();
+    } else if (h.length === 1 && n >= 2) {
+      setHour12(n);
+      minuteRef.current?.focus();
+    } else if (!isNaN(n) && n >= 1 && n <= 12) {
+      setHour12(n);
+    }
+  };
+
+  const handleMinuteChange = (text) => {
+    const m = text.replace(/\D/g, '').slice(0, 2);
+    setMinuteInput(m);
+    startTyping(isTypingMinute, minuteTimer);
+    setInputError('');
+    const n = parseInt(m, 10);
+    if (m.length >= 2 && !isNaN(n) && n >= 0 && n <= 59) {
+      setMinute(n);
+      Keyboard.dismiss();
+    } else if (!isNaN(n) && n >= 0 && n <= 59) {
+      setMinute(n);
+    }
+  };
+
+  // ── Blur handlers — pad single-digit entries to 2 digits ──
+  const handleDayBlur = () => {
+    isTypingDay.current = false;
+    if (dayInput.length === 1) {
+      const n = parseInt(dayInput, 10);
+      if (!isNaN(n) && n >= 1 && n <= 31) {
+        setDayInput(pad2(n));
+        setDay(Math.min(n, getDaysInMonth(month, year)));
+      }
+    }
+  };
+  const handleMonthBlur = () => {
+    isTypingMonth.current = false;
+    if (monthInput.length === 1) {
+      const n = parseInt(monthInput, 10);
+      if (!isNaN(n) && n >= 1 && n <= 12) {
+        setMonthInput(pad2(n));
+        setMonth(n - 1);
+      }
+    }
+  };
+  const handleHourBlur = () => {
+    isTypingHour.current = false;
+    if (hourInput.length === 1) {
+      const n = parseInt(hourInput, 10);
+      if (!isNaN(n) && n >= 1 && n <= 12) {
+        setHourInput(pad2(n));
+        setHour12(n);
+      }
+    }
+  };
+  const handleMinuteBlur = () => {
+    isTypingMinute.current = false;
+    if (minuteInput.length === 1) {
+      const n = parseInt(minuteInput, 10);
+      if (!isNaN(n) && n >= 0 && n <= 59) {
+        setMinuteInput(pad2(n));
+        setMinute(n);
+      }
     }
   };
 
@@ -393,8 +389,6 @@ export function BirthDatePicker({
     }
   };
 
-  // Hide wheels when keyboard is open to prevent cramped layout;
-  // input fields stay visible at the top.
   const [kbVisible, setKbVisible] = useState(false);
   useEffect(() => {
     const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKbVisible(true));
@@ -428,56 +422,126 @@ export function BirthDatePicker({
             </Text>
           </View>
 
-          {/* Manual input fields */}
-          <View style={ws.inputRow}>
-            <View style={ws.inputGroup}>
-              <Text style={ws.inputLabel}>{lang === 'te' ? 'తేదీ' : 'Date'}</Text>
-              <TextInput
-                style={ws.inputField}
-                value={dateInput}
-                onChangeText={handleDateChange}
-                onBlur={handleDateBlur}
-                selection={dateSelection}
-                onSelectionChange={(e) => {
-                  dateCursor.current = e.nativeEvent.selection.start;
-                }}
-                placeholder="DD-MM-YYYY"
-                placeholderTextColor="rgba(255,255,255,0.25)"
-                keyboardType="number-pad"
-                maxLength={10}
-                returnKeyType="done"
-              />
-            </View>
-            {showTime && (
-              <View style={ws.inputGroup}>
-                <Text style={ws.inputLabel}>{lang === 'te' ? 'సమయం' : 'Time'}</Text>
+          {/* ── Date entry — three separate boxes with hyphen separators ── */}
+          <View style={ws.fieldsBlock}>
+            <Text style={ws.blockLabel}>{lang === 'te' ? 'తేదీ' : 'Date'}</Text>
+            <View style={ws.boxRow}>
+              <View style={ws.miniGroup}>
+                <Text style={ws.miniLabel}>{lang === 'te' ? 'రోజు' : 'DD'}</Text>
                 <TextInput
-                  style={ws.inputField}
-                  value={timeInput}
-                  onChangeText={handleTimeChange}
-                  onBlur={handleTimeBlur}
-                  selection={timeSelection}
-                  onSelectionChange={(e) => {
-                    timeCursor.current = e.nativeEvent.selection.start;
-                  }}
-                  placeholder="HH:MM AM"
+                  ref={dayRef}
+                  style={ws.miniBox}
+                  value={dayInput}
+                  onChangeText={handleDayChange}
+                  onBlur={handleDayBlur}
+                  placeholder="DD"
                   placeholderTextColor="rgba(255,255,255,0.25)"
-                  // Allow letters for AM/PM but keep numeric prominence
-                  keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
-                  autoCapitalize="characters"
-                  maxLength={8}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  selectTextOnFocus
+                  returnKeyType="next"
+                />
+              </View>
+              <Text style={ws.sepText}>−</Text>
+              <View style={ws.miniGroup}>
+                <Text style={ws.miniLabel}>{lang === 'te' ? 'నెల' : 'MM'}</Text>
+                <TextInput
+                  ref={monthRef}
+                  style={ws.miniBox}
+                  value={monthInput}
+                  onChangeText={handleMonthChange}
+                  onBlur={handleMonthBlur}
+                  placeholder="MM"
+                  placeholderTextColor="rgba(255,255,255,0.25)"
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  selectTextOnFocus
+                  returnKeyType="next"
+                />
+              </View>
+              <Text style={ws.sepText}>−</Text>
+              <View style={ws.miniGroupWide}>
+                <Text style={ws.miniLabel}>{lang === 'te' ? 'సంవత్సరం' : 'YYYY'}</Text>
+                <TextInput
+                  ref={yearRef}
+                  style={ws.miniBoxWide}
+                  value={yearInput}
+                  onChangeText={handleYearChange}
+                  placeholder="YYYY"
+                  placeholderTextColor="rgba(255,255,255,0.25)"
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  selectTextOnFocus
                   returnKeyType="done"
                 />
               </View>
-            )}
+            </View>
           </View>
+
+          {/* ── Time entry — HH : MM with AM/PM toggle ── */}
+          {showTime && (
+            <View style={ws.fieldsBlock}>
+              <Text style={ws.blockLabel}>{lang === 'te' ? 'సమయం' : 'Time'}</Text>
+              <View style={ws.boxRow}>
+                <View style={ws.miniGroup}>
+                  <Text style={ws.miniLabel}>{lang === 'te' ? 'గంట' : 'HH'}</Text>
+                  <TextInput
+                    ref={hourRef}
+                    style={ws.miniBox}
+                    value={hourInput}
+                    onChangeText={handleHourChange}
+                    onBlur={handleHourBlur}
+                    placeholder="HH"
+                    placeholderTextColor="rgba(255,255,255,0.25)"
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    selectTextOnFocus
+                    returnKeyType="next"
+                  />
+                </View>
+                <Text style={ws.sepText}>:</Text>
+                <View style={ws.miniGroup}>
+                  <Text style={ws.miniLabel}>{lang === 'te' ? 'నిమి' : 'MM'}</Text>
+                  <TextInput
+                    ref={minuteRef}
+                    style={ws.miniBox}
+                    value={minuteInput}
+                    onChangeText={handleMinuteChange}
+                    onBlur={handleMinuteBlur}
+                    placeholder="MM"
+                    placeholderTextColor="rgba(255,255,255,0.25)"
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    selectTextOnFocus
+                    returnKeyType="done"
+                  />
+                </View>
+                <View style={ws.amPmGroup}>
+                  <Text style={ws.miniLabel}>{lang === 'te' ? 'కాలం' : 'AM/PM'}</Text>
+                  <View style={ws.amPmRow}>
+                    <TouchableOpacity
+                      style={[ws.amPmBtn, !isPm && ws.amPmBtnActive]}
+                      onPress={() => setIsPm(false)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[ws.amPmText, !isPm && ws.amPmTextActive]}>AM</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[ws.amPmBtn, isPm && ws.amPmBtnActive]}
+                      onPress={() => setIsPm(true)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[ws.amPmText, isPm && ws.amPmTextActive]}>PM</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+
           {inputError ? <Text style={ws.inputError}>{inputError}</Text> : null}
 
-          {/* Scroll wheels — hidden when keyboard is open to save space.
-              No outer ScrollView wrapper here: it was capturing wheel-
-              scroll gestures on Android (page-scrolls-instead-of-wheel
-              bug). With VISIBLE_ITEMS=3 the entire layout fits inside
-              the modal's maxHeight on every supported screen size. */}
+          {/* Scroll wheels — hidden when keyboard is open to save space */}
           {!kbVisible && (
             <View>
               <View style={ws.wheelsRow}>
@@ -551,11 +615,6 @@ export function BirthDatePicker({
                       width={timeColWidth}
                     />
                   </View>
-                  <Text style={ws.timeHint}>
-                    {lang === 'te'
-                      ? 'ఖచ్చితమైన సమయం తెలియకపోతే అంచనా సమయం ఎంచుకోండి'
-                      : 'Select approximate time if exact time is not known'}
-                  </Text>
                 </>
               )}
             </View>
@@ -564,8 +623,8 @@ export function BirthDatePicker({
           {kbVisible && (
             <Text style={ws.kbHint}>
               {lang === 'te'
-                ? 'తేదీ టైప్ చేయండి (DD-MM-YYYY). కీబోర్డ్ మూసిన తర్వాత స్క్రోల్ వీల్స్ తెరవవచ్చు.'
-                : 'Type date as DD-MM-YYYY. Scroll wheels appear after closing keyboard.'}
+                ? 'తేదీ టైప్ చేయండి. కీబోర్డ్ మూసిన తర్వాత స్క్రోల్ వీల్స్ తెరవవచ్చు.'
+                : 'Type the date. Scroll wheels appear after closing keyboard.'}
             </Text>
           )}
 
@@ -588,71 +647,86 @@ export function BirthDatePicker({
 }
 
 const ws = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'flex-end',
-  },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
   container: {
     backgroundColor: DarkColors.bgCard,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
     paddingBottom: Platform.OS === 'ios' ? 34 : 20,
     maxHeight: '92%',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: DarkColors.borderCard,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 16, paddingHorizontal: 16,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   closeBtn: { position: 'absolute', left: 16, top: 16, padding: 4 },
   title: { fontWeight: '800', color: DarkColors.gold, textAlign: 'center' },
   preview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 12,
     backgroundColor: DarkColors.goldDim,
-    marginHorizontal: 20,
-    marginTop: 12,
-    borderRadius: 12,
+    marginHorizontal: 20, marginTop: 12, borderRadius: 12,
   },
-  previewText: {
-    fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1,
+  previewText: { fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1 },
+
+  // ── Field blocks (date / time) ──
+  fieldsBlock: { paddingHorizontal: 20, paddingTop: 14 },
+  blockLabel: {
+    fontSize: 12, fontWeight: '800', color: DarkColors.silver,
+    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8,
   },
-  inputRow: { flexDirection: 'row', gap: 10, marginHorizontal: 20, marginTop: 12 },
-  inputGroup: { flex: 1 },
-  inputLabel: {
-    fontSize: 11, fontWeight: '700', color: DarkColors.silver,
-    textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4,
+  boxRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6 },
+  miniGroup: { alignItems: 'center', flex: 1 },
+  miniGroupWide: { alignItems: 'center', flex: 2 },
+  miniLabel: {
+    fontSize: 10, fontWeight: '700', color: DarkColors.silver,
+    marginBottom: 4, letterSpacing: 0.5,
   },
-  inputField: {
+  miniBox: {
+    width: '100%',
     backgroundColor: DarkColors.bgElevated,
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DarkColors.borderCard,
-    textAlign: 'center',
-    letterSpacing: 1,
+    borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8,
+    fontSize: 22, fontWeight: '900', color: '#FFFFFF',
+    textAlign: 'center', letterSpacing: 1,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
   },
+  miniBoxWide: {
+    width: '100%',
+    backgroundColor: DarkColors.bgElevated,
+    borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8,
+    fontSize: 22, fontWeight: '900', color: '#FFFFFF',
+    textAlign: 'center', letterSpacing: 1,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  sepText: {
+    fontSize: 24, fontWeight: '900', color: DarkColors.gold,
+    paddingHorizontal: 2, paddingBottom: 10,
+  },
+  amPmGroup: { alignItems: 'center', flex: 1.4 },
+  amPmRow: {
+    flexDirection: 'row', width: '100%',
+    backgroundColor: DarkColors.bgElevated,
+    borderRadius: 10, padding: 3,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  amPmBtn: {
+    flex: 1, paddingVertical: 10, borderRadius: 7,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  amPmBtnActive: { backgroundColor: DarkColors.gold },
+  amPmText: { fontSize: 14, fontWeight: '800', color: DarkColors.silver, letterSpacing: 0.5 },
+  amPmTextActive: { color: '#0A0A0A' },
+
   inputError: {
     fontSize: 12, color: DarkColors.kumkum,
-    textAlign: 'center', marginTop: 6, fontWeight: '600',
+    textAlign: 'center', marginTop: 8, fontWeight: '600',
     marginHorizontal: 20,
   },
   kbHint: {
     fontSize: 13, color: DarkColors.silver, textAlign: 'center',
     paddingVertical: 24, paddingHorizontal: 24, fontStyle: 'italic',
   },
+
   wheelsRow: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start',
     paddingVertical: 12, gap: 8,
@@ -662,7 +736,8 @@ const ws = StyleSheet.create({
     alignSelf: 'center', marginTop: 24,
   },
   timeDivider: {
-    flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginTop: 4,
+    flexDirection: 'row', alignItems: 'center',
+    marginHorizontal: 20, marginTop: 4,
   },
   timeDividerLine: { flex: 1, height: 1, backgroundColor: DarkColors.borderCard },
   timeDividerBadge: {
@@ -671,10 +746,6 @@ const ws = StyleSheet.create({
     backgroundColor: DarkColors.goldDim, borderRadius: 20, marginHorizontal: 8,
   },
   timeDividerText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
-  timeHint: {
-    fontSize: 12, color: DarkColors.silver, textAlign: 'center',
-    marginHorizontal: 20, marginBottom: 4, fontStyle: 'italic',
-  },
   column: { alignItems: 'center' },
   columnLabel: {
     fontSize: 12, fontWeight: '700', color: DarkColors.silver,
