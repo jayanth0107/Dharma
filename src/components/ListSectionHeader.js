@@ -29,7 +29,21 @@ function PulsingChevron({ color = DarkColors.saffron, size = 22 }) {
   );
 }
 
-export function ListSectionHeader({ title, subtitle, icon, iconColor = DarkColors.saffron }) {
+// inline=true: title + subtitle render on a SINGLE line separated by ·
+// — saves ~30 px vertical space per section, used by the calendar lists
+// where the year suffix ("· 2026") doesn't need its own line.
+export function ListSectionHeader({ title, subtitle, icon, iconColor = DarkColors.saffron, inline }) {
+  if (inline) {
+    return (
+      <View style={s.wrapInline}>
+        <View style={s.titleRow}>
+          {icon && <MaterialCommunityIcons name={icon} size={20} color={iconColor} style={{ marginRight: 8 }} />}
+          <Text style={s.title}>{title}</Text>
+          {subtitle ? <Text style={s.subtitleInline}>{` · ${subtitle}`}</Text> : null}
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={s.wrap}>
       <View style={s.titleRow}>
@@ -51,6 +65,18 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
   },
+  wrapInline: {
+    paddingBottom: 6,
+    marginBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: DarkColors.borderCard,
+  },
+  subtitleInline: {
+    fontSize: 14,
+    color: DarkColors.silver,
+    fontWeight: '500',
+    letterSpacing: 0.2,
+  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -58,16 +84,19 @@ const s = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
     letterSpacing: 0.5,
   },
   subtitle: {
-    fontSize: 13,
-    color: DarkColors.textMuted,
-    fontWeight: '600',
+    fontSize: 14,
+    color: DarkColors.silver,
+    fontWeight: '700',
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 6,
+    letterSpacing: 0.2,
+    lineHeight: 20,
+    paddingHorizontal: 8,
   },
   chevronRow: {
     alignItems: 'center',

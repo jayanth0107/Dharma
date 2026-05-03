@@ -70,7 +70,7 @@ const s = StyleSheet.create({
     position: 'absolute', top: 4, left: 4,
     backgroundColor: 'rgba(0,0,0,0.15)', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4,
   },
-  labelText: { fontSize: 8, fontWeight: '800', color: '#fff' },
+  labelText: { fontSize: 8, fontWeight: '600', color: '#fff' },
   text: { fontSize: 13, fontWeight: '700' },
   sub: { fontSize: 10, color: '#8A7A6A', marginTop: 1 },
 });

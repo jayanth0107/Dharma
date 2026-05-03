@@ -19,9 +19,11 @@ import { BirthDatePicker } from './BirthDatePicker';
 import { LocationSearchModal } from './LocationSearchModal';
 import { ClearableInput } from './ClearableInput';
 import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
+import { useLanguage } from '../context/LanguageContext';
 
 // ── Horoscope Card (shown in main feed) ──
 export function HoroscopeCard({ onOpen, isPremium }) {
+  const { t } = useLanguage();
   return (
     <TouchableOpacity
       style={cs.card}
@@ -36,8 +38,8 @@ export function HoroscopeCard({ onOpen, isPremium }) {
           <MaterialCommunityIcons name="zodiac-leo" size={28} color="#9B6FCF" />
         </View>
         <View style={cs.cardContent}>
-          <Text style={cs.cardTitle}>రాశి ఫలం — జాతకం</Text>
-          <Text style={cs.cardDesc}>మీ జన్మ వివరాలతో వేద జాతకం రూపొందించండి</Text>
+          <Text style={cs.cardTitle}>{t('రాశి ఫలం — జాతకం', 'Vedic Horoscope')}</Text>
+          <Text style={cs.cardDesc}>{t('మీ జన్మ వివరాలతో వేద జాతకం రూపొందించండి', 'Generate your Vedic chart from birth details')}</Text>
         </View>
         {isPremium ? (
           <Ionicons name="chevron-forward" size={20} color="#9B6FCF" />
@@ -63,7 +65,7 @@ const cs = StyleSheet.create({
     backgroundColor: 'rgba(74,26,107,0.25)', alignItems: 'center', justifyContent: 'center',
   },
   cardContent: { flex: 1, marginLeft: 14 },
-  cardTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  cardTitle: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
   cardDesc: { fontSize: 12, color: '#C0C0C0', marginTop: 3, lineHeight: 18 },
   premiumLock: { alignItems: 'center' },
   premiumText: { fontSize: 9, fontWeight: '700', color: DarkColors.gold, marginTop: 2 },
@@ -268,7 +270,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
       const { generateHoroscope, generateEnhancedHoroscope } = require('../utils/horoscopeCalculator');
       const [day, month, year] = dateClean.split('-').map(Number);
       if (!day || !month || !year || day > 31 || month > 12 || year < 1900) {
-        alert('చెల్లని తేదీ. దయచేసి DD-MM-YYYY ఫార్మాట్‌లో నమోదు చేయండి.');
+        alert(t('చెల్లని తేదీ. దయచేసి DD-MM-YYYY ఫార్మాట్‌లో నమోదు చేయండి.', 'Invalid date. Please enter in DD-MM-YYYY format.'));
         setStep('form'); return;
       }
       const date = new Date(year, month - 1, day);
@@ -284,7 +286,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
         .catch(() => {});
     } catch (e) {
       if (__DEV__) console.warn('Horoscope generation failed:', e);
-      alert('జాతకం రూపొందించడంలో లోపం. దయచేసి మళ్ళీ ప్రయత్నించండి.');
+      alert(t('జాతకం రూపొందించడంలో లోపం. దయచేసి మళ్ళీ ప్రయత్నించండి.', 'Error generating horoscope. Please try again.'));
       setStep('form');
     }
   };
@@ -325,8 +327,15 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
     trackEvent('horoscope_purchase', { plan: selectedPlan.id });
     setHoroPayStep('idle');
 
-    if (Platform.OS === 'web') alert(`🎉 ${selectedPlan.telugu} ప్లాన్ సక్రియం!`);
-    else Alert.alert('🎉 సక్రియం!', `${selectedPlan.telugu} ప్లాన్ — ${selectedPlan.uses} జాతకాలు`);
+    const planName = lang === 'te' ? selectedPlan.telugu : selectedPlan.english;
+    if (Platform.OS === 'web') {
+      alert(`🎉 ${t(`${planName} ప్లాన్ సక్రియం!`, `${planName} plan activated!`)}`);
+    } else {
+      Alert.alert(
+        t('🎉 సక్రియం!', '🎉 Activated!'),
+        t(`${planName} ప్లాన్ — ${selectedPlan.uses} జాతకాలు`, `${planName} plan — ${selectedPlan.uses} horoscopes`)
+      );
+    }
     setSelectedPlan(null);
     setStep('form');
   };
@@ -351,12 +360,12 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
             {step === 'locked' && (
               <View style={s.lockedWrap}>
                 <MaterialCommunityIcons name="lock" size={48} color="#9B6FCF" />
-                <Text style={s.lockedTitle}>Premium ఫీచర్</Text>
+                <Text style={s.lockedTitle}>{t('Premium ఫీచర్', 'Premium Feature')}</Text>
                 <Text style={s.lockedDesc}>
-                  రాశి ఫలం — వేద జాతకం Premium వినియోగదారులకు మాత్రమే అందుబాటులో ఉంటుంది.
-                </Text>
-                <Text style={s.lockedDescEn}>
-                  Vedic Horoscope is a Premium feature. Upgrade to generate your birth chart.
+                  {t(
+                    'రాశి ఫలం — వేద జాతకం Premium వినియోగదారులకు మాత్రమే అందుబాటులో ఉంటుంది.',
+                    'Vedic Horoscope is available only to Premium users. Upgrade to generate your birth chart.'
+                  )}
                 </Text>
                 <TouchableOpacity
                   style={s.lockedBtn}
@@ -365,11 +374,11 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 >
                   <LinearGradient colors={['#4A1A6B', '#2D1B4E']} style={s.lockedBtnGradient}>
                     <MaterialCommunityIcons name="crown" size={20} color={DarkColors.goldShimmer} />
-                    <Text style={s.lockedBtnText}>Premium అప్‌గ్రేడ్ చేయండి</Text>
+                    <Text style={s.lockedBtnText}>{t('Premium అప్‌గ్రేడ్ చేయండి', 'Upgrade to Premium')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onClose} style={{ marginTop: 16 }}>
-                  <Text style={s.lockedCancel}>తర్వాత చూస్తాను</Text>
+                  <Text style={s.lockedCancel}>{t('తర్వాత చూస్తాను', 'Maybe later')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -552,9 +561,9 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
             {step === 'payment' && (
               <View style={[s.form, { padding: formPad }]}>
-                <Text style={[s.formTitle, { fontSize: titleSize }]}>జాతకం రూపొందించడానికి ప్లాన్ ఎంచుకోండి</Text>
-                <Text style={{ fontSize: 12, color: '#999999', textAlign: 'center', marginBottom: 16 }}>
-                  Premium ఫీచర్ — వేద జ్యోతిష్య ఆధారిత ఖచ్చితమైన జాతకం
+                <Text style={[s.formTitle, { fontSize: titleSize }]}>{t('జాతకం రూపొందించడానికి ప్లాన్ ఎంచుకోండి', 'Choose a plan to generate your horoscope')}</Text>
+                <Text style={{ fontSize: 13, color: '#999999', textAlign: 'center', marginBottom: 16 }}>
+                  {t('Premium ఫీచర్ — వేద జ్యోతిష్య ఆధారిత ఖచ్చితమైన జాతకం', 'Premium feature — accurate Vedic astrology chart')}
                 </Text>
 
                 {/* Plan cards */}
@@ -579,8 +588,8 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 {selectedPlan && (
                   <View style={{ marginTop: 16 }}>
                     {/* UPI App buttons */}
-                    <Text style={{ fontSize: 14, fontWeight: '700', color: '#FFFFFF', textAlign: 'center', marginBottom: 10 }}>
-                      {selectedPlan.label} — UPI యాప్ ఎంచుకోండి
+                    <Text style={{ fontSize: 15, fontWeight: '600', color: '#FFFFFF', textAlign: 'center', marginBottom: 10 }}>
+                      {selectedPlan.label} — {t('UPI యాప్ ఎంచుకోండి', 'Choose a UPI app')}
                     </Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                       {[
@@ -594,7 +603,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                           style={s.upiAppBtn}
                           onPress={async () => {
                             if (Platform.OS === 'web') {
-                              alert(`UPI ID: ${UPI_ID_H}\n\n${app.name} లో ₹${selectedPlan.price} పంపండి.`);
+                              alert(`UPI ID: ${UPI_ID_H}\n\n${t(`${app.name} లో ₹${selectedPlan.price} పంపండి.`, `Send ₹${selectedPlan.price} via ${app.name}.`)}`);
                             } else {
                               const url = `${app.scheme}://upi/pay?pa=${encodeURIComponent(UPI_ID_H)}&pn=${encodeURIComponent(MERCHANT_H)}&am=${selectedPlan.price}&cu=INR&tn=${encodeURIComponent('Dharma Horoscope ' + selectedPlan.english)}`;
                               try { await Linking.openURL(url); } catch {}
@@ -604,7 +613,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                           {UPI_LOGOS_H[app.scheme] ? (
                             <Image source={UPI_LOGOS_H[app.scheme]} style={{ width: 24, height: 24, borderRadius: 4 }} resizeMode="contain" />
                           ) : (
-                            <View style={[s.upiLetter, { backgroundColor: app.bg }]}><Text style={{ color: '#fff', fontWeight: '900', fontSize: 12 }}>{app.letter}</Text></View>
+                            <View style={[s.upiLetter, { backgroundColor: app.bg }]}><Text style={{ color: '#fff', fontWeight: '700', fontSize: 12 }}>{app.letter}</Text></View>
                           )}
                           <Text style={[s.upiAppText, { color: app.bg }]}>{app.name}</Text>
                         </TouchableOpacity>
@@ -613,13 +622,13 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
                     {/* QR Code */}
                     <View style={{ alignItems: 'center', marginTop: 14, padding: 12, backgroundColor: '#222222', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
-                      <Text style={{ fontSize: 12, fontWeight: '600', color: '#999999', marginBottom: 8 }}>QR కోడ్ స్కాన్ చేయండి</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '500', color: '#999999', marginBottom: 8 }}>{t('QR కోడ్ స్కాన్ చేయండి', 'Scan QR code')}</Text>
                       {!qrFailed ? (
                         <Image source={{ uri: getHoroscopeQrUrl(selectedPlan.price) }} style={{ width: 160, height: 160 }} resizeMode="contain" onError={() => setQrFailed(true)} />
                       ) : (
                         <View style={{ alignItems: 'center', justifyContent: 'center', width: 160, height: 160 }}>
                           <MaterialCommunityIcons name="qrcode" size={48} color="#999999" />
-                          <Text style={{ fontSize: 12, color: '#999999', marginTop: 8 }}>QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.</Text>
+                          <Text style={{ fontSize: 13, color: '#999999', marginTop: 8 }}>{t('QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.', 'QR could not load. Use the UPI ID instead.')}</Text>
                         </View>
                       )}
                       <Text style={{ fontSize: 13, fontWeight: '700', color: '#9B6FCF', marginTop: 8 }}>₹{selectedPlan.price}</Text>
@@ -637,7 +646,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       <TouchableOpacity style={s.activatePayBtn} onPress={handleOpenHoroPayment}>
                         <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
                           <MaterialCommunityIcons name="bank-transfer" size={20} color="#FFF" />
-                          <Text style={s.activatePayText}>₹{selectedPlan?.price} UPI పేమెంట్ చేయండి</Text>
+                          <Text style={s.activatePayText}>{t(`₹${selectedPlan?.price} UPI పేమెంట్ చేయండి`, `Pay ₹${selectedPlan?.price} via UPI`)}</Text>
                         </LinearGradient>
                       </TouchableOpacity>
                     )}
@@ -645,7 +654,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                     {horoPayStep === 'processing' && (
                       <View style={{ alignItems: 'center', paddingVertical: 20 }}>
                         <ActivityIndicator size="large" color={DarkColors.tulasiGreen} />
-                        <Text style={{ fontSize: 14, fontWeight: '700', color: DarkColors.tulasiGreen, marginTop: 8 }}>ప్రాసెస్ అవుతోంది...</Text>
+                        <Text style={{ fontSize: 15, fontWeight: '600', color: DarkColors.tulasiGreen, marginTop: 8 }}>{t('ప్రాసెస్ అవుతోంది...', 'Processing...')}</Text>
                       </View>
                     )}
                     {/* Step 2: Confirm */}
@@ -653,17 +662,17 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       <>
                         <View style={{ alignItems: 'center', paddingVertical: 12, gap: 4, marginBottom: 10, backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 12, padding: 14 }}>
                           <MaterialCommunityIcons name="check-circle-outline" size={28} color={DarkColors.tulasiGreen} />
-                          <Text style={{ fontSize: 15, fontWeight: '800', color: DarkColors.tulasiGreen }}>పేమెంట్ పూర్తయిందా?</Text>
-                          <Text style={{ fontSize: 12, color: '#999999', textAlign: 'center' }}>₹{selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి</Text>
+                          <Text style={{ fontSize: 16, fontWeight: '700', color: DarkColors.tulasiGreen }}>{t('పేమెంట్ పూర్తయిందా?', 'Payment complete?')}</Text>
+                          <Text style={{ fontSize: 13, color: '#999999', textAlign: 'center' }}>{t(`₹${selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి`, `Tap below after sending ₹${selectedPlan?.price}`)}</Text>
                         </View>
                         <TouchableOpacity style={s.activatePayBtn} onPress={handleConfirmHoroPayment}>
                           <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
                             <MaterialCommunityIcons name="check-circle" size={20} color="#FFF" />
-                            <Text style={s.activatePayText}>అవును, పేమెంట్ చేశాను ✓</Text>
+                            <Text style={s.activatePayText}>{t('అవును, పేమెంట్ చేశాను ✓', 'Yes, I have paid ✓')}</Text>
                           </LinearGradient>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setHoroPayStep('idle')} style={{ marginTop: 8, alignItems: 'center' }}>
-                          <Text style={{ fontSize: 12, color: '#999999' }}>← వెనక్కి / పేమెంట్ చేయలేదు</Text>
+                          <Text style={{ fontSize: 13, color: '#999999' }}>{t('← వెనక్కి / పేమెంట్ చేయలేదు', '← Back / Did not pay')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -671,7 +680,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 )}
 
                 <TouchableOpacity onPress={() => setStep('form')} style={{ marginTop: 12, alignItems: 'center' }}>
-                  <Text style={{ fontSize: 13, color: '#999999' }}>← వెనక్కి</Text>
+                  <Text style={{ fontSize: 14, color: '#999999' }}>{t('← వెనక్కి', '← Back')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -679,8 +688,8 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
             {step === 'loading' && (
               <View style={s.loadingBox}>
                 <ActivityIndicator size="large" color="#9B6FCF" />
-                <Text style={s.loadingText}>గ్రహ స్థానాలు గణిస్తోంది...</Text>
-                <Text style={s.loadingSubtext}>Calculating planetary positions...</Text>
+                <Text style={s.loadingText}>{t('గ్రహ స్థానాలు గణిస్తోంది...', 'Calculating planetary positions...')}</Text>
+                {lang === 'te' && <Text style={s.loadingSubtext}>Calculating planetary positions...</Text>}
               </View>
             )}
 
@@ -740,7 +749,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                         <View key={i} style={s.navagrahaItem}>
                           <Text style={s.ngName}>{planet.telugu}</Text>
                           <Text style={s.ngRashi}>{planet.rashi}</Text>
-                          {planet.retrograde && <Text style={s.ngRetro}>వక్ర</Text>}
+                          {planet.retrograde && <Text style={s.ngRetro}>{t('వక్ర', 'R')}</Text>}
                         </View>
                       ))}
                     </View>
@@ -763,7 +772,11 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 {horoscope.dailyForecast && (
                   <View style={s.dailyBox}>
                     <Text style={s.dailyTitle}>{t('📅 నేటి ఫలం', '📅 Today\'s Forecast')}</Text>
-                    <Text style={s.dailyText}>{horoscope.dailyForecast}</Text>
+                    <Text style={s.dailyText}>
+                      {typeof horoscope.dailyForecast === 'string'
+                        ? horoscope.dailyForecast
+                        : t(horoscope.dailyForecast.te, horoscope.dailyForecast.en)}
+                    </Text>
                   </View>
                 )}
 
@@ -836,7 +849,11 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       <MaterialCommunityIcons name="shield-star" size={18} color={DarkColors.tulasiGreen} style={{ marginRight: 10, marginTop: 2 }} />
                       <View style={{ flex: 1 }}>
                         <Text style={s.predSectionTitle}>{t('ఉపాయాలు & పరిహారాలు', 'Remedies')}</Text>
-                        <Text style={s.predText}>{horoscope.vedic.remedy}</Text>
+                        <Text style={s.predText}>
+                          {typeof horoscope.vedic.remedy === 'string'
+                            ? horoscope.vedic.remedy
+                            : t(horoscope.vedic.remedy.te, horoscope.vedic.remedy.en)}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -855,13 +872,64 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                   </View>
                 )}
 
-                {/* Share — same component used by all other sections */}
+                {/* Share — same component used by all other sections.
+                    Builder must extract bilingual {te,en} objects via the
+                    user's current language; previously these printed as
+                    "[object Object]" because predictions / dailyForecast
+                    / remedy became {te,en} after the recent leak fix. */}
                 <SectionShareRow
                   section="horoscope"
                   insideModal
                   buildText={() => {
                     const h = horoscope;
-                    let text = `🙏 వేద జాతకం — ${h.name}\n`;
+                    // Bilingual / scalar field extractor — handles strings,
+                    // {te,en} objects, and {telugu,english} (panchangam shape).
+                    const pickL = (v) => {
+                      if (v == null) return '';
+                      if (typeof v === 'string' || typeof v === 'number') return String(v);
+                      if (typeof v === 'object') {
+                        if (lang === 'en') return v.en || v.english || v.te || v.telugu || '';
+                        return v.te || v.telugu || v.en || v.english || '';
+                      }
+                      return String(v);
+                    };
+                    const isEn = lang === 'en';
+
+                    // Bilingual section labels — share output respects the
+                    // user's selected language, just like the on-screen text.
+                    const L = isEn ? {
+                      hdr: 'Vedic Horoscope', birth: 'Birth Details',
+                      date: 'Date', time: 'Time', place: 'Place',
+                      rashi: 'Rashi', nak: 'Nakshatra', pada: 'Pada', lagna: 'Lagna', sun: 'Sun Sign',
+                      panch: 'Birth Panchangam', tithi: 'Tithi', yoga: 'Yoga', karana: 'Karana',
+                      navagraha: 'Navagraha Positions', retro: 'R',
+                      preds: 'Predictions', personality: 'Personality', career: 'Career',
+                      health: 'Health', relationships: 'Relationships', spiritual: 'Spirituality',
+                      forecast: "Today's Forecast",
+                      vedic: 'Gemstones & Remedies',
+                      gem: 'Gemstone', alt: 'Alternate', metal: 'Metal',
+                      day: 'Lucky Day', color: 'Lucky Color', dir: 'Direction',
+                      deity: 'Presiding Deity', mantra: 'Mantra', remedy: 'Remedies',
+                      footer: 'Dharma App — Telugu Panchangam',
+                      blessing: 'May all beings be happy',
+                    } : {
+                      hdr: 'వేద జాతకం', birth: 'జన్మ వివరాలు',
+                      date: 'తేదీ', time: 'సమయం', place: 'స్థలం',
+                      rashi: 'రాశి', nak: 'నక్షత్రం', pada: 'పాద', lagna: 'లగ్నం', sun: 'సూర్య రాశి',
+                      panch: 'జన్మ పంచాంగం', tithi: 'తిథి', yoga: 'యోగం', karana: 'కరణం',
+                      navagraha: 'నవగ్రహ స్థానాలు', retro: 'వక్ర',
+                      preds: 'జాతక ఫలాలు', personality: 'వ్యక్తిత్వం', career: 'వృత్తి',
+                      health: 'ఆరోగ్యం', relationships: 'సంబంధాలు', spiritual: 'ఆధ్యాత్మికత',
+                      forecast: 'నేటి ఫలం',
+                      vedic: 'రత్నాలు & ఉపాయాలు',
+                      gem: 'రత్నం', alt: 'ప్రత్యామ్నాయం', metal: 'లోహం',
+                      day: 'శుభ వారం', color: 'శుభ రంగు', dir: 'శుభ దిక్కు',
+                      deity: 'ఆరాధ్య దేవత', mantra: 'మంత్రం', remedy: 'ఉపాయాలు',
+                      footer: 'Dharma App — Telugu Panchangam',
+                      blessing: 'సర్వే జనాః సుఖినో భవంతు',
+                    };
+
+                    let text = `🙏 ${L.hdr} — ${h.name}\n`;
                     text += `━━━━━━━━━━━━━━━━\n\n`;
 
                     // Birth details
@@ -871,62 +939,68 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                     const placeStr = typeof h.birthPlace === 'object'
                       ? (h.birthPlace?.name || h.birthPlace?.area || '')
                       : (h.birthPlace || '');
-                    text += `📅 జన్మ వివరాలు\n`;
-                    text += `తేదీ: ${dateStr}\n`;
-                    text += `సమయం: ${h.birthTime || ''}\n`;
-                    text += `స్థలం: ${placeStr}\n\n`;
+                    text += `📅 ${L.birth}\n`;
+                    text += `${L.date}: ${dateStr}\n`;
+                    text += `${L.time}: ${h.birthTime || ''}\n`;
+                    text += `${L.place}: ${placeStr}\n\n`;
 
                     // Core astro data
-                    text += `🌙 రాశి: ${h.rashi?.telugu || ''} (${h.rashi?.english || ''})\n`;
-                    text += `⭐ నక్షత్రం: ${h.nakshatra?.telugu || ''} (పాద ${h.nakshatra?.pada || ''})\n`;
-                    text += `🔱 లగ్నం: ${h.lagna?.telugu || ''}\n`;
-                    text += `☀️ సూర్య రాశి: ${h.sunSign?.telugu || ''}\n\n`;
+                    const rashiName = isEn ? (h.rashi?.english || h.rashi?.telugu) : (h.rashi?.telugu || h.rashi?.english);
+                    const rashiAlt  = isEn ? h.rashi?.telugu : h.rashi?.english;
+                    const nakName   = isEn ? (h.nakshatra?.english || h.nakshatra?.telugu) : (h.nakshatra?.telugu || h.nakshatra?.english);
+                    const lagnaName = isEn ? (h.lagna?.english || h.lagna?.telugu) : (h.lagna?.telugu || h.lagna?.english);
+                    const sunName   = isEn ? (h.sunSign?.english || h.sunSign?.telugu) : (h.sunSign?.telugu || h.sunSign?.english);
+                    text += `🌙 ${L.rashi}: ${rashiName || ''}${rashiAlt ? ` (${rashiAlt})` : ''}\n`;
+                    text += `⭐ ${L.nak}: ${nakName || ''}${h.nakshatra?.pada ? ` (${L.pada} ${h.nakshatra.pada})` : ''}\n`;
+                    text += `🔱 ${L.lagna}: ${lagnaName || ''}\n`;
+                    text += `☀️ ${L.sun}: ${sunName || ''}\n\n`;
 
                     // Birth panchangam
-                    text += `📿 జన్మ పంచాంగం\n`;
-                    text += `తిథి: ${h.tithi?.telugu || ''}\n`;
-                    text += `యోగం: ${h.yoga?.telugu || ''}\n`;
-                    text += `కరణం: ${h.karana?.telugu || ''}\n\n`;
+                    text += `📿 ${L.panch}\n`;
+                    text += `${L.tithi}: ${pickL(h.tithi)}\n`;
+                    text += `${L.yoga}: ${pickL(h.yoga)}\n`;
+                    text += `${L.karana}: ${pickL(h.karana)}\n\n`;
 
                     // Navagraha positions
                     if (h.navagraha) {
-                      text += `🪐 నవగ్రహ స్థానాలు\n`;
+                      text += `🪐 ${L.navagraha}\n`;
                       Object.values(h.navagraha).forEach(p => {
-                        text += `${p.telugu}: ${p.rashi}${p.retrograde ? ' (వక్ర)' : ''}\n`;
+                        const planet = isEn ? (p.english || p.telugu) : (p.telugu || p.english);
+                        text += `${planet}: ${p.rashi}${p.retrograde ? ` (${L.retro})` : ''}\n`;
                       });
                       text += `\n`;
                     }
 
-                    // Predictions
+                    // Predictions — use pickL for each {te,en} object
                     if (h.predictions) {
-                      text += `📜 జాతక ఫలాలు\n`;
-                      if (h.predictions.personality) text += `👤 వ్యక్తిత్వం: ${h.predictions.personality}\n\n`;
-                      if (h.predictions.career) text += `💼 వృత్తి: ${h.predictions.career}\n\n`;
-                      if (h.predictions.health) text += `❤️ ఆరోగ్యం: ${h.predictions.health}\n\n`;
-                      if (h.predictions.relationships) text += `💑 సంబంధాలు: ${h.predictions.relationships}\n\n`;
-                      if (h.predictions.spiritual) text += `🧘 ఆధ్యాత్మికత: ${h.predictions.spiritual}\n\n`;
+                      text += `📜 ${L.preds}\n`;
+                      if (h.predictions.personality)   text += `👤 ${L.personality}: ${pickL(h.predictions.personality)}\n\n`;
+                      if (h.predictions.career)        text += `💼 ${L.career}: ${pickL(h.predictions.career)}\n\n`;
+                      if (h.predictions.health)        text += `❤️ ${L.health}: ${pickL(h.predictions.health)}\n\n`;
+                      if (h.predictions.relationships) text += `💑 ${L.relationships}: ${pickL(h.predictions.relationships)}\n\n`;
+                      if (h.predictions.spiritual)     text += `🧘 ${L.spiritual}: ${pickL(h.predictions.spiritual)}\n\n`;
                     }
 
-                    // Daily forecast
+                    // Daily forecast — bilingual object
                     if (h.dailyForecast) {
-                      text += `📅 నేటి ఫలం\n${h.dailyForecast}\n\n`;
+                      text += `📅 ${L.forecast}\n${pickL(h.dailyForecast)}\n\n`;
                     }
 
-                    // Vedic remedies
+                    // Vedic remedies — every field is now {te,en}
                     if (h.vedic) {
-                      text += `💎 రత్నాలు & ఉపాయాలు\n`;
-                      text += `రత్నం: ${h.vedic.gemstone.te}\n`;
-                      text += `ప్రత్యామ్నాయం: ${h.vedic.gemstoneAlt.te}\n`;
-                      text += `లోహం: ${h.vedic.metal.te}\n`;
-                      text += `శుభ వారం: ${h.vedic.luckyDay.te}\n`;
-                      text += `శుభ రంగు: ${h.vedic.luckyColor.te}\n`;
-                      text += `శుభ దిక్కు: ${h.vedic.direction.te}\n`;
-                      text += `ఆరాధ్య దేవత: ${h.vedic.deity.te}\n`;
-                      text += `మంత్రం: ${h.vedic.mantra}\n\n`;
-                      text += `🛡️ ఉపాయాలు:\n${h.vedic.remedy}\n\n`;
+                      text += `💎 ${L.vedic}\n`;
+                      text += `${L.gem}: ${pickL(h.vedic.gemstone)}\n`;
+                      text += `${L.alt}: ${pickL(h.vedic.gemstoneAlt)}\n`;
+                      text += `${L.metal}: ${pickL(h.vedic.metal)}\n`;
+                      text += `${L.day}: ${pickL(h.vedic.luckyDay)}\n`;
+                      text += `${L.color}: ${pickL(h.vedic.luckyColor)}\n`;
+                      text += `${L.dir}: ${pickL(h.vedic.direction)}\n`;
+                      text += `${L.deity}: ${pickL(h.vedic.deity)}\n`;
+                      text += `${L.mantra}: ${h.vedic.mantra || ''}\n\n`;
+                      text += `🛡️ ${L.remedy}:\n${pickL(h.vedic.remedy)}\n\n`;
                     }
 
-                    text += `━━━━━━━━━━━━━━━━\n📲 *Dharma App* — Telugu Panchangam\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n🙏 సర్వే జనాః సుఖినో భవంతు`;
+                    text += `━━━━━━━━━━━━━━━━\n📲 *${L.footer}*\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n🙏 ${L.blessing}`;
                     return text;
                   }}
                 />
@@ -1133,85 +1207,99 @@ function buildPersonalDetail(key, horoscope, t) {
 
   // Helper to extract bilingual prediction text
   const predText = (p) => p ? (typeof p === 'string' ? p : t(p.te, p.en)) : '';
+  // Safe-renderable extractor — tolerates plain string, {te,en}, and
+  // {telugu,english} shapes. Rendering an object as a Text child crashes
+  // RN with "Objects are not valid as a React child" — that's the
+  // "Read More" crash on Health/Spiritual where v.remedy was promoted
+  // to a bilingual object but two callsites still passed the raw value.
+  const txt = (val) => {
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'object') {
+      if (val.te != null || val.en != null) return t(val.te, val.en) || '';
+      if (val.telugu != null || val.english != null) return t(val.telugu, val.english) || '';
+    }
+    return String(val);
+  };
 
   const sections = {
     personality: {
       personalInfo: pred.personality ? [
         { label: t('మీ వ్యక్తిత్వ లక్షణాలు', 'Your Personality Traits'), text: predText(pred.personality) },
-        v.bodyPart ? { label: t('సంబంధిత శరీర భాగం', 'Associated Body Part'), text: t(v.bodyPart.te, v.bodyPart.en) } : null,
-        v.element ? { label: t('తత్వం', 'Element'), text: t(v.element.te, v.element.en) } : null,
+        v.bodyPart ? { label: t('సంబంధిత శరీర భాగం', 'Associated Body Part'), text: txt(v.bodyPart) } : null,
+        v.element ? { label: t('తత్వం', 'Element'), text: txt(v.element) } : null,
       ].filter(Boolean) : [],
     },
     career: {
       personalInfo: pred.career ? [
         { label: t('మీ వృత్తి ఫలాలు', 'Your Career Predictions'), text: predText(pred.career) },
-        v.luckyDay ? { label: t('శుభ వారం (ముఖ్య నిర్ణయాలకు)', 'Lucky Day (for key decisions)'), text: t(v.luckyDay.te, v.luckyDay.en) } : null,
-        v.direction ? { label: t('శుభ దిక్కు (వ్యాపారానికి)', 'Lucky Direction (for business)'), text: t(v.direction.te, v.direction.en) } : null,
-        v.metal ? { label: t('శుభ లోహం', 'Lucky Metal'), text: t(v.metal.te, v.metal.en) } : null,
+        v.luckyDay ? { label: t('శుభ వారం (ముఖ్య నిర్ణయాలకు)', 'Lucky Day (for key decisions)'), text: txt(v.luckyDay) } : null,
+        v.direction ? { label: t('శుభ దిక్కు (వ్యాపారానికి)', 'Lucky Direction (for business)'), text: txt(v.direction) } : null,
+        v.metal ? { label: t('శుభ లోహం', 'Lucky Metal'), text: txt(v.metal) } : null,
       ].filter(Boolean) : [],
     },
     health: {
       personalInfo: pred.health ? [
         { label: t('మీ ఆరోగ్య ఫలాలు', 'Your Health Predictions'), text: predText(pred.health) },
-        v.bodyPart ? { label: t('జాగ్రత్త వహించాల్సిన శరీర భాగం', 'Body Part to Watch'), text: t(v.bodyPart.te, v.bodyPart.en) } : null,
-        v.remedy ? { label: t('ఆరోగ్య ఉపాయం', 'Health Remedy'), text: v.remedy } : null,
+        v.bodyPart ? { label: t('జాగ్రత్త వహించాల్సిన శరీర భాగం', 'Body Part to Watch'), text: txt(v.bodyPart) } : null,
+        v.remedy ? { label: t('ఆరోగ్య ఉపాయం', 'Health Remedy'), text: txt(v.remedy) } : null,
       ].filter(Boolean) : [],
     },
     relationships: {
       personalInfo: pred.relationships ? [
         { label: t('మీ సంబంధ ఫలాలు', 'Your Relationship Predictions'), text: predText(pred.relationships) },
-        v.deity ? { label: t('ప్రార్థించాల్సిన దేవత', 'Deity to Worship'), text: t(v.deity.te, v.deity.en) } : null,
-        v.luckyColor ? { label: t('శుభ రంగు', 'Lucky Color'), text: t(v.luckyColor.te, v.luckyColor.en) } : null,
+        v.deity ? { label: t('ప్రార్థించాల్సిన దేవత', 'Deity to Worship'), text: txt(v.deity) } : null,
+        v.luckyColor ? { label: t('శుభ రంగు', 'Lucky Color'), text: txt(v.luckyColor) } : null,
       ].filter(Boolean) : [],
     },
     spiritual: {
       personalInfo: pred.spiritual ? [
         { label: t('మీ ఆధ్యాత్మిక మార్గం', 'Your Spiritual Path'), text: predText(pred.spiritual) },
-        v.deity ? { label: t('ఆరాధ్య దేవత', 'Presiding Deity'), text: t(v.deity.te, v.deity.en) } : null,
-        v.mantra ? { label: t('బీజ మంత్రం', 'Beeja Mantra'), text: v.mantra } : null,
-        v.remedy ? { label: t('ఆధ్యాత్మిక ఉపాయం', 'Spiritual Remedy'), text: v.remedy } : null,
+        v.deity ? { label: t('ఆరాధ్య దేవత', 'Presiding Deity'), text: txt(v.deity) } : null,
+        v.mantra ? { label: t('బీజ మంత్రం', 'Beeja Mantra'), text: txt(v.mantra) } : null,
+        v.remedy ? { label: t('ఆధ్యాత్మిక ఉపాయం', 'Spiritual Remedy'), text: txt(v.remedy) } : null,
       ].filter(Boolean) : [],
     },
     rashi: {
       personalInfo: [
-        { label: t('మీ చంద్ర రాశి', 'Your Moon Sign'), text: `${r.telugu} (${r.english})` },
-        v.deity ? { label: t('అధిష్టాన దేవత', 'Ruling Deity'), text: t(v.deity.te, v.deity.en) } : null,
-        v.element ? { label: t('తత్వం', 'Element'), text: t(v.element.te, v.element.en) } : null,
-        v.bodyPart ? { label: t('శరీర భాగం', 'Body Part'), text: t(v.bodyPart.te, v.bodyPart.en) } : null,
-        v.gemstone ? { label: t('ప్రధాన రత్నం', 'Primary Gemstone'), text: t(v.gemstone.te, v.gemstone.en) } : null,
-        v.metal ? { label: t('శుభ లోహం', 'Lucky Metal'), text: t(v.metal.te, v.metal.en) } : null,
-        v.luckyDay ? { label: t('శుభ వారం', 'Lucky Day'), text: t(v.luckyDay.te, v.luckyDay.en) } : null,
-        v.luckyColor ? { label: t('శుభ రంగు', 'Lucky Color'), text: t(v.luckyColor.te, v.luckyColor.en) } : null,
-        v.direction ? { label: t('శుభ దిక్కు', 'Lucky Direction'), text: t(v.direction.te, v.direction.en) } : null,
-        v.mantra ? { label: t('బీజ మంత్రం', 'Beeja Mantra'), text: v.mantra } : null,
+        { label: t('మీ చంద్ర రాశి', 'Your Moon Sign'), text: `${r.telugu || ''} (${r.english || ''})` },
+        v.deity ? { label: t('అధిష్టాన దేవత', 'Ruling Deity'), text: txt(v.deity) } : null,
+        v.element ? { label: t('తత్వం', 'Element'), text: txt(v.element) } : null,
+        v.bodyPart ? { label: t('శరీర భాగం', 'Body Part'), text: txt(v.bodyPart) } : null,
+        v.gemstone ? { label: t('ప్రధాన రత్నం', 'Primary Gemstone'), text: txt(v.gemstone) } : null,
+        v.metal ? { label: t('శుభ లోహం', 'Lucky Metal'), text: txt(v.metal) } : null,
+        v.luckyDay ? { label: t('శుభ వారం', 'Lucky Day'), text: txt(v.luckyDay) } : null,
+        v.luckyColor ? { label: t('శుభ రంగు', 'Lucky Color'), text: txt(v.luckyColor) } : null,
+        v.direction ? { label: t('శుభ దిక్కు', 'Lucky Direction'), text: txt(v.direction) } : null,
+        v.mantra ? { label: t('బీజ మంత్రం', 'Beeja Mantra'), text: txt(v.mantra) } : null,
       ].filter(Boolean),
     },
     nakshatra: {
       personalInfo: [
-        { label: t('మీ జన్మ నక్షత్రం', 'Your Birth Star'), text: `${n.telugu} (${n.english})` },
-        n.pada ? { label: t('పాదం', 'Pada'), text: `${n.pada}` } : null,
-        n.deity ? { label: t('నక్షత్ర దేవత', 'Nakshatra Deity'), text: n.deity } : null,
+        { label: t('మీ జన్మ నక్షత్రం', 'Your Birth Star'), text: `${n.telugu || ''} (${n.english || ''})` },
+        n.pada ? { label: t('పాదం', 'Pada'), text: String(n.pada) } : null,
+        n.deity ? { label: t('నక్షత్ర దేవత', 'Nakshatra Deity'), text: txt(n.deity) } : null,
       ].filter(Boolean),
     },
     lagna: {
       personalInfo: [
-        { label: t('మీ లగ్నం', 'Your Ascendant'), text: `${horoscope.lagna?.telugu} (${horoscope.lagna?.english})` },
-        horoscope.lagna?.lord ? { label: t('లగ్నాధిపతి', 'Lagna Lord'), text: horoscope.lagna.lord } : null,
+        { label: t('మీ లగ్నం', 'Your Ascendant'), text: `${horoscope.lagna?.telugu || ''} (${horoscope.lagna?.english || ''})` },
+        horoscope.lagna?.lord ? { label: t('లగ్నాధిపతి', 'Lagna Lord'), text: txt(horoscope.lagna.lord) } : null,
       ].filter(Boolean),
     },
     sunSign: {
       personalInfo: [
-        { label: t('మీ సూర్య రాశి', 'Your Sun Sign'), text: `${horoscope.sunSign?.telugu} (${horoscope.sunSign?.english})` },
+        { label: t('మీ సూర్య రాశి', 'Your Sun Sign'), text: `${horoscope.sunSign?.telugu || ''} (${horoscope.sunSign?.english || ''})` },
       ],
     },
     vedic: {
       personalInfo: [
-        v.gemstone ? { label: t('ప్రధాన రత్నం', 'Primary Gemstone'), text: t(v.gemstone.te, v.gemstone.en) } : null,
-        v.gemstoneAlt ? { label: t('ప్రత్యామ్నాయం', 'Alternative'), text: t(v.gemstoneAlt.te, v.gemstoneAlt.en) } : null,
-        v.metal ? { label: t('లోహం', 'Metal'), text: t(v.metal.te, v.metal.en) } : null,
-        v.deity ? { label: t('ఆరాధ్య దేవత', 'Deity'), text: t(v.deity.te, v.deity.en) } : null,
-        v.mantra ? { label: t('మంత్రం', 'Mantra'), text: v.mantra } : null,
-        v.remedy ? { label: t('నివారణ ఉపాయం', 'Remedy'), text: v.remedy } : null,
+        v.gemstone    ? { label: t('ప్రధాన రత్నం', 'Primary Gemstone'), text: txt(v.gemstone) } : null,
+        v.gemstoneAlt ? { label: t('ప్రత్యామ్నాయం', 'Alternative'),     text: txt(v.gemstoneAlt) } : null,
+        v.metal       ? { label: t('లోహం', 'Metal'),                text: txt(v.metal) } : null,
+        v.deity       ? { label: t('ఆరాధ్య దేవత', 'Deity'),          text: txt(v.deity) } : null,
+        v.mantra      ? { label: t('మంత్రం', 'Mantra'),              text: txt(v.mantra) } : null,
+        v.remedy      ? { label: t('నివారణ ఉపాయం', 'Remedy'),       text: txt(v.remedy) } : null,
       ].filter(Boolean),
     },
     navagraha: { personalInfo: [] },
@@ -1251,6 +1339,15 @@ function PredictionSection({ icon, title, text, detailKey, onReadMore }) {
 }
 
 function buildHoroscopeHtml(h) {
+  // Bilingual / scalar field extractor for the PDF — Telugu by default
+  // (the PDF template uses Telugu headings). Handles {te,en},
+  // {telugu,english}, plain strings, and nullish.
+  const pickT = (v) => {
+    if (v == null) return '';
+    if (typeof v === 'string' || typeof v === 'number') return String(v);
+    if (typeof v === 'object') return v.te || v.telugu || v.en || v.english || '';
+    return String(v);
+  };
   return `<!DOCTYPE html><html><head><meta charset="utf-8">
     <style>
       body{font-family:sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#2C1810;line-height:1.8}
@@ -1279,13 +1376,13 @@ function buildHoroscopeHtml(h) {
     </div>
     <h2>జాతక ఫలాలు</h2>
     ${h.predictions ? `
-      <div class="pred"><div class="pred-title">వ్యక్తిత్వం</div>${h.predictions.personality || ''}</div>
-      <div class="pred"><div class="pred-title">వృత్తి</div>${h.predictions.career || ''}</div>
-      <div class="pred"><div class="pred-title">ఆరోగ్యం</div>${h.predictions.health || ''}</div>
-      <div class="pred"><div class="pred-title">సంబంధాలు</div>${h.predictions.relationships || ''}</div>
-      <div class="pred"><div class="pred-title">ఆధ్యాత్మికత</div>${h.predictions.spiritual || ''}</div>
+      <div class="pred"><div class="pred-title">వ్యక్తిత్వం</div>${pickT(h.predictions.personality)}</div>
+      <div class="pred"><div class="pred-title">వృత్తి</div>${pickT(h.predictions.career)}</div>
+      <div class="pred"><div class="pred-title">ఆరోగ్యం</div>${pickT(h.predictions.health)}</div>
+      <div class="pred"><div class="pred-title">సంబంధాలు</div>${pickT(h.predictions.relationships)}</div>
+      <div class="pred"><div class="pred-title">ఆధ్యాత్మికత</div>${pickT(h.predictions.spiritual)}</div>
     ` : ''}
-    ${h.dailyForecast ? `<h2>📅 నేటి ఫలం</h2><p>${h.dailyForecast}</p>` : ''}
+    ${h.dailyForecast ? `<h2>📅 నేటి ఫలం</h2><p>${pickT(h.dailyForecast)}</p>` : ''}
     <div class="footer">Generated by ధర్మ దినచర్య (ధర్మ) App<br>Vedic calculations using Drik Ganita + Lahiri Ayanamsa<br>🙏 సర్వే జనాః సుఖినో భవంతు</div>
     </body></html>`;
 }
@@ -1299,14 +1396,14 @@ const s = StyleSheet.create({
     position: 'relative',
   },
   backX: { position: 'absolute', left: 16 },
-  title: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
+  title: { fontSize: 18, fontWeight: '600', color: DarkColors.gold },
 
   // Locked / Premium gate
   lockedWrap: {
     alignItems: 'center', padding: 40, paddingTop: 50,
   },
   lockedTitle: {
-    fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 16,
+    fontSize: 22, fontWeight: '600', color: '#FFFFFF', marginTop: 16,
   },
   lockedDesc: {
     fontSize: 14, color: '#C0C0C0', textAlign: 'center', marginTop: 12, lineHeight: 22,
@@ -1322,7 +1419,7 @@ const s = StyleSheet.create({
     paddingVertical: 14, gap: 8,
   },
   lockedBtnText: {
-    fontSize: 16, fontWeight: '800', color: DarkColors.goldShimmer,
+    fontSize: 16, fontWeight: '600', color: DarkColors.goldShimmer,
   },
   lockedCancel: {
     fontSize: 13, color: '#999999', fontWeight: '600',
@@ -1331,7 +1428,7 @@ const s = StyleSheet.create({
   // Form
   form: {},
   formTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 16, position: 'relative' },
-  formTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  formTitle: { fontSize: 16, fontWeight: '600', color: '#FFFFFF', textAlign: 'center' },
   clearFormBtn: {
     position: 'absolute', right: 0, flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8,
@@ -1359,7 +1456,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
   },
   timeDisplayBig: {
-    fontSize: 32, fontWeight: '900', color: DarkColors.gold,
+    fontSize: 32, fontWeight: '700', color: DarkColors.gold,
     textAlign: 'center', marginBottom: 14, letterSpacing: 2,
   },
   timeControlsRow: {
@@ -1373,12 +1470,12 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(212,160,23,0.3)',
   },
-  timeSpinValue: { fontSize: 24, fontWeight: '900', color: '#FFFFFF', minWidth: 36, textAlign: 'center' },
-  timeColonBig: { fontSize: 28, fontWeight: '900', color: '#999999', marginTop: 22 },
+  timeSpinValue: { fontSize: 24, fontWeight: '700', color: '#FFFFFF', minWidth: 36, textAlign: 'center' },
+  timeColonBig: { fontSize: 28, fontWeight: '700', color: '#999999', marginTop: 22 },
   ampmGroup: { flexDirection: 'column', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: DarkColors.gold },
   ampmBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'transparent' },
   ampmBtnActive: { backgroundColor: 'rgba(212,160,23,0.25)' },
-  ampmText: { fontSize: 13, fontWeight: '800', color: 'rgba(212,160,23,0.5)', textAlign: 'center' },
+  ampmText: { fontSize: 13, fontWeight: '600', color: 'rgba(212,160,23,0.5)', textAlign: 'center' },
   ampmTextActive: { color: DarkColors.gold },
   // Place input with clear button
   placeInputRow: {
@@ -1423,7 +1520,7 @@ const s = StyleSheet.create({
     paddingVertical: 16, borderRadius: 16, gap: 10,
     backgroundColor: 'rgba(212,160,23,0.12)', borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  generateText: { fontSize: 17, fontWeight: '800', color: DarkColors.gold },
+  generateText: { fontSize: 17, fontWeight: '600', color: DarkColors.gold },
   disclaimer: { fontSize: 11, color: '#999999', fontStyle: 'italic', textAlign: 'center', marginTop: 16, lineHeight: 18 },
 
   // Payment step
@@ -1435,11 +1532,11 @@ const s = StyleSheet.create({
   planCardSelected: { borderColor: '#9B6FCF', backgroundColor: 'rgba(155,111,207,0.1)' },
   planCardBest: { borderColor: '#9B6FCF', borderWidth: 2 },
   bestTag: { position: 'absolute', top: -8, right: 12, backgroundColor: '#4A1A6B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  bestTagText: { fontSize: 8, fontWeight: '800', color: DarkColors.goldShimmer },
+  bestTagText: { fontSize: 8, fontWeight: '600', color: DarkColors.goldShimmer },
   planEmoji: { fontSize: 24 },
   planName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   planDesc: { fontSize: 11, color: '#999999', marginTop: 2 },
-  planPrice: { fontSize: 20, fontWeight: '900', color: '#9B6FCF' },
+  planPrice: { fontSize: 20, fontWeight: '700', color: '#9B6FCF' },
   upiAppBtn: {
     width: '48%', flexDirection: 'row', alignItems: 'center',
     backgroundColor: '#222222', borderRadius: 12, padding: 10, marginBottom: 8,
@@ -1449,7 +1546,7 @@ const s = StyleSheet.create({
   upiAppText: { fontSize: 12, fontWeight: '700' },
   activatePayBtn: { borderRadius: 14, overflow: 'hidden', marginTop: 14 },
   activatePayGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, gap: 8 },
-  activatePayText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  activatePayText: { fontSize: 15, fontWeight: '600', color: '#fff' },
 
   // Loading
   loadingBox: { alignItems: 'center', padding: 60 },
@@ -1459,7 +1556,7 @@ const s = StyleSheet.create({
   // Result
   result: {},
   resultHeader: { alignItems: 'center', marginBottom: 20 },
-  resultName: { fontSize: 24, fontWeight: '900', color: '#FFFFFF' },
+  resultName: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
   resultBirth: { fontSize: 14, color: '#BBBBBB', marginTop: 6 },
   keyInfoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   keyCardTouch: { width: '47%' },
@@ -1468,7 +1565,7 @@ const s = StyleSheet.create({
     borderLeftWidth: 3, alignItems: 'center',
   },
   keyLabel: { fontSize: 13, color: '#BBBBBB', fontWeight: '700', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
-  keyValue: { fontSize: 20, fontWeight: '900', marginTop: 3 },
+  keyValue: { fontSize: 20, fontWeight: '700', marginTop: 3 },
   keySub: { fontSize: 13, color: '#DDDDDD', fontWeight: '500', marginTop: 2 },
 
   // Navagraha
@@ -1478,7 +1575,7 @@ const s = StyleSheet.create({
     width: '31%', backgroundColor: '#222222', borderRadius: 10, padding: 10, alignItems: 'center',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  ngName: { fontSize: 14, fontWeight: '800', color: '#9B6FCF' },
+  ngName: { fontSize: 14, fontWeight: '600', color: '#9B6FCF' },
   ngRashi: { fontSize: 13, color: '#DDDDDD', fontWeight: '500', marginTop: 2 },
   ngRetro: { fontSize: 11, fontWeight: '700', color: '#E8495A', marginTop: 2 },
 
@@ -1488,10 +1585,10 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   bpLabel: { fontSize: 13, color: '#BBBBBB', fontWeight: '700' },
-  bpValue: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginTop: 3 },
+  bpValue: { fontSize: 16, fontWeight: '600', color: '#FFFFFF', marginTop: 3 },
 
   predictions: { marginBottom: 20 },
-  predTitle: { fontSize: 19, fontWeight: '900', color: '#FFFFFF', marginBottom: 14 },
+  predTitle: { fontSize: 19, fontWeight: '700', color: '#FFFFFF', marginBottom: 14 },
   // Vedic info grid
   vedicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   vedicItem: {
@@ -1499,20 +1596,20 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', gap: 4,
   },
   vedicLabel: { fontSize: 13, color: '#BBBBBB', fontWeight: '700' },
-  vedicValue: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', textAlign: 'center' },
+  vedicValue: { fontSize: 16, fontWeight: '600', color: '#FFFFFF', textAlign: 'center' },
   predRow: {
     flexDirection: 'row', alignItems: 'flex-start',
     backgroundColor: '#222222', borderRadius: 14, padding: 16, marginBottom: 12,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  predSectionTitle: { fontSize: 16, fontWeight: '800', color: '#9B6FCF', marginBottom: 6 },
+  predSectionTitle: { fontSize: 16, fontWeight: '600', color: '#9B6FCF', marginBottom: 6 },
   predText: { fontSize: 15, color: '#DDDDDD', lineHeight: 23, fontWeight: '500' },
 
   dailyBox: {
     backgroundColor: 'rgba(155,111,207,0.08)', borderRadius: 16, padding: 18, marginBottom: 20,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
-  dailyTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginBottom: 10 },
+  dailyTitle: { fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginBottom: 10 },
   dailyText: { fontSize: 15, color: '#DDDDDD', lineHeight: 24, fontWeight: '500' },
 
   actionRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 12 },
@@ -1556,7 +1653,7 @@ const s = StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
     padding: 12,
   },
-  savedName: { fontSize: 15, fontWeight: '800', color: '#FFFFFF' },
+  savedName: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
   savedMeta: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   savedDeleteBtn: {
     padding: 12, borderLeftWidth: 1, borderLeftColor: DarkColors.borderCard,
@@ -1579,13 +1676,13 @@ const s = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 34 : 16,
   },
   detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
-  detailTitle: { flex: 1, fontSize: 20, fontWeight: '900', color: DarkColors.gold },
+  detailTitle: { flex: 1, fontSize: 20, fontWeight: '700', color: DarkColors.gold },
   detailCloseBtn: { padding: 6 },
   detailSection: { marginTop: 16 },
   detailSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  detailSectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  detailSectionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
   detailBody: { fontSize: 15, color: DarkColors.silver, lineHeight: 24, fontWeight: '500' },
-  detailHighlight: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  detailHighlight: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
   detailSubHighlight: { fontSize: 14, color: DarkColors.goldLight, fontWeight: '600', marginTop: 4 },
   personalRow: { marginTop: 10, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: DarkColors.borderCard },
   personalLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },

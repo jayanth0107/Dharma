@@ -176,10 +176,10 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 14, marginBottom: 28,
   },
-  brand: { color: DarkColors.gold, fontWeight: '900', letterSpacing: 4 },
+  brand: { color: DarkColors.gold, fontWeight: '700', letterSpacing: 4 },
 
   // Screen 1 — language picker
-  langPrompt:    { color: DarkColors.gold, fontWeight: '900', textAlign: 'center', marginBottom: 4 },
+  langPrompt:    { color: DarkColors.gold, fontWeight: '700', textAlign: 'center', marginBottom: 4 },
   langPromptEn:  { color: DarkColors.silver, fontWeight: '600', textAlign: 'center', marginBottom: 32 },
   langBtn: {
     backgroundColor: DarkColors.bgCard, borderRadius: 18,
@@ -187,7 +187,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 24, marginHorizontal: 24, marginBottom: 14,
     alignItems: 'center',
   },
-  langText: { color: DarkColors.gold, fontWeight: '900', letterSpacing: 0.5 },
+  langText: { color: DarkColors.gold, fontWeight: '700', letterSpacing: 0.5 },
   langSub:  { color: DarkColors.silver, fontWeight: '600', marginTop: 6 },
   changeHint: {
     color: DarkColors.textMuted, fontWeight: '500', textAlign: 'center',
@@ -195,7 +195,7 @@ const s = StyleSheet.create({
   },
 
   // Screen 2 — value summary
-  welcomeTitle: { color: DarkColors.gold, fontWeight: '900', textAlign: 'center', marginTop: 8, lineHeight: 30 },
+  welcomeTitle: { color: DarkColors.gold, fontWeight: '700', textAlign: 'center', marginTop: 8, lineHeight: 30 },
   welcomeSub:   { color: DarkColors.silver, fontWeight: '600', textAlign: 'center', marginTop: 8, marginBottom: 28 },
 
   tilesGrid: {
@@ -226,5 +226,5 @@ const s = StyleSheet.create({
     paddingVertical: 16, paddingHorizontal: 32, borderRadius: 16,
     marginHorizontal: 12,
   },
-  startText: { color: '#0A0A0A', fontWeight: '900', letterSpacing: 0.4 },
+  startText: { color: '#0A0A0A', fontWeight: '700', letterSpacing: 0.4 },
 });

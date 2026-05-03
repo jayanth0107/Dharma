@@ -2,12 +2,13 @@
 
 ## What is this project?
 
-**Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu Panchangam & Vedic Astrology mobile app. It provides astronomically accurate daily panchangam (Tithi, Nakshatra, Yoga, Karana), auspicious/inauspicious timings, festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Muhurtam finder, Vedic horoscope (జాతకం), matchmaking, daily rashi predictions, live gold/silver prices, Indian market indices, and nearby temple finder — for Telugu-speaking users.
+**Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu **sacred-stories + panchangam + Vedic astrology** mobile app. Daily Ramayana / Mahabharata episode, Bhagavad Gita sloka, Neethi Sukta wisdom, Sanskrit word, Dharma debate / quiz, Stotras + Mantras with pandit recordings, animated meditation; full Drik-Ganita panchangam (Tithi, Nakshatra, Yoga, Karana, Muhurtams), festivals + Ekadashi + Pournami / Amavasya / Pradosham observances, Vedic horoscope (జాతకం), 8-Kuta matchmaking, Muhurtam finder, daily rashi predictions, Vedic personality profile, live gold/silver prices, Indian market indices, nearby-temple finder.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.4.0 (versionCode 8)
+**Version:** 2.4.2 (versionCode 10)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
+**EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
 
 ## Tech stack
 
@@ -19,7 +20,8 @@
 - **Firebase 12.11.0** (Firestore for payment sync, Phone Auth, Analytics)
 - **expo-linear-gradient**, **@expo/vector-icons**
 - **@react-native-async-storage/async-storage**
-- **expo-location** (coarse only), **expo-print**, **expo-sharing**, **expo-notifications**, **expo-font**
+- **expo-audio** (`useAudioPlayer`, `setAudioModeAsync` — replaces deprecated `expo-av`)
+- **expo-location** (coarse only), **expo-print**, **expo-sharing**, **expo-notifications**, **expo-font**, **expo-speech**
 - Targets iOS, Android, Web
 
 ## Architecture (v2.1 — Swipeable + Responsive + Accessible)
@@ -197,46 +199,57 @@ Already responsive: home tile grid, branded header (icons, flag, title font, sub
 
 ## Navigation structure
 
-### MAIN_SECTIONS — 18 entries (source of truth for top bar, bottom bar, swipe order)
+### MAIN_SECTIONS — source of truth for top bar, bottom bar, swipe order, AND home grid
 
-| # | Route | Telugu | English | Notes |
-|---|-------|--------|---------|-------|
-| 0 | Home | హోమ్ | Home | dashboard |
-| 1 | Panchang | నేటి దినం | Today's Date | CalendarScreen, `tab: panchang` |
-| 2 | Festivals | పండుగలు | Festivals | CalendarScreen, `tab: festivals` |
-| 3 | DailyRashi | రాశి ఫలాలు | Rashi Predictions | per-sign predictions |
-| 4 | Horoscope | వేద జాతకం | Birth Chart | **premium** |
-| 5 | Matchmaking | పొందిక | Love Match | **premium** |
-| 6 | Muhurtam | శుభ దినాలు | Auspicious Dates | **premium** |
-| 7 | Astro | జ్యోతిష్యం | Astro | astrology features |
-| 8 | Gold | బంగారం | Gold | gold + silver prices |
-| 9 | Gita | గీత | Gita | Bhagavad Gita |
-| 10 | GoodTimes | శుభ సమయాలు | Auspicious Times | CalendarScreen, `tab: timings` |
-| 11 | Market | మార్కెట్ | Market | NSE/BSE (mobile only) |
-| 12 | Reminder | రిమైండర్ | Set Reminder | reminder CRUD |
-| 13 | Kids | పిల్లల కథలు | Kid's Stories | CalendarScreen, `tab: kids` |
-| 14 | TempleNearby | దేవాలయాలు | Nearby Temples | location-aware temple finder |
-| 15 | Donate | దానం | Donate | UPI donation |
-| 16 | Premium | ప్రీమియం | Premium | plans + payment |
-| 17 | More | మరిన్ని | More | settings, share, info |
+`src/navigation/sections.js` is the single registry. Sections are grouped into 5 thematic blocks; the home grid renders the same order with `<SectionDivider>` between blocks. Reorder there → top bar, bottom bar, swipe, home grid all update together.
+
+**1. Daily Habit (everyone)**
+- Panchang (CalendarScreen, `tab: panchang`)
+- Festivals (CalendarScreen, `tab: festivals`)
+- DailyRashi
+- Gold
+- Market (NSE/BSE, mobile only — web shows "Available in mobile app")
+
+**2. Ithihaasa (Sanskrit "thus it happened" — sacred history)**
+- Ramayana (30-episode rotation)
+- Mahabharata (30-episode rotation)
+- Gita (Bhagavad Gita — 30-sloka rotation)
+- NeethiSukta (Chanakya / Vidura / Bhartrihari / Subhashitas / Thirukkural / Panchatantra wisdom quotes)
+- Kids (CalendarScreen, `tab: kids`)
+- Pramana (Shruti / Smriti / Shishtachara source attribution)
+
+**3. Youth & Learning (15–25, engagement + bite-size knowledge)**
+- DharmaPoll (daily dharmic A/B debate)
+- Quiz (daily Vedic & Puranic quiz)
+- SanskritWord (Sanskrit word of the day — Devanagari + etymology + modern Telugu)
+- RashiProfile (Vedic personality profile for all 12 rashis)
+- Matchmaking (8-Kuta Ashtakoot + PDF report)
+- Astro (Vedic Wisdom hub)
+
+**4. Life Decisions (adults / premium-gated)**
+- Horoscope (Vedic జాతకం — Moon Rashi, Lagna, Nakshatra, Navagraha, share + PDF)
+- Muhurtam (date selector ±1 year + 90-day event scan: wedding / griha pravesh / travel / business / vehicle / education)
+- Family (multi-member kundali storage)
+
+**5. Devotion & Service (elders, deeper practice)**
+- Stotra (Stotras + Mantras with pandit YouTube recordings)
+- Meditation (animated breathing circle + mantra picker — chant continues on screen-lock, stops on tab-switch)
+- PujaGuide (12 step-by-step guides with samagri lists)
+- TempleNearby (location-aware temple finder)
+- Donate (UPI donation with bilingual amount picker)
+
+**Utility tail**
+- Reminder
+- More
 
 ### UTILITY_SCREENS — push-only, not in nav bars
-Settings, InfoPage (WebView), Login, Location, Notifications, Services (placeholder — registered but not surfaced)
+Settings, InfoPage (WebView for Privacy/Terms/About/Rate/Feedback), Login, Location, Notifications, Premium (plans + payment), Services (placeholder — registered but not surfaced).
 
 ### CalendarScreen routes & sub-tabs
-- `Panchang` — no sub-tabs
-- `Festivals` — sub-tabs: Ekadashi, Chaturthi, Pournami, Amavasya, Pradosham, Holidays, Darshan
+- `Panchang` — no sub-tabs; scroll-wheel date picker (any date), date dominates layout
+- `Festivals` — year-chip strip (current ± 1 — bundled 2025/2026/2027) + sub-tabs: Festivals, Ekadashi, Chaturthi, Pournami, Amavasya, Pradosham, Holidays, Darshan (chips wrap into ≤3 rows on phones; observances computed dynamically for any year via `lunarObservances.js`)
 - `GoodTimes` — no sub-tabs
 - `Kids` — no sub-tabs
-
-### Home grid tiles (current order, matches nav bar order)
-Row 1: నేటి దినం, పండుగలు, రాశి ఫలాలు
-Row 2 (PREMIUM): వేద జాతకం, జాతక పొందిక, శుభ దినాలు
-Row 3: జ్యోతిష్యం, బంగారం వెండి ధరలు, భగవద్గీత
-Row 4: శుభ సమయాలు, మార్కెట్, రిమైండర్
-Row 5: పిల్లల కథలు, దేవాలయాలు, దానం
-
-(Premium screen accessible via drawer / nav bar — not a Home tile.)
 
 ## Key conventions
 

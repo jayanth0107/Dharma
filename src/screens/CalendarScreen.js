@@ -3,7 +3,7 @@
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform,
 } from 'react-native';
@@ -16,7 +16,7 @@ import { usePick } from '../theme/responsive';
 import { PageHeader } from '../components/PageHeader';
 import { ListSectionHeader } from '../components/ListSectionHeader';
 import { SubTabBar } from '../components/SubTabBar';
-import { MiniCalendar } from '../components/MiniCalendar';
+import { BirthDatePicker } from '../components/BirthDatePicker';
 import { PanchangaCard, TimingCard, MuhurthamCard, SlokaCard } from '../components/PanchangaCard';
 import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 import { UpcomingFestivalItem } from '../components/FestivalCard';
@@ -31,6 +31,11 @@ import { getUpcomingObservances } from '../data/observances';
 import { FESTIVALS_2026 } from '../data/festivals';
 import { EKADASHI_2026 } from '../data/ekadashi';
 import { PUBLIC_HOLIDAYS_2026 } from '../data/holidays';
+import { loadYearlyData, isYearBundled } from '../utils/festivalsService';
+import {
+  computePournamiDates, computeAmavasyaDates,
+  computeSankashtiDates, computePradoshamDates, computeEkadashiDates,
+} from '../utils/lunarObservances';
 import { CHATURTHI_2026, POURNAMI_2026, AMAVASYA_2026, PRADOSHAM_2026 } from '../data/observances';
 
 // Build a full-year list with daysLeft + isPast annotations, sorted chronologically.
@@ -73,15 +78,21 @@ import {
 // SubTabBar shows only categories NOT already in the top/bottom nav bars.
 // Panchang, Festivals, GoodTimes are top-level nav entries — accessing them
 // from sub-tabs would be a duplicate.
+//
+// Each entry carries an icon hint so the new pill-button SubTabBar can
+// give users a visual anchor in addition to the text label. The pills
+// scroll horizontally (no chevron arrows) and the active pill fills
+// saffron — same affordance pattern as Stotras / Mantras sub-tabs.
 function getSubTabs(t) {
   return [
-    { id: 'ekadashi', label: t(TR.ekadashi.te, TR.ekadashi.en) },
-    { id: 'chaturthi', label: t('చతుర్థి', 'Chaturthi') },
-    { id: 'pournami', label: t('పౌర్ణమి', 'Pournami') },
-    { id: 'amavasya', label: t('అమావాస్య', 'Amavasya') },
-    { id: 'pradosham', label: t('ప్రదోషం', 'Pradosham') },
-    { id: 'holidays', label: t(TR.holidays.te, TR.holidays.en) },
-    { id: 'darshan', label: t(TR.darshan.te, TR.darshan.en) },
+    { id: 'festivals', icon: 'party-popper',           label: t(TR.festivals.te, TR.festivals.en) },
+    { id: 'ekadashi',  icon: 'calendar-star',          label: t(TR.ekadashi.te, TR.ekadashi.en) },
+    { id: 'chaturthi', icon: 'elephant',               label: t('చతుర్థి', 'Chaturthi') },
+    { id: 'pournami',  icon: 'moon-full',              label: t('పౌర్ణమి', 'Pournami') },
+    { id: 'amavasya',  icon: 'moon-new',               label: t('అమావాస్య', 'Amavasya') },
+    { id: 'pradosham', icon: 'om',                     label: t('ప్రదోషం', 'Pradosham') },
+    { id: 'holidays',  icon: 'flag-variant',           label: t(TR.holidays.te, TR.holidays.en) },
+    { id: 'darshan',   icon: 'temple-hindu',           label: t(TR.darshan.te, TR.darshan.en) },
   ];
 }
 
@@ -97,6 +108,60 @@ export function CalendarScreen({ route }) {
   const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
   const [activeSubTab, setActiveSubTab] = useState(route?.params?.tab || 'panchang');
   const [seniorMode, setSeniorMode] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Festivals route filters by YEAR only — independent of panchangam's
+  // selectedDate. Per-day picking added complexity without value: users
+  // pick a year to see that year's festivals/observances/ekadashis, and
+  // the "days from today" countdown still uses real today() as the
+  // reference. Defaults to current year on first mount.
+  const [festivalsYear, setFestivalsYear] = useState(() => new Date().getFullYear());
+  // Reference date for "X days from today" calculations. Always today —
+  // year selection only filters which entries to show, not the anchor.
+  const festivalsRefDate = useMemo(() => new Date(), [festivalsYear]); // re-create on year change so withRecentPast re-runs
+  // Year strip: previous, current, next — three chips. Tester said
+  // 5+ chips was excessive; only the immediate horizon matters for
+  // festivals. Add more years here once their data is bundled or
+  // hosted at the remote URL (see src/utils/festivalsService.js).
+  const yearOptions = useMemo(() => {
+    const cur = new Date().getFullYear();
+    return [cur - 1, cur, cur + 1];
+  }, []);
+
+  // Loaded festivals / holidays for the selected year. These are
+  // hand-curated per year (fetched from bundled data → cache → remote).
+  // Observances (pournami, amavasya, chaturthi, pradosham, ekadashi)
+  // are computed dynamically from the astronomical engine and don't
+  // need fetching — see the useMemo below.
+  const [yearData, setYearData] = useState({ festivals: [], holidays: [], loading: false });
+  useEffect(() => {
+    let cancelled = false;
+    const bundled = isYearBundled(festivalsYear, 'festivals');
+    setYearData(prev => ({ ...prev, loading: !bundled }));
+    Promise.all([
+      loadYearlyData(festivalsYear, 'festivals'),
+      loadYearlyData(festivalsYear, 'holidays'),
+    ]).then(([festivals, holidays]) => {
+      if (!cancelled) setYearData({ festivals, holidays, loading: false });
+    });
+    return () => { cancelled = true; };
+  }, [festivalsYear]);
+
+  // Lunar observances for the selected year — computed locally via
+  // astronomy-engine (works for any year, no fetch). lunarObservances
+  // memoises by (year, lat, lon) so this is cheap to recompute on
+  // every render.
+  const observancesForYear = useMemo(() => {
+    const lat = location?.latitude ?? 17.3850;
+    const lon = location?.longitude ?? 78.4867;
+    return {
+      pournami:  computePournamiDates (festivalsYear, lat, lon),
+      amavasya:  computeAmavasyaDates (festivalsYear, lat, lon),
+      chaturthi: computeSankashtiDates(festivalsYear, lat, lon),
+      pradosham: computePradoshamDates(festivalsYear, lat, lon),
+      ekadashi:  computeEkadashiDates (festivalsYear, lat, lon),
+    };
+  }, [festivalsYear, location?.latitude, location?.longitude]);
 
   // Load senior mode preference
   React.useEffect(() => {
@@ -173,26 +238,81 @@ export function CalendarScreen({ route }) {
 
       <ScrollView style={s.scroll} contentContainerStyle={[s.scrollContent, { paddingHorizontal: contentPad }]} showsVerticalScrollIndicator={true}>
 
+        {/* ── Year chip strip ──
+            Compact horizontal year picker for the festivals route.
+            Festivals/observances/ekadashi/holidays only need year-level
+            granularity — picking a specific day added no value and ate
+            screen space. Range: previous year, current, next 4. */}
+        {routeName === 'Festivals' && (
+          <View style={s.yearStrip}>
+            <Text style={s.yearStripLabel}>{t('సంవత్సరం', 'Year')}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={s.yearStripScroll}
+            >
+              {yearOptions.map(y => {
+                const active = y === festivalsYear;
+                return (
+                  <TouchableOpacity
+                    key={y}
+                    style={[s.yearChip, active && s.yearChipActive]}
+                    onPress={() => setFestivalsYear(y)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[s.yearChipText, active && s.yearChipTextActive]}>{y}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+
         {/* ── Panchang Tab ── */}
         {activeSubTab === 'panchang' && (
           <>
-            <MiniCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+            {/* Date display — day number dominates because day is the
+                primary axis when looking up a panchangam (you usually
+                already know the month/year). Calendar-tear-off look:
+                BIG day number on the left, month + year + weekday
+                stacked compact on the right. Tap anywhere → scroll
+                wheel picker. */}
+            <TouchableOpacity
+              style={s.dateDisplayBtn}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+              accessibilityLabel="Pick a date"
+              hitSlop={{ top: 4, right: 4, bottom: 4, left: 4 }}
+            >
+              <Text style={s.dateDayBig}>{selectedDate.getDate()}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={s.dateMonthYear} numberOfLines={1}>
+                  {selectedDate.toLocaleDateString(t('te', 'en') === 'te' ? 'te-IN' : 'en-IN', {
+                    month: 'long', year: 'numeric',
+                  })}
+                </Text>
+                <Text style={s.dateWeekday} numberOfLines={1}>
+                  {selectedDate.toLocaleDateString(t('te', 'en') === 'te' ? 'te-IN' : 'en-IN', { weekday: 'long' })}
+                </Text>
+              </View>
+              <MaterialCommunityIcons name="chevron-down" size={20} color={DarkColors.gold} />
+            </TouchableOpacity>
 
-            {/* Date Navigation */}
-            <View style={s.dateNav}>
-              <TouchableOpacity onPress={() => navigateDate(-1)} style={s.dateNavBtn}>
-                <Ionicons name="chevron-back" size={16} color={DarkColors.saffron} />
-                <Text style={s.dateNavText}>{t(TR.yesterday.te, TR.yesterday.en)}</Text>
+            {/* Yesterday / Today / Tomorrow nav removed — the scroll-wheel
+                date picker behind the date display covers all date
+                navigation, and 3 redundant chips were stealing vertical
+                space. A small "Today" reset link sits inline with the
+                date display when the user has scrolled away from today. */}
+            {selectedDate.toDateString() !== new Date().toDateString() && (
+              <TouchableOpacity
+                style={s.todayResetLink}
+                onPress={() => setSelectedDate(new Date())}
+                activeOpacity={0.6}
+              >
+                <MaterialCommunityIcons name="calendar-today" size={14} color={DarkColors.saffron} />
+                <Text style={s.todayResetText}>{t('నేడుకి తిరిగి వెళ్ళు', 'Reset to today')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setSelectedDate(new Date())} style={s.todayBtn}>
-                <MaterialCommunityIcons name="calendar-today" size={14} color="#fff" style={{ marginRight: 4 }} />
-                <Text style={s.todayBtnText}>{t(TR.today.te, TR.today.en)}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigateDate(1)} style={s.dateNavBtn}>
-                <Text style={s.dateNavText}>{t(TR.tomorrow.te, TR.tomorrow.en)}</Text>
-                <Ionicons name="chevron-forward" size={16} color={DarkColors.saffron} />
-              </TouchableOpacity>
-            </View>
+            )}
 
             {/* Senior/Simple View toggle */}
             <TouchableOpacity style={[s.seniorToggle, seniorMode && s.seniorToggleActive]} onPress={toggleSeniorMode} activeOpacity={0.7}>
@@ -287,9 +407,12 @@ export function CalendarScreen({ route }) {
                 <PanchangaCard label={t(TR.yogam.te, TR.yogam.en)} teluguValue={t(panchangam.yoga.telugu, panchangam.yoga.english || panchangam.yoga.telugu)} accentColor={DarkColors.tulasiGreen} />
                 <PanchangaCard label={t(TR.karanam.te, TR.karanam.en)} teluguValue={t(panchangam.karana.telugu, panchangam.karana.english || panchangam.karana.telugu)} accentColor={DarkColors.kumkum} />
                 <PanchangaCard label={t(TR.vaaram.te, TR.vaaram.en)} teluguValue={t(panchangam.vaaram.telugu, panchangam.vaaram.english)} sublabel={t(`${TR.deity.te}: ${panchangam.vaaram.deity}`, `${TR.deity.en}: ${panchangam.vaaram.deity}`)} accentColor={panchangam.vaaram.id === 6 ? '#8E8EAE' : panchangam.vaaram.color || DarkColors.silver} />
-                <PanchangaCard label={t(TR.maasam.te, TR.maasam.en)} teluguValue={t(panchangam.teluguMonth.telugu, panchangam.teluguMonth.english)} sublabel={panchangam.teluguYear} accentColor={'#9B6FCF'} />
+                <PanchangaCard label={t(TR.maasam.te, TR.maasam.en)} teluguValue={t(panchangam.teluguMonth.telugu, panchangam.teluguMonth.english)} sublabel={t(panchangam.teluguYear?.te, panchangam.teluguYear?.en)} accentColor={'#9B6FCF'} />
               </View>
             </View>
+
+            {/* Slim divider between Panchangam Elements and Key Timings */}
+            <View style={s.cardDivider} />
 
             {/* Key Timings Summary — quick glance */}
             <View style={s.card}>
@@ -335,6 +458,9 @@ export function CalendarScreen({ route }) {
                 )}
               </View>
             </View>
+
+            {/* Slim divider between Key Timings and Today's Significance */}
+            <View style={s.cardDivider} />
 
             {/* Today's Significance */}
             <View style={s.card}>
@@ -417,18 +543,35 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Festivals Tab ── all 2026 festivals ── */}
+        {/* ── Festivals Tab ── all 2026 festivals ──
+            Header restored for consistency with the other sub-tabs
+            (Chaturthi, Pournami, Amavasya, Pradosham, Holidays, Darshan)
+            — every list now has the same icon + title + subtitle anchor
+            on top, so the layout pattern is uniform across all pills. */}
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
             <ListSectionHeader
               title={t(TR.festivals.te, TR.festivals.en)}
-              subtitle={t('2026 పండుగలు — క్రింద చూడండి', '2026 festivals — scroll below')}
+              subtitle={`${festivalsYear}`}
               icon="party-popper"
               iconColor={DarkColors.gold}
+              inline
             />
             {(() => {
-              const items = withRecentPast(withDaysLeft(FESTIVALS_2026, selectedDate));
-              if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noFestivals.te, TR.noFestivals.en)}</Text>;
+              // Pulls from bundled data → AsyncStorage cache → GitHub raw URL,
+              // in that order. festivalsService handles all the resolution.
+              if (yearData.loading) {
+                return <Text style={s.emptyText}>{t('లోడ్ అవుతోంది…', 'Loading…')}</Text>;
+              }
+              const items = withRecentPast(withDaysLeft(yearData.festivals, festivalsRefDate));
+              if (items.length === 0) {
+                return (
+                  <Text style={s.emptyText}>
+                    {t(`${festivalsYear} డేటా త్వరలో — ఆన్‌లైన్‌లో అందుబాటులో లేదు`,
+                       `${festivalsYear} data coming soon — not yet online`)}
+                  </Text>
+                );
+              }
               return (
                 <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={true}>
                   {items.map((festival, idx) => (
@@ -439,7 +582,7 @@ export function CalendarScreen({ route }) {
                 </ScrollView>
               );
             })()}
-            <SectionShareRow section="festivals" buildText={() => buildFestivalsShareText(upcomingFestivals, FESTIVALS_2026)} />
+            <SectionShareRow section="festivals" buildText={() => buildFestivalsShareText(upcomingFestivals, yearData.festivals || [])} />
           </View>
         )}
 
@@ -453,7 +596,7 @@ export function CalendarScreen({ route }) {
                 activeSubTab === 'amavasya'  ? t('అమావాస్య', 'Amavasya') :
                                                 t('ప్రదోషం', 'Pradosham')
               }
-              subtitle={t('2026 తేదీలు — క్రింద చూడండి', '2026 dates — scroll below')}
+              subtitle={`${festivalsYear}`}
               icon={
                 activeSubTab === 'chaturthi' ? 'elephant' :
                 activeSubTab === 'pournami'  ? 'moon-full' :
@@ -466,11 +609,17 @@ export function CalendarScreen({ route }) {
                 activeSubTab === 'amavasya'  ? '#9B6FCF' :
                                                 '#4A90D9'
               }
+              inline
             />
             {(() => {
-              const source = OBSERVANCE_DATA[activeSubTab];
-              if (!source) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
-              const items = withRecentPast(withDaysLeft(source, selectedDate));
+              // Lunar observances (chaturthi/pournami/amavasya/pradosham)
+              // are computed dynamically for any year via lunarObservances —
+              // no bundled data dependency, no fetch required.
+              const source = observancesForYear[activeSubTab];
+              if (!source || source.length === 0) {
+                return <Text style={s.emptyText}>{t(`${festivalsYear} డేటా అందుబాటులో లేదు`, `${festivalsYear} data not available`)}</Text>;
+              }
+              const items = withRecentPast(withDaysLeft(source, festivalsRefDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t('రాబోయే తేదీలు లేవు', 'No upcoming dates')}</Text>;
               return (
                 <ScrollView style={[s.innerScroll, { maxHeight: innerMaxHeight }]} nestedScrollEnabled showsVerticalScrollIndicator={true}>
@@ -506,30 +655,41 @@ export function CalendarScreen({ route }) {
           <View style={s.card}>
             <ListSectionHeader
               title={t('ఏకాదశి', 'Ekadashi')}
-              subtitle={t('2026 — 24 ఏకాదశి దినాలు', '2026 — 24 Ekadashi days')}
+              subtitle={`${festivalsYear}`}
               icon="hands-pray"
               iconColor="#9B6FCF"
+              inline
             />
             {todayEkadashi && (
               <EkadashiSection
                 todayEkadashi={todayEkadashi}
                 upcomingEkadashis={[]}
-                selectedDate={selectedDate}
+                selectedDate={festivalsRefDate}
                 showAll
               />
             )}
-            <ScrollView
-              style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
-              nestedScrollEnabled
-              showsVerticalScrollIndicator={true}
-            >
-              <EkadashiSection
-                todayEkadashi={null}
-                upcomingEkadashis={withRecentPast(withDaysLeft(EKADASHI_2026, selectedDate))}
-                selectedDate={selectedDate}
-                showAll
-              />
-            </ScrollView>
+            {(() => {
+              // Ekadashi computed for any year — no fetch needed.
+              const source = observancesForYear.ekadashi;
+              const items = withRecentPast(withDaysLeft(source, festivalsRefDate));
+              if (items.length === 0) {
+                return <Text style={s.emptyText}>{t(`${festivalsYear} డేటా అందుబాటులో లేదు`, `${festivalsYear} data not available`)}</Text>;
+              }
+              return (
+                <ScrollView
+                  style={[s.innerScroll, { maxHeight: innerMaxHeight }]}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={true}
+                >
+                  <EkadashiSection
+                    todayEkadashi={null}
+                    upcomingEkadashis={items}
+                    selectedDate={festivalsRefDate}
+                    showAll
+                  />
+                </ScrollView>
+              );
+            })()}
             <SectionShareRow section="ekadashi" buildText={() => buildEkadashiShareText(upcomingEkadashiList, EKADASHI_2026)} />
           </View>
         )}
@@ -539,12 +699,16 @@ export function CalendarScreen({ route }) {
           <View style={s.card}>
             <ListSectionHeader
               title={t(TR.govtHolidays.te, TR.govtHolidays.en)}
-              subtitle={t('2026 ప్రభుత్వ సెలవులు', '2026 government holidays')}
+              subtitle={`${festivalsYear}`}
               icon="airplane"
               iconColor="#4A90D9"
+              inline
             />
             {(() => {
-              const items = withRecentPast(withDaysLeft(PUBLIC_HOLIDAYS_2026, selectedDate));
+              if (yearData.loading) {
+                return <Text style={s.emptyText}>{t('లోడ్ అవుతోంది…', 'Loading…')}</Text>;
+              }
+              const items = withRecentPast(withDaysLeft(yearData.holidays, festivalsRefDate));
               if (items.length === 0) return <Text style={s.emptyText}>{t(TR.noHolidays.te, TR.noHolidays.en)}</Text>;
               return (
                 <ScrollView
@@ -605,6 +769,22 @@ export function CalendarScreen({ route }) {
         <AdBannerWidget variant="festival" />
         <View style={{ height: 20 }} />
       </ScrollView>
+
+      {/* Scroll-wheel date picker — dark-themed, used for the Panchang
+          tab's date selector. Mounted once at root so it overlays
+          regardless of which sub-tab is active. */}
+      {showDatePicker && (
+        <BirthDatePicker
+          visible
+          selectedDate={selectedDate}
+          title={t('తేదీ ఎంచుకోండి', 'Pick a Date')}
+          lang={t('te', 'en') === 'te' ? 'te' : 'en'}
+          onSelect={(d) => { setSelectedDate(d); setShowDatePicker(false); }}
+          onClose={() => setShowDatePicker(false)}
+        />
+      )}
+
+      {/* Festivals route uses an inline year-chip strip — no modal. */}
     </View>
     </SwipeWrapper>
   );
@@ -613,7 +793,76 @@ export function CalendarScreen({ route }) {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   screenHeader: { paddingHorizontal: 16, paddingBottom: 4 },
-  screenTitle: { fontSize: 24, fontWeight: '900', color: DarkColors.gold, letterSpacing: 0.5 },
+  screenTitle: { fontSize: 24, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.5 },
+
+  // Year-chip strip for festivals route — single horizontal row.
+  yearStrip: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 8, marginBottom: 6,
+  },
+  yearStripLabel: {
+    fontSize: 13, fontWeight: '600', color: DarkColors.textMuted,
+    letterSpacing: 0.4, textTransform: 'uppercase',
+  },
+  yearStripScroll: { gap: 6, paddingRight: 16 },
+  yearChip: {
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 18,
+    backgroundColor: DarkColors.bgCard,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+    minWidth: 64, alignItems: 'center',
+  },
+  yearChipActive: {
+    backgroundColor: DarkColors.gold, borderColor: DarkColors.gold,
+  },
+  yearChipText: {
+    fontSize: 15, fontWeight: '500', color: DarkColors.silverLight,
+    letterSpacing: 0.3,
+  },
+  yearChipTextActive: {
+    color: '#0A0A0A', fontWeight: '600',
+  },
+
+  // Inline "Reset to today" link — pill-shaped affordance with a saffron
+  // tint so it reads as an action, not a passive label. Bumped from
+  // 13 px medium → 15 px semibold + tinted background for legibility on
+  // the dark card.
+  todayResetLink: {
+    flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start',
+    gap: 6, marginTop: 8, marginBottom: 6,
+    paddingVertical: 7, paddingHorizontal: 14,
+    backgroundColor: 'rgba(232,117,26,0.12)',
+    borderRadius: 16,
+    borderWidth: 1, borderColor: 'rgba(232,117,26,0.32)',
+  },
+  todayResetText: {
+    fontSize: 15, fontWeight: '600', color: DarkColors.saffronLight,
+    letterSpacing: 0.2,
+  },
+
+  // Date display — calendar-tear-off layout. Day number takes ~60 px
+  // on the left at 44 px font size; month/year + weekday stack on the
+  // right at body sizes. Day is the dominant visual element.
+  dateDisplayBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: DarkColors.bgCard,
+    borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+    marginVertical: 8,
+  },
+  dateDayBig: {
+    fontSize: 44, fontWeight: '700', color: DarkColors.gold,
+    minWidth: 56, textAlign: 'center', lineHeight: 50,
+    letterSpacing: -1,
+  },
+  dateMonthYear: {
+    fontSize: 18, fontWeight: '600', color: '#FFFFFF',
+    letterSpacing: 0.2, lineHeight: 22,
+  },
+  dateWeekday: {
+    fontSize: 14, fontWeight: '500', color: DarkColors.silver,
+    marginTop: 1, letterSpacing: 0.2,
+  },
+
   scroll: { flex: 1 },
   // Reserve bottom space so the last list item clears the bottom tab bar.
   scrollContent: { paddingBottom: 40 },
@@ -632,14 +881,22 @@ const s = StyleSheet.create({
     paddingRight: 6,
   },
   card: {
-    marginHorizontal: 16, marginBottom: 16, paddingVertical: 8,
+    marginHorizontal: 16, marginBottom: 8, paddingVertical: 4,
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: DarkColors.borderCard,
+    marginHorizontal: 40,
+    marginTop: 0,
+    marginBottom: 6,
+    opacity: 0.5,
   },
   cardHeader: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginBottom: 14, paddingBottom: 10,
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  cardTitle: { fontSize: 17, fontWeight: '800', color: DarkColors.silver, letterSpacing: 0.5 },
+  cardTitle: { fontSize: 17, fontWeight: '600', color: DarkColors.silver, letterSpacing: 0.5 },
   cardGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   separator: { height: 1, backgroundColor: DarkColors.borderGold, marginHorizontal: 16, marginVertical: 10 },
   festivalBanner: {
@@ -648,7 +905,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   festivalBannerTitle: {
-    fontSize: 17, fontWeight: '800', color: DarkColors.gold, marginBottom: 4, lineHeight: 22,
+    fontSize: 17, fontWeight: '600', color: DarkColors.gold, marginBottom: 4, lineHeight: 22,
   },
   festivalBannerDesc: {
     fontSize: 13, color: DarkColors.textSecondary, lineHeight: 19, fontWeight: '500',
@@ -672,28 +929,28 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   observanceDateCol: { width: 52, alignItems: 'center', marginRight: 14 },
-  observanceDay: { fontSize: 22, fontWeight: '900', color: DarkColors.gold },
-  observanceMonth: { fontSize: 12, color: DarkColors.textSecondary, fontWeight: '800', letterSpacing: 0.5 },
+  observanceDay: { fontSize: 22, fontWeight: '700', color: DarkColors.gold },
+  observanceMonth: { fontSize: 12, color: DarkColors.textSecondary, fontWeight: '600', letterSpacing: 0.5 },
   observanceName: { fontSize: 16, fontWeight: '700', color: DarkColors.silver },
   observanceSub: { fontSize: 13, color: DarkColors.textMuted, marginTop: 4, fontWeight: '500' },
   observanceBadge: { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6 },
-  observanceDays: { fontSize: 18, fontWeight: '900', color: DarkColors.gold },
-  observanceDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '800', letterSpacing: 0.5 },
+  observanceDays: { fontSize: 18, fontWeight: '700', color: DarkColors.gold },
+  observanceDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '600', letterSpacing: 0.5 },
   holidayItem: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: 12, marginBottom: 4,
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   holidayDateCol: { alignItems: 'center', width: 52 },
-  holidayDay: { fontSize: 24, fontWeight: '900', color: DarkColors.gold, lineHeight: 26 },
+  holidayDay: { fontSize: 24, fontWeight: '700', color: DarkColors.gold, lineHeight: 26 },
   holidayMonth: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, textTransform: 'uppercase' },
   holidayWeekday: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, marginTop: 2 },
   holidayDivider: { width: 1, height: 40, backgroundColor: DarkColors.borderCard, marginHorizontal: 12 },
   holidayName: { fontSize: 16, fontWeight: '700', color: DarkColors.silver },
   holidayEnglish: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '500', marginTop: 1 },
   holidayBadge: { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8 },
-  holidayDaysNum: { fontSize: 18, fontWeight: '900', color: DarkColors.gold },
-  holidayDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '800', letterSpacing: 0.5 },
+  holidayDaysNum: { fontSize: 18, fontWeight: '700', color: DarkColors.gold },
+  holidayDaysLabel: { fontSize: 11, color: DarkColors.gold, fontWeight: '600', letterSpacing: 0.5 },
 
   // Senior/Simple View toggle
   seniorToggle: {
@@ -710,12 +967,12 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 16,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  seniorDate: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', marginBottom: 16 },
+  seniorDate: { fontSize: 18, fontWeight: '600', color: '#FFFFFF', textAlign: 'center', marginBottom: 16 },
   seniorRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 },
-  seniorValue: { fontSize: 22, fontWeight: '900', color: '#FFFFFF' },
+  seniorValue: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
   seniorDivider: { height: 1, backgroundColor: DarkColors.borderCard, marginVertical: 14 },
   seniorLabel: { fontSize: 14, fontWeight: '700', color: DarkColors.textMuted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
-  seniorBigText: { fontSize: 22, fontWeight: '800', color: DarkColors.gold, marginBottom: 12 },
+  seniorBigText: { fontSize: 22, fontWeight: '600', color: DarkColors.gold, marginBottom: 12 },
 
   // Sunrise / Sunset banner
   sunBanner: {
@@ -727,29 +984,29 @@ const s = StyleSheet.create({
   sunItem: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   sunDivider: { width: 1, height: 32, backgroundColor: DarkColors.borderCard, marginHorizontal: 12 },
   sunLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700' },
-  sunTime: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginTop: 2 },
+  sunTime: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
 
   // Section title inside cards
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold, marginBottom: 10, marginHorizontal: 4 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.gold, marginBottom: 8, marginTop: 2, marginHorizontal: 4 },
 
   // Key Timings quick grid
   timingsQuickGrid: { gap: 8 },
   timingQuickItem: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 10, paddingHorizontal: 12,
+    paddingVertical: 12, paddingHorizontal: 14,
     backgroundColor: DarkColors.bgCard, borderRadius: 12,
     borderLeftWidth: 3, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  timingQuickLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '700' },
-  timingQuickValue: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', marginTop: 1 },
+  timingQuickLabel: { fontSize: 14, color: DarkColors.textMuted, fontWeight: '600' },
+  timingQuickValue: { fontSize: 17, fontWeight: '500', color: '#FFFFFF', marginTop: 2 },
 
   // Today's Significance
   significanceList: { gap: 10 },
   sigItem: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
-    paddingVertical: 8, paddingHorizontal: 10,
+    paddingVertical: 10, paddingHorizontal: 12,
     backgroundColor: DarkColors.bgCard, borderRadius: 12,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  sigText: { flex: 1, fontSize: 14, color: DarkColors.silver, lineHeight: 21, fontWeight: '500' },
+  sigText: { flex: 1, fontSize: 16, color: DarkColors.silverLight, lineHeight: 25, fontWeight: '500' },
 });

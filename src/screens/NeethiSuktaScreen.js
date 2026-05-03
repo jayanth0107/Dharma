@@ -34,11 +34,15 @@ export function NeethiSuktaScreen() {
   const quoteLh = usePick({ default: 30, md: 32, xl: 36 });
 
   const buildShareText = (sukta) => {
-    return `🙏 *ధర్మ — నీతి సూక్తం*\n\n` +
-      `📜 ${sukta.source.te}\n\n` +
-      `"${sukta.quote.te}"\n\n` +
-      `💡 *అర్థం:* ${sukta.meaning.te}\n\n` +
-      `✅ *ఈరోజు ఆచరించండి:* ${sukta.applyToday.te}\n\n` +
+    const isEn = lang === 'en';
+    const L = isEn
+      ? { hdr: 'Dharma — Neethi Sukta', meaning: 'Meaning', apply: 'Apply Today' }
+      : { hdr: 'ధర్మ — నీతి సూక్తం',     meaning: 'అర్థం',   apply: 'ఈరోజు ఆచరించండి' };
+    return `🙏 *${L.hdr}*\n\n` +
+      `📜 ${t(sukta.source.te, sukta.source.en)}\n\n` +
+      `"${t(sukta.quote.te, sukta.quote.en)}"\n\n` +
+      `💡 *${L.meaning}:* ${t(sukta.meaning.te, sukta.meaning.en)}\n\n` +
+      `✅ *${L.apply}:* ${t(sukta.applyToday.te, sukta.applyToday.en)}\n\n` +
       `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
   };
 
@@ -47,7 +51,7 @@ export function NeethiSuktaScreen() {
       {/* Source badge + speaker */}
       <View style={s.sourceRow}>
         <View style={s.sourceBadge}>
-          <MaterialCommunityIcons name="book-open-variant" size={14} color={DarkColors.gold} />
+          <MaterialCommunityIcons name="book-open-variant" size={16} color={DarkColors.gold} />
           <Text style={s.sourceText}>{t(sukta.source.te, sukta.source.en)}</Text>
         </View>
         {isToday && (
@@ -112,9 +116,9 @@ export function NeethiSuktaScreen() {
           <Text style={s.browseBtnText}>{showAll ? t('దాచు', 'Hide') : t('అన్ని 30 సూక్తాలు చూడండి', 'Browse all 30 quotes')}</Text>
         </TouchableOpacity>
 
-        {showAll && NEETHI_SUKTAS.filter(s => s.id !== today.id).map(sukta => renderSukta(sukta, false))}
+        {showAll && NEETHI_SUKTAS.filter(sukta => sukta.id !== today.id).map(sukta => renderSukta(sukta, false))}
 
-        <SacredContentDisclaimer compact />
+        <SacredContentDisclaimer source="neethi" compact />
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
@@ -127,43 +131,46 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '900', color: DarkColors.gold, textAlign: 'center' },
-  headerSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center', lineHeight: 20 },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
+  headerSub: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 23, paddingHorizontal: 8 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   cardToday: { borderColor: DarkColors.borderGold, borderWidth: 1.5 },
-  sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  sourceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
   sourceBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(212,160,23,0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8,
+    backgroundColor: 'rgba(212,160,23,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
   },
-  sourceText: { fontSize: 12, fontWeight: '800', color: DarkColors.gold },
-  todayBadge: { backgroundColor: DarkColors.gold, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  todayText: { fontSize: 10, fontWeight: '800', color: '#0A0A0A' },
+  sourceText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  todayBadge: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  todayText: { fontSize: 12, fontWeight: '700', color: '#0A0A0A', letterSpacing: 0.3 },
   speakerBtn: {
     marginLeft: 'auto', width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(212,160,23,0.1)', borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   speakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
-  quoteBox: { marginBottom: 14, paddingHorizontal: 4 },
-  quoteOpen: { fontSize: 36, fontWeight: '900', color: DarkColors.gold, lineHeight: 36, marginBottom: -8 },
-  quoteText: { fontSize: 18, fontWeight: '600', color: '#FFFFFF', fontStyle: 'italic', lineHeight: 30 },
-  quoteClose: { fontSize: 36, fontWeight: '900', color: DarkColors.gold, lineHeight: 36, textAlign: 'right', marginTop: -4 },
+  // v2 — eased weights and bumped sizes after tester feedback that the
+  // bold quote read as "shouting" and the Apply Today text was too small.
+  quoteBox: { marginBottom: 16, paddingHorizontal: 4 },
+  quoteOpen: { fontSize: 36, fontWeight: '600', color: DarkColors.gold, lineHeight: 36, marginBottom: -8 },
+  quoteText: { fontSize: 19, fontWeight: '500', color: '#FFFFFF', fontStyle: 'italic', lineHeight: 32 },
+  quoteClose: { fontSize: 36, fontWeight: '600', color: DarkColors.gold, lineHeight: 36, textAlign: 'right', marginTop: -4 },
   meaningBox: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
-    backgroundColor: 'rgba(212,160,23,0.04)', borderRadius: 12, padding: 12, marginBottom: 10,
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: 'rgba(212,160,23,0.04)', borderRadius: 12, padding: 14, marginBottom: 12,
   },
-  meaningText: { flex: 1, fontSize: 14, fontWeight: '500', color: DarkColors.silver, lineHeight: 22 },
+  meaningText: { flex: 1, fontSize: 16, fontWeight: '400', color: DarkColors.silverLight, lineHeight: 26 },
   applyBox: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
-    backgroundColor: 'rgba(76,175,80,0.06)', borderRadius: 12, padding: 12, marginBottom: 10,
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: 'rgba(76,175,80,0.06)', borderRadius: 12, padding: 14, marginBottom: 12,
     borderWidth: 1, borderColor: 'rgba(76,175,80,0.2)',
   },
-  applyLabel: { fontSize: 11, fontWeight: '800', color: DarkColors.tulasiGreen, letterSpacing: 0.5, marginBottom: 2 },
-  applyText: { fontSize: 14, fontWeight: '600', color: DarkColors.silver, lineHeight: 22 },
+  applyLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.tulasiGreen, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' },
+  // Apply Today body bumped 14 → 16, weight 600 → 500. Was hard to read.
+  applyText: { fontSize: 16, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 25 },
   browseBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 14, marginVertical: 8,

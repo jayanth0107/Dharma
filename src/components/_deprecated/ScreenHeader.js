@@ -50,7 +50,7 @@ const s = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
     letterSpacing: 0.5,
   },

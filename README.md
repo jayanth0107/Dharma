@@ -2,9 +2,9 @@
 
 **ధర్మ — సనాతనం**
 
-A comprehensive **React Native (Expo)** app delivering daily **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, Bhagavad Gita slokas, Indian market data, live gold/silver prices, nearby temple finder, and cultural content — built for Telugu-speaking Hindu communities worldwide.
+A comprehensive **React Native (Expo)** app delivering daily **sacred stories** (Ramayana, Mahabharata, Gita), **Neethi Sukta wisdom**, **mantras & stotras**, **meditation**, **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, daily Rashi predictions, Sanskrit word of the day, Dharma debate / quiz, Indian market data, live gold/silver prices, and nearby temple finder — built for Telugu-speaking Hindu communities worldwide.
 
-> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.1.0
+> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.2 (versionCode 10) &nbsp;|&nbsp; **Expo SDK:** 54
 
 - **GitHub:** https://github.com/jayanth0107/Dharma
 - **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
@@ -32,75 +32,78 @@ A comprehensive **React Native (Expo)** app delivering daily **Telugu Panchangam
 
 ## Features
 
-### Free
+### Daily
 
-- **Accurate Panchangam** — Tithi, Nakshatra, Yoga, Karana (Lahiri Ayanamsa, `astronomy-engine`)
-- **Auspicious/Inauspicious timings** — Brahma Muhurtam, Abhijit, Amrit Kalam, Rahu Kalam, Yama Ganda, Gulika Kalam
-- **Festival calendar** — 2026 festivals with bilingual descriptions
-- **Ekadashi tracker** — All 24 Ekadashis with deity + significance
-- **Daily Rashi** — Per-sign predictions for today
-- **Daily Darshan** — Deity of the day with mantra
-- **Live gold & silver prices** — 3-API cascade with India premium
-- **Indian market** — NSE/BSE indices + ETFs (mobile only; Yahoo Finance)
-- **Nearby temples** — location-aware temple finder
-- **Bhagavad Gita** — one sloka per day (30 rotating)
-- **Mini calendar** — monthly grid with festival/ekadashi dots
+- **Panchangam** — Tithi, Nakshatra, Yoga, Karana (Lahiri Ayanamsa via `astronomy-engine`); Brahma Muhurtam, Abhijit, Amrit Kalam, Rahu Kalam, Yama Ganda, Gulika Kalam, Durmuhurtam — for any date, computed from your exact location
+- **Festivals** — 2025 / 2026 / 2027 bundled (with online fetch fallback for future years), full descriptions, year-chip filter, share preview
+- **Ekadashi & observances** — Ekadashi · Sankashti Chaturthi · Pournami · Amavasya · Pradosham — computed dynamically for any year via lunar-observance engine
+- **Daily Rashi** — per-sign predictions in **Senior** (career/finance/health/relationships) and **Student** (studies/exams/friendships) modes; bilingual; "Today's Lucky" weekday-bound colour/direction/deity
+- **Live gold & silver prices** — 3-API cascade with India premium, alert subscriptions, 2h cache
+- **Indian market** — NSE/BSE indices + ETFs (Yahoo Finance, mobile only)
+
+### Ithihaasa (sacred history)
+
+- **Ramayana Daily** — 30 episodes covering all 7 kandas with moral, "Did You Know?", characters, Sarga reference (Valmiki Ramayana)
+- **Mahabharata Daily** — 30 stories spanning all 18 parvas with character studies (Vyasa, BORI Critical Edition)
+- **Bhagavad Gita** — 30 slokas in Sanskrit + Telugu + English meaning; Sanskrit transliterated to Telugu lipi when in Telugu mode
+- **Neethi Suktas** — 30 daily wisdom quotes from Chanakya · Vidura · Bhartrihari · Subhashitas · Thirukkural · Panchatantra with "Apply Today" action tip
+- **Kid's Stories** — 50 simple moral stories + 30 easy slokas for children
+- **Pramana Trayam** — Shruti / Smriti / Shishtachara source attribution for every deity, festival, vrata
+
+### Youth & Learning
+
+- **Dharma Debate** — daily dharmic question, A/B vote, results with arguments revealed after voting
+- **Daily Quiz** — Vedic and Puranic questions
+- **Sanskrit Word of the Day** — Devanagari + root etymology + how it lives in modern Telugu
+- **Vedic Personality Profile** — comprehensive Vedic personality profile for all 12 rashis (life mission, daily affirmation, fasting day, chakra, shadow work, lucky number/day/colour, gemstone, deity)
+- **Love Match** — 8-Kuta Ashtakoot compatibility score, North-Indian Kundli charts, PDF report
+- **Vedic Wisdom** — astrology overview hub
+
+### Astrology
+
+- **Vedic Horoscope (జాతకం)** — Moon Rashi, Lagna, Nakshatra, Navagraha positions; bilingual predictions across personality, career, health, relationships, spirituality with "Read More" detail modals; share + PDF
+- **Muhurtam Finder** — pick any date (±1 year) → auspicious-time analysis for that date; or run a 90-day scan for wedding / house warming / travel / business / vehicle / education
+- **Family Profiles** — store and look up multiple family-member kundalis
+
+### Devotion
+
+- **Stotras & Mantras** — Vishnu Sahasranama, Lalita Sahasranama, Hanuman Chalisa, Sri Rudram, Ganapati Atharva Shirsha, Aditya Hridayam, Sri Sukta, Bhaja Govindam, Gayatri, Maha Mrityunjaya — read-along with authentic pandit recordings via YouTube
+- **Meditation** — animated breathing circle, mantra picker (Om / Om Namah Shivaya / Hare Krishna Hare Rama / Om Reverb), 4-2-6 inhale-hold-exhale guide; chant continues on screen-lock, stops on tab-switch
+- **Puja Guide** — 12 step-by-step guides with itemised samagri lists
+- **Daily Darshan** — deity of the day with mantra and significance
+- **Nearby Temples** — location-aware temple finder
+
+### Utility
+
 - **Reminders** — custom reminder CRUD with notifications
 - **Public holidays** — India + Telangana/AP
-- **Kids section** — stories + slokas
+- **Bilingual i18n** — instant Telugu/English toggle ("Eng" / "తెలుగు")
+- **Share** — WhatsApp, PDF, native share with bilingual section dividers in every share builder
 - **Phone OTP login** — optional (Firebase Auth)
-- **Bilingual** — instant Telugu/English toggle
-- **Share** — WhatsApp, PDF, native share for any section
+- **Notifications** — opt-in daily Ramayana / Gita / Mahabharata / Neethi Sukta + festival/Ekadashi reminders (defaults: only Neethi Sukta + Panchangam are ON)
 
 ### Premium (3-day free trial)
 
-- **వేద జాతకం (Birth Chart)** — Vedic birth chart with Rashi, Lagna, Nakshatra, Navagraha positions; 12-hour AM/PM birth-time picker
-- **శుభ దినాలు (Auspicious Dates / Muhurtam Finder)** — auspicious days for wedding, house warming, travel, business, vehicle, education (90-day scan, PDF export)
-- **పొందిక (Love Match / Matchmaking)** — 8-kuta Ashtakoot compatibility score; nakshatra auto-detected from DOB
-- **Bhagavad Gita library** — all 30 slokas with theme/chapter search
-- **Ad-free experience**
-
-### Pricing
-
-| Plan | Price | Duration |
-|------|-------|----------|
-| Weekly | ₹29 | 7 days |
-| Monthly | ₹99 | 30 days |
-| Yearly | ₹499 | 365 days |
-| Lifetime | ₹999 | Forever |
-
-Payments via UPI (Google Pay, PhonePe, Paytm, BHIM). Payment records synced anonymously to Firebase Firestore.
+- All Itihaasa / Devotion / Astrology features above are free at launch. The premium gates remain plumbed in code for a future tier (₹29 weekly / ₹99 monthly / ₹499 yearly / ₹999 lifetime via UPI). Anonymous payment records sync to Firestore.
 
 ---
 
-## Screens & navigation (v2.1)
+## Screens & navigation (v2.4)
 
-The app exposes **18 main sections** in a custom **scrollable bottom tab bar** — every section also appears in the matching **top tab bar** and supports **left/right swipe** to move between sections. Active state highlight is **gold** (`#D4A017` — WCAG AAA).
+`MAIN_SECTIONS` (`src/navigation/sections.js`) is the source of truth used by the top tab bar, bottom scrollable tab bar, swipe navigation, and the home grid. Sections are grouped into 5 thematic blocks; the home grid renders the same order with thematic dividers.
 
-| # | Section | Telugu | English |
-|---|---------|--------|---------|
-| 0 | Home | హోమ్ | Home |
-| 1 | Panchang | నేటి దినం | Today's Date |
-| 2 | Festivals | పండుగలు | Festivals |
-| 3 | Daily Rashi | రాశి ఫలాలు | Rashi Predictions |
-| 4 | **Birth Chart** ⭐ | వేద జాతకం | Birth Chart |
-| 5 | **Love Match** ⭐ | పొందిక | Love Match |
-| 6 | **Auspicious Dates** ⭐ | శుభ దినాలు | Auspicious Dates |
-| 7 | Astrology | జ్యోతిష్యం | Astro |
-| 8 | Gold prices | బంగారం | Gold |
-| 9 | Bhagavad Gita | గీత | Gita |
-| 10 | Auspicious Times | శుభ సమయాలు | Auspicious Times |
-| 11 | Market | మార్కెట్ | Market |
-| 12 | Set Reminder | రిమైండర్ | Set Reminder |
-| 13 | Kid's Stories | పిల్లల కథలు | Kid's Stories |
-| 14 | Nearby Temples | దేవాలయాలు | Nearby Temples |
-| 15 | Donate | దానం | Donate |
-| 16 | Premium | ప్రీమియం | Premium |
-| 17 | More | మరిన్ని | More |
+| Group | Sections (in order) |
+|-------|---------------------|
+| **1. Daily** | Panchang · Festivals · DailyRashi · Gold · Market |
+| **2. Ithihaasa** | Ramayana · Mahabharata · Gita · NeethiSukta · Kids · Pramana |
+| **3. Youth & Learning** | DharmaPoll · Quiz · SanskritWord · RashiProfile · Matchmaking · Astro |
+| **4. Astrology** | Horoscope · Muhurtam · Family |
+| **5. Devotion** | Stotra · Meditation · PujaGuide · TempleNearby · Donate |
+| **Utility tail** | Reminder · More |
 
-⭐ = premium
+Active state highlight is **gold** (`#D4A017` — WCAG AAA on `#0A0A0A`). Each tab supports **drag-to-scroll** (mouse and touch) without spurious clicks — drag suppression is wired at the DOM capture phase.
 
-**Push-only utility screens:** Settings, Login, Location, Notifications, WebView (Privacy/Terms/About/Rate/Feedback), Services (placeholder).
+**Push-only utility screens:** Settings, Login, Location, Notifications, WebView (Privacy/Terms/About/Rate/Feedback), Services (placeholder), Premium (reachable via drawer).
 
 ## Accessibility & responsive design
 
@@ -431,11 +434,12 @@ Clear AsyncStorage (native) or `localStorage` (web) to wipe reminders, premium, 
 | App name | Dharma: Telugu Astro, Calendar & Gold |
 | Bundle ID (iOS) | `com.dharmadaily.app` |
 | Package (Android) | `com.dharmadaily.app` |
-| Version | 2.0.0 |
-| versionCode (Android) | 4 |
+| Version | 2.4.2 |
+| versionCode (Android) | 10 |
 | Expo SDK | 54 |
 | React Native | 0.81.5 |
-| Min Android | API 21 (Android 5.0) |
+| Min Android | API 24 (Android 7.0) |
+| EAS project | `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d` |
 
 ---
 

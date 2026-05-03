@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   },
   qrAmountText: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.gold,
   },
   qrNote: {
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   modal: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' },
   modalHeader: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16 },
   modalHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  modalHeaderTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
+  modalHeaderTitle: { fontSize: 20, fontWeight: '600', color: '#fff' },
   modalQuote: { fontSize: 15, fontWeight: '700', color: DarkColors.goldShimmer, textAlign: 'center', marginTop: 6, fontStyle: 'italic' },
   modalQuoteEn: { fontSize: 12, color: 'rgba(255,255,255,0.8)', textAlign: 'center', marginTop: 2 },
   modalBody: { padding: 20 },
@@ -577,11 +577,11 @@ const styles = StyleSheet.create({
     width: 32, height: 32, borderRadius: 8,
     alignItems: 'center', justifyContent: 'center',
   },
-  appLogoText: { fontSize: 16, fontWeight: '900', color: '#fff' },
+  appLogoText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   appBtnText: { fontSize: 13, fontWeight: '700', flex: 1 },
 
   amountEmoji: { fontSize: 22, marginBottom: 6 },
-  amountValue: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary },
+  amountValue: { fontSize: 18, fontWeight: '600', color: DarkColors.textPrimary },
   amountValueActive: { color: DarkColors.gold },
   amountTelugu: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
 

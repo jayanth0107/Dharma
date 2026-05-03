@@ -1,6 +1,6 @@
 // ధర్మ — Daily Quiz Data (600 bilingual questions)
 // 5 sets of 20 questions per day, unique content for 30 days then rotates
-// ALL questions strictly from: Upanishads, Vedas, Puranas, Itihasas, Dharmic stories
+// ALL questions strictly from: Upanishads, Vedas, Puranas, Ithihaasas, Dharmic stories
 // Helper to create a question quickly
 const Q = (te, en, opts, ans, cat) => ({
   q: { te, en },
@@ -295,7 +295,7 @@ const QUIZ_POOL = [
   Q('షడ్దర్శనాలలో న్యాయం ఎవరు?', 'Nyaya founded by?', [['గౌతమ','Gautama'],['కపిల','Kapila'],['పతంజలి','Patanjali'],['కణాదుడు','Kanada']], 0, 'vedas'),
   Q('వైశేషిక దర్శనం ఎవరు?', 'Vaisheshika by?', [['కణాదుడు','Kanada'],['గౌతమ','Gautama'],['కపిల','Kapila'],['జైమిని','Jaimini']], 0, 'vedas'),
   Q('పూర్వ మీమాంస ఎవరు?', 'Purva Mimamsa by?', [['జైమిని','Jaimini'],['వ్యాసుడు','Vyasa'],['కపిల','Kapila'],['పతంజలి','Patanjali']], 0, 'vedas'),
-  Q('త్రిప్రస్థానం (ప్రస్థానత్రయం) ఏమిటి?', 'What is Prasthanatraya?', [['ఉపనిషత్తులు + గీత + బ్రహ్మసూత్రాలు','Upanishads + Gita + Brahma Sutras'],['వేదాలు + పురాణాలు + ఇతిహాసాలు','Vedas + Puranas + Itihasas'],['రామాయణం + మహాభారతం + భాగవతం','Ramayana + Mahabharata + Bhagavata'],['శ్రుతి + స్మృతి + పురాణం','Shruti + Smriti + Purana']], 0, 'vedas'),
+  Q('త్రిప్రస్థానం (ప్రస్థానత్రయం) ఏమిటి?', 'What is Prasthanatraya?', [['ఉపనిషత్తులు + గీత + బ్రహ్మసూత్రాలు','Upanishads + Gita + Brahma Sutras'],['వేదాలు + పురాణాలు + ఇతిహాసాలు','Vedas + Puranas + Ithihaasas'],['రామాయణం + మహాభారతం + భాగవతం','Ramayana + Mahabharata + Bhagavata'],['శ్రుతి + స్మృతి + పురాణం','Shruti + Smriti + Purana']], 0, 'vedas'),
   Q('మోక్షానికి మార్గాలు ఎన్ని?', 'Paths to Moksha?', [['3 (జ్ఞాన, భక్తి, కర్మ)','3 (Jnana, Bhakti, Karma)'],['1','1'],['5','5'],['7','7']], 0, 'vedas'),
   Q('జ్ఞాన యోగం ఏమి బోధిస్తుంది?', 'Jnana Yoga teaches?', [['ఆత్మ జ్ఞానం ద్వారా మోక్షం','Moksha through self-knowledge'],['భక్తి','Devotion'],['కర్మ','Action'],['ధ్యానం','Meditation']], 0, 'vedas'),
   Q('భక్తి యోగం ఏమి బోధిస్తుంది?', 'Bhakti Yoga teaches?', [['భగవంతుడిపై ప్రేమ ద్వారా మోక్షం','Moksha through devotion to God'],['జ్ఞానం','Knowledge'],['కర్మ','Action'],['తపస్సు','Penance']], 0, 'vedas'),

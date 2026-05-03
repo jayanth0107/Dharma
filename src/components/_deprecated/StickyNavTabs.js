@@ -172,7 +172,7 @@ const s = StyleSheet.create({
     marginTop: 4, textAlign: 'center', lineHeight: 15,
   },
   labelActive: {
-    fontWeight: '800',
+    fontWeight: '600',
   },
   crownBadge: {
     position: 'absolute', top: -4, right: -4,

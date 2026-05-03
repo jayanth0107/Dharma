@@ -44,10 +44,13 @@ export function NotificationScreen({ navigation }) {
   const cardRadius        = usePick({ default: 14, md: 16, lg: 18, xl: 20 });
   const sectionPadding    = usePick({ default: 14, md: 16, lg: 18, xl: 22 });
   const sectionTitleSize  = usePick({ default: 15, md: 16, lg: 17, xl: 19 });
-  const infoIconSize      = usePick({ default: 24, md: 28, lg: 30, xl: 34 });
-  const infoTitleSize     = usePick({ default: 15, md: 17, lg: 18, xl: 20 });
-  const infoTextSize      = usePick({ default: 12, md: 13, lg: 14, xl: 16 });
-  const infoTextLH        = usePick({ default: 20, md: 22, lg: 24, xl: 28 });
+  // "What do notifications do?" card — sizes bumped after tester
+  // feedback that the explanatory bullet list was too small to read at
+  // arm's length. Title 15→17, body 12→15, line-height 20→24 default.
+  const infoIconSize      = usePick({ default: 26, md: 30, lg: 32, xl: 36 });
+  const infoTitleSize     = usePick({ default: 17, md: 19, lg: 20, xl: 22 });
+  const infoTextSize      = usePick({ default: 15, md: 16, lg: 17, xl: 18 });
+  const infoTextLH        = usePick({ default: 24, md: 26, lg: 28, xl: 30 });
   const webNoteIconSize   = usePick({ default: 14, md: 16, lg: 18, xl: 20 });
   const webNoteTextSize   = usePick({ default: 11, md: 12, lg: 13, xl: 15 });
   const webNotePadding    = usePick({ default: 10, md: 12, lg: 14, xl: 16 });
@@ -131,40 +134,17 @@ export function NotificationScreen({ navigation }) {
 
           {settings.enabled && (
             <>
+              {/* Panchangam summary — distinct from wisdom group below */}
               <NotifRow
                 icon="pot-mix" color={DarkColors.gold}
                 title={t(TR.dailyPanchang.te, TR.dailyPanchang.en)}
-                subtitle={t('ప్రతిరోజూ సూర్యోదయం సమయంలో', 'Every day at sunrise time')}
+                subtitle={t('ప్రతిరోజూ ఉదయం', 'Every morning')}
                 value={settings.dailyPanchangam}
                 onChange={(v) => updateSetting('dailyPanchangam', v)}
                 rp={rp}
               />
-              <NotifRow
-                icon="format-quote-open" color="#9B6FCF"
-                title={t(TR.dailyQuote.te, TR.dailyQuote.en)}
-                subtitle={t('మధ్యాహ్నం 12 గంటలకు', 'At noon (12:00 PM)')}
-                value={settings.dailyQuote}
-                onChange={(v) => updateSetting('dailyQuote', v)}
-                rp={rp}
-              />
-              <NotifRow
-                icon="party-popper" color={DarkColors.tulasiGreen}
-                title={t(TR.festivalReminder.te, TR.festivalReminder.en)}
-                subtitle={t(TR.festivalReminderSub.te, TR.festivalReminderSub.en)}
-                value={settings.festivalReminder}
-                onChange={(v) => updateSetting('festivalReminder', v)}
-                rp={rp}
-              />
-              <NotifRow
-                icon="hands-pray" color={DarkColors.saffron}
-                title={t(TR.ekadashiReminder.te, TR.ekadashiReminder.en)}
-                subtitle={t(TR.ekadashiReminderSub.te, TR.ekadashiReminderSub.en)}
-                value={settings.ekadashiReminder}
-                onChange={(v) => updateSetting('ekadashiReminder', v)}
-                rp={rp}
-              />
 
-              {/* Notification time */}
+              {/* Notification time — applies to the panchangam slot */}
               <View style={[s.timeRow, { paddingVertical: timePaddingV }]}>
                 <MaterialCommunityIcons name="clock-outline" size={timeIconSize} color={DarkColors.gold} />
                 <Text style={[s.timeLabel, { fontSize: timeLabelSize }]}>{t('పంచాంగం సమయం', 'Panchang Time')}</Text>
@@ -183,6 +163,82 @@ export function NotificationScreen({ navigation }) {
             </>
           )}
         </View>
+
+        {/* ──────── Daily Wisdom Streams (opt-in) ──────── */}
+        {settings.enabled && (
+          <View style={[s.section, { padding: sectionPadding, borderRadius: cardRadius }]}>
+            <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t('దైనందిన జ్ఞానం', 'Daily Wisdom')}</Text>
+            <Text style={[s.sectionHint, { fontSize: notifSubSize }]}>
+              {t(
+                'ఈ నోటిఫికేషన్‌లు రోజులో వేర్వేరు సమయాల్లో పంపబడతాయి. మీకు కావలసినవి మాత్రమే ఎంచుకోండి.',
+                'These arrive at different times of day. Enable only the ones you want — Neethi Sukta is on by default.'
+              )}
+            </Text>
+
+            {/* Ramayana — 7 AM */}
+            <NotifRow
+              icon="bow-arrow" color="#E8751A"
+              title={t('రామాయణ ఘట్టం', 'Ramayana Episode')}
+              subtitle={t('ఉదయం 7 గంటలకు — రోజుకు ఒక ఘట్టం', '7:00 AM — one episode each day')}
+              value={settings.dailyRamayana}
+              onChange={(v) => updateSetting('dailyRamayana', v)}
+              rp={rp}
+            />
+
+            {/* Gita — 9 AM */}
+            <NotifRow
+              icon="book-open-page-variant" color={DarkColors.gold}
+              title={t('భగవద్గీత శ్లోకం', 'Bhagavad Gita Sloka')}
+              subtitle={t('ఉదయం 9 గంటలకు — రోజుకు ఒక శ్లోకం', '9:00 AM — one sloka each day')}
+              value={settings.dailyGita}
+              onChange={(v) => updateSetting('dailyGita', v)}
+              rp={rp}
+            />
+
+            {/* Neethi Sukta — 12 PM (default ON) */}
+            <NotifRow
+              icon="format-quote-open" color="#9B6FCF"
+              title={t('నీతి సూక్తం', 'Neethi Sukta')}
+              subtitle={t('మధ్యాహ్నం 12 గంటలకు — రోజువారీ నీతి వాక్యం', '12:00 PM — daily wisdom quote (default on)')}
+              value={settings.dailyQuote}
+              onChange={(v) => updateSetting('dailyQuote', v)}
+              rp={rp}
+            />
+
+            {/* Mahabharata — 6 PM */}
+            <NotifRow
+              icon="sword-cross" color="#9B6FCF"
+              title={t('మహాభారత ఘట్టం', 'Mahabharata Episode')}
+              subtitle={t('సాయంత్రం 6 గంటలకు — రోజుకు ఒక ఘట్టం', '6:00 PM — one episode each day')}
+              value={settings.dailyMahabharata}
+              onChange={(v) => updateSetting('dailyMahabharata', v)}
+              rp={rp}
+            />
+          </View>
+        )}
+
+        {/* ──────── Event Reminders ──────── */}
+        {settings.enabled && (
+          <View style={[s.section, { padding: sectionPadding, borderRadius: cardRadius }]}>
+            <Text style={[s.sectionTitle, { fontSize: sectionTitleSize }]}>{t('సందర్భ రిమైండర్‌లు', 'Event Reminders')}</Text>
+            <NotifRow
+              icon="party-popper" color={DarkColors.tulasiGreen}
+              title={t(TR.festivalReminder.te, TR.festivalReminder.en)}
+              subtitle={t(TR.festivalReminderSub.te, TR.festivalReminderSub.en)}
+              value={settings.festivalReminder}
+              onChange={(v) => updateSetting('festivalReminder', v)}
+              rp={rp}
+            />
+            <NotifRow
+              icon="hands-pray" color={DarkColors.saffron}
+              title={t(TR.ekadashiReminder.te, TR.ekadashiReminder.en)}
+              subtitle={t(TR.ekadashiReminderSub.te, TR.ekadashiReminderSub.en)}
+              value={settings.ekadashiReminder}
+              onChange={(v) => updateSetting('ekadashiReminder', v)}
+              rp={rp}
+            />
+          </View>
+        )}
 
         {/* Today's alerts */}
         <View style={[s.section, { padding: sectionPadding, borderRadius: cardRadius }]}>
@@ -234,7 +290,7 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, marginBottom: 16,
     borderWidth: 1, borderColor: DarkColors.borderGold, alignItems: 'center',
   },
-  infoTitle: { fontWeight: '800', color: DarkColors.gold, marginTop: 10 },
+  infoTitle: { fontWeight: '600', color: DarkColors.gold, marginTop: 10 },
   infoText: { color: DarkColors.textSecondary, marginTop: 12 },
   webNote: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -246,7 +302,8 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, marginBottom: 16,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  sectionTitle: { fontWeight: '800', color: DarkColors.gold, marginBottom: 14 },
+  sectionTitle: { fontWeight: '600', color: DarkColors.gold, marginBottom: 8 },
+  sectionHint: { color: DarkColors.textMuted, marginBottom: 12, lineHeight: 18, fontStyle: 'italic' },
   // Notification rows
   notifRow: {
     flexDirection: 'row', alignItems: 'center',
@@ -263,8 +320,8 @@ const s = StyleSheet.create({
   timeBtn: {
     backgroundColor: DarkColors.bgElevated, alignItems: 'center', justifyContent: 'center',
   },
-  timeBtnText: { fontWeight: '800', color: DarkColors.saffron },
-  timeDisplay: { fontWeight: '800', color: DarkColors.goldLight, minWidth: 60, textAlign: 'center' },
+  timeBtnText: { fontWeight: '600', color: DarkColors.saffron },
+  timeDisplay: { fontWeight: '600', color: DarkColors.goldLight, minWidth: 60, textAlign: 'center' },
   // Alerts
   alertItem: {
     flexDirection: 'row', alignItems: 'center', gap: 10,

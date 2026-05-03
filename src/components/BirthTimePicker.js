@@ -267,7 +267,7 @@ const ts = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.gold,
     textAlign: 'center',
   },
@@ -284,7 +284,7 @@ const ts = StyleSheet.create({
   },
   previewText: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.goldLight,
     letterSpacing: 2,
   },
@@ -297,7 +297,7 @@ const ts = StyleSheet.create({
   },
   colonText: {
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
     alignSelf: 'center',
     marginTop: 24,
@@ -342,7 +342,7 @@ const ts = StyleSheet.create({
   },
   itemTextSelected: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
   },
   itemTextDim: {
@@ -390,7 +390,7 @@ const ts = StyleSheet.create({
   },
   confirmText: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '600',
     color: '#0A0A0A',
   },
 });

@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
     letterSpacing: 0.5,
   },
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   },
   dayHeaderText: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textMuted,
   },
   sundayText: {
@@ -223,11 +223,11 @@ const styles = StyleSheet.create({
   },
   selectedText: {
     color: DarkColors.textPrimary,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   todayText: {
     color: DarkColors.gold,
-    fontWeight: '900',
+    fontWeight: '700',
   },
   indicators: {
     flexDirection: 'row',

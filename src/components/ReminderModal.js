@@ -107,11 +107,18 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
     try {
       const parsed = await loadForm(FORM_KEYS.reminders);
       if (Array.isArray(parsed)) setReminders(parsed);
-    } catch {}
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[ReminderModal] failed to load reminders:', e?.message || e);
+    }
   }
 
   async function saveReminders(data) {
-    try { await saveForm(FORM_KEYS.reminders, data); } catch {}
+    try { await saveForm(FORM_KEYS.reminders, data); }
+    catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[ReminderModal] failed to save reminders:', e?.message || e);
+    }
   }
 
   function formatDateForInput(d) {
@@ -149,15 +156,24 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
 
   const handleSave = useCallback(() => {
     if (!title.trim()) {
-      Alert.alert('దయచేసి శీర్షిక నమోదు చేయండి', 'Title is required');
+      Alert.alert(
+        t('దయచేసి శీర్షిక నమోదు చేయండి', 'Title is required'),
+        t('రిమైండర్‌కు ఒక శీర్షిక ఇవ్వండి', 'Please enter a title for this reminder'),
+      );
       return;
     }
     if (!isValidDate(dateStr)) {
-      Alert.alert('చెల్లని తేదీ', 'Please enter date in YYYY-MM-DD format');
+      Alert.alert(
+        t('చెల్లని తేదీ', 'Invalid date'),
+        t('తేదీని YYYY-MM-DD ఫార్మాట్‌లో నమోదు చేయండి', 'Please enter date in YYYY-MM-DD format'),
+      );
       return;
     }
     if (!isValidTime(timeStr)) {
-      Alert.alert('చెల్లని సమయం', 'Please enter time in HH:MM format');
+      Alert.alert(
+        t('చెల్లని సమయం', 'Invalid time'),
+        t('సమయాన్ని HH:MM ఫార్మాట్‌లో నమోదు చేయండి', 'Please enter time in HH:MM format'),
+      );
       return;
     }
 
@@ -174,9 +190,12 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
     setReminders(prev => [...prev, reminder]);
     setTitle('');
     setNote('');
-    Alert.alert('రిమైండర్ సేవ్ చేయబడింది!', `${title} — ${formatDisplayDate(dateStr)} ${formatDisplayTime(timeStr)}`);
+    Alert.alert(
+      t('రిమైండర్ సేవ్ చేయబడింది!', 'Reminder saved!'),
+      `${title} — ${formatDisplayDate(dateStr)} ${formatDisplayTime(timeStr)}`,
+    );
     onClose();
-  }, [title, note, dateStr, timeStr, onClose]);
+  }, [title, note, dateStr, timeStr, onClose, t]);
 
   const handleDelete = useCallback((id) => {
     setReminders(prev => {
@@ -479,7 +498,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
   },
   timeDisplayBig: {
-    fontWeight: '900', color: DarkColors.gold,
+    fontWeight: '700', color: DarkColors.gold,
     textAlign: 'center', marginBottom: 14, letterSpacing: 2,
   },
   timeControlsRow: {
@@ -492,12 +511,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: 'rgba(212,160,23,0.3)',
   },
-  timeSpinValue: { fontWeight: '900', color: '#FFFFFF', minWidth: 36, textAlign: 'center' },
-  timeColonBig: { fontSize: 28, fontWeight: '900', color: '#999999', marginTop: 22 },
+  timeSpinValue: { fontWeight: '700', color: '#FFFFFF', minWidth: 36, textAlign: 'center' },
+  timeColonBig: { fontSize: 28, fontWeight: '700', color: '#999999', marginTop: 22 },
   ampmGroup: { flexDirection: 'column', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: DarkColors.gold },
   ampmBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'transparent' },
   ampmBtnActive: { backgroundColor: 'rgba(212,160,23,0.25)' },
-  ampmText: { fontSize: 13, fontWeight: '800', color: 'rgba(212,160,23,0.5)', textAlign: 'center' },
+  ampmText: { fontSize: 13, fontWeight: '600', color: 'rgba(212,160,23,0.5)', textAlign: 'center' },
   ampmTextActive: { color: DarkColors.gold },
   // fieldBlock — padding, radius, margin set inline
   fieldBlock: {
@@ -554,7 +573,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyText: {
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
     marginTop: 4,
     textAlign: 'center',
@@ -572,7 +591,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13, paddingHorizontal: 20, borderRadius: 14,
     marginTop: 22,
   },
-  emptyCtaText: { fontSize: 14, fontWeight: '800', color: '#0A0A0A' },
+  emptyCtaText: { fontSize: 14, fontWeight: '600', color: '#0A0A0A' },
   // reminderItem — padding, margin, radius set inline
   reminderItem: {
     flexDirection: 'row',

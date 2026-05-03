@@ -15,6 +15,21 @@ export class ScreenErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     if (__DEV__) console.warn('Screen crash:', this.props.screenName, error);
+    // Fire-and-forget crash report. trackEvent is safe — analytics
+    // failures are swallowed downstream so a broken sink can't recurse
+    // into another crash. Trim payload aggressively (Firestore docs are
+    // free up to ~1MB but we don't want stack-trace explosions).
+    try {
+      const { trackEvent } = require('../utils/analytics');
+      trackEvent('app_crash', {
+        screen: this.props.screenName || 'unknown',
+        message: String(error?.message || error || 'unknown error').slice(0, 500),
+        // First 6 frames only — enough to identify the call site without
+        // bloating Firestore. Symbolicated stacks live in dev tools.
+        stack: String(error?.stack || '').split('\n').slice(0, 6).join('\n').slice(0, 1000),
+        componentStack: String(errorInfo?.componentStack || '').split('\n').slice(0, 6).join('\n').slice(0, 600),
+      });
+    } catch {}
   }
 
   render() {
@@ -42,7 +57,7 @@ const s = StyleSheet.create({
     flex: 1, backgroundColor: DarkColors.bg,
     justifyContent: 'center', alignItems: 'center', padding: 30,
   },
-  title: { fontSize: 18, fontWeight: '800', color: DarkColors.gold, marginTop: 16 },
+  title: { fontSize: 18, fontWeight: '600', color: DarkColors.gold, marginTop: 16 },
   subtitle: { fontSize: 13, color: DarkColors.textMuted, marginTop: 8, textAlign: 'center' },
   btn: {
     marginTop: 20, backgroundColor: DarkColors.saffron,

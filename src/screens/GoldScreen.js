@@ -68,22 +68,35 @@ export function GoldScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    try { await fetchGoldSilverPrices(); } catch {}
+    try { await fetchGoldSilverPrices(); }
+    catch (e) { /* eslint-disable-next-line no-console */ console.warn('[GoldScreen] price refresh failed:', e?.message || e); }
     setRefreshing(false);
   }, []);
 
   const handleSetAlert = async () => {
-    const price = parseInt(targetPrice);
+    // Always use radix 10 — `parseInt('007')` returns 7 with no radix on
+    // some hosts; explicit radix avoids surprises with leading zeros.
+    const price = parseInt(targetPrice, 10);
     if (!price || price < 100) return;
-    await setGoldAlert(price, 'below');
-    setAlert(await getGoldAlert());
-    setShowAlertForm(false);
-    setTargetPrice('');
+    try {
+      await setGoldAlert(price, 'below');
+      setAlert(await getGoldAlert());
+      setShowAlertForm(false);
+      setTargetPrice('');
+    } catch (e) {
+      /* eslint-disable-next-line no-console */
+      console.warn('[GoldScreen] setGoldAlert failed:', e?.message || e);
+    }
   };
 
   const handleClearAlert = async () => {
-    await clearGoldAlert();
-    setAlert(null);
+    try {
+      await clearGoldAlert();
+      setAlert(null);
+    } catch (e) {
+      /* eslint-disable-next-line no-console */
+      console.warn('[GoldScreen] clearGoldAlert failed:', e?.message || e);
+    }
   };
 
   return (
@@ -170,7 +183,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   alertHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  alertTitle: { fontWeight: '800', color: DarkColors.gold },
+  alertTitle: { fontWeight: '600', color: DarkColors.gold },
   alertActive: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 10,
@@ -186,7 +199,7 @@ const s = StyleSheet.create({
     color: DarkColors.textPrimary, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   alertSetBtn: { backgroundColor: DarkColors.gold, borderRadius: 12, justifyContent: 'center' },
-  alertSetText: { fontWeight: '800', color: '#fff' },
+  alertSetText: { fontWeight: '600', color: '#fff' },
   alertSetupBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 12,

@@ -331,7 +331,7 @@ export const KIDS_STORIES = [
   },
   {
     id: 39, title: 'కప్ప రాజు', english: 'The Frogs Who Wanted a King',
-    source: 'T', icon: 'frog', color: '#2E7D32', image: IMAGES.ganesha,
+    source: 'T', icon: 'paw', color: '#2E7D32', image: IMAGES.ganesha,
     story: 'కప్పలు స్వేచ్ఛగా ఉన్నాయి, కానీ "మాకు రాజు కావాలి!" అని దేవేంద్రుడిని అడిగాయి.\n\nదేవేంద్రుడు ఒక పెద్ద కొయ్యదుంగను చెరువులో వేశాడు — "ఇదే మీ రాజు!" కప్పలు మొదట భయపడ్డాయి, తర్వాత కొయ్యదుంగ మీద ఆడుకోసాగాయి.\n\n"ఈ రాజు ఏమీ చేయడు! మాకు మరో రాజు కావాలి!" అన్నాయి.\n\nదేవేంద్రుడు కొంగను పంపాడు. కొంగ రోజూ కప్పలను తినేయసాగింది!\n\nకప్పలు "మా స్వేచ్ఛ మాకు ఇవ్వు!" అని ఏడ్చాయి.',
     storyEn: "Frogs lived freely but demanded, \"We want a king!\" from Indra.\n\nIndra dropped a wooden log in the pond — \"Here is your king!\" The frogs were scared at first, then started playing on the log.\n\n\"This king does nothing! We want a real king!\" they complained.\n\nIndra sent a crane. The crane started eating the frogs every day!\n\nThe frogs cried, \"Give us back our freedom!\"",
     moral: 'ఉన్న స్వేచ్ఛ విలువ తెలుసుకోవాలి. ఉన్నదానితో సంతోషపడకపోతే కష్టాలు వస్తాయి.',

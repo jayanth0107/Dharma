@@ -117,7 +117,7 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 14, marginBottom: 10,
     borderWidth: 1, borderColor: DarkColors.borderCard, borderLeftWidth: 4,
   },
-  pujaCardName: { fontSize: 17, fontWeight: '800', color: '#FFFFFF' },
+  pujaCardName: { fontSize: 17, fontWeight: '600', color: '#FFFFFF' },
   pujaCardWhen: { fontSize: 13, color: DarkColors.textMuted, marginTop: 2 },
   pujaCardSteps: { fontSize: 12, color: DarkColors.gold, fontWeight: '700', marginTop: 3 },
 
@@ -127,7 +127,7 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 14, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard, borderLeftWidth: 4,
   },
-  pujaTitle: { fontSize: 20, fontWeight: '900' },
+  pujaTitle: { fontSize: 20, fontWeight: '700' },
   pujaWhen: { fontSize: 13, color: DarkColors.silver, marginTop: 4 },
   pujaDuration: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
 
@@ -137,7 +137,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   itemsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  itemsTitle: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
+  itemsTitle: { fontSize: 15, fontWeight: '600', color: DarkColors.gold },
   itemsCount: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700', marginLeft: 'auto' },
   itemRow: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
@@ -147,7 +147,7 @@ const s = StyleSheet.create({
   itemsTextFallback: { fontSize: 14, color: DarkColors.silver, lineHeight: 22, fontWeight: '500' },
 
   // Steps
-  stepsTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold, marginBottom: 12 },
+  stepsTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.gold, marginBottom: 12 },
   stepCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 14,
     backgroundColor: DarkColors.bgCard, borderRadius: 12, marginBottom: 8,
@@ -156,7 +156,7 @@ const s = StyleSheet.create({
   stepNumber: {
     width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
   },
-  stepNumText: { fontSize: 12, fontWeight: '900', color: '#FFFFFF' },
+  stepNumText: { fontSize: 12, fontWeight: '700', color: '#FFFFFF' },
   stepText: { flex: 1, fontSize: 15, color: '#FFFFFF', lineHeight: 22, fontWeight: '600' },
 
   // Back button (top)

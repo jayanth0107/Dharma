@@ -1,11 +1,13 @@
 // ధర్మ — Feature Tile Grid Component
 // Large, clear icons and labels — fills screen, no scroll needed
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, Type, Spacing, Radius, useColumns } from '../theme';
 import { usePick } from '../theme/responsive';
+import { useLanguage } from '../context/LanguageContext';
+import { trackEvent } from '../utils/analytics';
 
 const GRID_PADDING = 12;
 const TILE_GAP = 12;
@@ -22,16 +24,40 @@ function getTileWidthPercent(columns) {
   return `${((100 - gapFraction) / columns).toFixed(2)}%`;
 }
 
-export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, _gridIndex, _gridTotal }) {
+export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, analyticsId, _gridIndex, _gridTotal }) {
+  // Wrap onPress so every home/feature tile fires a uniform tile_tap
+  // event. `icon` is a stable English-only string and works as the key
+  // when an explicit analyticsId isn't passed. The label varies by
+  // language so it would split usage by user locale — useless for
+  // rollups.
+  const handlePress = useCallback((e) => {
+    try {
+      trackEvent('tile_tap', {
+        tile: analyticsId || icon || 'unknown',
+        // Capture the rendered label for human-readable dashboards;
+        // the dashboard groups by `tile` regardless of language.
+        label: typeof label === 'string' ? label : '',
+      });
+    } catch {}
+    if (onPress) onPress(e);
+  }, [analyticsId, icon, label, onPress]);
   const columns = useColumns();
   const gridCtx = useContext(FeatureGridContext);
   const cols = gridCtx?.columns || columns;
+  const { lang } = useLanguage();
   // Tile sizing — sublabel-less tiles are ~30 px shorter, icon takes
   // more visual weight since label is now a single word.
   const iconSize = usePick({ default: 36, md: 40, lg: 44, xl: 50 });
   const tileMinH = usePick({ default: 90, md: 100, lg: 116, xl: 128 });
-  const labelSize = usePick({ default: 14, md: 15, lg: 16, xl: 18 });
-  const subSize = usePick({ default: 14, md: 15, lg: 16, xl: 17 });
+  // Telugu glyphs render ~80% of em-square height vs Latin caps that fill
+  // it top-to-bottom — same nominal fontSize reads visually smaller.
+  // Bump 2 px in Telugu so tile labels look the same weight in both
+  // languages (industry-standard "Telugu optical adjustment").
+  // v3 — bumped one rung above v2 (14 → 15 default) after tester said
+  // home tile labels were still too small to read at arm's length.
+  const teBump = lang === 'te' ? 2 : 0;
+  const labelSize = usePick({ default: 15, md: 16, lg: 17, xl: 19 }) + teBump;
+  const subSize   = usePick({ default: 14, md: 15, lg: 16, xl: 17 }) + teBump;
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
   const widthStyle = gridCtx?.tileWidth

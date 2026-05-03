@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
     letterSpacing: 0.3,
   },
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   overlayName: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.textPrimary,
     letterSpacing: 1,
     ...(Platform.OS === 'web'
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   fallbackName: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '600',
     marginTop: 8,
   },
   fallbackEnglish: {

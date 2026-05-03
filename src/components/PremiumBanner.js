@@ -88,9 +88,16 @@ async function openUpiApp(scheme, amount) {
   return false;
 }
 
+// Module-level UPI helpers can't read React context, so the alert text
+// is rendered bilingually (Telugu + English on separate lines) so users
+// in either language mode see something meaningful.
 async function openUpiPayment(amount) {
   if (Platform.OS === 'web') {
-    alert(`UPI ID: ${UPI_ID}\n\nదయచేసి మీ UPI యాప్‌లో ₹${amount} పంపండి.\nలేదా QR కోడ్ స్కాన్ చేయండి.`);
+    alert(
+      `UPI ID: ${UPI_ID}\n\n` +
+      `దయచేసి మీ UPI యాప్‌లో ₹${amount} పంపండి. లేదా QR కోడ్ స్కాన్ చేయండి.\n` +
+      `Send ₹${amount} via your UPI app, or scan the QR code.`,
+    );
     return;
   }
 
@@ -107,7 +114,10 @@ async function openUpiPayment(amount) {
     if (opened) return;
   }
 
-  Alert.alert('UPI యాప్ కనుగొనబడలేదు', `దయచేసి ₹${amount} ఈ UPI ID కి పంపండి:\n\n${UPI_ID}`);
+  Alert.alert(
+    'UPI యాప్ కనుగొనబడలేదు / No UPI app found',
+    `దయచేసి ₹${amount} ఈ UPI ID కి పంపండి:\nPlease send ₹${amount} to this UPI ID:\n\n${UPI_ID}`,
+  );
 }
 
 async function copyUpiId() {
@@ -632,10 +642,10 @@ const b = StyleSheet.create({
   gradient: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderRadius: 16 },
   iconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center' },
   textWrap: { flex: 1, marginLeft: 12 },
-  title: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
+  title: { fontSize: 15, fontWeight: '600', color: DarkColors.gold },
   subtitle: { fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2, lineHeight: 16 },
   badge: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  badgeText: { fontSize: 10, fontWeight: '800', color: '#0A0A0A' },
+  badgeText: { fontSize: 10, fontWeight: '600', color: '#0A0A0A' },
 });
 
 const q = StyleSheet.create({
@@ -647,7 +657,7 @@ const q = StyleSheet.create({
   fallback: { alignItems: 'center', justifyContent: 'center' },
   fallbackText: { fontSize: 12, color: DarkColors.textMuted, marginTop: 8 },
   badge: { position: 'absolute', bottom: -10, backgroundColor: DarkColors.gold, paddingHorizontal: 14, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 14, fontWeight: '800', color: DarkColors.gold },
+  badgeText: { fontSize: 14, fontWeight: '600', color: DarkColors.gold },
 });
 
 const s = StyleSheet.create({
@@ -657,7 +667,7 @@ const s = StyleSheet.create({
   headerCompact: { paddingVertical: 10 },
   closeX: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
   backX: { position: 'absolute', top: 16, left: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 26, fontWeight: '800', color: DarkColors.gold, marginTop: 12, letterSpacing: 1 },
+  title: { fontSize: 26, fontWeight: '600', color: DarkColors.gold, marginTop: 12, letterSpacing: 1 },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 8, textAlign: 'center' },
   subtitleEn: { fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
 
@@ -673,7 +683,7 @@ const s = StyleSheet.create({
   trialSection: { paddingHorizontal: 20, paddingTop: 24 },
   trialBtn: { borderRadius: 16, overflow: 'hidden' },
   trialGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16 },
-  trialBtnText: { fontSize: 16, fontWeight: '800', color: '#FFF', marginLeft: 8 },
+  trialBtnText: { fontSize: 16, fontWeight: '600', color: '#FFF', marginLeft: 8 },
   trialNote: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 8 },
 
   pricingSection: { paddingHorizontal: 20, paddingTop: 24 },
@@ -685,24 +695,24 @@ const s = StyleSheet.create({
   },
   planCardBest: { borderColor: DarkColors.gold, borderWidth: 2, position: 'relative' },
   bestBadge: { position: 'absolute', top: -10, right: 12, backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8 },
-  bestBadgeText: { fontSize: 9, fontWeight: '800', color: DarkColors.gold },
+  bestBadgeText: { fontSize: 9, fontWeight: '600', color: DarkColors.gold },
   planEmoji: { fontSize: 24, marginRight: 12 },
   planInfo: { flex: 1 },
   planName: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
   planSavings: { fontSize: 11, color: DarkColors.saffron, fontWeight: '600', marginTop: 2 },
-  planPrice: { fontSize: 20, fontWeight: '800', color: DarkColors.textPrimary, marginRight: 8 },
+  planPrice: { fontSize: 20, fontWeight: '600', color: DarkColors.textPrimary, marginRight: 8 },
 
   // Payment screen
   paySection: { paddingHorizontal: 20, paddingTop: 16 },
   paySummary: { alignItems: 'center', paddingVertical: 16, backgroundColor: 'rgba(212,160,23,0.12)', borderRadius: 16 },
   paySummaryEmoji: { fontSize: 36 },
   paySummaryPlan: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginTop: 8 },
-  paySummaryPrice: { fontSize: 32, fontWeight: '800', color: DarkColors.gold, marginTop: 4 },
+  paySummaryPrice: { fontSize: 32, fontWeight: '600', color: DarkColors.gold, marginTop: 4 },
   paySummaryDuration: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4 },
 
   // UPI app buttons
   appBtnsSection: { marginTop: 20 },
-  appBtnsTitle: { fontSize: 15, fontWeight: '800', color: DarkColors.textPrimary, marginBottom: 12, textAlign: 'center' },
+  appBtnsTitle: { fontSize: 15, fontWeight: '600', color: DarkColors.textPrimary, marginBottom: 12, textAlign: 'center' },
   appBtnsGrid: {
     flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between',
   },
@@ -717,7 +727,7 @@ const s = StyleSheet.create({
     width: 40, height: 40, borderRadius: 10, marginBottom: 6,
     alignItems: 'center', justifyContent: 'center',
   },
-  appLogoText: { fontSize: 18, fontWeight: '900', color: '#fff' },
+  appLogoText: { fontSize: 18, fontWeight: '700', color: '#fff' },
   appGridText: { fontSize: 13, fontWeight: '700', marginBottom: 2 },
   appGridAmount: { fontSize: 11, fontWeight: '600', color: DarkColors.textMuted },
   // Legacy row styles (kept for donate section compatibility)
@@ -750,12 +760,12 @@ const s = StyleSheet.create({
 
   activateBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 16 },
   activateGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16 },
-  activateBtnText: { fontSize: 15, fontWeight: '800', color: '#FFF', marginLeft: 8 },
+  activateBtnText: { fontSize: 15, fontWeight: '600', color: '#FFF', marginLeft: 8 },
   activateNote: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 8, lineHeight: 16 },
   verifyingBox: { alignItems: 'center', paddingVertical: 24, gap: 10 },
   verifyingText: { fontSize: 16, fontWeight: '700', color: DarkColors.gold, marginTop: 8 },
   confirmBox: { alignItems: 'center', paddingVertical: 16, gap: 6, marginBottom: 12, backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 14, padding: 16 },
-  confirmTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
+  confirmTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.gold },
   confirmSubtext: { fontSize: 13, color: DarkColors.textMuted, textAlign: 'center', lineHeight: 18 },
 
   closeBtn: { alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginBottom: 20, backgroundColor: 'transparent', borderRadius: 12, borderWidth: 1.5, borderColor: DarkColors.gold },
@@ -787,5 +797,5 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   claimBtnDisabled: { opacity: 0.4 },
-  claimBtnText: { fontSize: 14, fontWeight: '800', color: '#fff' },
+  claimBtnText: { fontSize: 14, fontWeight: '600', color: '#fff' },
 });

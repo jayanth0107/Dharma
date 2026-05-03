@@ -15,11 +15,25 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { getAllPramanaCategories, getDeityPramana } from '../data/pramanaData';
 
+// Icon colours unified to gold for the dark theme — earlier saffron /
+// purple / green felt mismatched against the gold-text section titles
+// and varied wildly in contrast on the dark background. Different icon
+// SHAPES (fire / book / account-group) plus the colored left border on
+// each section in the modal still distinguish the three pramanas.
 const PRAMANA_TYPES = [
-  { key: 'shruti', icon: 'fire', color: '#E8751A', te: 'శ్రుతి (వేదం)', en: 'Shruti (Veda)' },
-  { key: 'smriti', icon: 'book-open-variant', color: '#9B6FCF', te: 'స్మృతి (పురాణం)', en: 'Smriti (Purana)' },
-  { key: 'shishtachara', icon: 'account-group', color: DarkColors.tulasiGreen, te: 'శిష్టాచారం (సంప్రదాయం)', en: 'Shishtachara (Tradition)' },
+  { key: 'shruti',       icon: 'fire',               color: DarkColors.gold, te: 'శ్రుతి (వేదం)',          en: 'Shruti (Veda)' },
+  { key: 'smriti',       icon: 'book-open-variant',  color: DarkColors.gold, te: 'స్మృతి (పురాణం)',         en: 'Smriti (Purana)' },
+  { key: 'shishtachara', icon: 'account-group',      color: DarkColors.gold, te: 'శిష్టాచారం (సంప్రదాయం)',  en: 'Shishtachara (Tradition)' },
 ];
+
+// Decorative left-border accents for the modal sections — these stay
+// per-pramana so the three sections remain visually distinguishable
+// even though the icon + label colours are unified.
+const PRAMANA_BORDER = {
+  shruti:       'rgba(232,117,26,0.55)',  // saffron
+  smriti:       'rgba(155,111,207,0.55)', // purple
+  shishtachara: 'rgba(76,175,80,0.55)',   // tulasi green
+};
 
 function PramanaCard({ item, onPress, t }) {
   const name = item.deity || item.name;
@@ -65,12 +79,13 @@ export function PramanaScreen() {
               'Every Dharmic practice has three authorities — Shruti (Vedas, direct revelation), Smriti (Puranas, Dharmasutras), and Shishtachara (established tradition of elders). These authenticate Sanatan Dharma practices.'
             )}
           </Text>
-          {/* Three pillars */}
+          {/* Three pillars — unified gold colour for readability; the icon
+              colour stays per-pramana so the visual distinction remains. */}
           <View style={s.pillarsRow}>
             {PRAMANA_TYPES.map(p => (
               <View key={p.key} style={s.pillar}>
-                <MaterialCommunityIcons name={p.icon} size={20} color={p.color} />
-                <Text style={[s.pillarText, { color: p.color }]}>{t(p.te, p.en)}</Text>
+                <MaterialCommunityIcons name={p.icon} size={22} color={p.color} />
+                <Text style={s.pillarText}>{t(p.te, p.en)}</Text>
               </View>
             ))}
           </View>
@@ -125,15 +140,17 @@ export function PramanaScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Three Pramanas */}
+                {/* Three Pramanas — unified gold heading for readability;
+                    the icon and left-border colour stay per-pramana so the
+                    three sections remain visually distinguishable. */}
                 {PRAMANA_TYPES.map(pType => {
                   const data = selectedItem[pType.key];
                   if (!data) return null;
                   return (
-                    <View key={pType.key} style={[s.pramanaSection, { borderLeftColor: pType.color }]}>
+                    <View key={pType.key} style={[s.pramanaSection, { borderLeftColor: PRAMANA_BORDER[pType.key] }]}>
                       <View style={s.pramanaSectionHeader}>
-                        <MaterialCommunityIcons name={pType.icon} size={20} color={pType.color} />
-                        <Text style={[s.pramanaSectionTitle, { color: pType.color }]}>{t(pType.te, pType.en)}</Text>
+                        <MaterialCommunityIcons name={pType.icon} size={22} color={pType.color} />
+                        <Text style={s.pramanaSectionTitle}>{t(pType.te, pType.en)}</Text>
                       </View>
                       <Text style={s.pramanaBody}>{t(data.te, data.en)}</Text>
                       {data.source && (
@@ -165,11 +182,14 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 20,
     borderWidth: 1, borderColor: DarkColors.borderGold, alignItems: 'center', marginBottom: 16,
   },
-  headerTitle: { fontSize: 22, fontWeight: '900', color: DarkColors.gold, marginTop: 8 },
-  headerDesc: { fontSize: 14, color: DarkColors.silver, lineHeight: 22, textAlign: 'center', marginTop: 8, fontWeight: '500' },
-  pillarsRow: { flexDirection: 'row', gap: 12, marginTop: 16, flexWrap: 'wrap', justifyContent: 'center' },
-  pillar: { alignItems: 'center', gap: 4, minWidth: 90 },
-  pillarText: { fontSize: 11, fontWeight: '700', textAlign: 'center' },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, marginTop: 8 },
+  headerDesc: { fontSize: 15, color: DarkColors.silver, lineHeight: 24, textAlign: 'center', marginTop: 8, fontWeight: '400' },
+  pillarsRow: { flexDirection: 'row', gap: 14, marginTop: 18, flexWrap: 'wrap', justifyContent: 'center' },
+  pillar: { alignItems: 'center', gap: 6, minWidth: 96 },
+  // Unified gold for all three pramana labels — earlier each was a
+  // different colour (orange / purple / green) which made the strip
+  // visually noisy and hard to read at small size.
+  pillarText: { fontSize: 13, fontWeight: '600', color: DarkColors.gold, textAlign: 'center' },
 
   // Today's deity
   todayCard: {
@@ -180,8 +200,8 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
   },
-  todayBadgeText: { fontSize: 11, fontWeight: '800', color: '#0A0A0A' },
-  todayDeity: { fontSize: 20, fontWeight: '900', color: DarkColors.gold, marginTop: 8 },
+  todayBadgeText: { fontSize: 11, fontWeight: '600', color: '#0A0A0A' },
+  todayDeity: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, marginTop: 8 },
   todayHint: { fontSize: 13, color: DarkColors.silver, marginTop: 4 },
 
   // Category pills
@@ -200,8 +220,8 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   pramanaCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  pramanaCardTitle: { flex: 1, fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
-  pramanaCardSource: { fontSize: 12, color: DarkColors.textMuted, marginTop: 6, fontStyle: 'italic' },
+  pramanaCardTitle: { flex: 1, fontSize: 17, fontWeight: '600', color: '#FFFFFF' },
+  pramanaCardSource: { fontSize: 13, color: DarkColors.textMuted, marginTop: 6, fontStyle: 'italic' },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
@@ -213,17 +233,19 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 10,
     marginBottom: 16, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  modalTitle: { flex: 1, fontSize: 20, fontWeight: '900', color: DarkColors.gold },
+  modalTitle: { flex: 1, fontSize: 20, fontWeight: '700', color: DarkColors.gold },
 
   // Pramana sections in modal
   pramanaSection: {
     marginTop: 14, paddingLeft: 14, borderLeftWidth: 3,
     paddingVertical: 4,
   },
-  pramanaSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  pramanaSectionTitle: { fontSize: 15, fontWeight: '800' },
-  pramanaBody: { fontSize: 14, color: DarkColors.silver, lineHeight: 23, fontWeight: '500' },
-  pramanaSource: { fontSize: 12, color: DarkColors.gold, marginTop: 6, fontWeight: '700', fontStyle: 'italic' },
+  pramanaSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  // Unified gold colour for all three section titles — visual distinction
+  // is preserved by the colored left border + icon. Bumped from 15 → 17.
+  pramanaSectionTitle: { fontSize: 17, fontWeight: '700', color: DarkColors.gold },
+  pramanaBody: { fontSize: 16, color: DarkColors.silverLight, lineHeight: 26, fontWeight: '400' },
+  pramanaSource: { fontSize: 13, color: DarkColors.gold, marginTop: 8, fontWeight: '600', fontStyle: 'italic' },
 
   modalDoneBtn: {
     backgroundColor: DarkColors.bgElevated, borderRadius: 14, paddingVertical: 14,

@@ -171,6 +171,8 @@ export function EkadashiSection({ todayEkadashi, upcomingEkadashis, selectedDate
               <TouchableOpacity
                 style={{ position: 'absolute', top: 14, right: 16, width: modalCloseBtnSize, height: modalCloseBtnSize, borderRadius: modalCloseBtnSize / 2, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center' }}
                 onPress={() => setShowAllModal(false)}
+                hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                accessibilityLabel="Close Ekadashi list"
               >
                 <Ionicons name="close" size={modalCloseIconSize} color={DarkColors.textPrimary} />
               </TouchableOpacity>
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
     textAlign: 'center',
     marginTop: 3,
@@ -296,13 +298,13 @@ const styles = StyleSheet.create({
   },
   ekadashiDay: {
     fontSize: 26,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#E0B0FF',
     lineHeight: 28,
   },
   ekadashiMonth: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -333,13 +335,13 @@ const styles = StyleSheet.create({
   },
   ekadashiDaysNum: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '700',
     color: '#E0B0FF',
   },
   ekadashiDaysLabel: {
     fontSize: 11,
     color: '#E0B0FF',
-    fontWeight: '800',
+    fontWeight: '600',
     letterSpacing: 0.5,
   },
   ekadashiInfo: { flex: 1 },
@@ -351,7 +353,7 @@ const styles = StyleSheet.create({
   },
   ekadashiName: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
     lineHeight: 24,
   },
@@ -411,7 +413,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
   },
   modalSubtitle: {
@@ -447,7 +449,7 @@ const styles = StyleSheet.create({
   allEkRight: { flex: 1 },
   allEkName: {
     fontSize: 17,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
   },
   allEkEnglish: {
@@ -463,7 +465,7 @@ const styles = StyleSheet.create({
   },
   todayTag: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.goldLight,
     letterSpacing: 0.5,
   },

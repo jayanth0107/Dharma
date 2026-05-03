@@ -102,6 +102,8 @@ export function UpcomingFestivalItem({ festival, daysLeft }) {
             <TouchableOpacity
               style={{ position: 'absolute', top: 12, right: 12, zIndex: 10, width: closeBtnSize, height: closeBtnSize, borderRadius: closeBtnSize / 2, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' }}
               onPress={() => setShowDetail(false)}
+              hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              accessibilityLabel="Close festival detail"
             >
               <Ionicons name="close" size={closeIconSize} color="#FFFFFF" />
             </TouchableOpacity>
@@ -139,8 +141,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, paddingHorizontal: 20,
   },
   bannerContent: { flex: 1, alignItems: 'center', marginHorizontal: 12 },
-  bannerTitle: { fontSize: 24, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.3 },
-  bannerEnglish: { fontSize: 15, color: 'rgba(255,255,255,0.9)', fontWeight: '600', marginTop: 3 },
+  bannerTitle: { fontSize: 24, fontWeight: '600', color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.3 },
+  bannerEnglish: { fontSize: 15, color: 'rgba(255,255,255,0.9)', fontWeight: '500', marginTop: 3 },
 
   // Festival Item
   festivalItem: {
@@ -151,24 +153,24 @@ const styles = StyleSheet.create({
   festivalDateCol: {
     alignItems: 'center', width: 52,
   },
-  festivalDay: { fontSize: 28, fontWeight: '900', color: DarkColors.saffron, lineHeight: 30 },
-  festivalMonth: { fontSize: 14, fontWeight: '800', color: DarkColors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 },
-  festivalWeekday: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, marginTop: 2, letterSpacing: 0.3 },
+  festivalDay: { fontSize: 28, fontWeight: '700', color: DarkColors.saffron, lineHeight: 30 },
+  festivalMonth: { fontSize: 14, fontWeight: '600', color: DarkColors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  festivalWeekday: { fontSize: 12, fontWeight: '500', color: DarkColors.textMuted, marginTop: 2, letterSpacing: 0.3 },
   festivalDivider: {
     width: 1.5, height: 48, backgroundColor: DarkColors.gold, opacity: 0.3,
     marginHorizontal: 12, borderRadius: 1,
   },
   festivalInfo: { flex: 1 },
-  festivalName: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary, lineHeight: 24 },
-  festivalEnglish: { fontSize: 15, color: DarkColors.textSecondary, fontWeight: '600', marginTop: 2 },
-  festivalDateTe: { fontSize: 14, color: DarkColors.saffronLight, fontWeight: '700', marginTop: 5 },
+  festivalName: { fontSize: 19, fontWeight: '600', color: DarkColors.textPrimary, lineHeight: 26 },
+  festivalEnglish: { fontSize: 15, color: DarkColors.textSecondary, fontWeight: '500', marginTop: 2 },
+  festivalDateTe: { fontSize: 14, color: DarkColors.saffronLight, fontWeight: '600', marginTop: 5 },
   festivalDaysBadge: {
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: DarkColors.saffronDim, borderRadius: 12,
     paddingHorizontal: 10, paddingVertical: 6, marginLeft: 8,
   },
-  festivalDaysNum: { fontSize: 20, fontWeight: '900', color: DarkColors.saffron },
-  festivalDaysLabel: { fontSize: 10, color: DarkColors.saffron, fontWeight: '800', letterSpacing: 0.5 },
+  festivalDaysNum: { fontSize: 20, fontWeight: '700', color: DarkColors.saffron },
+  festivalDaysLabel: { fontSize: 11, color: DarkColors.saffron, fontWeight: '600', letterSpacing: 0.5 },
 
   // Detail Modal
   detailOverlay: {
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
     elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 12,
   },
   detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  detailTitle: { fontSize: 22, fontWeight: '800', color: DarkColors.textPrimary, flex: 1 },
+  detailTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.textPrimary, flex: 1 },
   detailEnglish: { fontSize: 14, color: DarkColors.textMuted, marginTop: 2, marginLeft: 34 },
   detailDateRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   detailDateText: { fontSize: 15, fontWeight: '600', color: DarkColors.saffronLight },

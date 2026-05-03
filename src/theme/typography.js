@@ -1,186 +1,211 @@
-// ధర్మ — Typography Tokens
+// ధర్మ — Typography (single source of truth)
+// ─────────────────────────────────────────────────────────────────────
 //
-// One source of truth for font sizes, weights, and line-heights.
-// Use Type.X in components instead of inline `fontSize: 14`.
+// THE RULE
+// ────────
+// Every <Text> in the app should compose its style from ONE of the
+// `Type.X` tokens below — NOT from inline `fontSize` / `fontWeight`.
+// Color is the only thing components add at the call site:
 //
-// Telugu glyphs are taller than Latin — line-heights here include enough
-// vertical room so descenders + diacritics don't clip.
+//   import { Type, DarkColors as C } from '../theme';
+//
+//   <Text style={[Type.cardTitle,  { color: C.gold }]}>...</Text>
+//   <Text style={[Type.cardBody,   { color: C.silverLight }]}>...</Text>
+//   <Text style={[Type.dataLabel,  { color: C.textMuted }]}>TITHI</Text>
+//   <Text style={[Type.dataValue,  { color: '#FFF' }]}>Vidiya</Text>
+//
+// If a token doesn't fit your use case, ADD ONE HERE — don't write
+// inline numbers. That way the next "this card is too small / too
+// bold" complaint becomes a one-line edit in this file instead of
+// hunting through 50 components.
+//
+// FONT
+// ────
+// Single platform-aware family — no expo-google-fonts dependency.
+//   • Native: 'System' → SF Pro / Roboto + the OS's Telugu fallback
+//     (Noto Sans Telugu since Android 7 / iOS 13).
+//   • Web: Noto Sans Telugu loaded via Google Fonts CSS @import in App.js.
+// Same visual outcome, no Metro asset headaches.
+//
+// WEIGHTS — ceiling is 700 (bold). Tester said anything heavier read
+// as "shouting". Font weight ladder:
+//   400 regular   — DEFAULT body / paragraph
+//   500 medium    — labels, values, buttons, slightly emphasised body
+//   600 semibold  — titles, section headings, card titles
+//   700 bold      — screen titles, scores, hero numbers — TRUE emphasis
+//
+// SIZES — bumped 1-2 px from v1 in May 2026 after tester feedback that
+// the app read too small at arm's length. The new floor for body text
+// is 16 (was 14). Telugu glyphs occupy ~80% of the em-square that
+// Latin caps fill, so tokens with mixed-script content also bump the
+// fontSize a step compared to pure-English equivalents.
 
-// ── Font scale (px) ────────────────────────────────────────────────────
-// Sized for readability per WCAG 2.1 + iOS HIG / Material Design:
-//   • Body text 16px — meets WCAG body baseline
-//   • Smallest USER-VISIBLE size 12px — minimum readable on mobile
-//   • 11px (`nano`) reserved for tiny pill-badges, admin-only data, watermark
-//
-// Larger sizes are unchanged to avoid breaking fixed-height tile / card layouts.
+import { Platform } from 'react-native';
+
+// ── Font family ───────────────────────────────────────────────────────
+const DEFAULT_FAMILY = Platform.OS === 'web'
+  ? '"Noto Sans Telugu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
+  : 'System';
+
+export const FontFamilies = {
+  regular:  DEFAULT_FAMILY,
+  medium:   DEFAULT_FAMILY,
+  semibold: DEFAULT_FAMILY,
+  bold:     DEFAULT_FAMILY,
+};
+
+// ── Raw scales ────────────────────────────────────────────────────────
 export const FontSizes = {
-  nano:     11,   // pill badges only (PRO badge, day count) — NOT for body
-  micro:    12,   // timestamp tags, hint text (was 11 — failed mobile minimum)
-  caption:  12,   // footer text, tertiary labels
-  small:    14,   // sub-labels, English subtitles, secondary list info
-  body:     16,   // descriptions, body paragraphs (was 15 — meets WCAG min)
-  bodyLg:   16,   // prominent body text, top-tab labels
-  label:    17,   // primary tile labels, section sublabels, list item labels
-  title:    19,   // card titles, modal subtitles, daily greeting
-  h3:       20,   // section headings, deity names, app-info section titles
-  h2:       22,   // banner titles, screen titles
-  h1:       24,   // hero numbers (festival day count), large modal titles
-  display:  28,   // home grid overlay numbers
-  hero:     34,   // splash, error screen
+  nano:     12,   // pill badges only — last resort
+  micro:    13,   // tiny hint text
+  caption:  13,   // footer / tertiary labels
+  small:    15,   // sub-labels, dropdowns
+  body:     17,   // body paragraph (WCAG body min met)
+  bodyLg:   17,   // emphasised body / top-tab labels
+  label:    18,   // tile labels, list item primary
+  title:    20,   // card titles
+  h3:       22,   // section headings
+  h2:       24,   // banner titles, screen titles
+  h1:       28,   // hero numbers, large modal titles
+  display:  32,   // grid overlay numbers
+  hero:     38,   // splash, error screen
 };
 
-// ── Font weights ───────────────────────────────────────────────────────
-// React Native expects strings.
-//
-// Note: We don't use 300/400 anywhere — on dark backgrounds, sub-medium
-// weights ghost out, especially for Telugu glyphs. Minimum is 500 (regular).
-// All key body/label tokens use 600+ for accessible contrast-of-stroke.
 export const FontWeights = {
-  regular:  '500',  // body text floor — never go lighter on dark bg
-  medium:   '600',
-  semibold: '700',
-  bold:     '800',
-  heavy:    '900',
+  regular:  '400',
+  medium:   '500',
+  semibold: '600',
+  bold:     '700',
+  heavy:    '700',  // collapsed; we no longer ship anything heavier
 };
 
-// ── Line heights (multiplier of fontSize) ──────────────────────────────
-// Use as Math.round(FontSizes.X * LineHeights.normal) — exposed pre-computed below.
-//
-// `normal` raised from 1.35 → 1.45 to approach WCAG SC 1.4.12 guideline of
-// ≥1.5 for paragraph text without breaking single-line fixed-height layouts.
-// Use `relaxed` (1.5) explicitly for body paragraphs and Telugu glyphs.
 export const LineHeights = {
-  tight:   1.25,   // single-line buttons, badges (was 1.2 — slightly more breathing room)
-  normal:  1.45,   // multi-line body text (was 1.35)
-  relaxed: 1.5,    // long descriptions, sloka text (WCAG body min)
-  loose:   1.7,    // poetry, mantras
+  tight:   1.30,   // single-line buttons, badges
+  normal:  1.50,   // multi-line body (meets WCAG SC 1.4.12)
+  relaxed: 1.60,   // long paragraphs, sloka text
+  loose:   1.75,   // poetry, mantras
 };
 
-// ── Letter spacing ─────────────────────────────────────────────────────
 export const LetterSpacing = {
   none:    0,
-  tight:   0.2,    // most body text
-  normal:  0.5,    // labels
-  loose:   1,      // UPPERCASE labels
-  ultra:   1.5,    // section titles
+  tight:   0.1,
+  normal:  0.3,
+  loose:   0.6,
+  ultra:   1.0,
 };
 
-// ── Pre-built text styles ──────────────────────────────────────────────
-// Compose into StyleSheet.create({ ...Type.title, color: ... }).
-// Color is intentionally left out — pair with DarkColors at the call site.
+// ── Helper to build a token without repeating fontFamily ──────────────
+const t = (size, weight, lh = 'normal', extras = {}) => ({
+  fontFamily: DEFAULT_FAMILY,
+  fontSize:   FontSizes[size]    ?? size,
+  fontWeight: FontWeights[weight] ?? weight,
+  lineHeight: Math.round((FontSizes[size] ?? size) * LineHeights[lh]),
+  ...extras,
+});
+
+// ── Semantic Type tokens ──────────────────────────────────────────────
+// Each token is named for its USE CASE, not its visual size. That way
+// "make the card body bigger" is one line in this file — not a hunt
+// through every Card.js across the app.
 export const Type = {
-  // Tiny
-  micro: {
-    fontSize: FontSizes.micro,
-    fontWeight: FontWeights.semibold,
-    lineHeight: Math.round(FontSizes.micro * LineHeights.tight),
-    letterSpacing: LetterSpacing.tight,
-  },
-  caption: {
-    fontSize: FontSizes.caption,
-    fontWeight: FontWeights.semibold,
-    lineHeight: Math.round(FontSizes.caption * LineHeights.normal),
-    letterSpacing: LetterSpacing.tight,
-  },
+  // ─── Body / paragraph ───
+  // Default body text. Use everywhere a paragraph is rendered.
+  body:           t('body', 'regular', 'normal'),
 
-  // Body
-  small: {
-    fontSize: FontSizes.small,
-    fontWeight: FontWeights.semibold,
-    lineHeight: Math.round(FontSizes.small * LineHeights.normal),
-  },
-  body: {
-    fontSize: FontSizes.body,
-    fontWeight: FontWeights.medium,
-    lineHeight: Math.round(FontSizes.body * LineHeights.normal),
-  },
-  bodyEmphasis: {
-    fontSize: FontSizes.body,
-    fontWeight: FontWeights.bold,
-    lineHeight: Math.round(FontSizes.body * LineHeights.normal),
-  },
-  bodyLg: {
-    fontSize: FontSizes.bodyLg,
-    fontWeight: FontWeights.semibold,
-    lineHeight: Math.round(FontSizes.bodyLg * LineHeights.normal),
-  },
+  // Body with mild emphasis — slightly heavier than body, same size.
+  // Use for the "what's important here" sentence inside a paragraph.
+  bodyEmphasis:   t('body', 'semibold', 'normal'),
 
-  // Labels
-  label: {
-    fontSize: FontSizes.label,
-    fontWeight: FontWeights.bold,
-    lineHeight: Math.round(FontSizes.label * LineHeights.normal),
+  // Smaller body — hints, sub-labels, tertiary metadata.
+  small:          t('small', 'regular', 'normal'),
+  micro:          t('micro', 'medium', 'tight'),
+  caption:        t('caption', 'medium', 'normal'),
+
+  // ─── Card patterns ───
+  // The most common card shape: title at top, body below.
+  cardTitle:      t('title', 'semibold', 'normal',  { letterSpacing: LetterSpacing.tight }),
+  cardSubtitle:   t('small', 'medium',   'normal'),
+  cardBody:       t('body',  'regular',  'relaxed'),
+
+  // ─── Section / list ───
+  // The "Strengths / Career / Compatibility" header pattern.
+  sectionTitle:   t('label', 'semibold', 'normal'),
+  // Item in a list — primary text + secondary metadata.
+  listTitle:      t('label', 'semibold', 'normal'),
+  listSubtitle:   t('small', 'regular',  'normal'),
+
+  // ─── Data display (key:value rows) ───
+  // Sizes here are deliberately bumped one rung above v2: testers said
+  // home-screen labels and panchanga values both read too small. New
+  // floor: label 15, value 18, large value 20.
+  // For "TITHI / NAKSHATRA / SUNRISE" style labels — compact,
+  // uppercase, semibold, letter-spaced. Pair with C.textMuted for color.
+  dataLabel:      t('small', 'semibold', 'tight', {
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.normal,
+  }),
+  // The actual value next to a dataLabel (Vidiya, Anuradha, Tuesday).
+  // 18 px / medium — clearly readable at arm's length; visible Telugu
+  // glyph mass big enough to compete with the gold-uppercase label.
+  dataValue:      t('label', 'medium',   'normal'),
+  // Compact data value — for tight grids and dense rows where 18 px
+  // doesn't fit (e.g. multi-column metadata, time chips).
+  dataValueSm:    t('body',  'medium',   'normal'),
+  // Larger data value — for headline numbers (₹1,15,000, 3:45 AM).
+  dataValueLg:    t('title', 'semibold', 'normal'),
+
+  // ─── Buttons / actionable text ───
+  button:         t('label', 'semibold', 'tight',  { letterSpacing: LetterSpacing.tight }),
+  buttonSm:       t('small', 'semibold', 'tight'),
+  // For text links inline in body: "tap here", "see all", etc.
+  link:           t('body',  'medium',   'normal'),
+
+  // ─── Headings ───
+  h3:             t('h3', 'semibold', 'normal',  { letterSpacing: LetterSpacing.normal }),
+  h2:             t('h2', 'bold',     'normal',  { letterSpacing: LetterSpacing.normal }),
+  h1:             t('h1', 'bold',     'tight',   { letterSpacing: LetterSpacing.normal }),
+
+  // ─── Display numbers / hero ───
+  display:        t('display', 'bold', 'tight',  { letterSpacing: LetterSpacing.normal }),
+  hero:           t('hero',    'bold', 'tight',  { letterSpacing: LetterSpacing.loose  }),
+
+  // ─── Scriptural content ───
+  // Sanskrit verse, gold-italic, longer line height.
+  scripture:      t('title', 'medium', 'loose',  {
     letterSpacing: LetterSpacing.tight,
-  },
-  labelLoose: {
-    fontSize: FontSizes.label,
-    fontWeight: FontWeights.heavy,
-    lineHeight: Math.round(FontSizes.label * LineHeights.normal),
+    fontStyle: 'italic',
+  }),
+  // Meaning paragraph below a scripture — calmer body weight.
+  scriptureMeaning: t('body',  'regular', 'relaxed'),
+  // Mantra (Om Namah Shivaya) — italic, looser, larger.
+  mantra:         t('title', 'medium', 'loose',  {
+    letterSpacing: LetterSpacing.tight,
+    fontStyle: 'italic',
+  }),
+
+  // ─── Helper / utility ───
+  // Italic muted note below a field ("Best at Brahma Muhurtam...").
+  helper:         t('caption', 'regular', 'normal', { fontStyle: 'italic' }),
+  // Tag / badge / pill text inside a coloured chip.
+  tag:            t('caption', 'semibold', 'tight', { letterSpacing: LetterSpacing.tight }),
+
+  // ─── Telugu-specific overrides ───
+  // Use these when content is GUARANTEED Telugu — they get a relaxed
+  // line-height to give above/below diacritic marks breathing room.
+  // Most tokens above already work fine for Telugu; reach for these
+  // only when you see clipping or cramped feel.
+  teluguBody:     t('body',  'regular', 'relaxed'),
+  teluguTitle:    t('h3',    'semibold', 'relaxed'),
+  teluguDisplay:  t('h1',    'bold',     'normal'),
+
+  // ─── Legacy ───
+  // Retained so older components don't break before they're migrated.
+  // Prefer the named tokens above for new code.
+  bodyLg:         t('bodyLg', 'medium',   'normal'),
+  label:          t('label',  'medium',   'normal',  { letterSpacing: LetterSpacing.tight }),
+  labelLoose:     t('label',  'bold',     'normal',  {
     letterSpacing: LetterSpacing.loose,
     textTransform: 'uppercase',
-  },
-
-  // Titles
-  title: {
-    fontSize: FontSizes.title,
-    fontWeight: FontWeights.bold,
-    lineHeight: Math.round(FontSizes.title * LineHeights.normal),
-    letterSpacing: LetterSpacing.tight,
-  },
-  h3: {
-    fontSize: FontSizes.h3,
-    fontWeight: FontWeights.bold,
-    lineHeight: Math.round(FontSizes.h3 * LineHeights.normal),
-    letterSpacing: LetterSpacing.normal,
-  },
-  h2: {
-    fontSize: FontSizes.h2,
-    fontWeight: FontWeights.bold,
-    lineHeight: Math.round(FontSizes.h2 * LineHeights.normal),
-    letterSpacing: LetterSpacing.normal,
-  },
-  h1: {
-    fontSize: FontSizes.h1,
-    fontWeight: FontWeights.heavy,
-    lineHeight: Math.round(FontSizes.h1 * LineHeights.tight),
-    letterSpacing: LetterSpacing.normal,
-  },
-  display: {
-    fontSize: FontSizes.display,
-    fontWeight: FontWeights.heavy,
-    lineHeight: Math.round(FontSizes.display * LineHeights.tight),
-    letterSpacing: LetterSpacing.normal,
-  },
-  hero: {
-    fontSize: FontSizes.hero,
-    fontWeight: FontWeights.heavy,
-    lineHeight: Math.round(FontSizes.hero * LineHeights.tight),
-    letterSpacing: LetterSpacing.loose,
-  },
-
-  // Telugu-friendly variants — give Telugu vertical room so glyphs don't clip
-  teluguBody: {
-    fontSize: FontSizes.body,
-    fontWeight: FontWeights.medium,
-    lineHeight: Math.round(FontSizes.body * LineHeights.relaxed),
-  },
-  teluguTitle: {
-    fontSize: FontSizes.h3,
-    fontWeight: FontWeights.bold,
-    lineHeight: Math.round(FontSizes.h3 * LineHeights.relaxed),
-  },
-  teluguDisplay: {
-    fontSize: FontSizes.h1,
-    fontWeight: FontWeights.heavy,
-    lineHeight: Math.round(FontSizes.h1 * LineHeights.normal),
-  },
-
-  // Mantra / sloka — italic, longer line height
-  mantra: {
-    fontSize: FontSizes.title,
-    fontWeight: FontWeights.semibold,
-    lineHeight: Math.round(FontSizes.title * LineHeights.loose),
-    fontStyle: 'italic',
-    letterSpacing: LetterSpacing.tight,
-  },
+  }),
+  title:          t('title',  'semibold', 'normal',  { letterSpacing: LetterSpacing.tight }),
 };

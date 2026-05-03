@@ -3,7 +3,7 @@
 // Uses Firebase Analytics when configured, falls back to local storage tracking.
 // All data is anonymous — no personal information is collected.
 
-import { Platform } from 'react-native';
+import { Platform, Dimensions } from 'react-native';
 import Constants from 'expo-constants';
 import { logEventToCloud, setUserProperties } from './analyticsSync';
 
@@ -117,6 +117,57 @@ async function initFirebaseAnalytics() {
 
 // --- Public API ---
 
+// ── Device & cohort helpers ───────────────────────────────────────────
+// Captured once per session and attached to every cloud event via
+// setUserProperties. Cheap to compute, no PII.
+function collectDeviceInfo() {
+  const { width, height } = Dimensions.get('window');
+  const info = {
+    platform: Platform.OS,
+    appVersion: APP_VERSION,
+    osVersion: String(Platform.Version || ''),
+    screenSize: `${Math.round(width)}x${Math.round(height)}`,
+  };
+  // Web-only: pull a coarse browser hint (Chrome / Firefox / Safari /
+  // Edge — not full UA, just for rollup). Avoids clipping the UA in
+  // Firestore docs.
+  if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
+    const ua = navigator.userAgent || '';
+    info.browser =
+      /Edg\//.test(ua)         ? 'Edge'    :
+      /OPR\/|Opera/.test(ua)   ? 'Opera'   :
+      /Chrome\//.test(ua)      ? 'Chrome'  :
+      /Firefox\//.test(ua)     ? 'Firefox' :
+      /Safari\//.test(ua)      ? 'Safari'  :
+                                 'Other';
+    info.userAgent = ua.slice(0, 200);  // capped to keep doc small
+  } else {
+    // Native: pull device model / OS name via Constants when available
+    info.deviceModel = Constants?.deviceName || Constants?.expoConfig?.android?.package || '';
+  }
+  return info;
+}
+
+// User cohort — computed off firstLaunch.
+//   'new'        first 24 h
+//   'returning'  >24 h && <7 days
+//   'active'     >=7 days AND >=3 lifetime sessions
+//   'churned'    >30 days idle since lastActive (still firing → win-back)
+function computeUserStatus(data) {
+  const now = Date.now();
+  const first = data.firstLaunch ? Date.parse(data.firstLaunch) : now;
+  const last = data.lastActive  ? Date.parse(data.lastActive)  : now;
+  const ageMs = now - first;
+  const idleMs = now - last;
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+  const appAgeDays = Math.max(0, Math.floor(ageMs / ONE_DAY));
+  let status = 'active';
+  if (ageMs < ONE_DAY) status = 'new';
+  else if (ageMs < 7 * ONE_DAY) status = 'returning';
+  else if (idleMs > 30 * ONE_DAY) status = 'churned';
+  return { userStatus: status, appAgeDays };
+}
+
 /**
  * Initialize analytics — call once on app start
  */
@@ -130,10 +181,14 @@ export async function initAnalytics() {
   sessionStart = Date.now();
   sessionEvents = [];
 
-  // Set static user properties — dynamic ones (premium/login/lang) are set by contexts
+  // Set device + cohort properties — dynamic ones (premium/login/lang)
+  // are still patched in by contexts later.
+  const cohort = computeUserStatus(data);
   setUserProperties({
-    platform: Platform.OS,
-    appVersion: APP_VERSION,
+    ...collectDeviceInfo(),
+    ...cohort,
+    totalSessions: data.totalSessions,
+    activeDays: Object.keys(data.dailyOpens || {}).length,
   });
 
   await saveAnalytics();
@@ -143,6 +198,8 @@ export async function initAnalytics() {
   trackEvent('session_start', {
     session_number: data.totalSessions,
     platform: Platform.OS,
+    user_status: cohort.userStatus,
+    app_age_days: cohort.appAgeDays,
   });
 }
 

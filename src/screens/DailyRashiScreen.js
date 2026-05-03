@@ -17,6 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
 import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
+import { getTodayLucky } from '../utils/astroFeatures';
 
 // Detect rashi from birth date using accurate Moon sidereal longitude
 function detectRashiFromDOB(date) {
@@ -124,23 +125,97 @@ export function DailyRashiScreen() {
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
-        {/* Date header + Student Mode toggle */}
-        <View style={s.dateHeader}>
-          <MaterialCommunityIcons name="calendar-today" size={18} color={DarkColors.gold} />
-          <Text style={s.dateText}>{dateStr}</Text>
+        {/* Unified header: date + rashi + change button live in one card
+            so the user sees, at a glance, "what date these predictions are
+            for" and "which rashi is set" — and can change either from the
+            same place. Earlier these lived in two disconnected sections. */}
+        <View style={s.headerCard}>
+          <View style={s.dateRow}>
+            <MaterialCommunityIcons name="calendar-today" size={18} color={DarkColors.gold} />
+            <Text style={s.dateText}>{dateStr}</Text>
+            <View style={s.todayPill}>
+              <Text style={s.todayPillText}>{t('నేడు', 'Today')}</Text>
+            </View>
+          </View>
+          <View style={s.headerDivider} />
+
+          {myRashi ? (
+            <View style={s.myRashiHeader}>
+              <Image source={RASHIS[myRashi.rashiIndex].image} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.myRashiLabel}>{t('మీ  రాశి', 'YOUR RASHI')}</Text>
+                <Text style={[s.myRashiName, { fontSize: nameFontSize + 2 }]}>{t(myRashi.rashiTe, myRashi.rashiEn)}</Text>
+              </View>
+              <TouchableOpacity onPress={handleClearRashi} style={s.changeBtn} activeOpacity={0.7}>
+                <MaterialCommunityIcons name="pencil" size={14} color={DarkColors.gold} />
+                <Text style={s.changeBtnText}>{t('మార్చు', 'Change')}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={() => setShowDobPicker(true)} activeOpacity={0.8}>
+              <LinearGradient
+                colors={['rgba(212,160,23,0.15)', 'rgba(232,117,26,0.10)', 'rgba(212,160,23,0.05)']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                style={s.setRashiInline}
+              >
+                <Image source={require('../../assets/zodiac/leo.png')} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
+                <View style={{ flex: 1, marginLeft: 14 }}>
+                  <Text style={s.setRashiTitle}>{t('మీ రాశి తెలుసుకోండి', 'Know Your Rashi')}</Text>
+                  <Text style={s.setRashiSub}>{t('పుట్టిన తేదీ నమోదు చేయండి → రాశి స్వయంచాలకంగా గుర్తించబడుతుంది', 'Enter birth date → Rashi auto-detected from moon position')}</Text>
+                </View>
+                <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.gold} />
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
         </View>
 
+        {/* Today's Lucky — moved here from Vedic Wisdom. This is weekday-
+            bound (Sun day, Moon day, …) and applies to everyone, on top
+            of each rashi's own lucky number/colour shown below. */}
+        {(() => {
+          const lucky = getTodayLucky(new Date());
+          return (
+            <View style={s.todayLuckyCard}>
+              <View style={s.todayLuckyHeader}>
+                <MaterialCommunityIcons name="star-shooting" size={18} color={DarkColors.gold} />
+                <Text style={s.todayLuckyTitle}>{t('నేటి అదృష్టం', "Today's Lucky")}</Text>
+                <Text style={s.todayLuckyDeity}>{t(`${lucky.deity.te} గ్రహ దినం`, `${lucky.deity.en} day`)}</Text>
+              </View>
+              <View style={s.todayLuckyRow}>
+                <View style={s.todayLuckyItem}>
+                  <Text style={s.todayLuckyLabel}>{t('రంగు', 'Colour')}</Text>
+                  <Text style={s.todayLuckyValue} numberOfLines={1}>{t(lucky.color.te, lucky.color.en)}</Text>
+                </View>
+                <View style={s.todayLuckyDivider} />
+                <View style={s.todayLuckyItem}>
+                  <Text style={s.todayLuckyLabel}>{t('దిశ', 'Direction')}</Text>
+                  <Text style={s.todayLuckyValue} numberOfLines={1}>{t(lucky.direction.te, lucky.direction.en)}</Text>
+                </View>
+                <View style={s.todayLuckyDivider} />
+                <View style={s.todayLuckyItem}>
+                  <Text style={s.todayLuckyLabel}>{t('దేవత', 'Deity')}</Text>
+                  <Text style={s.todayLuckyValue} numberOfLines={1}>{t(lucky.deity.te, lucky.deity.en)}</Text>
+                </View>
+              </View>
+            </View>
+          );
+        })()}
+
         {/* Mode selector — Student / Senior */}
+        {/* Senior mode active: gold bg → DARK text (#0A0A0A) for AAA contrast.
+            Student mode active: blue bg → white text (already AA contrast).
+            Earlier: both used white text on their bg, but white on gold
+            (#D4A017) is only 1.7:1 — unreadable. Now split per mode. */}
         <View style={s.modeSelectorRow}>
           <TouchableOpacity
             style={[s.modeBtn, !studentMode && s.modeBtnActive]}
             onPress={() => { if (studentMode) toggleStudentMode(); }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="account-tie" size={18} color={!studentMode ? '#FFFFFF' : DarkColors.gold} />
+            <MaterialCommunityIcons name="account-tie" size={20} color={!studentMode ? '#0A0A0A' : DarkColors.gold} />
             <View>
-              <Text style={[s.modeBtnText, !studentMode && s.modeBtnTextActive]}>{t('సీనియర్ మోడ్', 'Senior Mode')}</Text>
-              <Text style={[s.modeBtnAge, !studentMode && s.modeBtnAgeActive]}>{t('25+ సంవత్సరాలు', '25+ years')}</Text>
+              <Text style={[s.modeBtnText, !studentMode && s.modeBtnTextActiveSenior]}>{t('సీనియర్ మోడ్', 'Senior Mode')}</Text>
+              <Text style={[s.modeBtnAge, !studentMode && s.modeBtnAgeActiveSenior]}>{t('25+ సంవత్సరాలు', '25+ years')}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
@@ -148,10 +223,10 @@ export function DailyRashiScreen() {
             onPress={() => { if (!studentMode) toggleStudentMode(); }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="school" size={18} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
+            <MaterialCommunityIcons name="school" size={20} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
             <View>
-              <Text style={[s.modeBtnText, { color: '#4A90D9' }, studentMode && s.modeBtnTextActive]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
-              <Text style={[s.modeBtnAge, studentMode && s.modeBtnAgeActive]}>{t('15–25 సంవత్సరాలు', '15–25 years')}</Text>
+              <Text style={[s.modeBtnText, { color: '#4A90D9' }, studentMode && s.modeBtnTextActiveStudent]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
+              <Text style={[s.modeBtnAge, studentMode && s.modeBtnAgeActiveStudent]}>{t('15–25 సంవత్సరాలు', '15–25 years')}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -165,39 +240,6 @@ export function DailyRashiScreen() {
               : t('వృత్తి, ఆర్థికం, ఆరోగ్యం & సంబంధాల ఫలాలు చూపిస్తున్నాము', 'Showing Career, Finance, Health & Relationship predictions')}
           </Text>
         </View>
-
-        {/* My Rashi Section */}
-        {myRashi ? (
-          <View style={s.myRashiCard}>
-            <View style={s.myRashiHeader}>
-              <Image source={RASHIS[myRashi.rashiIndex].image} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
-              <View style={{ flex: 1 }}>
-                <Text style={s.myRashiLabel}>{t('మీ  రాశి', 'Your Rashi')}</Text>
-                <Text style={[s.myRashiName, { fontSize: nameFontSize + 2 }]}>{t(myRashi.rashiTe, myRashi.rashiEn)}</Text>
-              </View>
-              <TouchableOpacity onPress={handleClearRashi} style={s.changeBtn}>
-                <Text style={s.changeBtnText}>{t('మార్చు', 'Change')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : (
-          <TouchableOpacity style={s.setRashiCardOuter} onPress={() => setShowDobPicker(true)} activeOpacity={0.8}>
-            <LinearGradient
-              colors={['rgba(212,160,23,0.15)', 'rgba(232,117,26,0.10)', 'rgba(212,160,23,0.05)']}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={s.setRashiGradient}
-            >
-              <Image source={require('../../assets/zodiac/leo.png')} style={{ width: imgSize, height: imgSize, resizeMode: 'contain' }} />
-              <View style={{ flex: 1, marginLeft: 14 }}>
-                <Text style={s.setRashiTitle}>{t('మీ రాశి తెలుసుకోండి', 'Know Your Rashi')}</Text>
-                <Text style={s.setRashiSub}>{t('పుట్టిన తేదీ నమోదు చేయండి → రాశి స్వయంచాలకంగా గుర్తించబడుతుంది', 'Enter birth date → Rashi auto-detected from moon position')}</Text>
-              </View>
-              <View style={s.setRashiArrow}>
-                <MaterialCommunityIcons name="chevron-right" size={22} color={DarkColors.gold} />
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
 
         {/* All 12 Rashis (my rashi first if set) */}
         {sortedPredictions.map((pred, i) => {
@@ -381,23 +423,84 @@ const s = StyleSheet.create({
   content: { padding: 16 },
 
   // Date header — prominent, top of list
-  dateHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: 10, marginBottom: 12,
+  // Unified header card — date + rashi + change button under one roof.
+  // Replaces the previous standalone date strip + separate "My Rashi"
+  // card so the date context and the change action sit together.
+  headerCard: {
+    backgroundColor: DarkColors.bgCard,
+    borderRadius: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+    padding: 14,
+    marginBottom: 14,
+  },
+  dateRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingBottom: 10,
+  },
+  dateText: { flex: 1, fontSize: 16, color: DarkColors.silverLight, fontWeight: '700' },
+  todayPill: {
+    backgroundColor: 'rgba(212,160,23,0.18)',
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12,
+  },
+  todayPillText: { fontSize: 12, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.3 },
+  headerDivider: {
+    height: 1, backgroundColor: DarkColors.borderCard,
+    marginBottom: 12, opacity: 0.6,
+  },
+  setRashiInline: {
+    flexDirection: 'row', alignItems: 'center', borderRadius: 12,
+    paddingVertical: 10, paddingHorizontal: 12,
+  },
+
+  // Today's Lucky — universal weekday-bound card (deity / colour /
+  // direction). Placed above the per-rashi list so every user sees it.
+  todayLuckyCard: {
+    backgroundColor: DarkColors.bgCard,
+    borderRadius: 14, padding: 12, marginBottom: 14,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  todayLuckyHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    paddingBottom: 10,
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  dateText: { fontSize: 16, color: DarkColors.silver, fontWeight: '700' },
+  todayLuckyTitle: {
+    fontSize: 17, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.4,
+  },
+  todayLuckyDeity: {
+    flex: 1, fontSize: 13, fontWeight: '700', color: DarkColors.saffron,
+    textAlign: 'right', fontStyle: 'italic',
+  },
+  todayLuckyRow: { flexDirection: 'row', alignItems: 'center' },
+  todayLuckyItem: { flex: 1, alignItems: 'center' },
+  todayLuckyDivider: {
+    width: 1, height: 40, backgroundColor: DarkColors.borderCard,
+  },
+  todayLuckyLabel: {
+    fontSize: 12, fontWeight: '700', color: DarkColors.textMuted,
+    letterSpacing: 0.5, marginBottom: 4, textTransform: 'uppercase',
+  },
+  todayLuckyValue: {
+    fontSize: 16, fontWeight: '600', color: '#FFFFFF',
+    textAlign: 'center', paddingHorizontal: 4,
+  },
 
   // Zodiac image
   rashiImg: { width: 50, height: 50, resizeMode: 'contain' },
 
-  // My Rashi (when set)
-  myRashiCard: { paddingBottom: 18, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
+  // My Rashi (when set) — now sits inside headerCard, no own padding/border.
   myRashiHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  myRashiLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '600' },
-  myRashiName: { fontSize: 22, fontWeight: '900', color: DarkColors.gold },
-  changeBtn: { paddingHorizontal: 14, paddingVertical: 8 },
-  changeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  myRashiLabel: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700', letterSpacing: 0.5 },
+  myRashiName: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, marginTop: 2 },
+  changeBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
+    backgroundColor: 'rgba(212,160,23,0.12)',
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  changeBtnText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
 
   // Set Rashi prompt (when not set) — highlighted card
   setRashiCardOuter: {
@@ -408,7 +511,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     padding: 16,
   },
-  setRashiTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
+  setRashiTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.gold },
   setRashiSub: { fontSize: 13, color: DarkColors.silver, marginTop: 4, lineHeight: 20 },
   setRashiArrow: {
     width: 36, height: 36, borderRadius: 18,
@@ -421,16 +524,20 @@ const s = StyleSheet.create({
     flexDirection: 'row', gap: 8, marginBottom: 8,
   },
   modeBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 10, paddingHorizontal: 14, borderRadius: 14,
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 12, paddingHorizontal: 14, borderRadius: 14,
     backgroundColor: 'rgba(212,160,23,0.04)', borderWidth: 1.5, borderColor: DarkColors.borderCard,
   },
   modeBtnActive: { backgroundColor: DarkColors.gold, borderColor: DarkColors.gold },
   modeBtnActiveStudent: { backgroundColor: '#4A90D9', borderColor: '#4A90D9' },
-  modeBtnText: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
-  modeBtnTextActive: { color: '#FFFFFF' },
-  modeBtnAge: { fontSize: 13, fontWeight: '600', color: DarkColors.silver, marginTop: 2 },
-  modeBtnAgeActive: { color: 'rgba(255,255,255,0.85)' },
+  modeBtnText: { fontSize: 17, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.2 },
+  // Senior active: dark text on gold bg (AAA contrast 8.4:1)
+  modeBtnTextActiveSenior: { color: '#0A0A0A' },
+  // Student active: white text on blue bg (AA contrast)
+  modeBtnTextActiveStudent: { color: '#FFFFFF' },
+  modeBtnAge: { fontSize: 14, fontWeight: '600', color: DarkColors.silverLight, marginTop: 3 },
+  modeBtnAgeActiveSenior:  { color: 'rgba(10,10,10,0.75)' },
+  modeBtnAgeActiveStudent: { color: 'rgba(255,255,255,0.85)' },
   modeIndicator: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, marginBottom: 12,
@@ -441,9 +548,9 @@ const s = StyleSheet.create({
   rashiCard: { paddingVertical: 14, paddingHorizontal: 12, marginBottom: 6, borderRadius: 14, borderWidth: 1, borderColor: DarkColors.borderCard },
   myRashiHighlight: { borderColor: DarkColors.borderGold, borderWidth: 1.5, backgroundColor: 'rgba(212,160,23,0.06)' },
   rashiHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  rashiName: { fontSize: 19, fontWeight: '800', color: DarkColors.silver },
+  rashiName: { fontSize: 19, fontWeight: '600', color: DarkColors.silver },
   rashiMeta: { fontSize: 14, color: DarkColors.silver, marginTop: 4, fontWeight: '600' },
-  myBadgeText: { fontSize: 13, fontWeight: '800', color: DarkColors.gold },
+  myBadgeText: { fontSize: 13, fontWeight: '600', color: DarkColors.gold },
   starsRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 5 },
   scoreText: { fontSize: 14, color: DarkColors.silver, fontWeight: '700', marginLeft: 6 },
   overallText: { fontSize: 16, color: DarkColors.silver, marginTop: 10, fontStyle: 'italic', lineHeight: 24, fontWeight: '500' },
@@ -454,7 +561,7 @@ const s = StyleSheet.create({
   // Each detail — stacked: icon+label on top, value text below
   detailSection: { marginBottom: 16 },
   detailHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  detailLabel: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  detailLabel: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
   detailText: { fontSize: 17, color: DarkColors.silver, fontWeight: '600', lineHeight: 26, paddingLeft: 28 },
 
   // Ruler & element row
@@ -467,5 +574,5 @@ const s = StyleSheet.create({
   luckyRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
   luckyItem: { flex: 1, alignItems: 'center', gap: 4 },
   luckyLabel: { fontSize: 14, color: DarkColors.silver, fontWeight: '600' },
-  luckyValue: { fontSize: 17, fontWeight: '800', color: DarkColors.gold },
+  luckyValue: { fontSize: 17, fontWeight: '600', color: DarkColors.gold },
 });

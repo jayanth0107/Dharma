@@ -62,7 +62,12 @@ export function CalendarPicker({ selectedDate, onSelect, onClose, title }) {
         {/* Title */}
         <View style={s.titleRow}>
           <Text style={s.title}>{title || t(TR.selectDateTitle.te, TR.selectDateTitle.en)}</Text>
-          <TouchableOpacity onPress={onClose} style={s.closeBtn}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={s.closeBtn}
+            hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }}
+            accessibilityLabel="Close calendar"
+          >
             <Ionicons name="close" size={22} color={DarkColors.silver} />
           </TouchableOpacity>
         </View>
@@ -162,16 +167,16 @@ const s = StyleSheet.create({
   titleRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12,
   },
-  title: { fontSize: 18, fontWeight: '800', color: DarkColors.gold },
+  title: { fontSize: 18, fontWeight: '600', color: DarkColors.gold },
   closeBtn: { padding: 4 },
 
   // Navigation
   navRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 14 },
   navBtn: { padding: 8 },
   monthBtn: { backgroundColor: DarkColors.bgCard, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: DarkColors.borderGold },
-  monthText: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  monthText: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
   yearBtn: { backgroundColor: DarkColors.bgCard, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: DarkColors.borderCard },
-  yearText: { fontSize: 16, fontWeight: '800', color: DarkColors.textPrimary },
+  yearText: { fontSize: 16, fontWeight: '600', color: DarkColors.textPrimary },
 
   // Day headers
   dayHeaderRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 6 },
@@ -187,7 +192,7 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.saffron, borderRadius: 21,
   },
   cellText: { fontSize: 15, fontWeight: '600', color: DarkColors.textSecondary },
-  cellTextSelected: { color: '#fff', fontWeight: '800' },
+  cellTextSelected: { color: '#fff', fontWeight: '600' },
 
   // Today
   todayBtn: { alignItems: 'center', paddingVertical: 12, marginTop: 10, backgroundColor: DarkColors.bgCard, borderRadius: 12, borderWidth: 1, borderColor: DarkColors.saffron },
@@ -195,10 +200,10 @@ const s = StyleSheet.create({
 
   // Year/Month pickers
   pickerOverlay: { maxHeight: 350 },
-  pickerTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold, textAlign: 'center', marginBottom: 10 },
+  pickerTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold, textAlign: 'center', marginBottom: 10 },
   pickerScroll: { maxHeight: 300 },
   pickerItem: { paddingVertical: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
   pickerItemActive: { backgroundColor: DarkColors.saffronDim },
   pickerItemText: { fontSize: 16, fontWeight: '600', color: DarkColors.textPrimary, textAlign: 'center' },
-  pickerItemTextActive: { color: DarkColors.saffron, fontWeight: '800' },
+  pickerItemTextActive: { color: DarkColors.saffron, fontWeight: '600' },
 });

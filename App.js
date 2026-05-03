@@ -7,6 +7,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
+// Fonts are loaded per-platform — no Expo Google Fonts dependency:
+//   • Native (iOS/Android): use 'System' font. Latin uses
+//     San Francisco / Roboto; Telugu glyphs use the OS's Noto Sans
+//     Telugu fallback (default since Android 7 / iOS 13).
+//   • Web: load Noto Sans Telugu via Google Fonts CSS @import (see
+//     IS_WEB style injection below). Zero bundle cost; browser caches.
+// This gives the same "Noto Sans Telugu" outcome without Metro asset
+// resolution headaches.
 import { AppProvider } from './src/context/AppContext';
 import { LanguageProvider } from './src/context/LanguageContext';
 import { AuthProvider } from './src/context/AuthContext';
@@ -14,7 +22,21 @@ import { trackScreenView } from './src/utils/analytics';
 import { checkRatePrompt } from './src/utils/ratePrompt';
 import { OnboardingScreen } from './src/components/OnboardingScreen';
 import { TabNavigator } from './src/navigation/TabNavigator';
-import { DarkColors, WEB_MAX_WIDTH, IS_WEB } from './src/theme';
+import { DarkColors, WEB_MAX_WIDTH, IS_WEB, FontFamilies } from './src/theme';
+
+// ── Global default font ─────────────────────────────────────────────────
+// Set the project's default font on every <Text>. Component-level styles
+// still override (RN merges arrays — last wins).
+try {
+  Text.defaultProps = Text.defaultProps || {};
+  const existing = Text.defaultProps.style;
+  Text.defaultProps.style = existing
+    ? [{ fontFamily: FontFamilies.regular }, existing]
+    : { fontFamily: FontFamilies.regular };
+} catch {
+  // If a future RN version locks defaultProps, components still get
+  // fontFamily from Type tokens — graceful fallback, no broken bundle.
+}
 
 // Configure notification handler so notifications display when app is in foreground (mobile only)
 if (Platform.OS !== 'web') {
@@ -27,21 +49,41 @@ if (Platform.OS !== 'web') {
         shouldSetBadge: false,
       }),
     });
-    // Create Android notification channel (required for Android 8+)
+    // Create Android notification channel (required for Android 8+).
+    // Older Android versions (7 and below) ignore channels — the call
+    // is a no-op there. setNotificationChannelAsync returns a Promise,
+    // so we attach a .catch() to surface failures in dev. In prod the
+    // error is swallowed so a misbehaving OEM build doesn't crash the
+    // app shell — notifications just won't show.
     if (Platform.OS === 'android') {
       Notifications.setNotificationChannelAsync('dharma-daily', {
         name: 'Dharma Daily',
         importance: Notifications.AndroidImportance.HIGH,
         sound: 'default',
         vibrationPattern: [0, 250, 250, 250],
+      }).catch((err) => {
+        if (__DEV__) console.warn('[Notifications] channel setup failed:', err?.message || err);
       });
     }
-  } catch {}
+  } catch (err) {
+    if (__DEV__) console.warn('[Notifications] setup threw:', err?.message || err);
+  }
 }
 
 // Web-only: hide all scrollbars so they don't reserve layout width.
 // Users still scroll via wheel / touch / keyboard. Runs once per page load.
 if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharma-hide-scrollbars')) {
+  // Load Noto Sans Telugu (and its Latin companion) via Google Fonts.
+  // Done as a <link> tag in <head> so the browser fetches and caches the
+  // font files in parallel with the app bundle. No expo-font / asset
+  // resolution required.
+  if (!document.getElementById('dharma-fonts-link')) {
+    const link = document.createElement('link');
+    link.id = 'dharma-fonts-link';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&display=swap';
+    document.head.appendChild(link);
+  }
   const style = document.createElement('style');
   style.id = 'dharma-hide-scrollbars';
   style.innerText = `
@@ -49,7 +91,8 @@ if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharm
        to the tab bar. RN-Web manages its own root flex — we only set
        the height so the root doesn't collapse on some browsers. */
     html, body, #root { height: 100%; min-height: 100vh; }
-    body { margin: 0; overflow-x: hidden; background: #000; }
+    body { margin: 0; overflow-x: hidden; background: #000;
+           font-family: "Noto Sans Telugu", system-ui, -apple-system, sans-serif; }
 
     /* Hide scrollbars so they don't reserve layout width */
     html, body, div { scrollbar-width: none; -ms-overflow-style: none; }
@@ -138,8 +181,9 @@ function useOnboarding() {
 export default function App() {
   const { showOnboarding, checked, dismiss } = useOnboarding();
 
-  // Preload icon font glyphs so they paint instantly on first render
-  // (avoids the brief "blank square" flash on cold start)
+  // Preload icon glyphs so they paint instantly on first render.
+  // (Text fonts come from System on native and Google Fonts CSS on web —
+  // see the IS_WEB style block above.)
   const [fontsLoaded] = useFonts({
     ...MaterialCommunityIcons.font,
     ...Ionicons.font,
@@ -208,10 +252,10 @@ export default function App() {
               notification: DarkColors.saffron,
             },
             fonts: {
-              regular: { fontFamily: 'System', fontWeight: '400' },
-              medium: { fontFamily: 'System', fontWeight: '600' },
-              bold: { fontFamily: 'System', fontWeight: '700' },
-              heavy: { fontFamily: 'System', fontWeight: '800' },
+              regular: { fontFamily: FontFamilies.regular, fontWeight: '400' },
+              medium:  { fontFamily: FontFamilies.medium,  fontWeight: '500' },
+              bold:    { fontFamily: FontFamilies.bold,    fontWeight: '700' },
+              heavy:   { fontFamily: FontFamilies.bold,    fontWeight: '700' },
             },
           }}
         >
@@ -244,24 +288,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   bootTitle: {
-    fontSize: 36, fontWeight: '900', color: DarkColors.gold, letterSpacing: 4,
+    fontSize: 36, fontFamily: FontFamilies.bold, fontWeight: '700', color: DarkColors.gold, letterSpacing: 4,
   },
   errorContainer: {
     flex: 1, backgroundColor: DarkColors.bg,
     justifyContent: 'center', alignItems: 'center', padding: 30,
   },
   errorTitle: {
-    fontSize: 20, color: DarkColors.gold, marginTop: 16, fontWeight: '700',
+    fontSize: 22, color: DarkColors.gold, marginTop: 16, fontFamily: FontFamilies.bold, fontWeight: '700',
   },
   errorTelugu: {
-    fontSize: 14, color: DarkColors.textPrimary, marginTop: 12, textAlign: 'center',
+    fontSize: 16, color: DarkColors.textPrimary, marginTop: 12, textAlign: 'center', lineHeight: 24,
   },
   errorEnglish: {
-    fontSize: 12, color: DarkColors.textMuted, marginTop: 8, textAlign: 'center',
+    fontSize: 14, color: DarkColors.textMuted, marginTop: 8, textAlign: 'center', lineHeight: 21,
   },
   errorBtn: {
     marginTop: 24, backgroundColor: DarkColors.saffron,
     paddingVertical: 12, paddingHorizontal: 32, borderRadius: 20,
   },
-  errorBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+  errorBtnText: { color: '#FFF', fontFamily: FontFamilies.semibold, fontWeight: '600', fontSize: 16 },
 });

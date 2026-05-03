@@ -18,6 +18,7 @@ import { useSpeaker } from '../utils/speechService';
 import { getTodayGitaSloka, GITA_SLOKAS } from '../data/bhagavadGita';
 import { SacredContentDisclaimer } from '../components/SacredContentDisclaimer';
 import { AdBannerWidget } from '../components/AdBanner';
+import { devanagariToTelugu } from '../utils/transliterate';
 
 const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
 
@@ -39,14 +40,23 @@ export function GitaScreen() {
   const meaningFs     = usePick({ default: 16, md: 17, xl: 19 });
   const meaningLh     = usePick({ default: 26, md: 28, xl: 32 });
 
-  const buildShareText = (sl) =>
-    `🙏 *ధర్మ — భగవద్గీత*\n\n` +
-    `📖 అధ్యాయం ${sl.chapter} · శ్లోకం ${sl.verse}\n` +
-    `🏷️ ${sl.theme}\n\n` +
-    `${sl.sanskrit}\n\n` +
-    `*తెలుగు అర్థం:*\n${sl.telugu}\n\n` +
-    `*English Meaning:*\n${sl.english}\n\n` +
-    `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+  // Share text adapts to the user's selected language. Sanskrit verse
+  // always shown in its source script (Devanagari for English, Telugu
+  // lipi for Telugu mode); the meaning paragraph and labels follow lang.
+  const buildShareText = (sl) => {
+    const isEn = lang === 'en';
+    const header     = isEn ? 'Dharma — Bhagavad Gita' : 'ధర్మ — భగవద్గీత';
+    const refLabel   = isEn ? `Chapter ${sl.chapter} · Verse ${sl.verse}` : `అధ్యాయం ${sl.chapter} · శ్లోకం ${sl.verse}`;
+    const sanskrit   = isEn ? sl.sanskrit : devanagariToTelugu(sl.sanskrit);
+    const meaning    = isEn ? sl.english : sl.telugu;
+    const meaningLbl = isEn ? 'Meaning' : 'తెలుగు అర్థం';
+    return `🙏 *${header}*\n\n` +
+      `📖 ${refLabel}\n` +
+      `🏷️ ${sl.theme}\n\n` +
+      `${sanskrit}\n\n` +
+      `*${meaningLbl}:*\n${meaning}\n\n` +
+      `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+  };
 
   const renderSloka = (sloka, isToday = false) => {
     const themeShort = sloka.theme.split('/')[0].trim();
@@ -76,14 +86,8 @@ export function GitaScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Sanskrit verse — gold-bordered, italic, centered */}
-        <View style={s.sanskritBox}>
-          <Text style={[s.sanskritText, { fontSize: sanskritFs, lineHeight: sanskritLh }]}>
-            {sloka.sanskrit}
-          </Text>
-        </View>
-
-        {/* Telugu meaning */}
+        {/* Telugu meaning — shown FIRST so Telugu readers see it without
+            scrolling past Devanagari they may not read. */}
         <View style={s.meaningSection}>
           <Text style={s.meaningLabel}>{t('తెలుగు అర్థం', 'Telugu Meaning')}</Text>
           <Text style={[s.meaningText, { fontSize: meaningFs, lineHeight: meaningLh }]}>
@@ -97,6 +101,27 @@ export function GitaScreen() {
           <Text style={[s.englishText, { fontSize: meaningFs - 1, lineHeight: meaningLh - 2 }]}>
             {sloka.english}
           </Text>
+        </View>
+
+        {/* Sanskrit verse — rendered in the user's preferred script.
+            • Telugu mode: Devanagari is mechanically transliterated to
+              Telugu lipi so Telugu readers can chant the original
+              Sanskrit using letters they can read. This is standard
+              practice in Telugu Gita publications.
+            • English mode: kept in Devanagari (the canonical script).
+            The translated meaning still shows above. */}
+        <View style={s.sanskritSection}>
+          <View style={s.sanskritHeader}>
+            <MaterialCommunityIcons name="om" size={14} color={DarkColors.gold} />
+            <Text style={s.sanskritLabel}>
+              {t('సంస్కృత శ్లోకం (తెలుగు లిపి)', 'Sanskrit Verse (Devanagari)')}
+            </Text>
+          </View>
+          <View style={s.sanskritBox}>
+            <Text style={[s.sanskritText, { fontSize: sanskritFs, lineHeight: sanskritLh }]}>
+              {lang === 'te' ? devanagariToTelugu(sloka.sanskrit) : sloka.sanskrit}
+            </Text>
+          </View>
         </View>
 
         {/* Share + PDF (built-in to SectionShareRow) */}
@@ -156,7 +181,7 @@ export function GitaScreen() {
 
           {showAll && GITA_SLOKAS.filter(sl => sl.id !== today.id).map(sl => renderSloka(sl, false))}
 
-          <SacredContentDisclaimer />
+          <SacredContentDisclaimer source="gita" />
           <AdBannerWidget variant="spiritual" />
           <View style={{ height: 30 }} />
         </ScrollView>
@@ -170,8 +195,8 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontWeight: '900', color: DarkColors.gold, textAlign: 'center', letterSpacing: 0.5 },
-  headerSub: { fontSize: 14, color: DarkColors.silver, textAlign: 'center', fontWeight: '500' },
+  headerTitle: { fontWeight: '700', color: DarkColors.gold, textAlign: 'center', letterSpacing: 0.5 },
+  headerSub: { fontSize: 15, lineHeight: 22, color: DarkColors.silverLight, textAlign: 'center', fontWeight: '500' },
 
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,
@@ -179,13 +204,13 @@ const s = StyleSheet.create({
   },
   cardToday: { borderColor: DarkColors.borderGold, borderWidth: 1.5 },
 
-  kandaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12, flexWrap: 'wrap' },
-  kandaBadge: { backgroundColor: 'rgba(212,160,23,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  kandaText: { fontSize: 12, fontWeight: '800', color: DarkColors.gold },
-  themeBadge: { backgroundColor: 'rgba(232,117,26,0.12)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, maxWidth: 140 },
-  themeText: { fontSize: 11, fontWeight: '700', color: DarkColors.saffron },
-  todayBadge: { backgroundColor: DarkColors.gold, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  todayText: { fontSize: 10, fontWeight: '800', color: '#0A0A0A' },
+  kandaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' },
+  kandaBadge: { backgroundColor: 'rgba(212,160,23,0.15)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  kandaText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  themeBadge: { backgroundColor: 'rgba(232,117,26,0.12)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, maxWidth: 180 },
+  themeText: { fontSize: 13, fontWeight: '700', color: DarkColors.saffron },
+  todayBadge: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  todayText: { fontSize: 12, fontWeight: '700', color: '#0A0A0A', letterSpacing: 0.3 },
   speakerBtn: {
     marginLeft: 'auto', width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
@@ -193,16 +218,24 @@ const s = StyleSheet.create({
   },
   speakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
 
+  sanskritSection: { marginBottom: 14 },
+  sanskritHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8,
+  },
+  sanskritLabel: {
+    fontSize: 13, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.4, textTransform: 'uppercase',
+  },
   sanskritBox: {
-    backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12, padding: 14, marginBottom: 14,
+    backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12, padding: 14,
     borderLeftWidth: 3, borderLeftColor: DarkColors.gold,
   },
   sanskritText: { color: DarkColors.goldLight, fontWeight: '500', textAlign: 'center', fontStyle: 'italic' },
 
   meaningSection: { marginBottom: 14 },
   meaningLabel: {
-    fontSize: 12, fontWeight: '800', color: DarkColors.saffron,
-    marginBottom: 6, letterSpacing: 0.5, textTransform: 'uppercase',
+    fontSize: 13, fontWeight: '700', color: DarkColors.saffron,
+    marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase',
   },
   meaningText: { color: DarkColors.silver, fontWeight: '500' },
   englishText: { color: DarkColors.silver, fontWeight: '500', fontStyle: 'italic' },

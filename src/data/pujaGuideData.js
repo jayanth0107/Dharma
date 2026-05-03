@@ -245,7 +245,7 @@ export const PUJA_GUIDES = [
   {
     id: 'krishna_janmashtami',
     name: { te: 'శ్రీ కృష్ణ జన్మాష్టమి', en: 'Krishna Janmashtami' },
-    icon: 'flute',
+    icon: 'music-clef-treble',
     color: '#4A90D9',
     when: { te: 'శ్రావణ బహుళ అష్టమి (ఆగస్టు/సెప్టెంబర్)', en: 'Shravana Krishna Ashtami (Aug/Sep)' },
     duration: { te: 'రాత్రి 11:30 - 12:30 (మధ్యరాత్రి జన్మం)', en: '11:30 PM - 12:30 AM (midnight birth)' },
@@ -256,7 +256,7 @@ export const PUJA_GUIDES = [
       { icon: 'flower-tulip', te: 'తాజా పూలు (గులాబీ, మల్లె)', en: 'Fresh flowers (Rose, Jasmine)' },
       { icon: 'food-variant', te: 'వెన్న, పెరుగు, పాలు (కృష్ణుడికి ఇష్టం)', en: 'Butter, Curd, Milk (Krishna\'s favourites)' },
       { icon: 'food-apple', te: 'పండ్లు, మిఠాయి, బెల్లం పానకం', en: 'Fruits, sweets, Bellam panakam' },
-      { icon: 'flute', te: 'వేణువు (bansuri) — కృష్ణ ప్రతీక', en: 'Flute (bansuri) — Krishna\'s symbol' },
+      { icon: 'music-clef-treble', te: 'వేణువు (bansuri) — కృష్ణ ప్రతీక', en: 'Flute (bansuri) — Krishna\'s symbol' },
       { icon: 'feather', te: 'నెమలి ఈక (peacock feather)', en: 'Peacock feather' },
       { icon: 'food-variant', te: 'నైవేద్యం: అటుకులు, పానకం, పాయసం, లడ్డు', en: 'Naivedya: Atukulu, Panakam, Payasam, Laddu' },
     ],

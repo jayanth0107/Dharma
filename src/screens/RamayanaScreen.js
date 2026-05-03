@@ -36,11 +36,15 @@ export function RamayanaScreen() {
   const storyLh = usePick({ default: 28, md: 30, xl: 34 });
 
   const buildShareText = (ep) => {
-    return `🙏 *ధర్మ — రామాయణం*\n\n` +
-      `📖 ${ep.kanda.te} — ${t(ep.title.te, ep.title.en)}\n\n` +
-      `${ep.story.te}\n\n` +
-      `💡 *నీతి:* ${ep.moral.te}\n\n` +
-      `🤔 *తెలుసా?* ${ep.didYouKnow.te}\n\n` +
+    const isEn = lang === 'en';
+    const L = isEn
+      ? { hdr: 'Dharma — Ramayana',  moral: 'Moral',  trivia: 'Did you know?' }
+      : { hdr: 'ధర్మ — రామాయణం',     moral: 'నీతి',    trivia: 'తెలుసా?'      };
+    return `🙏 *${L.hdr}*\n\n` +
+      `📖 ${t(ep.kanda.te, ep.kanda.en)} — ${t(ep.title.te, ep.title.en)}\n\n` +
+      `${t(ep.story.te, ep.story.en)}\n\n` +
+      `💡 *${L.moral}:* ${t(ep.moral.te, ep.moral.en)}\n\n` +
+      `🤔 *${L.trivia}* ${t(ep.didYouKnow.te, ep.didYouKnow.en)}\n\n` +
       `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
   };
 
@@ -80,9 +84,11 @@ export function RamayanaScreen() {
 
       {/* Did You Know */}
       <View style={s.dykBox}>
-        <MaterialCommunityIcons name="help-circle" size={16} color={DarkColors.saffron} />
-        <Text style={s.dykLabel}>{t('తెలుసా?', 'Did you know?')}</Text>
-        <Text style={s.dykText}>{t(ep.didYouKnow.te, ep.didYouKnow.en)}</Text>
+        <MaterialCommunityIcons name="help-circle" size={18} color={DarkColors.saffron} style={s.dykIcon} />
+        <View style={s.dykContent}>
+          <Text style={s.dykLabel}>{t('తెలుసా?', 'Did you know?')}</Text>
+          <Text style={s.dykText}>{t(ep.didYouKnow.te, ep.didYouKnow.en)}</Text>
+        </View>
       </View>
 
       {/* Characters */}
@@ -106,7 +112,7 @@ export function RamayanaScreen() {
         <View style={s.header}>
           <MaterialCommunityIcons name="bow-arrow" size={28} color={DarkColors.saffron} />
           <Text style={s.headerTitle}>{t('రామాయణం — నేటి ఎపిసోడ్', 'Ramayana — Today\'s Episode')}</Text>
-          <Text style={s.headerSub}>{t('ప్రతి రోజు ఒక కథ — 30 రోజుల్లో రామాయణం', 'One story every day — Ramayana in 30 days')}</Text>
+          <Text style={s.headerSub}>{t('ప్రతి రోజు ఒక ఘట్టం — 30 రోజుల్లో రామాయణం', 'One episode every day — Ramayana in 30 days')}</Text>
         </View>
 
         {/* Telugu voice not available note */}
@@ -129,7 +135,7 @@ export function RamayanaScreen() {
 
         {showAll && RAMAYANA_EPISODES.filter(e => e.id !== episode.id).map(ep => renderEpisode(ep, false))}
 
-        <SacredContentDisclaimer />
+        <SacredContentDisclaimer source="ramayana" />
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
@@ -142,26 +148,26 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '900', color: DarkColors.saffron, textAlign: 'center' },
-  headerSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.saffron, textAlign: 'center' },
+  headerSub: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 22 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   cardToday: { borderColor: DarkColors.borderGold, borderWidth: 1.5 },
-  kandaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  kandaBadge: { backgroundColor: 'rgba(232,117,26,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  kandaText: { fontSize: 12, fontWeight: '800', color: DarkColors.saffron },
-  episodeNum: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted },
-  todayBadge: { backgroundColor: DarkColors.gold, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  todayText: { fontSize: 10, fontWeight: '800', color: '#0A0A0A' },
+  kandaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  kandaBadge: { backgroundColor: 'rgba(232,117,26,0.15)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  kandaText: { fontSize: 14, fontWeight: '700', color: DarkColors.saffron },
+  episodeNum: { fontSize: 14, fontWeight: '700', color: DarkColors.silverLight },
+  todayBadge: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  todayText: { fontSize: 12, fontWeight: '700', color: '#0A0A0A', letterSpacing: 0.3 },
   speakerBtn: {
     marginLeft: 'auto', width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(212,160,23,0.1)', borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   speakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
-  title: { fontSize: 20, fontWeight: '900', color: '#FFFFFF', marginBottom: 12, lineHeight: 30 },
+  title: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginBottom: 12, lineHeight: 30 },
   story: { fontSize: 16, fontWeight: '500', color: DarkColors.silver, lineHeight: 28, marginBottom: 14 },
   moralBox: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
@@ -169,14 +175,26 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   moralText: { flex: 1, fontSize: 14, fontWeight: '700', color: DarkColors.gold, lineHeight: 22 },
+  // "Did you know?" — same row layout as the Moral box above so the
+  // two callouts read consistently. The icon sits on the left, label
+  // and text stack in their own column on the right.
   dykBox: {
-    backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 10, padding: 10, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(232,117,26,0.2)',
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 12, padding: 12, marginBottom: 10,
+    borderWidth: 1, borderColor: 'rgba(232,117,26,0.25)',
   },
-  dykLabel: { fontSize: 12, fontWeight: '800', color: DarkColors.saffron, marginBottom: 4, marginLeft: 24 },
-  dykText: { fontSize: 13, fontWeight: '500', color: DarkColors.silver, lineHeight: 20, marginLeft: 24 },
-  charRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  charText: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted },
+  dykIcon: { marginTop: 1 },
+  dykContent: { flex: 1 },
+  dykLabel: {
+    fontSize: 13, fontWeight: '600', color: DarkColors.saffron,
+    marginBottom: 4, letterSpacing: 0.3, textTransform: 'uppercase',
+  },
+  dykText: {
+    fontSize: 14, fontWeight: '500', color: DarkColors.silver,
+    lineHeight: 22,
+  },
+  charRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  charText: { fontSize: 14, fontWeight: '600', color: DarkColors.silverLight },
   browseBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 14, marginVertical: 8,

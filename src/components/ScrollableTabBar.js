@@ -21,6 +21,12 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
   const pillLayouts = useRef({});
   const { width: screenW } = useWindow();
 
+  // Drag-vs-tap discriminator. Implemented at the DOM level on web —
+  // we swallow the synthetic click in capture phase if the pointer
+  // moved beyond DRAG_THRESHOLD between pointerdown and pointerup.
+  // (React-state approach lost the race against onPress.)
+  const DRAG_THRESHOLD = 5;
+
   // Responsive sizing — bigger pills on tablets, tighter on tiny phones.
   const pillPadH    = usePick({ default: 10, sm: 10, md: 14, lg: 16, xl: 20 });
   const pillPadV    = usePick({ default: 6,  sm: 6,  md: 8,  lg: 10, xl: 12 });
@@ -40,21 +46,61 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
     scrollRef.current.scrollTo({ x: targetX, animated: true });
   }, [activeRouteName, screenW]);
 
-  // Enable mouse wheel horizontal scrolling on web
+  // Wheel-scroll + DOM-level drag-vs-tap suppression (see TopTabBar.js
+  // for the same pattern + commentary).
   const onScrollViewRef = useCallback((node) => {
     scrollRef.current = node;
     if (Platform.OS === 'web' && node) {
-      // Get the inner DOM node for wheel event
-      const inner = node.getInnerViewNode?.() || node.getScrollableNode?.();
-      const el = inner || (node._nativeTag ? undefined : node);
+      // Resolve the underlying DOM node defensively (see TopTabBar.js
+      // for the same pattern). getInnerViewNode / getScrollableNode are
+      // deprecated in react-native-web — fall back gracefully if they
+      // disappear in a future release.
+      let el = null;
+      try {
+        const inner = (typeof node.getInnerViewNode === 'function' && node.getInnerViewNode())
+                   || (typeof node.getScrollableNode === 'function' && node.getScrollableNode())
+                   || null;
+        el = inner || (node._nativeTag ? null : node);
+      } catch {
+        el = null;
+      }
       if (el && el.addEventListener && !scrollNodeRef.current) {
         scrollNodeRef.current = el;
+
         el.addEventListener('wheel', (e) => {
           if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
             e.preventDefault();
             el.scrollLeft += e.deltaY;
           }
         }, { passive: false });
+
+        let pointerDownX = null;
+        let dragged = false;
+        let suppressUntil = 0;
+
+        el.addEventListener('pointerdown', (e) => {
+          pointerDownX = e.clientX;
+          dragged = false;
+        }, true);
+        el.addEventListener('pointermove', (e) => {
+          if (pointerDownX != null && Math.abs(e.clientX - pointerDownX) > DRAG_THRESHOLD) {
+            dragged = true;
+          }
+        }, true);
+        const endPointer = () => {
+          if (dragged) suppressUntil = Date.now() + 350;
+          pointerDownX = null;
+        };
+        el.addEventListener('pointerup', endPointer, true);
+        el.addEventListener('pointercancel', endPointer, true);
+
+        el.addEventListener('click', (e) => {
+          if (Date.now() < suppressUntil) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
       }
     }
   }, []);
@@ -83,6 +129,8 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
                 }
               }}
               onPress={() => {
+                // Drag suppression handled in DOM capture phase
+                // (see onScrollViewRef).
                 if (section.params) {
                   navigation.navigate(section.name, { ...section.params, _ts: Date.now() });
                 } else {
@@ -151,6 +199,6 @@ const s = StyleSheet.create({
   },
   labelActive: {
     color: DarkColors.gold,
-    fontWeight: '800',
+    fontWeight: '600',
   },
 });

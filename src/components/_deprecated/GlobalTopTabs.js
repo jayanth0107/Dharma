@@ -83,6 +83,6 @@ const s = StyleSheet.create({
   },
   tabTextActive: {
     color: DarkColors.textPrimary,
-    fontWeight: '800',
+    fontWeight: '600',
   },
 });

@@ -64,12 +64,19 @@ export function LocationPickerModal({ forceOpen, onDone }) {
 
   const handleSelectLocation = (item) => {
     origSelectLocation(item);
-    if (onDone) setTimeout(() => onDone(), 100);
+    // origSelectLocation enqueues a setState in the AppContext reducer.
+    // React 18 batches it, so by the next microtask the new location
+    // is committed; calling onDone synchronously after is safe.
+    if (onDone) onDone();
   };
 
   const handleRedetectLocation = () => {
     origRedetect();
-    if (onDone) setTimeout(() => onDone(), 500);
+    // GPS redetect is async (waits on the OS); the parent context
+    // shows its own "Detecting…" state. We close the picker
+    // immediately so the user sees the parent screen update in real
+    // time rather than a frozen modal for 500 ms.
+    if (onDone) onDone();
   };
 
   const innerContent = (
@@ -79,6 +86,8 @@ export function LocationPickerModal({ forceOpen, onDone }) {
               <TouchableOpacity
                 style={[s.backBtn, { width: closeXBtnSize, height: closeXBtnSize, borderRadius: closeXBtnSize / 2 }]}
                 onPress={closeModal}
+                hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                accessibilityLabel="Back"
               >
                 <Ionicons name="arrow-back" size={closeXSize} color={DarkColors.gold} />
               </TouchableOpacity>
@@ -90,6 +99,8 @@ export function LocationPickerModal({ forceOpen, onDone }) {
               <TouchableOpacity
                 style={[s.closeX, { width: closeXBtnSize, height: closeXBtnSize, borderRadius: closeXBtnSize / 2 }]}
                 onPress={closeModal}
+                hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                accessibilityLabel="Close"
               >
                 <Ionicons name="close" size={closeXSize} color={DarkColors.gold} />
               </TouchableOpacity>
@@ -145,20 +156,22 @@ export function LocationPickerModal({ forceOpen, onDone }) {
           {locationSearchResults.length > 0 ? (
             <FlatList
               data={locationSearchResults}
-              keyExtractor={(item, i) => `search-${item.latitude}-${item.longitude}-${i}`}
+              keyExtractor={(item, i) => `search-${item.placeId || ''}|${item.latitude}|${item.longitude}|${i}`}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[s.locationItem, { paddingVertical: locationItemPadV, paddingHorizontal: locationItemPadH }]}
                   onPress={() => handleSelectLocation(item)}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={[s.locationName, { fontSize: locationNameSize }]}>{item.name}</Text>
-                    <Text style={[s.locationSub, { fontSize: locationSubSize }]}>{item.displayName}</Text>
+                    <Text style={[s.locationName, { fontSize: locationNameSize }]} numberOfLines={1}>{item.name}</Text>
+                    <Text style={[s.locationSub, { fontSize: locationSubSize }]} numberOfLines={2}>{item.displayName}</Text>
                   </View>
                   <MaterialCommunityIcons name="map-marker-outline" size={mapMarkerSize} color={DarkColors.textMuted} />
                 </TouchableOpacity>
               )}
               style={{ maxHeight: searchResultsMaxH }}
+              keyboardShouldPersistTaps="handled"
+              removeClippedSubviews={false}
             />
           ) : locationSearchQuery.length >= 2 && !locationSearching ? (
             <Text style={[s.noResults, { fontSize: noResultsSize }]}>{t(TR.noResults.te, TR.noResults.en)}</Text>
@@ -237,7 +250,7 @@ const s = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   content: { backgroundColor: DarkColors.bgElevated, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '70%', paddingBottom: 20 },
   header: { alignItems: 'center', borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, position: 'relative' },
-  title: { fontWeight: '800', color: DarkColors.textPrimary },
+  title: { fontWeight: '600', color: DarkColors.textPrimary },
   subtitle: { color: DarkColors.textMuted, marginTop: 4 },
   closeX: {
     position: 'absolute', top: 14, right: 16, zIndex: 10,

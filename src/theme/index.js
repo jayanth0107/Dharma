@@ -8,7 +8,7 @@
 //   const styles = StyleSheet.create({ title: { ...Type.h2, color: Theme.colors.gold } });
 
 import { DarkColors, DarkGradients, Colors as LightColors, Gradients as LightGradients } from './colors';
-import { Type, FontSizes, FontWeights, LineHeights, LetterSpacing } from './typography';
+import { Type, FontSizes, FontWeights, FontFamilies, LineHeights, LetterSpacing } from './typography';
 import { Spacing, Radius, Shadow } from './spacing';
 import {
   Breakpoints, useWindow, useColumns, useIsAtLeast, usePick,
@@ -17,7 +17,7 @@ import {
 
 // Export everything individually so callers can pick what they need
 export { DarkColors, DarkGradients, LightColors, LightGradients };
-export { Type, FontSizes, FontWeights, LineHeights, LetterSpacing };
+export { Type, FontSizes, FontWeights, FontFamilies, LineHeights, LetterSpacing };
 export { Spacing, Radius, Shadow };
 export { Breakpoints, useWindow, useColumns, useIsAtLeast, usePick, WEB_MAX_WIDTH, IS_WEB };
 
@@ -28,6 +28,7 @@ export const Theme = {
   type:      Type,
   fontSize:  FontSizes,
   weight:    FontWeights,
+  family:    FontFamilies,
   space:     Spacing,
   radius:    Radius,
   shadow:    Shadow,

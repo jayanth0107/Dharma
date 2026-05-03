@@ -109,14 +109,13 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
-          {/* Header */}
-          <View style={s.header}>
-            <TouchableOpacity style={s.closeX} onPress={onClose}>
+          {/* Header — close icon only. The screen-level PageHeader
+              already shows the "Settings" title above this modal, so the
+              cog + bilingual subtitle were redundant. */}
+          <View style={s.headerCloseOnly}>
+            <TouchableOpacity style={s.closeX} onPress={onClose} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }} accessibilityLabel={t('మూసివేయండి', 'Close')}>
               <Ionicons name="close" size={24} color={DarkColors.gold} />
             </TouchableOpacity>
-            <MaterialCommunityIcons name="cog" size={headerIconSize} color={DarkColors.gold} />
-            <Text style={[s.title, { fontSize: titleSize }]}>{t(TR.settings.te, TR.settings.en)}</Text>
-            <Text style={s.subtitle}>{t(TR.settings.en, TR.settings.te)}</Text>
           </View>
 
           <ScrollView style={[s.body, { paddingHorizontal: bodyPadH }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -303,19 +302,19 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                         {/* Stats summary */}
                         <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, marginBottom: 10 }}>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: DarkColors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '700', color: DarkColors.tulasiGreen }}>₹{cloudStats.totalRevenue}</Text>
                             <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.totalRevenue.te, TR.totalRevenue.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: '#9B6FCF' }}>{cloudStats.uniqueDevices}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '700', color: '#9B6FCF' }}>{cloudStats.uniqueDevices}</Text>
                             <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.devicesLabel.te, TR.devicesLabel.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: DarkColors.saffron }}>{cloudStats.purchases}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '700', color: DarkColors.saffron }}>{cloudStats.purchases}</Text>
                             <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.purchasesLabel.te, TR.purchasesLabel.en)}</Text>
                           </View>
                           <View style={{ alignItems: 'center' }}>
-                            <Text style={{ fontSize: cloudStatSize, fontWeight: '900', color: DarkColors.gold }}>{cloudStats.trials}</Text>
+                            <Text style={{ fontSize: cloudStatSize, fontWeight: '700', color: DarkColors.gold }}>{cloudStats.trials}</Text>
                             <Text style={{ fontSize: paymentSmallSize - 1, color: DarkColors.textMuted }}>{t(TR.trialsLabel.te, TR.trialsLabel.en)}</Text>
                           </View>
                         </View>
@@ -370,15 +369,15 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     {/* Headline numbers */}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard }}>
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: DarkColors.gold }}>{analyticsSummary.totalSessions}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: DarkColors.gold }}>{analyticsSummary.totalSessions}</Text>
                         <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600' }}>{t('సెషన్లు', 'Sessions')}</Text>
                       </View>
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: DarkColors.gold }}>{analyticsSummary.totalEvents}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: DarkColors.gold }}>{analyticsSummary.totalEvents}</Text>
                         <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600' }}>{t('ఈవెంట్లు', 'Events')}</Text>
                       </View>
                       <View style={{ alignItems: 'center' }}>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: DarkColors.gold }}>{analyticsSummary.activeDays}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: DarkColors.gold }}>{analyticsSummary.activeDays}</Text>
                         <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600' }}>{t('సక్రియ రోజులు', 'Active Days')}</Text>
                       </View>
                     </View>
@@ -386,7 +385,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     {/* Top events — what users actually do */}
                     {analyticsSummary.topEvents.length > 0 && (
                       <View style={{ marginTop: 12 }}>
-                        <Text style={{ fontSize: 13, fontWeight: '800', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
                           {t('అత్యధికంగా వాడిన ఫీచర్లు', 'Top Features')}
                         </Text>
                         {analyticsSummary.topEvents.slice(0, 8).map(([name, count], i) => {
@@ -396,7 +395,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                             <View key={i} style={{ marginBottom: 6 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
                                 <Text style={{ fontSize: 12, color: DarkColors.silver, fontWeight: '600' }} numberOfLines={1}>{name}</Text>
-                                <Text style={{ fontSize: 12, color: DarkColors.gold, fontWeight: '800' }}>{count}</Text>
+                                <Text style={{ fontSize: 12, color: DarkColors.gold, fontWeight: '600' }}>{count}</Text>
                               </View>
                               <View style={{ height: 4, backgroundColor: DarkColors.bgCard, borderRadius: 2, overflow: 'hidden' }}>
                                 <View style={{ width: `${pct}%`, height: 4, backgroundColor: DarkColors.gold, borderRadius: 2 }} />
@@ -410,7 +409,7 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     {/* Last 7 days — daily-open bar chart */}
                     {analyticsSummary.last7Days && (
                       <View style={{ marginTop: 16 }}>
-                        <Text style={{ fontSize: 13, fontWeight: '800', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
                           {t('గత 7 రోజులు', 'Last 7 Days')}
                         </Text>
                         <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 60, gap: 4 }}>
@@ -528,23 +527,24 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '90%',
   },
-  header: {
-    alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20,
-    backgroundColor: DarkColors.bgElevated, borderBottomWidth: 1, borderBottomColor: 'rgba(212,160,23,0.2)',
-    position: 'relative',
+  // Slim close-only header — replaces the old icon + title block.
+  headerCloseOnly: {
+    flexDirection: 'row', justifyContent: 'flex-end',
+    paddingTop: 8, paddingHorizontal: 12,
   },
   closeX: {
-    position: 'absolute', top: 12, right: 16, zIndex: 10,
-    width: 36, height: 36, borderRadius: 18, backgroundColor: DarkColors.bgCard,
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: DarkColors.bgCard,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
     alignItems: 'center', justifyContent: 'center',
   },
-  title: { fontSize: 22, fontWeight: '800', color: DarkColors.gold, marginTop: 6 },
+  title: { fontSize: 22, fontWeight: '600', color: DarkColors.gold, marginTop: 6 },
   subtitle: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
 
   body: { paddingHorizontal: 20, paddingTop: 16 },
 
   sectionTitle: {
-    fontSize: 16, fontWeight: '800', color: DarkColors.textPrimary,
+    fontSize: 16, fontWeight: '600', color: DarkColors.textPrimary,
     marginBottom: 12, letterSpacing: 0.5,
   },
 
@@ -567,8 +567,8 @@ const s = StyleSheet.create({
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: DarkColors.saffron, alignItems: 'center', justifyContent: 'center',
   },
-  timeBtnText: { fontSize: 18, fontWeight: '800', color: '#fff' },
-  timeValue: { fontSize: 18, fontWeight: '800', color: DarkColors.textPrimary, minWidth: 50, textAlign: 'center' },
+  timeBtnText: { fontSize: 18, fontWeight: '600', color: '#fff' },
+  timeValue: { fontSize: 18, fontWeight: '600', color: DarkColors.textPrimary, minWidth: 50, textAlign: 'center' },
 
   infoRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -587,7 +587,7 @@ const s = StyleSheet.create({
     borderRadius: 14, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   adminTitle: {
-    fontSize: 15, fontWeight: '800', color: DarkColors.textPrimary, marginBottom: 12,
+    fontSize: 15, fontWeight: '600', color: DarkColors.textPrimary, marginBottom: 12,
   },
   adminInput: {
     backgroundColor: DarkColors.bgCard, borderRadius: 10, padding: 12,

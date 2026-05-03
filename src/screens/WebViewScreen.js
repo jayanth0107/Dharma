@@ -110,11 +110,11 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 14, padding: 16, marginBottom: 12,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  heading: { fontSize: 17, fontWeight: '800', color: DarkColors.gold, marginBottom: 8 },
+  heading: { fontSize: 17, fontWeight: '600', color: DarkColors.gold, marginBottom: 8 },
   text: { fontSize: 14, color: DarkColors.textSecondary, lineHeight: 22 },
   actionBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     backgroundColor: DarkColors.saffron, borderRadius: 14, paddingVertical: 16, marginTop: 8,
   },
-  actionBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  actionBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
 });

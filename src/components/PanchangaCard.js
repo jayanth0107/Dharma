@@ -32,7 +32,7 @@ export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel
   const cardWidth = usePick({ default: '48%', lg: '31%', xl: '23%' });
   const labelSize = usePick({ default: 13, lg: 14, xl: 15 });
   const valueSize = usePick({ default: 20, lg: 22, xl: 24 });
-  const subSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const subSize = usePick({ default: 15, lg: 16, xl: 17 });
   const iconSize = usePick({ default: 16, lg: 18, xl: 20 });
 
   return (
@@ -46,7 +46,7 @@ export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel
         <Text style={styles.englishValue}>{englishValue}</Text>
       )}
       {sublabel && (
-        <Text style={[styles.sublabel, { fontSize: subSize - 1 }]}>{sublabel}</Text>
+        <Text style={[styles.sublabel, { fontSize: subSize, lineHeight: subSize + 6 }]}>{sublabel}</Text>
       )}
     </View>
   );
@@ -61,26 +61,23 @@ const TIMING_DESCRIPTIONS = {
 export function TimingCard({ icon, label, startTime, endTime, isActive, accentColor, iconName, isAuspicious }) {
   const color = accentColor || DarkColors.kumkum;
   const info = TIMING_DESCRIPTIONS[label] || {};
-  const labelSize = usePick({ default: 16, lg: 18, xl: 20 });
-  const timeSize = usePick({ default: 16, lg: 18, xl: 20 });
-  const descSize = usePick({ default: 13, lg: 14, xl: 15 });
-  const iconSz = usePick({ default: 20, lg: 22, xl: 24 });
+  const labelSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const timeSize = usePick({ default: 17, lg: 19, xl: 21 });
+  const descSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const iconSz = usePick({ default: 22, lg: 24, xl: 26 });
 
   return (
     <View style={[
       styles.timingCard,
-      { borderColor: color + '25', borderLeftColor: color },
-      isActive && styles.timingCardActive,
+      { borderLeftColor: color, borderLeftWidth: 4 },
+      isActive && [styles.timingCardActive, { borderColor: color }],
     ]}>
-      <LinearGradient
-        colors={[color + '08', color + '04']}
-        style={styles.timingGradient}
-      >
+      <View style={styles.timingInner}>
         <View style={styles.timingTopRow}>
           {iconName ? (
-            <MaterialCommunityIcons name={iconName} size={iconSz} color={color} style={{ marginRight: 10 }} />
+            <MaterialCommunityIcons name={iconName} size={iconSz} color={color} style={{ marginRight: 12 }} />
           ) : (
-            <Text style={{ fontSize: iconSz - 2, marginRight: 10 }}>{icon}</Text>
+            <Text style={{ fontSize: iconSz - 2, marginRight: 12 }}>{icon}</Text>
           )}
           <View style={{ flex: 1 }}>
             <Text style={[styles.timingLabel, { color, fontSize: labelSize }]}>{label}</Text>
@@ -93,32 +90,32 @@ export function TimingCard({ icon, label, startTime, endTime, isActive, accentCo
           )}
         </View>
         <View style={styles.timingTimeRow}>
-          <MaterialCommunityIcons name="clock-alert-outline" size={15} color={color} style={{ marginRight: 6, opacity: 0.6 }} />
+          <MaterialCommunityIcons name="clock-outline" size={16} color={color} style={{ marginRight: 8 }} />
           <Text style={[styles.timingValue, { color, fontSize: timeSize }]}>
             {startTime}  —  {endTime}
           </Text>
         </View>
         {info.desc ? <Text style={[styles.timingDesc, { fontSize: descSize }]}>{info.desc}</Text> : null}
-      </LinearGradient>
+      </View>
     </View>
   );
 }
 
 export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
-  const bgColors = isAuspicious
-    ? ['rgba(212,160,23,0.06)', 'rgba(212,160,23,0.02)']
-    : ['rgba(232,117,26,0.06)', 'rgba(232,117,26,0.02)'];
-  const borderColor = isAuspicious ? 'rgba(212,160,23,0.2)' : 'rgba(232,117,26,0.15)';
   const iconColor = isAuspicious ? DarkColors.gold : DarkColors.saffron;
   const iconName = isAuspicious ? 'check-decagram' : 'close-octagon-outline';
-  const nameSize = usePick({ default: 16, lg: 18, xl: 20 });
-  const timeSize = usePick({ default: 16, lg: 18, xl: 20 });
+  const nameSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const timeSize = usePick({ default: 17, lg: 19, xl: 21 });
 
   return (
-    <View style={[styles.muhurthamCard, { borderColor }, isActive && styles.muhurthamCardActive]}>
-      <LinearGradient colors={bgColors} style={styles.muhurthamGradient}>
+    <View style={[
+      styles.muhurthamCard,
+      { borderLeftColor: iconColor, borderLeftWidth: 4 },
+      isActive && [styles.muhurthamCardActive, { borderColor: iconColor }],
+    ]}>
+      <View style={styles.muhurthamInner}>
         <View style={styles.muhurthamTopRow}>
-          <MaterialCommunityIcons name={iconName} size={20} color={iconColor} style={{ marginRight: 10 }} />
+          <MaterialCommunityIcons name={iconName} size={22} color={iconColor} style={{ marginRight: 12 }} />
           <View style={{ flex: 1 }}>
             <Text style={[styles.muhurthamName, { color: iconColor, fontSize: nameSize }]}>{muhurtham.telugu}</Text>
             <Text style={styles.muhurthamEnglish}>{muhurtham.english}</Text>
@@ -130,13 +127,13 @@ export function MuhurthamCard({ muhurtham, isActive, isAuspicious }) {
           )}
         </View>
         <View style={styles.muhurthamTimeRow}>
-          <MaterialCommunityIcons name="clock-outline" size={15} color={iconColor} style={{ marginRight: 6, opacity: 0.6 }} />
+          <MaterialCommunityIcons name="clock-outline" size={16} color={iconColor} style={{ marginRight: 8 }} />
           <Text style={[styles.muhurthamTime, { color: iconColor, fontSize: timeSize }]}>
             {muhurtham.startFormatted}  —  {muhurtham.endFormatted}
           </Text>
         </View>
-      </LinearGradient>
-      {muhurtham.description ? <Text style={styles.muhurthamDesc}>{muhurtham.description}</Text> : null}
+        {muhurtham.description ? <Text style={styles.muhurthamDesc}>{muhurtham.description}</Text> : null}
+      </View>
     </View>
   );
 }
@@ -145,8 +142,8 @@ export function SlokaCard({ sloka }) {
   const { lang, t } = useLanguage();
   const { isSpeaking, toggle: toggleSpeak, speakerIcon, isAvailable } = useSpeaker();
   if (!sloka) return null;
-  const slokaSize = usePick({ default: 16, lg: 18, xl: 20 });
-  const meaningSize = usePick({ default: 13, lg: 14, xl: 15 });
+  const slokaSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const meaningSize = usePick({ default: 15, lg: 16, xl: 17 });
   const padV = usePick({ default: 20, lg: 26, xl: 32 });
 
   return (
@@ -193,86 +190,73 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 6,
   },
-  cardLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: DarkColors.textMuted,
-    letterSpacing: 0.5,
-  },
-  teluguValue: {
-    ...Type.teluguDisplay,
-    fontSize: 20,
-    lineHeight: 26,
-    color: DarkColors.textPrimary,
-    marginBottom: 3,
-  },
-  englishValue: {
-    ...Type.label,
-    color: DarkColors.textSecondary,
-    fontWeight: '600',
-  },
+  // All sizes pulled from Type tokens — bumped after tester said
+  // "tithi, nakshatram, yogam, karanam are all small in mee panchangam".
+  // Label was 13 → 15 (via dataLabel rebump in typography.js); the
+  // headline value goes from h3 (22) → h2 (24) so each panchanga card
+  // reads at the same visual weight as a screen heading.
+  cardLabel:    { ...Type.dataLabel,  color: DarkColors.textMuted },
+  teluguValue:  { ...Type.h2, fontWeight: '500', color: DarkColors.textPrimary, marginBottom: 3 },
+  englishValue: { ...Type.dataValueLg, color: DarkColors.textSecondary },
   sublabel: {
     ...Type.body,
-    color: DarkColors.textMuted,
-    marginTop: 4,
-    fontStyle: 'italic',
+    color: DarkColors.silverLight,
+    fontWeight: '500',
+    marginTop: 6,
   },
 
-  // Timing Card — clean layout
+  // Timing Card — flat (no gradient bg). Strong colored left bar +
+  // hairline border tells you what kind of timing it is. The previous
+  // tinted gradient muddied the gold/saffron text.
   timingCard: {
     marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: DarkColors.borderCard,
+    backgroundColor: 'transparent',
+    borderRadius: 8,
+    borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1,
+    borderColor: DarkColors.borderCard,
   },
-  timingGradient: {
-    paddingVertical: 12,
+  timingInner: {
+    paddingVertical: 14,
+    paddingHorizontal: 14,
   },
   timingTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  timingEnglish: {
-    ...Type.body,
-    color: DarkColors.textSecondary,
-    fontWeight: '600',
-    marginTop: 2,
-  },
+  timingEnglish: { fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, marginTop: 3 },
   timingTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: 10,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: DarkColors.borderCard,
-    marginLeft: 30,
+    marginLeft: 34,
   },
   timingDesc: {
-    ...Type.body,
-    color: DarkColors.textSecondary,
-    fontStyle: 'italic',
-    marginTop: 6,
-    marginLeft: 30,
+    fontSize: 15,
+    fontWeight: '500',
+    color: DarkColors.silverLight,
+    marginTop: 10,
+    marginLeft: 34,
+    lineHeight: 22,
   },
-  timingCardActive: {},
-  timingLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  timingValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
+  timingCardActive: { borderWidth: 1.5 },
+  timingLabel: { fontWeight: '700', letterSpacing: 0.3 },
+  timingValue: { fontWeight: '600', letterSpacing: 0.5 },
 
-  // Muhurtham Card — clean
+  // Muhurtham Card — flat, same pattern as TimingCard.
   muhurthamCard: {
     marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: DarkColors.borderCard,
+    backgroundColor: 'transparent',
+    borderRadius: 8,
+    borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1,
+    borderColor: DarkColors.borderCard,
   },
-  muhurthamCardActive: {},
-  muhurthamGradient: {
-    paddingVertical: 12,
+  muhurthamCardActive: { borderWidth: 1.5 },
+  muhurthamInner: {
+    paddingVertical: 14,
+    paddingHorizontal: 14,
   },
   muhurthamTopRow: {
     flexDirection: 'row',
@@ -281,45 +265,34 @@ const styles = StyleSheet.create({
   muhurthamTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: 10,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: DarkColors.borderCard,
-    marginLeft: 30,
+    marginLeft: 34,
   },
-  muhurthamName: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  muhurthamEnglish: {
-    fontSize: 13,
-    color: DarkColors.textMuted,
-    fontWeight: '500',
-    marginTop: 1,
-  },
-  muhurthamTime: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
+  muhurthamName:    { fontWeight: '700', letterSpacing: 0.3 },
+  muhurthamEnglish: { fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, marginTop: 3 },
+  muhurthamTime:    { fontWeight: '600', letterSpacing: 0.5 },
   muhurthamDesc: {
-    fontSize: 14,
-    color: DarkColors.textMuted,
-    fontStyle: 'italic',
-    paddingHorizontal: 14,
-    paddingBottom: 10,
-    lineHeight: 20,
+    fontSize: 15,
+    fontWeight: '500',
+    color: DarkColors.silverLight,
+    marginTop: 10,
+    marginLeft: 34,
+    lineHeight: 22,
   },
   activeBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 8,
     marginTop: 4,
   },
   activeBadgeText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: '700',
-    color: DarkColors.textPrimary,
+    color: '#0A0A0A',
+    letterSpacing: 0.3,
   },
 
   // Sloka Card — clean
@@ -338,16 +311,16 @@ const styles = StyleSheet.create({
   },
   slokaDeity: {
     color: DarkColors.goldShimmer,
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '600',
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
   slokaText: {
     color: DarkColors.textPrimary,
-    fontSize: 16,
-    lineHeight: 28,
+    fontSize: 18,
+    lineHeight: 30,
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -360,8 +333,8 @@ const styles = StyleSheet.create({
   },
   slokaMeaning: {
     color: DarkColors.textSecondary,
-    fontSize: 13,
-    lineHeight: 22,
+    fontSize: 15,
+    lineHeight: 24,
     textAlign: 'center',
     fontStyle: 'italic',
   },

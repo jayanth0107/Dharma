@@ -13,6 +13,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
+import { FontFamilies } from '../theme/typography';
 import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
 import { LOCATIONS } from '../utils/panchangamCalculator';
@@ -28,18 +29,42 @@ import { recordDailyOpen } from '../utils/streakService';
 import { useAuth } from '../context/AuthContext';
 import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappShare';
 
-// Slim divider between Home tile groups: gold rule + a small badge
-// containing an icon and a single-word category label. Keeps the
-// grouping cue visible (testers confused by icon-only) while still
-// taking far less space than the original 28-px text headers.
+// Divider between Home tile groups: gold rule + a clear pill badge with
+// the category icon and label. v2 (May 2026) — bumped icon 13→18, label
+// 12→15, badge padding 4/10→7/14 after tester reported "dividers are
+// too small to read at arm's length". Still slim vertically (one line),
+// but unambiguously legible now.
 function SectionDivider({ icon, te, en }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const labelSize = lang === 'te' ? 17 : 15;
+  const iconSize = labelSize + 4;
+  // Why this combo of styles works for alignment:
+  //   1. Both glyphs in a flex row with alignItems:'center'
+  //   2. Text gets explicit lineHeight = iconSize so its box height
+  //      EXACTLY matches the icon's render box. Same heights → flex
+  //      centers them on the same horizontal line.
+  //   3. transform: translateY pushes the text glyph down ~1.5 px to
+  //      compensate for baseline-anchoring (Latin/Telugu glyphs sit
+  //      slightly above the geometric center of their line box because
+  //      descent area is unused for x-height letters).
   return (
     <View style={s.sectionDivider}>
       <View style={s.dividerLine} />
       <View style={s.dividerBadge}>
-        <MaterialCommunityIcons name={icon} size={13} color={DarkColors.gold} />
-        <Text style={s.dividerText}>{t(te, en)}</Text>
+        <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.gold} />
+        <Text
+          allowFontScaling={false}
+          style={[
+            s.dividerText,
+            {
+              fontSize: labelSize,
+              lineHeight: iconSize,
+              transform: [{ translateY: 1.5 }],
+            },
+          ]}
+        >
+          {t(te, en)}
+        </Text>
       </View>
       <View style={s.dividerLine} />
     </View>
@@ -85,8 +110,8 @@ export function HomeScreen({ navigation }) {
   const pillPadV      = usePick({ default: 5,  sm: 5,  md: 6,  lg: 7,  xl: 8 });
   const pillIconSz    = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
   const pillTextSize  = usePick({ default: 12, sm: 12, md: 13, lg: 14, xl: 15 });
-  const langDotSize   = usePick({ default: 12, sm: 12, md: 14, lg: 16, xl: 18 });
-  const langFontSize  = usePick({ default: 10, sm: 10, md: 11, lg: 12, xl: 13 });
+  const langDotSize   = usePick({ default: 14, sm: 14, md: 16, lg: 18, xl: 20 });
+  const langFontSize  = usePick({ default: 14, sm: 14, md: 15, lg: 16, xl: 17 });
 
   const openUrl = (url) => {
     if (Platform.OS === 'web') window.open(url, '_blank');
@@ -212,11 +237,11 @@ export function HomeScreen({ navigation }) {
             onPress={toggleLang}
             activeOpacity={0.7}
           >
-            <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>ENG</Text>
+            <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>Eng</Text>
             <View style={[s.langSwitch, { width: langDotSize * 2.4, height: langDotSize + 4 }, lang === 'en' && s.langSwitchEn]}>
               <View style={[s.langDot, { width: langDotSize, height: langDotSize, borderRadius: langDotSize / 2 }]} />
             </View>
-            <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తెలు</Text>
+            <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తెలుగు</Text>
           </TouchableOpacity>
         </View>
 
@@ -272,37 +297,47 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="party-popper" label={t('పండుగలు', 'Festivals')}  onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
           <FeatureTile icon="star-circle"  label={t('రాశి', 'Rashi')}        onPress={() => navigation.navigate('DailyRashi')} />
           <FeatureTile icon="gold"         label={t('బంగారం', 'Gold')}        onPress={() => navigation.navigate('Gold')} />
+          <FeatureTile icon="chart-line"   label={t('మార్కెట్', 'Market')}    onPress={() => navigation.navigate('Market')} />
         </FeatureGrid>
 
-        <SectionDivider icon="book-open-page-variant" te="కథలు" en="Stories" />
+        {/* "Ithihaasa" — Sanskrit for "thus it happened" — is the proper
+            classification for Ramayana and Mahabharata (and the Gita
+            within). They are not casual "stories" but historical
+            scripture in the Sanatana tradition. */}
+        <SectionDivider icon="book-open-page-variant" te="ఇతిహాసం" en="Ithihaasa" />
 
-        {/* 2. Sacred Stories */}
+        {/* 2. Ithihaasa — Ramayana, Mahabharata, Gita + Kids retellings +
+            Pramana + Neethi (sutras/aphorisms from itihasa-adjacent texts
+            like Chanakya Niti, Vidura Niti — fits this category better
+            than "Youth" where it lived earlier) */}
         <FeatureGrid>
           <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    onPress={() => navigation.navigate('Ramayana')} />
           <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} onPress={() => navigation.navigate('Mahabharata')} />
           <FeatureTile icon="book-open-page-variant" label={t('గీత', 'Gita')}            onPress={() => navigation.navigate('Gita')} />
+          <FeatureTile icon="script-text"            label={t('నీతి', 'Neethi')}         onPress={() => navigation.navigate('NeethiSukta')} />
           <FeatureTile icon="baby-face-outline"      label={t('పిల్లలు', 'Kids')}        onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
           <FeatureTile icon="shield-star"            label={t('ప్రమాణం', 'Pramana')}     onPress={() => navigation.navigate('Pramana')} />
         </FeatureGrid>
 
         <SectionDivider icon="rocket-launch" te="యువత" en="Youth" />
 
-        {/* 3. Youth & Learning */}
+        {/* 3. Youth & Learning — gained Match (compatibility lookup is
+            a youth-life-stage decision that benefits from being grouped
+            with debate/quiz/sanskrit) */}
         <FeatureGrid>
           <FeatureTile icon="vote"             label={t('చర్చ', 'Debate')}        onPress={() => navigation.navigate('DharmaPoll')} />
           <FeatureTile icon="head-question"    label={t('క్విజ్', 'Quiz')}         onPress={() => navigation.navigate('Quiz')} />
           <FeatureTile icon="alpha-s-circle"   label={t('సంస్కృతం', 'Sanskrit')}   onPress={() => navigation.navigate('SanskritWord')} />
           <FeatureTile icon="account-circle"   label={t('వ్యక్తిత్వం', 'Personality')} onPress={() => navigation.navigate('RashiProfile')} />
-          <FeatureTile icon="script-text"      label={t('నీతి', 'Neethi')}         onPress={() => navigation.navigate('NeethiSukta')} />
+          <FeatureTile icon="heart-multiple"   label={t('పొందిక', 'Match')}        onPress={() => navigation.navigate('Matchmaking')} />
           <FeatureTile icon="zodiac-leo"       label={t('విజ్ఞానం', 'Wisdom')}      onPress={() => navigation.navigate('Astro')} />
         </FeatureGrid>
 
         <SectionDivider icon="account-star" te="జ్యోతిష్యం" en="Astrology" />
 
-        {/* 4. Life Decisions */}
+        {/* 4. Life Decisions — Match moved to Youth */}
         <FeatureGrid>
           <FeatureTile icon="account-star"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
-          <FeatureTile icon="heart-multiple" label={t('పొందిక', 'Match')}     onPress={() => navigation.navigate('Matchmaking')} />
           <FeatureTile icon="calendar-star"  label={t('ముహూర్తం', 'Muhurtam')} onPress={() => navigation.navigate('Muhurtam')} />
           <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family')}    onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
@@ -320,9 +355,8 @@ export function HomeScreen({ navigation }) {
 
         <SectionDivider icon="tools" te="ఉపయుక్త" en="Utility" />
 
-        {/* Utility tail */}
+        {/* Utility tail — Market moved to Daily */}
         <FeatureGrid>
-          <FeatureTile icon="chart-line" label={t('మార్కెట్', 'Market')}    onPress={() => navigation.navigate('Market')} />
           <FeatureTile icon="bell-plus"  label={t('రిమైండర్', 'Reminder')}  onPress={() => navigation.navigate('Reminder')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />
@@ -339,7 +373,7 @@ export function HomeScreen({ navigation }) {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   loading: { flex: 1, backgroundColor: DarkColors.bg, justifyContent: 'center', alignItems: 'center' },
-  loadingTitle: { fontSize: 28, fontWeight: '900', color: DarkColors.gold, marginTop: 16, letterSpacing: 2 },
+  loadingTitle: { fontSize: 28, fontWeight: '700', color: DarkColors.gold, marginTop: 16, letterSpacing: 2 },
   loadingSub: { fontSize: 14, color: DarkColors.saffron, fontWeight: '700', letterSpacing: 3, marginTop: 4 },
 
   // ── Header ──
@@ -372,7 +406,7 @@ const s = StyleSheet.create({
   },
   appTitle: {
     fontSize: 22,                  // base size — auto-shrinks via adjustsFontSizeToFit
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
     letterSpacing: 1.2,
     includeFontPadding: false,
@@ -416,7 +450,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(255,215,0,0.12)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8,
     borderWidth: 1, borderColor: 'rgba(255,215,0,0.25)',
   },
-  premiumPillText: { fontSize: 9, fontWeight: '900', color: DarkColors.gold },
+  premiumPillText: { fontSize: 9, fontWeight: '700', color: DarkColors.gold },
   loginPrompt: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     marginTop: 6, paddingVertical: 5,
@@ -454,7 +488,7 @@ const s = StyleSheet.create({
     fontSize: 11, fontWeight: '700', color: DarkColors.textMuted,
   },
   langLabelActive: {
-    color: DarkColors.saffron, fontWeight: '800',
+    color: DarkColors.saffron, fontWeight: '600',
   },
   langSwitch: {
     width: 32, height: 18, borderRadius: 9,
@@ -497,25 +531,32 @@ const s = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  // Divider between Home tile groups: thin gold rule + a small pill
-  // badge with the category icon and a single-word label.
+  // Divider between Home tile groups. Tight vertical rhythm — testers
+  // wanted to see more tiles per scroll, so we keep a clear section
+  // break without stealing screen real estate from the grid.
   sectionDivider: {
     flexDirection: 'row', alignItems: 'center',
-    marginTop: 12, marginBottom: 6,
+    marginTop: 8, marginBottom: 4,     // tightened further from 14/8
     paddingHorizontal: 4,
   },
   dividerLine: {
-    flex: 1, height: 1, backgroundColor: DarkColors.borderGold,
+    flex: 1, height: 1.5, backgroundColor: DarkColors.borderGold,
   },
   dividerBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
-    backgroundColor: 'rgba(212,160,23,0.10)',
-    borderWidth: 1, borderColor: DarkColors.borderGold,
-    marginHorizontal: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 18,
+    backgroundColor: 'rgba(212,160,23,0.14)',
+    borderWidth: 1.5, borderColor: DarkColors.borderGold,
+    marginHorizontal: 10,
   },
   dividerText: {
-    fontSize: 12, fontWeight: '800', color: DarkColors.gold,
-    letterSpacing: 0.4,
+    fontFamily: FontFamilies.bold, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.3,
+    // Killing both removes the invisible top/bottom padding that RN
+    // adds around glyphs by default, so the Text's box hugs the glyph
+    // tightly and centers properly against the icon.
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
 });

@@ -40,11 +40,11 @@ export function DrawerMenu({ visible, onClose, onAction }) {
   const avatarIconSize = usePick({ default: 44, md: 52, xl: 62 });
   const profileNameSize = usePick({ default: 18, md: 22, xl: 26 });
   const profileSubSize = usePick({ default: 13, md: 15, xl: 17 });
-  const menuItemPaddingV = usePick({ default: 12, md: 15, xl: 18 });
+  const menuItemPaddingV = usePick({ default: 14, md: 16, xl: 20 });
   const menuItemPaddingH = usePick({ default: 16, md: 20, xl: 28 });
-  const menuIconSize = usePick({ default: 20, md: 22, xl: 26 });
-  const menuIconWidth = usePick({ default: 24, md: 28, xl: 34 });
-  const menuLabelSize = usePick({ default: 15, md: 17, xl: 20 });
+  const menuIconSize = usePick({ default: 22, md: 24, xl: 28 });
+  const menuIconWidth = usePick({ default: 28, md: 32, xl: 36 });
+  const menuLabelSize = usePick({ default: 17, md: 19, xl: 22 });
   const chevronSize = usePick({ default: 20, md: 22, xl: 26 });
   const badgeFontSize = usePick({ default: 9, md: 9, xl: 11 });
   const guestBadgeFontSize = usePick({ default: 10, md: 11, xl: 13 });
@@ -215,7 +215,7 @@ const s = StyleSheet.create({
   },
   profileName: {
     fontSize: 22,
-    fontWeight: '900',
+    fontWeight: '700',
     color: DarkColors.gold,
   },
   profileSub: {
@@ -256,7 +256,9 @@ const s = StyleSheet.create({
   menuLabel: {
     ...Type.title,
     fontSize: 17,
+    fontWeight: '600',
     color: DarkColors.textPrimary,
+    letterSpacing: 0.2,
   },
   menuLabelDisabled: { color: DarkColors.textMuted },
   comingSoonBadge: {
@@ -266,7 +268,7 @@ const s = StyleSheet.create({
     marginLeft: 8,
   },
   comingSoonText: {
-    fontSize: 11, fontWeight: '800', color: DarkColors.gold, letterSpacing: 0.4,
+    fontSize: 11, fontWeight: '600', color: DarkColors.gold, letterSpacing: 0.4,
   },
   menuDivider: {
     height: 1,

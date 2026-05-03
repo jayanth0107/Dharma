@@ -239,8 +239,11 @@ function calculateGulikaKalam(dayOfWeek, sunrise, sunset) {
   };
 }
 
-// Telugu year name (Prabhava cycle — 60-year Jovian cycle)
-// Uses known Ugadi dates for accurate year transition
+// Telugu year name (Prabhava cycle — 60-year Jovian cycle).
+// Uses known Ugadi dates for accurate year transition.
+// Returns { te, en } so the consumer can render in either language —
+// English mode showed raw Telugu glyphs ("శ్రీపరాభవ") because the field
+// was a single string.
 function getTeluguYear(date) {
   const teluguYears = [
     'ప్రభవ', 'విభవ', 'శుక్ల', 'ప్రమోదూత', 'ప్రజోత్పత్తి',
@@ -255,6 +258,20 @@ function getTeluguYear(date) {
     'పరిధావి', 'ప్రమాదీచ', 'ఆనంద', 'రాక్షస', 'నల',
     'పింగళ', 'కాళయుక్తి', 'సిద్ధార్థి', 'రౌద్రి', 'దుర్మతి',
     'దుందుభి', 'రుధిరోద్గారి', 'రక్తాక్షి', 'క్రోధన', 'అక్షయ',
+  ];
+  const teluguYearsEn = [
+    'Prabhava', 'Vibhava', 'Shukla', 'Pramodyuta', 'Prajotpatti',
+    'Angirasa', 'Shrimukha', 'Bhava', 'Yuva', 'Dhata',
+    'Ishvara', 'Bahudhanya', 'Pramathi', 'Vikrama', 'Vrisha',
+    'Chitrabhanu', 'Svabhanu', 'Tarana', 'Parthiva', 'Vyaya',
+    'Sarvajit', 'Sarvadhari', 'Virodhi', 'Vikriti', 'Khara',
+    'Nandana', 'Vijaya', 'Jaya', 'Manmatha', 'Durmukhi',
+    'Hevilambi', 'Vilambi', 'Vikari', 'Sharvari', 'Plava',
+    'Shubhakrit', 'Shobhakrit', 'Krodhi', 'Vishvavasu', 'Parabhava',
+    'Plavanga', 'Kilaka', 'Saumya', 'Sadharana', 'Virodhikrit',
+    'Paridhavi', 'Pramadicha', 'Ananda', 'Rakshasa', 'Nala',
+    'Pingala', 'Kalayukti', 'Siddharthi', 'Raudri', 'Durmati',
+    'Dundubhi', 'Rudhirodgari', 'Raktakshi', 'Krodhana', 'Akshaya',
   ];
 
   // Known Ugadi dates (Chaitra Shukla Padyami) — verified against DrikPanchang/timeanddate
@@ -281,7 +298,10 @@ function getTeluguYear(date) {
   }
 
   const yearIndex = ((teluguStartYear - 1987) % 60 + 60) % 60;
-  return 'శ్రీ ' + teluguYears[yearIndex];
+  return {
+    te: 'శ్రీ ' + teluguYears[yearIndex],
+    en: 'Sri ' + teluguYearsEn[yearIndex],
+  };
 }
 
 // Telugu month — Lunar month (Amanta/Southern system used in AP/Telangana)

@@ -63,6 +63,15 @@ async function getDeviceId() {
 let userProps = {
   platform: Platform.OS,          // 'web' | 'ios' | 'android'
   appVersion: APP_VERSION,        // pulled from app.json at boot — never stale
+  osVersion: '',                  // platform.Version stringified
+  screenSize: '',                 // 'WxH' device-pixel-rounded
+  browser: '',                    // web only: Chrome/Safari/Firefox/Edge/Opera/Other
+  userAgent: '',                  // web only, capped at 200 chars
+  deviceModel: '',                // native only
+  userStatus: '',                 // 'new' | 'returning' | 'active' | 'churned'
+  appAgeDays: 0,                  // days since first launch
+  totalSessions: 0,
+  activeDays: 0,
   premium: false,                 // updated when premium state changes
   loggedIn: false,
   lang: 'te',                     // 'te' | 'en'
@@ -201,8 +210,19 @@ export async function logEventToCloud(eventName, params = {}) {
       params: params || {},
       deviceId,
       userId: authUid,
+      // Device + cohort context — denormalised onto every event so
+      // dashboards can filter without joining against a sessions table.
       platform: userProps.platform,
       appVersion: userProps.appVersion,
+      osVersion: userProps.osVersion || '',
+      screenSize: userProps.screenSize || '',
+      browser: userProps.browser || '',
+      userAgent: userProps.userAgent || '',
+      deviceModel: userProps.deviceModel || '',
+      userStatus: userProps.userStatus || '',
+      appAgeDays: userProps.appAgeDays || 0,
+      totalSessions: userProps.totalSessions || 0,
+      activeDays: userProps.activeDays || 0,
       premium: !!userProps.premium,
       loggedIn: !!userProps.loggedIn,
       lang: userProps.lang,

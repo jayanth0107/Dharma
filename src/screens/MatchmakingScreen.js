@@ -2,10 +2,10 @@
 // Form for bride & groom details → 8 Kuta scoring → results
 // Uses BirthDatePicker + Google Places API for birth place search
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  KeyboardAvoidingView, Platform, Modal,
+  KeyboardAvoidingView, Platform, Modal, Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
@@ -21,9 +21,77 @@ import { SectionShareRow } from '../components/SectionShareRow';
 import { SimpleKundliChart } from '../components/KundliChart';
 import { ClearableInput } from '../components/ClearableInput';
 import { calculateMatchmaking, getNakshatraRashiFromDate, NAKSHATRAS, NAKSHATRAS_EN, RASHIS, RASHIS_EN, KUTA_EXTENDED_DETAILS } from '../utils/matchmakingCalculator';
+import { calculateNameCompatibility } from '../utils/astroFeatures';
 import { googlePlacesAutocomplete, googlePlaceDetails, fallbackSearch } from '../utils/placesProxy';
 import { generateMatchmakingPdf } from '../utils/matchmakingReport';
 import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
+
+// ── Name Compatibility (Western numerology cross-check) ──────────
+// Sits as a self-contained card below the Ashtakoot result.
+// Defined OUTSIDE the main screen component so its TextInput state
+// isn't reset whenever the parent re-renders for unrelated reasons.
+function NameCompatCard({ t }) {
+  const [n1, setN1] = useState('');
+  const [n2, setN2] = useState('');
+  const compat = useMemo(() => calculateNameCompatibility(n1, n2), [n1, n2]);
+
+  const inputFs   = usePick({ default: 16, lg: 17, xl: 18 });
+  const inputPad  = usePick({ default: 14, lg: 16, xl: 18 });
+  const titleFs   = usePick({ default: 18, lg: 20, xl: 22 });
+  const subFs     = usePick({ default: 14, lg: 15, xl: 16 });
+  const scoreFs   = usePick({ default: 44, lg: 50, xl: 56 });
+  const verdictFs = usePick({ default: 17, lg: 18, xl: 20 });
+  const numsFs    = usePick({ default: 13, lg: 14, xl: 15 });
+
+  return (
+    <View style={s.compatCard}>
+      <View style={s.compatHeader}>
+        <MaterialCommunityIcons name="heart-pulse" size={22} color={DarkColors.saffron} />
+        <View style={{ flex: 1 }}>
+          <Text style={[s.compatCardTitle, { fontSize: titleFs }]}>
+            {t('పేరు అనుకూలత', 'Name Compatibility')}
+          </Text>
+          <Text style={[s.compatCardSubtitle, { fontSize: subFs }]}>
+            {t('రెండు పేర్లు నమోదు చేయండి', 'Enter both names')}
+          </Text>
+        </View>
+      </View>
+
+      <ClearableInput
+        style={[s.compatInput, { fontSize: inputFs, padding: inputPad }]}
+        value={n1}
+        onChangeText={(v) => setN1(v.slice(0, 40))}
+        placeholder={t('మొదటి పేరు', 'First name')}
+        placeholderTextColor={DarkColors.textMuted}
+        maxLength={40}
+        autoCapitalize="words"
+        autoCorrect={false}
+      />
+      <ClearableInput
+        style={[s.compatInput, { fontSize: inputFs, padding: inputPad, marginTop: 10 }]}
+        value={n2}
+        onChangeText={(v) => setN2(v.slice(0, 40))}
+        placeholder={t('రెండవ పేరు', 'Second name')}
+        placeholderTextColor={DarkColors.textMuted}
+        maxLength={40}
+        autoCapitalize="words"
+        autoCorrect={false}
+      />
+
+      {compat && (
+        <View style={s.compatResultBox}>
+          <Text style={[s.compatScoreText, { fontSize: scoreFs }]}>{compat.score}%</Text>
+          <Text style={[s.compatVerdictText, { fontSize: verdictFs }]} numberOfLines={2}>
+            {compat.verdict.emoji}  {t(compat.verdict.te, compat.verdict.en)}
+          </Text>
+          <Text style={[s.compatNumsText, { fontSize: numsFs }]}>
+            {t(`సంఖ్యలు: ${compat.num1} + ${compat.num2}`, `Numbers: ${compat.num1} + ${compat.num2}`)}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
 
 // Place search results — defined OUTSIDE component to prevent re-mount on re-render
 function PlaceResults({ results, onSelect }) {
@@ -49,7 +117,7 @@ function PlaceResults({ results, onSelect }) {
 }
 
 export function MatchmakingScreen({ navigation }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   // ── Responsive sizing ──
   const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
@@ -209,6 +277,12 @@ export function MatchmakingScreen({ navigation }) {
     setBridePlace(pair.bridePlace || null);
     setGroomPlaceQuery(pair.groomPlaceQuery || '');
     setBridePlaceQuery(pair.bridePlaceQuery || '');
+    // Clear any in-flight autocomplete dropdowns from the previous pair
+    // so we don't show stale Hyderabad results on top of a freshly-loaded
+    // Tirupati place (etc.).
+    setGroomPlaceResults([]);
+    setBridePlaceResults([]);
+    setResult(null);
     if (pair.groomDob) {
       const gDate = new Date(pair.groomDob);
       setGroomDob(gDate);
@@ -240,6 +314,9 @@ export function MatchmakingScreen({ navigation }) {
   };
 
   const handleCalculate = () => {
+    // Form not hydrated yet — saved DOBs still loading; don't compute on
+    // partial data.
+    if (!formLoaded) return;
     if (groomNak === null || brideNak === null) return;
     setResult(calculateMatchmaking(groomNak, brideNak, groomRashiIdx, brideRashiIdx));
     savePairToList();
@@ -358,7 +435,7 @@ export function MatchmakingScreen({ navigation }) {
               <ClearableInput style={[s.input, { padding: inputPad, fontSize: inputFontSize }]} value={groomName} onChangeText={setGroomName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
               {/* Date — tappable opens BirthDatePicker */}
               <TouchableOpacity style={[s.input, { padding: inputPad }]} onPress={() => setShowDatePicker('groom')}>
-                <Text style={groomDob ? [s.inputText, { fontSize: inputFontSize, fontWeight: '700' }] : [s.inputPlaceholder, { fontSize: inputFontSize }]}>
+                <Text style={groomDob ? [s.inputText, { fontSize: inputFontSize, fontWeight: '500' }] : [s.inputPlaceholder, { fontSize: inputFontSize }]}>
                   {groomDob ? formatDate(groomDob) + formatTime12(groomTime) : t(TR.dobLabel.te, TR.dobLabel.en)}
                 </Text>
               </TouchableOpacity>
@@ -367,7 +444,7 @@ export function MatchmakingScreen({ navigation }) {
                 {groomPlace ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
-                    <Text style={[s.inputText, { fontSize: inputFontSize, fontWeight: '700', flex: 1 }]}>{groomPlace.name}</Text>
+                    <Text style={[s.inputText, { fontSize: inputFontSize, fontWeight: '500', flex: 1 }]}>{groomPlace.name}</Text>
                     <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>({groomPlace.latitude?.toFixed(1)}°, {groomPlace.longitude?.toFixed(1)}°)</Text>
                     <TouchableOpacity onPress={() => { setGroomPlace(null); setGroomPlaceQuery(''); }}>
                       <MaterialCommunityIcons name="close-circle" size={16} color={DarkColors.textMuted} />
@@ -400,7 +477,7 @@ export function MatchmakingScreen({ navigation }) {
               <ClearableInput style={[s.input, { padding: inputPad, fontSize: inputFontSize }]} value={brideName} onChangeText={setBrideName} placeholder={t(TR.nameLabel.te, TR.nameLabel.en)} placeholderTextColor={DarkColors.textMuted} />
               {/* Date — tappable opens BirthDatePicker */}
               <TouchableOpacity style={[s.input, { padding: inputPad }]} onPress={() => setShowDatePicker('bride')}>
-                <Text style={brideDob ? [s.inputText, { fontSize: inputFontSize, fontWeight: '700' }] : [s.inputPlaceholder, { fontSize: inputFontSize }]}>
+                <Text style={brideDob ? [s.inputText, { fontSize: inputFontSize, fontWeight: '500' }] : [s.inputPlaceholder, { fontSize: inputFontSize }]}>
                   {brideDob ? formatDate(brideDob) + formatTime12(brideTime) : t(TR.dobLabel.te, TR.dobLabel.en)}
                 </Text>
               </TouchableOpacity>
@@ -409,7 +486,7 @@ export function MatchmakingScreen({ navigation }) {
                 {bridePlace ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
-                    <Text style={[s.inputText, { fontSize: inputFontSize, fontWeight: '700', flex: 1 }]}>{bridePlace.name}</Text>
+                    <Text style={[s.inputText, { fontSize: inputFontSize, fontWeight: '500', flex: 1 }]}>{bridePlace.name}</Text>
                     <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>({bridePlace.latitude?.toFixed(1)}°, {bridePlace.longitude?.toFixed(1)}°)</Text>
                     <TouchableOpacity onPress={() => { setBridePlace(null); setBridePlaceQuery(''); }}>
                       <MaterialCommunityIcons name="close-circle" size={16} color={DarkColors.textMuted} />
@@ -623,12 +700,29 @@ export function MatchmakingScreen({ navigation }) {
             {/* Download PDF Report */}
             <TouchableOpacity
               style={s.pdfBtn}
-              onPress={() => {
-                generateMatchmakingPdf(
-                  result,
-                  { name: groomName, dob: groomDob ? formatDate(groomDob) : '', time: formatTime12(groomTime), place: groomPlace?.name || '' },
-                  { name: brideName, dob: brideDob ? formatDate(brideDob) : '', time: formatTime12(brideTime), place: bridePlace?.name || '' }
-                );
+              onPress={async () => {
+                // shareAsPdf (under generateMatchmakingPdf) returns
+                // { success, error } rather than throwing — surface
+                // failures so the user isn't left wondering why nothing
+                // happened (low-storage Android / Sharing-not-available).
+                try {
+                  const res = await generateMatchmakingPdf(
+                    result,
+                    { name: groomName, dob: groomDob ? formatDate(groomDob) : '', time: formatTime12(groomTime), place: groomPlace?.name || '' },
+                    { name: brideName, dob: brideDob ? formatDate(brideDob) : '', time: formatTime12(brideTime), place: bridePlace?.name || '' }
+                  );
+                  if (res && res.success === false) {
+                    Alert.alert(
+                      'PDF',
+                      'PDF తయారు చేయడంలో సమస్య — దయచేసి మళ్లీ ప్రయత్నించండి.\n\nCould not generate the report. Please try again.',
+                    );
+                  }
+                } catch {
+                  Alert.alert(
+                    'PDF',
+                    'PDF తయారు చేయడంలో సమస్య — దయచేసి మళ్లీ ప్రయత్నించండి.\n\nCould not generate the report. Please try again.',
+                  );
+                }
               }}
             >
               <MaterialCommunityIcons name="file-pdf-box" size={20} color={DarkColors.kumkum} />
@@ -647,6 +741,13 @@ export function MatchmakingScreen({ navigation }) {
             </View>
           </>
         )}
+
+        {/* ── Name Compatibility — quick numerology cross-check ────
+            Sits below the Ashtakoot result. Two name fields, instant
+            score. Distinct from Ashtakoot (which is nakshatra-based) —
+            this is a fun cross-check users often ask for first. */}
+        <NameCompatCard t={t} />
+
         <View style={{ height: bottomSpacer }} />
       </ScrollView>
       </KeyboardAvoidingView>
@@ -729,7 +830,9 @@ export function MatchmakingScreen({ navigation }) {
         );
       })()}
 
-      {/* Share row for results — uses SectionShareRow with preview modal */}
+      {/* Share row for results — uses SectionShareRow with preview modal.
+          Output language follows the user's selected lang (was hardcoded
+          Telugu, broke share preview for English-mode users). */}
       {result && (
         <SectionShareRow
           section="matchmaking"
@@ -737,68 +840,118 @@ export function MatchmakingScreen({ navigation }) {
             const r = result;
             const gp = r.groomProfile || {};
             const bp = r.brideProfile || {};
-            let text = `💕 *జాతక పొందిక — అష్టకూట మిలన్*\n`;
-            text += `━━━━━━━━━━━━━━━━━━\n\n`;
+            const isEn = lang === 'en';
 
-            // Groom profile
-            text += `🤵 *వరుడు: ${groomName || 'వరుడు'}*\n`;
-            text += `   నక్షత్రం: ${r.groomNakshatra?.telugu || ''} (${r.groomNakshatra?.english || ''})\n`;
-            text += `   రాశి: ${r.groomRashi?.telugu || ''} (${r.groomRashi?.english || ''})\n`;
-            if (gp.rashiLord) text += `   రాశి అధిపతి: ${gp.rashiLord.te} (${gp.rashiLord.en})\n`;
-            if (gp.varna) text += `   వర్ణం: ${gp.varna.te} | గణం: ${gp.gana.te}\n`;
-            if (gp.nadi) text += `   నాడి: ${gp.nadi.te} | యోని: ${gp.yoni.te}\n`;
-            if (gp.element) text += `   తత్వం: ${gp.element.te} | వశ్యం: ${gp.vashya.te}\n`;
-            text += `\n`;
+            // Bilingual extractor — accepts {te,en} and {telugu,english}.
+            const pickL = (v) => {
+              if (v == null) return '';
+              if (typeof v === 'string' || typeof v === 'number') return String(v);
+              if (typeof v === 'object') {
+                return isEn
+                  ? (v.en || v.english || v.te || v.telugu || '')
+                  : (v.te || v.telugu || v.en || v.english || '');
+              }
+              return String(v);
+            };
 
-            // Bride profile
-            text += `👰 *వధువు: ${brideName || 'వధువు'}*\n`;
-            text += `   నక్షత్రం: ${r.brideNakshatra?.telugu || ''} (${r.brideNakshatra?.english || ''})\n`;
-            text += `   రాశి: ${r.brideRashi?.telugu || ''} (${r.brideRashi?.english || ''})\n`;
-            if (bp.rashiLord) text += `   రాశి అధిపతి: ${bp.rashiLord.te} (${bp.rashiLord.en})\n`;
-            if (bp.varna) text += `   వర్ణం: ${bp.varna.te} | గణం: ${bp.gana.te}\n`;
-            if (bp.nadi) text += `   నాడి: ${bp.nadi.te} | యోని: ${bp.yoni.te}\n`;
-            if (bp.element) text += `   తత్వం: ${bp.element.te} | వశ్యం: ${bp.vashya.te}\n`;
+            // Bilingual section labels.
+            const L = isEn ? {
+              hdr: 'Compatibility — Ashtakoot Milan',
+              groom: 'Groom', bride: 'Bride',
+              groomName: groomName || 'Groom', brideName: brideName || 'Bride',
+              nakshatra: 'Nakshatra', rashi: 'Rashi', rashiLord: 'Rashi Lord',
+              varna: 'Varna', gana: 'Gana', nadi: 'Nadi',
+              yoni: 'Yoni', element: 'Element', vashya: 'Vashya',
+              totalScore: 'Total Score', kutas: 'Ashtakoot Details',
+              kundli: 'Rashi Kundli', moon: 'Moon Sign',
+              mangalDosha: 'Mangal Dosha / Kuja Dosha',
+              mangalRemedy: 'If Mangal Dosha is present, perform a remedial puja.',
+              verdict: 'Verdict',
+              lowScore: 'Below 18 points — consult a Vedic astrologer.',
+              disclaimer: 'Disclaimer',
+              disclaimerText: 'This report is based on astronomical calculations and Vedic astrology. It is advisory only — final decisions should be made with personal discretion.',
+              footer: 'Dharma App — Telugu Panchangam & Astrology',
+              blessing: 'May all beings be happy',
+            } : {
+              hdr: 'జాతక పొందిక — అష్టకూట మిలన్',
+              groom: 'వరుడు', bride: 'వధువు',
+              groomName: groomName || 'వరుడు', brideName: brideName || 'వధువు',
+              nakshatra: 'నక్షత్రం', rashi: 'రాశి', rashiLord: 'రాశి అధిపతి',
+              varna: 'వర్ణం', gana: 'గణం', nadi: 'నాడి',
+              yoni: 'యోని', element: 'తత్వం', vashya: 'వశ్యం',
+              totalScore: 'మొత్తం స్కోర్', kutas: 'అష్టకూట వివరాలు',
+              kundli: 'రాశి కుండలి', moon: 'చంద్ర రాశి',
+              mangalDosha: 'మంగళ దోషం / కుజ దోషం',
+              mangalRemedy: 'మంగళ దోషం ఉంటే నివారణ పూజ చేయించాలి.',
+              verdict: 'నిర్ణయం',
+              lowScore: '18 పాయింట్ల కంటే తక్కువ — వేద జ్యోతిష నిపుణుల సలహా తీసుకోండి.',
+              disclaimer: 'నిరాకరణ',
+              disclaimerText: 'ఈ నివేదిక ఖగోళ గణనలు మరియు వేద జ్యోతిషం ఆధారంగా రూపొందించబడింది. ఇది సలహా మాత్రమే — తుది నిర్ణయాలు వ్యక్తిగత విచక్షణతో తీసుకోవాలి.',
+              footer: 'Dharma App — Telugu Panchangam & Astrology',
+              blessing: 'సర్వే జనాః సుఖినో భవంతు',
+            };
+
+            // Profile block builder — shared between groom and bride.
+            const profileBlock = (icon, title, name, nak, rashi, p) => {
+              let block = `${icon} *${title}: ${name}*\n`;
+              block += `   ${L.nakshatra}: ${pickL(nak)}\n`;
+              block += `   ${L.rashi}: ${pickL(rashi)}\n`;
+              if (p.rashiLord) block += `   ${L.rashiLord}: ${pickL(p.rashiLord)}\n`;
+              if (p.varna)     block += `   ${L.varna}: ${pickL(p.varna)} | ${L.gana}: ${pickL(p.gana)}\n`;
+              if (p.nadi)      block += `   ${L.nadi}: ${pickL(p.nadi)} | ${L.yoni}: ${pickL(p.yoni)}\n`;
+              if (p.element)   block += `   ${L.element}: ${pickL(p.element)} | ${L.vashya}: ${pickL(p.vashya)}\n`;
+              return block;
+            };
+
+            let text = `💕 *${L.hdr}*\n━━━━━━━━━━━━━━━━━━\n\n`;
+            text += profileBlock('🤵', L.groom, L.groomName, r.groomNakshatra, r.groomRashi, gp) + '\n';
+            text += profileBlock('👰', L.bride, L.brideName, r.brideNakshatra, r.brideRashi, bp);
             text += `\n━━━━━━━━━━━━━━━━━━\n`;
 
             // Score
-            text += `⭐ *మొత్తం స్కోర్: ${r.totalScore} / ${r.maxScore} (${r.percentage}%)*\n`;
-            text += `${r.verdict}\n${r.verdictEn}\n\n`;
+            text += `⭐ *${L.totalScore}: ${r.totalScore} / ${r.maxScore} (${r.percentage}%)*\n`;
+            text += `${isEn ? (r.verdictEn || r.verdict) : r.verdict}\n\n`;
 
             // 8 Kuta details with interpretations
-            text += `📊 *అష్టకూట వివరాలు:*\n\n`;
+            text += `📊 *${L.kutas}:*\n\n`;
             r.kutas.forEach((k, i) => {
               const status = k.score === k.max ? '✅' : k.score === 0 ? '❌' : '⚠️';
-              text += `${status} *${i + 1}. ${k.name}* (${k.nameEn}): ${k.score}/${k.max}\n`;
-              if (k.interpretation?.telugu) text += `   ${k.interpretation.telugu}\n`;
+              const kName = isEn ? (k.nameEn || k.name) : k.name;
+              text += `${status} *${i + 1}. ${kName}*: ${k.score}/${k.max}\n`;
+              if (k.interpretation) {
+                const interp = isEn
+                  ? (k.interpretation.english || k.interpretation.telugu || '')
+                  : (k.interpretation.telugu || k.interpretation.english || '');
+                if (interp) text += `   ${interp}\n`;
+              }
               text += `\n`;
             });
 
             // Rashi Kundli summary
             text += `━━━━━━━━━━━━━━━━━━\n`;
-            text += `🔮 *రాశి కుండలి:*\n`;
-            text += `🤵 ${groomName || 'వరుడు'}: ${r.groomRashi?.telugu || ''} (${r.groomRashi?.english || ''}) — చంద్ర రాశి\n`;
-            text += `👰 ${brideName || 'వధువు'}: ${r.brideRashi?.telugu || ''} (${r.brideRashi?.english || ''}) — చంద్ర రాశి\n`;
+            text += `🔮 *${L.kundli}:*\n`;
+            text += `🤵 ${L.groomName}: ${pickL(r.groomRashi)} — ${L.moon}\n`;
+            text += `👰 ${L.brideName}: ${pickL(r.brideRashi)} — ${L.moon}\n`;
 
             // Mangal Dosha
             if (r.mangalDosha) {
-              text += `\n🔴 *మంగళ దోషం / కుజ దోషం:*\n`;
-              text += `🤵 ${groomName || 'వరుడు'}: ${r.mangalDosha.groom.telugu} (${r.mangalDosha.groom.english})\n`;
-              text += `👰 ${brideName || 'వధువు'}: ${r.mangalDosha.bride.telugu} (${r.mangalDosha.bride.english})\n`;
+              text += `\n🔴 *${L.mangalDosha}:*\n`;
+              text += `🤵 ${L.groomName}: ${pickL(r.mangalDosha.groom)}\n`;
+              text += `👰 ${L.brideName}: ${pickL(r.mangalDosha.bride)}\n`;
               if (r.mangalDosha.groom.present || r.mangalDosha.bride.present) {
-                text += `   ⚠️ మంగళ దోషం ఉంటే నివారణ పూజ చేయించాలి.\n`;
+                text += `   ⚠️ ${L.mangalRemedy}\n`;
               }
             }
 
             // Conclusion
             text += `\n━━━━━━━━━━━━━━━━━━\n`;
-            text += `📋 *నిర్ణయం:* ${r.verdict}\n`;
-            if (r.totalScore < 18) text += `⚠️ 18 పాయింట్ల కంటే తక్కువ — వేద జ్యోతిష నిపుణుల సలహా తీసుకోండి.\n`;
+            text += `📋 *${L.verdict}:* ${isEn ? (r.verdictEn || r.verdict) : r.verdict}\n`;
+            if (r.totalScore < 18) text += `⚠️ ${L.lowScore}\n`;
             text += `\n━━━━━━━━━━━━━━━━━━\n`;
-            text += `⚠️ *నిరాకరణ:* ఈ నివేదిక ఖగోళ గణనలు మరియు వేద జ్యోతిషం ఆధారంగా రూపొందించబడింది. ఇది సలహా మాత్రమే — తుది నిర్ణయాలు వ్యక్తిగత విచక్షణతో తీసుకోవాలి.\n`;
-            text += `_Disclaimer: This report is based on astronomical calculations and Vedic astrology. It is advisory only — final decisions should be made with personal discretion._\n\n`;
-            text += `📲 *Dharma App* — Telugu Panchangam & Astrology\n`;
+            text += `⚠️ *${L.disclaimer}:* ${L.disclaimerText}\n\n`;
+            text += `📲 *${L.footer}*\n`;
             text += `https://play.google.com/store/apps/details?id=com.dharmadaily.app\n`;
-            text += `🙏 సర్వే జనాః సుఖినో భవంతు`;
+            text += `🙏 ${L.blessing}`;
             return text;
           }}
         />
@@ -812,9 +965,54 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   scroll: { flex: 1 },
   content: { padding: 16 },
+
+  // ── Name Compatibility card ──
+  // Sized larger than the old Astro version because a) it now stands
+  // alone in the Matchmaking flow, b) the previous card was reported
+  // as having unreadable fonts on Android.
+  compatCard: {
+    backgroundColor: DarkColors.bgCard,
+    borderRadius: 18, padding: 18, marginTop: 16,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  compatHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    marginBottom: 14,
+  },
+  compatCardTitle: {
+    fontSize: 18, fontWeight: '700', color: DarkColors.saffron,
+    letterSpacing: 0.4,
+  },
+  compatCardSubtitle: {
+    fontSize: 14, fontWeight: '600', color: DarkColors.textSecondary,
+    marginTop: 2,
+  },
+  compatInput: {
+    backgroundColor: DarkColors.bgElevated,
+    borderRadius: 12, paddingVertical: 14, paddingHorizontal: 14,
+    fontSize: 16, color: DarkColors.textPrimary,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+  },
+  compatResultBox: {
+    alignItems: 'center', paddingVertical: 18, marginTop: 14,
+    backgroundColor: 'rgba(232,117,26,0.10)', borderRadius: 14,
+    borderWidth: 1, borderColor: 'rgba(232,117,26,0.25)',
+  },
+  compatScoreText: {
+    fontSize: 44, fontWeight: '700', color: DarkColors.saffron,
+    letterSpacing: 0.5,
+  },
+  compatVerdictText: {
+    fontSize: 17, fontWeight: '700', color: DarkColors.textPrimary,
+    marginTop: 6, textAlign: 'center', paddingHorizontal: 12,
+  },
+  compatNumsText: {
+    fontSize: 13, fontWeight: '600', color: DarkColors.textMuted,
+    marginTop: 6, fontStyle: 'italic',
+  },
   personCard: { backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: DarkColors.borderCard },
   personHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
-  personTitle: { fontSize: 18, fontWeight: '800' },
+  personTitle: { fontSize: 18, fontWeight: '600' },
   input: { backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14, fontSize: 15, color: DarkColors.textPrimary, marginBottom: 10, borderWidth: 1, borderColor: DarkColors.borderCard, outlineStyle: 'none' },
   inputText: { fontSize: 15, color: DarkColors.textPrimary },
   inputPlaceholder: { fontSize: 15, color: DarkColors.textMuted },
@@ -826,7 +1024,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   nakChipLabel: { fontSize: 13, color: DarkColors.textMuted, fontWeight: '600' },
-  nakChipValue: { flex: 1, fontSize: 14, color: DarkColors.goldLight, fontWeight: '800' },
+  nakChipValue: { flex: 1, fontSize: 14, color: DarkColors.goldLight, fontWeight: '600' },
   // Place search
   selectedPlace: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10, paddingHorizontal: 4 },
   selectedPlaceText: { fontSize: 13, color: DarkColors.tulasiGreen, fontWeight: '600' },
@@ -837,7 +1035,7 @@ const s = StyleSheet.create({
   // Nakshatra selector
   selectorOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
   selectorBox: { backgroundColor: DarkColors.bgElevated, borderRadius: 20, maxHeight: '80%', overflow: 'hidden' },
-  selectorTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold, textAlign: 'center', paddingVertical: 16 },
+  selectorTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.gold, textAlign: 'center', paddingVertical: 16 },
   selectorScroll: { maxHeight: 400 },
   selectorItem: { paddingVertical: 14, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   selectorItemActive: { backgroundColor: DarkColors.saffronDim },
@@ -848,33 +1046,33 @@ const s = StyleSheet.create({
   // Calculate
   calcBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: DarkColors.gold, borderRadius: 16, paddingVertical: 16, marginTop: 8 },
   calcBtnDisabled: { opacity: 0.4 },
-  calcBtnText: { fontSize: 16, fontWeight: '800', color: '#0A0A0A' },
+  calcBtnText: { fontSize: 16, fontWeight: '600', color: '#0A0A0A' },
   // Results
   scoreHeader: { alignItems: 'center', backgroundColor: DarkColors.bgCard, borderRadius: 20, padding: 24, borderWidth: 2, marginBottom: 16 },
-  scoreNumber: { fontSize: 56, fontWeight: '900', color: DarkColors.gold },
+  scoreNumber: { fontSize: 56, fontWeight: '700', color: DarkColors.gold },
   scoreMax: { fontSize: 20, color: DarkColors.textMuted, marginTop: -8 },
   scoreBar: { width: '100%', height: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 4, marginTop: 16 },
   scoreBarFill: { height: 8, borderRadius: 4 },
-  scorePercent: { fontSize: 24, fontWeight: '900', marginTop: 8 },
-  verdict: { fontSize: 16, fontWeight: '800', marginTop: 8, textAlign: 'center' },
+  scorePercent: { fontSize: 24, fontWeight: '700', marginTop: 8 },
+  verdict: { fontSize: 16, fontWeight: '600', marginTop: 8, textAlign: 'center' },
   coupleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   coupleCard: { flex: 1, alignItems: 'center', backgroundColor: DarkColors.bgCard, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: DarkColors.borderCard },
-  coupleName: { fontSize: 18, fontWeight: '900', color: '#FFFFFF', marginTop: 8, textAlign: 'center' },
+  coupleName: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', marginTop: 8, textAlign: 'center' },
   coupleDetail: { alignItems: 'center', marginTop: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: DarkColors.borderCard, width: '100%' },
   coupleLabel: { fontSize: 11, fontWeight: '700', color: DarkColors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
-  coupleNakValue: { fontSize: 16, fontWeight: '800', color: DarkColors.gold, marginTop: 2, textAlign: 'center' },
+  coupleNakValue: { fontSize: 16, fontWeight: '600', color: DarkColors.gold, marginTop: 2, textAlign: 'center' },
   coupleNakEn: { fontSize: 13, color: DarkColors.goldLight, fontWeight: '600', marginTop: 1 },
   coupleRashiValue: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', marginTop: 2, textAlign: 'center' },
   sectionDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginTop: 28, marginBottom: 18 },
-  sectionLabel: { fontSize: 18, fontWeight: '800', color: DarkColors.gold, marginBottom: 8 },
+  sectionLabel: { fontSize: 18, fontWeight: '600', color: DarkColors.gold, marginBottom: 8 },
   sectionSub: { fontSize: 12, color: DarkColors.textMuted, marginBottom: 14 },
   kutaRow: { backgroundColor: DarkColors.bgCard, borderRadius: 14, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: DarkColors.borderCard },
   kutaInfo: { marginBottom: 8 },
-  kutaName: { fontSize: 15, fontWeight: '800', color: DarkColors.textPrimary },
+  kutaName: { fontSize: 15, fontWeight: '600', color: DarkColors.textPrimary },
   kutaNameEn: { fontSize: 12, color: DarkColors.textMuted, marginTop: 1 },
   kutaDesc: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2, fontStyle: 'italic' },
   kutaScoreBox: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 6 },
-  kutaScore: { fontSize: 22, fontWeight: '900' },
+  kutaScore: { fontSize: 22, fontWeight: '700' },
   kutaMax: { fontSize: 13, color: DarkColors.textMuted, marginLeft: 2 },
   kutaBar: { height: 6, backgroundColor: DarkColors.bgElevated, borderRadius: 3 },
   kutaBarFill: { height: 6, borderRadius: 3 },
@@ -886,15 +1084,15 @@ const s = StyleSheet.create({
   doshaRow: { flexDirection: 'row', gap: 10 },
   doshaCard: { flex: 1, alignItems: 'center', backgroundColor: DarkColors.bgCard, borderRadius: 14, padding: 14, borderWidth: 1.5, borderColor: DarkColors.borderCard },
   doshaName: { fontSize: 13, fontWeight: '700', color: DarkColors.textPrimary, marginTop: 4 },
-  doshaStatus: { fontSize: 14, fontWeight: '800', marginTop: 6, textAlign: 'center' },
+  doshaStatus: { fontSize: 14, fontWeight: '600', marginTop: 6, textAlign: 'center' },
   doshaStatusEn: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2, textAlign: 'center' },
   // Per-guna interpretation
   interpWrap: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: DarkColors.borderCard },
   interpText: { fontSize: 13, color: DarkColors.silver, lineHeight: 20, fontWeight: '500' },
   // Conclusion
   conclusionBox: { backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 20, marginTop: 16, borderWidth: 2, alignItems: 'center' },
-  conclusionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold, marginBottom: 8 },
-  conclusionVerdict: { fontSize: 18, fontWeight: '900', textAlign: 'center' },
+  conclusionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold, marginBottom: 8 },
+  conclusionVerdict: { fontSize: 18, fontWeight: '700', textAlign: 'center' },
   conclusionNote: { fontSize: 12, color: DarkColors.kumkum, marginTop: 10, textAlign: 'center', lineHeight: 18 },
   // PDF button
   pdfBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: DarkColors.bgCard, borderRadius: 14, paddingVertical: 14, marginTop: 12, borderWidth: 1, borderColor: DarkColors.kumkum },
@@ -934,7 +1132,7 @@ const s = StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12,
   },
   savedPairIcons: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  savedName: { fontSize: 15, fontWeight: '800', color: '#FFFFFF' },
+  savedName: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
   savedMeta: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   savedDeleteBtn: {
     padding: 12, borderLeftWidth: 1, borderLeftColor: DarkColors.borderCard,
@@ -950,10 +1148,14 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 10,
     borderBottomWidth: 2,
   },
-  profileName: { fontSize: 14, fontWeight: '900' },
+  // Saved-match profile rows — names stay semibold (600) for scanning;
+  // date/location keys and values drop to medium (500) so the card
+  // reads as "data list" rather than a wall of bold text. Earlier each
+  // row was '700' which testers called "flashy".
+  profileName: { fontSize: 14, fontWeight: '600' },
   profileRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 12, paddingVertical: 7, borderBottomWidth: 0.5, borderBottomColor: DarkColors.borderCard },
-  profileKey: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '700' },
-  profileValue: { fontSize: 14, color: '#FFFFFF', fontWeight: '800' },
+  profileKey: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '500' },
+  profileValue: { fontSize: 14, color: '#FFFFFF', fontWeight: '500' },
   // Read More button on each kuta
   readMoreBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -971,15 +1173,15 @@ const s = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 34 : 16,
   },
   modalHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
-  modalTitle: { fontSize: 20, fontWeight: '900', color: DarkColors.gold },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.gold },
   modalSubtitle: { fontSize: 13, color: DarkColors.textMuted, marginTop: 2 },
   modalScoreBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 2 },
-  modalScoreText: { fontSize: 16, fontWeight: '900' },
+  modalScoreText: { fontSize: 16, fontWeight: '700' },
   modalCloseBtn: { padding: 6, marginLeft: 4 },
   modalInterp: { fontSize: 15, fontWeight: '600', lineHeight: 24 },
   modalSection: { marginTop: 16 },
   modalSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  modalSectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  modalSectionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
   modalBody: { fontSize: 14, color: DarkColors.silver, lineHeight: 23, fontWeight: '500' },
   modalDoneBtn: {
     backgroundColor: DarkColors.bgElevated, borderRadius: 14, paddingVertical: 14,

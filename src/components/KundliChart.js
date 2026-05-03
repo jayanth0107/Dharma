@@ -265,7 +265,7 @@ const kc = StyleSheet.create({
   },
   title: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.gold,
     marginBottom: 4,
     textAlign: 'center',
@@ -332,7 +332,7 @@ const kc = StyleSheet.create({
   },
   moonRashiText: {
     color: DarkColors.gold,
-    fontWeight: '800',
+    fontWeight: '600',
   },
   moonMarker: {
     fontSize: 7,
@@ -350,7 +350,7 @@ const kc = StyleSheet.create({
   },
   centerText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.gold,
   },
   centerSub: {

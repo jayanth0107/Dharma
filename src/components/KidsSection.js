@@ -105,7 +105,7 @@ export function KidsSection({ dayOfWeek }) {
   const moralPad = usePick({ default: 12, md: 14, xl: 18 });
   const modalImgH = usePick({ default: 200, md: 220, xl: 280 });
   const modalFallbackIcon = usePick({ default: 56, md: 64, xl: 76 });
-  const closeIconSize = usePick({ default: 20, md: 22, xl: 26 });
+  const closeIconSize = usePick({ default: 24, md: 26, xl: 30 });
   const closeBtnPad = usePick({ default: 12, md: 14, xl: 18 });
   const closeBtnFs = usePick({ default: 14, md: 15, xl: 17 });
   const closeBtnMx = usePick({ default: 16, md: 20, xl: 28 });
@@ -151,8 +151,10 @@ export function KidsSection({ dayOfWeek }) {
               <TouchableOpacity
                 style={st.modalCloseX}
                 onPress={() => { stopSpeak(); setActiveStory(null); }}
+                hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                accessibilityLabel={t('మూసివేయండి', 'Close')}
               >
-                <Ionicons name="close" size={closeIconSize} color="#FFF" />
+                <Ionicons name="close" size={closeIconSize} color={DarkColors.gold} />
               </TouchableOpacity>
               <ScrollView showsVerticalScrollIndicator={false}>
                 {!modalImgFailed ? (
@@ -221,7 +223,7 @@ const st = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   tileTitleWrap: { paddingHorizontal: 10, paddingTop: 14, paddingBottom: 10 },
-  tileTitle: { fontSize: 14, fontWeight: '800', lineHeight: 22 },
+  tileTitle: { fontSize: 14, fontWeight: '600', lineHeight: 22 },
   tileEnglish: { fontSize: 12, color: DarkColors.textMuted, marginTop: 2 },
   tileReadRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
   tileRead: { fontSize: 12, fontWeight: '700' },
@@ -251,10 +253,18 @@ const st = StyleSheet.create({
   // Modal
   modalOverlay: { flex: 1, backgroundColor: DarkColors.overlay, justifyContent: 'flex-end' },
   modalContent: { backgroundColor: DarkColors.bgCard, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '90%' },
+  // Close X — solid dark pill with gold ring + drop shadow so it stands
+  // out against any image (deity photos can be very bright). Earlier
+  // 'rgba(255,255,255,0.15)' fill was invisible on lighter images.
   modalCloseX: {
     position: 'absolute', top: 12, right: 12, zIndex: 10,
-    width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)',
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderWidth: 2, borderColor: DarkColors.gold,
     alignItems: 'center', justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000', shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 2 }, shadowRadius: 4,
   },
   modalImage: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24 },
   modalImageFallback: { width: '100%', height: 220, borderTopLeftRadius: 24, borderTopRightRadius: 24, alignItems: 'center', justifyContent: 'center' },
@@ -267,7 +277,7 @@ const st = StyleSheet.create({
   },
   modalSpeakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
   modalSpeakerText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
-  modalTitle: { fontSize: 24, fontWeight: '800' },
+  modalTitle: { fontSize: 24, fontWeight: '600' },
   modalEnglish: { fontSize: 14, color: DarkColors.textMuted, marginTop: 2 },
   divider: { height: 1, backgroundColor: DarkColors.gold, opacity: 0.2, marginVertical: 16 },
   storyText: { fontSize: 16, color: DarkColors.textSecondary, lineHeight: 28 },

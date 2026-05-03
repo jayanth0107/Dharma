@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
-  Platform, Share, Linking,
+  Platform, Share, Linking, Alert,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
@@ -55,7 +55,7 @@ async function handlePlatformShare(platformId, text, title) {
     case 'facebook':
       // Facebook doesn't support pre-filling text — copy first, then open
       await copyToClipboard(text);
-      alert('టెక్స్ట్ కాపీ అయింది! Facebook లో paste చేయండి.');
+      alert('టెక్స్ట్ కాపీ అయింది! Facebook లో paste చేయండి.\nText copied! Paste it on Facebook.');
       window.open('https://www.facebook.com/', '_blank');
       break;
     case 'twitter': {
@@ -153,10 +153,26 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
       const win = window.open('', '_blank');
       if (win) { win.document.write(html); win.document.close(); setTimeout(() => win.print(), 500); }
     } else {
+      // shareAsPdf returns { success, error } — it doesn't throw on
+      // print/share failure, so we have to read the result and surface
+      // it. Without this the user taps PDF, nothing happens, and they
+      // wonder if the app is broken (most common on low-storage Android
+      // devices where printToFileAsync silently fails).
       try {
         const { shareAsPdf } = require('../utils/shareService');
-        await shareAsPdf(html, `ధర్మ Daily — ${section}`);
-      } catch { /* fallback */ }
+        const res = await shareAsPdf(html, `ధర్మ Daily — ${section}`);
+        if (!res || res.success === false) {
+          Alert.alert(
+            'PDF',
+            'PDF తయారు చేయడంలో సమస్య — దయచేసి మళ్లీ ప్రయత్నించండి.\n\nCould not generate the PDF. Please try again.',
+          );
+        }
+      } catch (err) {
+        Alert.alert(
+          'PDF',
+          'PDF తయారు చేయడంలో సమస్య — దయచేసి మళ్లీ ప్రయత్నించండి.\n\nCould not generate the PDF. Please try again.',
+        );
+      }
     }
   };
 
@@ -286,7 +302,7 @@ const s = StyleSheet.create({
   },
   header: { alignItems: 'center', paddingTop: 10, paddingBottom: 12, position: 'relative' },
   handleBar: { width: 40, height: 4, borderRadius: 2, backgroundColor: DarkColors.textMuted, marginBottom: 12 },
-  title: { fontWeight: '800', color: DarkColors.textPrimary },
+  title: { fontWeight: '600', color: DarkColors.textPrimary },
   subtitle: { color: DarkColors.textMuted, marginTop: 3 },
   closeBtn: {
     position: 'absolute', top: 12, right: 16,

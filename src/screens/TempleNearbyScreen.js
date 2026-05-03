@@ -316,10 +316,17 @@ export function TempleNearbyScreen() {
             { icon: 'temple-hindu', label: t('విష్ణు', 'Vishnu'), q: 'Vishnu temple near me', color: DarkColors.saffron },
             { icon: 'elephant', label: t('గణేష్', 'Ganesh'), q: 'Ganesh temple near me', color: DarkColors.kumkum },
             { icon: 'shield-star', label: t('హనుమాన్', 'Hanuman'), q: 'Hanuman temple near me', color: DarkColors.tulasiGreen },
-          ].map((d, i) => (
-            <TouchableOpacity key={i} style={s.deityBtn} onPress={() => searchMapsFor(d.q, usedLat, usedLon)}>
+          ].map((d) => (
+            <TouchableOpacity
+              key={d.q}
+              style={s.deityBtn}
+              onPress={() => searchMapsFor(d.q, usedLat, usedLon)}
+              activeOpacity={0.7}
+              hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
+              accessibilityLabel={`Search ${d.label} temples`}
+            >
               <MaterialCommunityIcons name={d.icon} size={18} color={d.color} />
-              <Text style={s.deityBtnText}>{d.label}</Text>
+              <Text style={s.deityBtnText} numberOfLines={1}>{d.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -327,7 +334,15 @@ export function TempleNearbyScreen() {
         {/* Distance Range */}
         <View style={s.rangeRow}>
           {DISTANCE_OPTIONS.map(km => (
-            <TouchableOpacity key={km} style={[s.rangePill, selectedRange === km && s.rangePillActive]} onPress={() => setSelectedRange(km)}>
+            <TouchableOpacity
+              key={km}
+              style={[s.rangePill, selectedRange === km && s.rangePillActive]}
+              onPress={() => setSelectedRange(km)}
+              activeOpacity={0.7}
+              hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
+              accessibilityLabel={`Search within ${km} kilometres`}
+              accessibilityState={{ selected: selectedRange === km }}
+            >
               <Text style={[s.rangePillText, selectedRange === km && s.rangePillActiveText]}>{km} km</Text>
             </TouchableOpacity>
           ))}
@@ -350,7 +365,13 @@ export function TempleNearbyScreen() {
 
         {/* Temple List */}
         {!loading && filtered.length > 0 && filtered.map((temple, i) => (
-          <TouchableOpacity key={i} style={s.templeCard} onPress={() => openInMaps(temple.lat, temple.lon, temple.name)} activeOpacity={0.7}>
+          <TouchableOpacity
+            key={`${temple.lat}|${temple.lon}|${temple.name || i}`}
+            style={s.templeCard}
+            onPress={() => openInMaps(temple.lat, temple.lon, temple.name)}
+            activeOpacity={0.7}
+            accessibilityLabel={`Open ${temple.name} in Maps`}
+          >
             <View style={s.templeIcon}>
               <MaterialCommunityIcons name="temple-hindu" size={24} color={DarkColors.saffron} />
             </View>
@@ -416,7 +437,7 @@ const s = StyleSheet.create({
   },
   locationText: { flex: 1, fontSize: 13, fontWeight: '600', color: DarkColors.textSecondary },
   locationBadge: {
-    fontSize: 10, fontWeight: '800', color: DarkColors.gold,
+    fontSize: 10, fontWeight: '600', color: DarkColors.gold,
     backgroundColor: DarkColors.bgElevated, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
     overflow: 'hidden',
   },
@@ -434,7 +455,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     backgroundColor: DarkColors.saffron, borderRadius: 14, paddingVertical: 14, marginBottom: 12,
   },
-  mapsBtnText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  mapsBtnText: { fontSize: 15, fontWeight: '600', color: '#fff' },
   // Deity buttons
   deityRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   deityBtn: {
@@ -454,7 +475,7 @@ const s = StyleSheet.create({
   rangePillActiveText: { color: '#fff' },
   // Result header
   resultHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
   resultCount: { fontSize: 12, color: DarkColors.textMuted },
   sourceInfo: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginBottom: 10 },
   // Loading
@@ -477,7 +498,7 @@ const s = StyleSheet.create({
   ratingText: { fontSize: 12, fontWeight: '700', color: DarkColors.gold },
   ratingCount: { fontSize: 12, color: DarkColors.textMuted },
   distBadge: { alignItems: 'center', gap: 2 },
-  distText: { fontSize: 13, fontWeight: '800', color: DarkColors.saffron },
+  distText: { fontSize: 13, fontWeight: '600', color: DarkColors.saffron },
   // Empty
   emptyBox: {
     alignItems: 'center', paddingVertical: 30, backgroundColor: DarkColors.bgCard,

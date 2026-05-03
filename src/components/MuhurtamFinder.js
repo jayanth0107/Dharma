@@ -4,7 +4,7 @@
 // Uses panchangam calculations to suggest best dates.
 // Includes PDF generation and WhatsApp/native sharing.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList, Platform,
   Share, Alert,
@@ -20,6 +20,7 @@ import { SectionShareRow } from './SectionShareRow';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { TimingCard, MuhurthamCard } from './PanchangaCard';
+import { BirthDatePicker } from './BirthDatePicker';
 import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 // Event types with their auspicious conditions
@@ -477,11 +478,26 @@ function ShareBar({ eventType, results, locationName }) {
  */
 export function MuhurtamFinderModal({ visible, onClose, location, isPremium = false, onOpenPremium, embedded = false }) {
   const { t } = useLanguage();
-  const { panchangam, isTimeInRange } = useApp();
+  const { isTimeInRange } = useApp();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedResult, setSelectedResult] = useState(null);
+
+  // ── Date selection ──
+  // Replaces the static "Find Auspicious Dates" header. Users pick any
+  // date in the past year or upcoming year — `getDailyPanchangam` is
+  // pure astronomy so it works for any date. "Today's Timings" → the
+  // picked date's timings.
+  const [targetDate, setTargetDate] = useState(() => new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const targetPanchangam = useMemo(
+    () => getDailyPanchangam(targetDate, location || DEFAULT_LOCATION),
+    [targetDate, location]
+  );
+  const isToday = targetDate.toDateString() === new Date().toDateString();
+  const minYear = new Date().getFullYear() - 1;
+  const maxYear = new Date().getFullYear() + 1;
 
   // Load saved event selection on mount
   useEffect(() => {
@@ -542,22 +558,22 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   const searchTextSize = usePick({ default: 14, md: 15, xl: 17 });
   const searchPad = usePick({ default: 32, md: 40, xl: 48 });
 
-  const resultPadH = usePick({ default: 14, md: 16, xl: 20 });
-  const resultPadV = usePick({ default: 10, md: 12, xl: 16 });
-  const dateColWidth = usePick({ default: 44, md: 50, xl: 60 });
-  const dayFontSize = usePick({ default: 20, md: 22, xl: 26 });
-  const monthFontSize = usePick({ default: 11, md: 12, xl: 14 });
-  const weekdayFontSize = usePick({ default: 11, md: 12, xl: 14 });
-  const dateFulFontSize = usePick({ default: 13, md: 14, xl: 16 });
-  const scoreBadgePadH = usePick({ default: 7, md: 8, xl: 10 });
-  const scoreBadgePadV = usePick({ default: 2, md: 2, xl: 4 });
-  const scoreTextSize = usePick({ default: 10, md: 11, xl: 13 });
-  const scorePercentSize = usePick({ default: 10, md: 11, xl: 13 });
-  const chevronSize = usePick({ default: 14, md: 16, xl: 20 });
+  const resultPadH = usePick({ default: 16, md: 18, xl: 22 });
+  const resultPadV = usePick({ default: 14, md: 16, xl: 20 });
+  const dateColWidth = usePick({ default: 56, md: 62, xl: 72 });
+  const dayFontSize = usePick({ default: 28, md: 30, xl: 34 });
+  const monthFontSize = usePick({ default: 13, md: 14, xl: 16 });
+  const weekdayFontSize = usePick({ default: 13, md: 14, xl: 16 });
+  const dateFulFontSize = usePick({ default: 16, md: 17, xl: 19 });
+  const scoreBadgePadH = usePick({ default: 12, md: 14, xl: 16 });
+  const scoreBadgePadV = usePick({ default: 5, md: 6, xl: 7 });
+  const scoreTextSize = usePick({ default: 14, md: 15, xl: 17 });
+  const scorePercentSize = usePick({ default: 14, md: 15, xl: 17 });
+  const chevronSize = usePick({ default: 20, md: 22, xl: 26 });
 
-  const reasonIconSize = usePick({ default: 13, md: 14, xl: 18 });
-  const reasonTextSize = usePick({ default: 12, md: 13, xl: 15 });
-  const reasonLineHeight = usePick({ default: 18, md: 20, xl: 24 });
+  const reasonIconSize = usePick({ default: 16, md: 18, xl: 20 });
+  const reasonTextSize = usePick({ default: 16, md: 17, xl: 19 });
+  const reasonLineHeight = usePick({ default: 24, md: 26, xl: 28 });
 
   const closeBtnPadV = usePick({ default: 12, md: 14, xl: 18 });
   const closeBtnMarginH = usePick({ default: 16, md: 20, xl: 28 });
@@ -582,7 +598,10 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
     setSelectedResult(null);
 
     setTimeout(() => {
-      const found = findBestDates(eventType, location || DEFAULT_LOCATION, new Date(), 90);
+      // Search 90 days starting from the user-picked targetDate (not
+      // hard-coded today). Lets users plan around future dates or
+      // analyze what windows existed near a past date.
+      const found = findBestDates(eventType, location || DEFAULT_LOCATION, targetDate, 90);
       setResults(found);
       setSearching(false);
       trackEvent('muhurtam_search', { event: eventType.id, resultsCount: found.length });
@@ -598,18 +617,40 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
-          {/* Header */}
-          <LinearGradient
-            colors={['#1A1008', '#0A0A0A']}
-            style={[s.modalHeader, { paddingVertical: headerPadV, paddingHorizontal: headerPadH }]}
-          >
-            <MaterialCommunityIcons name="calendar-star" size={headerIconSize} color="#F5D77A" />
-            <Text style={[s.modalTitle, { fontSize: titleSize }]}>{t('శుభ ముహూర్తాలు తెలుసుకోండి', 'Find Auspicious Dates')}</Text>
-            <Text style={[s.modalSub, { fontSize: subSize }]}>{t('రాబోయే 90 రోజుల శుభ ముహూర్తాలు', 'Best muhurtam dates in the next 90 days')}</Text>
-            <TouchableOpacity style={[s.closeX, { width: closeXBox, height: closeXBox, borderRadius: closeXBox / 2 }]} onPress={handleClose}>
-              <Ionicons name="close" size={closeXSize} color="#FFF" />
+          {/* Date selector header — replaces the old static title. The
+              picked date drives "Today's Timings" (now any-date timings)
+              and is also the start anchor for event-search results. */}
+          <View style={s.dateHeader}>
+            <View style={s.dateHeaderTopRow}>
+              <MaterialCommunityIcons name="calendar-star" size={20} color={DarkColors.gold} />
+              <Text style={s.dateHeaderLabel}>{t('ముహూర్తం తేదీ', 'Muhurtam Date')}</Text>
+              {!isToday && (
+                <TouchableOpacity onPress={() => setTargetDate(new Date())} style={s.todayResetBtn} activeOpacity={0.7}>
+                  <Text style={s.todayResetText}>{t('నేడు', 'Today')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <TouchableOpacity
+              style={s.dateDisplayBtn}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={s.dateDayBig}>{targetDate.getDate()}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={s.dateMonthYear} numberOfLines={1}>
+                  {targetDate.toLocaleDateString(t('te', 'en') === 'te' ? 'te-IN' : 'en-IN', { month: 'long', year: 'numeric' })}
+                </Text>
+                <Text style={s.dateWeekday} numberOfLines={1}>
+                  {targetDate.toLocaleDateString(t('te', 'en') === 'te' ? 'te-IN' : 'en-IN', { weekday: 'long' })}
+                </Text>
+              </View>
+              <MaterialCommunityIcons name="chevron-down" size={22} color={DarkColors.gold} />
             </TouchableOpacity>
-          </LinearGradient>
+            <Text style={s.dateHelper}>
+              {t(`గత 1 సంవత్సరం నుండి రాబోయే 1 సంవత్సరం వరకు ఎంచుకోండి`,
+                 `Pick any date from 1 year past to 1 year future`)}
+            </Text>
+          </View>
 
           {!isPremium ? (
             /* Premium Lock Overlay */
@@ -689,32 +730,38 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
                   <Ionicons name="arrow-back" size={backIconSize} color={DarkColors.textPrimary} />
                 </TouchableOpacity>
                 <MaterialCommunityIcons name="clock-check" size={resultEventIconSize} color={DarkColors.gold} style={{ marginLeft: 10 }} />
-                <Text style={[s.resultEventName, { fontSize: resultEventNameSize }]}>{t('నేటి శుభ సమయాలు', "Today's Auspicious Timings")}</Text>
+                <Text style={[s.resultEventName, { fontSize: resultEventNameSize }]}>
+                  {isToday
+                    ? t('నేటి శుభ సమయాలు', "Today's Auspicious Timings")
+                    : t('ఎంచుకున్న తేదీ శుభ సమయాలు', "Selected Date's Timings")}
+                </Text>
               </View>
-              {panchangam ? (
+              {targetPanchangam ? (
                 <FlatList
                   data={[{ key: 'timings' }]}
                   renderItem={() => (
                     <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                        <MaterialCommunityIcons name="check-decagram" size={16} color={DarkColors.gold} />
-                        <Text style={{ fontSize: 15, fontWeight: '800', color: DarkColors.gold }}>{t('శుభ సమయాలు', 'Auspicious Times')}</Text>
+                      <View style={s.timingsSectionHeader}>
+                        <MaterialCommunityIcons name="check-decagram" size={20} color={DarkColors.gold} />
+                        <Text style={[s.timingsSectionTitle, { color: DarkColors.gold }]}>{t('శుభ సమయాలు', 'Auspicious Times')}</Text>
                       </View>
-                      <MuhurthamCard muhurtham={panchangam.brahmaMuhurtam} isActive={isTimeInRange(panchangam.brahmaMuhurtam.start, panchangam.brahmaMuhurtam.end)} isAuspicious={true} />
-                      <MuhurthamCard muhurtham={panchangam.abhijitMuhurtam} isActive={isTimeInRange(panchangam.abhijitMuhurtam.start, panchangam.abhijitMuhurtam.end)} isAuspicious={true} />
-                      <MuhurthamCard muhurtham={panchangam.amritKalam} isActive={isTimeInRange(panchangam.amritKalam.start, panchangam.amritKalam.end)} isAuspicious={true} />
+                      <MuhurthamCard muhurtham={targetPanchangam.brahmaMuhurtam} isActive={isTimeInRange(targetPanchangam.brahmaMuhurtam.start, targetPanchangam.brahmaMuhurtam.end)} isAuspicious={true} />
+                      <MuhurthamCard muhurtham={targetPanchangam.abhijitMuhurtam} isActive={isTimeInRange(targetPanchangam.abhijitMuhurtam.start, targetPanchangam.abhijitMuhurtam.end)} isAuspicious={true} />
+                      <MuhurthamCard muhurtham={targetPanchangam.amritKalam} isActive={isTimeInRange(targetPanchangam.amritKalam.start, targetPanchangam.amritKalam.end)} isAuspicious={true} />
 
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 16, marginBottom: 10 }}>
-                        <MaterialCommunityIcons name="close-octagon-outline" size={16} color={DarkColors.saffron} />
-                        <Text style={{ fontSize: 15, fontWeight: '800', color: DarkColors.saffron }}>{t('అశుభ సమయాలు', 'Inauspicious Times')}</Text>
+                      <View style={s.timingsSectionDivider} />
+
+                      <View style={s.timingsSectionHeader}>
+                        <MaterialCommunityIcons name="close-octagon-outline" size={20} color={DarkColors.saffron} />
+                        <Text style={[s.timingsSectionTitle, { color: DarkColors.saffron }]}>{t('అశుభ సమయాలు', 'Inauspicious Times')}</Text>
                       </View>
-                      <MuhurthamCard muhurtham={panchangam.durmuhurtam} isActive={isTimeInRange(panchangam.durmuhurtam.start, panchangam.durmuhurtam.end)} isAuspicious={false} />
-                      {panchangam.durmuhurtam.start2 && (
-                        <MuhurthamCard muhurtham={{ ...panchangam.durmuhurtam, start: panchangam.durmuhurtam.start2, end: panchangam.durmuhurtam.end2, telugu: 'దుర్ముహూర్తం (2)', english: 'Durmuhurtam (2)' }} isActive={isTimeInRange(panchangam.durmuhurtam.start2, panchangam.durmuhurtam.end2)} isAuspicious={false} />
+                      <MuhurthamCard muhurtham={targetPanchangam.durmuhurtam} isActive={isTimeInRange(targetPanchangam.durmuhurtam.start, targetPanchangam.durmuhurtam.end)} isAuspicious={false} />
+                      {targetPanchangam.durmuhurtam.start2 && (
+                        <MuhurthamCard muhurtham={{ ...targetPanchangam.durmuhurtam, start: targetPanchangam.durmuhurtam.start2, end: targetPanchangam.durmuhurtam.end2, telugu: 'దుర్ముహూర్తం (2)', english: 'Durmuhurtam (2)' }} isActive={isTimeInRange(targetPanchangam.durmuhurtam.start2, targetPanchangam.durmuhurtam.end2)} isAuspicious={false} />
                       )}
-                      <TimingCard iconName="cancel" label={panchangam.rahuKalam.telugu} startTime={panchangam.rahuKalam.startFormatted} endTime={panchangam.rahuKalam.endFormatted} isActive={isTimeInRange(panchangam.rahuKalam.start, panchangam.rahuKalam.end)} accentColor={DarkColors.saffron} />
-                      <TimingCard iconName="alert-circle" label={panchangam.yamaGanda.telugu} startTime={panchangam.yamaGanda.startFormatted} endTime={panchangam.yamaGanda.endFormatted} isActive={isTimeInRange(panchangam.yamaGanda.start, panchangam.yamaGanda.end)} accentColor={DarkColors.saffron} />
-                      <TimingCard iconName="alert-rhombus" label={panchangam.gulikaKalam.telugu} startTime={panchangam.gulikaKalam.startFormatted} endTime={panchangam.gulikaKalam.endFormatted} isActive={isTimeInRange(panchangam.gulikaKalam.start, panchangam.gulikaKalam.end)} accentColor={DarkColors.saffron} />
+                      <TimingCard iconName="cancel" label={targetPanchangam.rahuKalam.telugu} startTime={targetPanchangam.rahuKalam.startFormatted} endTime={targetPanchangam.rahuKalam.endFormatted} isActive={isTimeInRange(targetPanchangam.rahuKalam.start, targetPanchangam.rahuKalam.end)} accentColor={DarkColors.saffron} />
+                      <TimingCard iconName="alert-circle" label={targetPanchangam.yamaGanda.telugu} startTime={targetPanchangam.yamaGanda.startFormatted} endTime={targetPanchangam.yamaGanda.endFormatted} isActive={isTimeInRange(targetPanchangam.yamaGanda.start, targetPanchangam.yamaGanda.end)} accentColor={DarkColors.saffron} />
+                      <TimingCard iconName="alert-rhombus" label={targetPanchangam.gulikaKalam.telugu} startTime={targetPanchangam.gulikaKalam.startFormatted} endTime={targetPanchangam.gulikaKalam.endFormatted} isActive={isTimeInRange(targetPanchangam.gulikaKalam.start, targetPanchangam.gulikaKalam.end)} accentColor={DarkColors.saffron} />
                     </View>
                   )}
                 />
@@ -836,6 +883,33 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
           <TouchableOpacity style={[s.closeBtn, { paddingVertical: closeBtnPadV, marginHorizontal: closeBtnMarginH }]} onPress={handleClose}>
             <Text style={[s.closeBtnText, { fontSize: closeBtnTextSize }]}>{t('మూసివేయండి', 'Close')}</Text>
           </TouchableOpacity>
+
+          {/* Date picker — opens when the user taps the date display in
+              the header. Year range is current ±1 so muhurtam analysis
+              stays anchored to the present (no asking what tithi was
+              relevant 50 years ago). */}
+          {showDatePicker && (
+            <BirthDatePicker
+              visible
+              selectedDate={targetDate}
+              title={t('తేదీ ఎంచుకోండి', 'Pick a Date')}
+              lang={t('te', 'en') === 'te' ? 'te' : 'en'}
+              yearStart={minYear}
+              yearEnd={maxYear}
+              onSelect={(d) => {
+                // Clamp to ±365 days from today — protects against the
+                // wheel landing on a January date when the picker is
+                // opened in late December (year boundary).
+                const today = new Date();
+                const minMs = today.getTime() - 365 * 24 * 60 * 60 * 1000;
+                const maxMs = today.getTime() + 365 * 24 * 60 * 60 * 1000;
+                const clamped = new Date(Math.max(minMs, Math.min(maxMs, d.getTime())));
+                setTargetDate(clamped);
+                setShowDatePicker(false);
+              }}
+              onClose={() => setShowDatePicker(false)}
+            />
+          )}
     </ModalOrView>
   );
 }
@@ -867,18 +941,43 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '90%', flex: 1,
   },
-  modalHeader: {
-    paddingVertical: 20, paddingHorizontal: 20,
-    borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    alignItems: 'center', position: 'relative',
+  // ── Date selector header (replaces old gradient header) ──
+  dateHeader: {
+    paddingVertical: 14, paddingHorizontal: 16,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: '#F5D77A', marginTop: 8, letterSpacing: 1 },
-  modalSub: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
-  closeX: {
-    position: 'absolute', top: 16, right: 16,
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center', justifyContent: 'center',
+  dateHeaderTopRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10,
+  },
+  dateHeaderLabel: {
+    flex: 1, fontSize: 14, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.5, textTransform: 'uppercase',
+  },
+  todayResetBtn: {
+    paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10,
+    backgroundColor: 'rgba(212,160,23,0.12)',
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  todayResetText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
+  dateDisplayBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: DarkColors.bgCard, borderRadius: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+    paddingVertical: 12, paddingHorizontal: 16,
+  },
+  dateDayBig: {
+    fontSize: 38, fontWeight: '700', color: DarkColors.gold,
+    minWidth: 48, textAlign: 'center', lineHeight: 42,
+  },
+  dateMonthYear: {
+    fontSize: 17, fontWeight: '600', color: DarkColors.textPrimary,
+  },
+  dateWeekday: {
+    fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, marginTop: 2,
+  },
+  dateHelper: {
+    fontSize: 12, fontWeight: '500', color: DarkColors.textMuted,
+    marginTop: 8, textAlign: 'center', fontStyle: 'italic',
   },
 
   eventCard: {
@@ -890,40 +989,68 @@ const s = StyleSheet.create({
     width: 68, height: 68, borderRadius: 34,
     alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
-  eventTelugu: { fontSize: 17, fontWeight: '800', color: DarkColors.textPrimary, textAlign: 'center' },
+  eventTelugu: { fontSize: 17, fontWeight: '600', color: DarkColors.textPrimary, textAlign: 'center' },
   eventEnglish: { fontSize: 13, color: DarkColors.textSecondary, marginTop: 4, fontWeight: '600' },
 
   resultHeader: {
     flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 16, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  resultEventName: { fontSize: 16, fontWeight: '700', color: DarkColors.textPrimary, marginLeft: 6, flex: 1 },
-  resultCount: { fontSize: 12, color: DarkColors.gold, fontWeight: '600' },
+  resultEventName: { fontSize: 18, fontWeight: '700', color: DarkColors.textPrimary, marginLeft: 8, flex: 1 },
+  resultCount: { fontSize: 14, color: DarkColors.gold, fontWeight: '700' },
+
+  // Auspicious / Inauspicious sub-headers in Today's Timings —
+  // bumped from 15 → 18 with stronger weight + a slim divider that
+  // clearly demarcates the two groups.
+  timingsSectionHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    marginBottom: 12, paddingBottom: 8,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
+  },
+  timingsSectionTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.3 },
+  timingsSectionDivider: {
+    height: 1, marginVertical: 8, marginHorizontal: 16,
+    backgroundColor: DarkColors.borderCard, opacity: 0.6,
+  },
 
   searchingBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  searchingText: { fontSize: 15, color: DarkColors.textMuted, marginTop: 12 },
+  searchingText: { fontSize: 17, fontWeight: '500', color: DarkColors.silverLight, marginTop: 14, textAlign: 'center', lineHeight: 25 },
 
+  // Result rows — flat, no tint, clear divider, generous padding so the
+  // date/score/expand-details all breathe.
   resultItem: {
-    paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 16, paddingVertical: 16,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  resultItemExpanded: { backgroundColor: 'rgba(212,160,23,0.08)' },
+  // Expanded state: keep flat — no background fill. A gold left-accent
+  // band signals "this row is open" without the tinted bg that fights
+  // the score-badge color.
+  resultItemExpanded: {
+    backgroundColor: 'transparent',
+    borderLeftWidth: 3, borderLeftColor: DarkColors.gold,
+  },
   resultRow: { flexDirection: 'row', alignItems: 'center' },
-  resultDateCol: { width: 50, alignItems: 'center' },
-  resultDay: { fontSize: 22, fontWeight: '800', color: DarkColors.gold },
-  resultMonth: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, textTransform: 'uppercase' },
-  resultWeekday: { fontSize: 12, color: DarkColors.textSecondary },
-  resultInfo: { flex: 1, marginLeft: 12 },
-  resultDateFull: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
-  resultBadges: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-  scoreBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  scoreText: { fontSize: 13, color: '#0A0A0A', fontWeight: '800' },
-  scorePercent: { fontSize: 11, color: DarkColors.textMuted, marginLeft: 8, fontWeight: '600' },
+  resultDateCol: { width: 60, alignItems: 'center' },
+  resultDay: { fontSize: 28, fontWeight: '700', color: DarkColors.gold, lineHeight: 32 },
+  resultMonth: { fontSize: 13, fontWeight: '700', color: DarkColors.silverLight, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 2 },
+  resultWeekday: { fontSize: 13, fontWeight: '500', color: DarkColors.textMuted, marginTop: 2 },
+  resultInfo: { flex: 1, marginLeft: 14 },
+  resultDateFull: { fontSize: 17, fontWeight: '600', color: DarkColors.textPrimary, lineHeight: 23 },
+  resultBadges: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 10 },
+  // Rating pill — kept solid (uses rating color) because the rating IS
+  // the colored signal. But pill is a bit chunkier so the label reads.
+  scoreBadge: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10 },
+  scoreText: { fontSize: 14, color: '#0A0A0A', fontWeight: '700', letterSpacing: 0.3 },
+  scorePercent: { fontSize: 14, color: DarkColors.silverLight, fontWeight: '700' },
 
-  resultDetails: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
-  reasonRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 },
-  reasonText: { fontSize: 13, color: DarkColors.textSecondary, marginLeft: 6, flex: 1, lineHeight: 20 },
+  // Expanded details — slim divider above; readable body text.
+  resultDetails: {
+    marginTop: 14, paddingTop: 14,
+    borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
+  },
+  reasonRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 },
+  reasonText: { fontSize: 16, fontWeight: '500', color: DarkColors.silverLight, flex: 1, lineHeight: 24 },
 
   closeBtn: {
     alignItems: 'center', paddingVertical: 14, marginHorizontal: 20, marginVertical: 12,
@@ -938,7 +1065,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 24, paddingVertical: 32,
   },
   premiumOverlayTitle: {
-    fontSize: 22, fontWeight: '800', color: DarkColors.textPrimary,
+    fontSize: 22, fontWeight: '600', color: DarkColors.textPrimary,
     marginTop: 16, marginBottom: 8,
   },
   premiumOverlayDesc: {
@@ -961,7 +1088,7 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   premiumPlanTelugu: { fontSize: 12, fontWeight: '600', color: DarkColors.textSecondary },
-  premiumPlanPrice: { fontSize: 22, fontWeight: '800', color: DarkColors.saffron, marginVertical: 4 },
+  premiumPlanPrice: { fontSize: 22, fontWeight: '600', color: DarkColors.saffron, marginVertical: 4 },
   premiumPlanDuration: { fontSize: 10, color: DarkColors.textMuted },
   premiumActivateBtn: { borderRadius: 12, overflow: 'hidden', width: '100%' },
   premiumActivateBtnGradient: {

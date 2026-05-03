@@ -1,158 +1,114 @@
-// ధర్మ — Scrollable Sub-Tab Bar with blinking chevrons
-// Compact horizontal tabs with always-visible pulsing scroll arrows
+// ధర్మ — Sub-Tab Bar (wrapping pill-button style)
+//
+// Pills wrap onto multiple rows so the user sees ALL options at once —
+// no horizontal scrolling, no off-screen tabs, no label-hint strip.
+// The active pill is clearly saffron-filled; that alone is enough to
+// tell the user which list is below.
+//
+// Sizing scales by phone class via `usePick`:
+//   sm/default (≤414 px)  pill 14 pt, padH 14, padV 9
+//   md (414+)             pill 15 pt, padH 16, padV 10
+//   lg (500+)             pill 16 pt, padH 18, padV 11
+//   xl (768+)             pill 18 pt, padH 22, padV 13
+// All paddings, gaps, bottom margin scale with phone width — the strip
+// breathes on tablets and stays compact on small Androids.
 
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Easing, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 
-function PulsingChevron({ direction, size, circleSize }) {
-  const pulse = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.2, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-  return (
-    <Animated.View style={[s.chevronCircle, { width: circleSize, height: circleSize, borderRadius: circleSize / 2, transform: [{ scale: pulse }] }]}>
-      <Ionicons name={direction === 'left' ? 'chevron-back' : 'chevron-forward'} size={size} color="#fff" />
-    </Animated.View>
-  );
-}
-
 export function SubTabBar({ tabs, activeTab, onTabChange }) {
-  const scrollRef = useRef(null);
-  const scrollXRef = useRef(0);
-  const tabFontSize = usePick({ default: 12, md: 13, xl: 15 });
-  const tabPaddingH = usePick({ default: 10, md: 14, xl: 20 });
-  const tabPaddingV = usePick({ default: 6, md: 8, xl: 12 });
-  const containerPaddingH = usePick({ default: 34, md: 40, xl: 50 });
-  const arrowWidth = usePick({ default: 30, md: 34, xl: 42 });
-  const chevronIconSize = usePick({ default: 12, md: 14, xl: 18 });
-  const chevronCircleSize = usePick({ default: 22, md: 24, xl: 30 });
-
-  const navigateTab = (dir) => {
-    const currentIdx = tabs.findIndex(t => t.id === activeTab);
-    // Wrap around: last → first, first → last
-    const nextIdx = (currentIdx + dir + tabs.length) % tabs.length;
-    onTabChange(tabs[nextIdx].id);
-  };
-
-  // Auto-scroll to active tab
-  useEffect(() => {
-    const idx = tabs.findIndex(t => t.id === activeTab);
-    if (idx >= 0 && scrollRef.current) {
-      const targetX = Math.max(0, idx * 90 - 90);
-      scrollRef.current.scrollTo({ x: targetX, animated: true });
-    }
-  }, [activeTab]);
+  // Responsive sizing — tuned so 8 festival chips wrap onto AT MOST 3 rows
+  // even on the narrowest (≤360 px) phone class.
+  const tabFontSize   = usePick({ default: 13, md: 14, lg: 15, xl: 17 });
+  const tabPadH       = usePick({ default: 10, md: 12, lg: 14, xl: 18 });
+  const tabPadV       = usePick({ default: 7,  md: 8,  lg: 10, xl: 12 });
+  const iconSize      = usePick({ default: 14, md: 16, lg: 17, xl: 19 });
+  const containerPadH = usePick({ default: 10, md: 14, lg: 18, xl: 26 });
+  const wrapperPadTop = usePick({ default: 8,  md: 10, lg: 12, xl: 14 });
+  const wrapperPadBot = usePick({ default: 10, md: 12, lg: 14, xl: 16 });
+  const pillGap       = usePick({ default: 6,  md: 7,  lg: 8,  xl: 10 });
+  const iconMarginR   = usePick({ default: 4,  md: 5,  lg: 6,  xl: 7 });
 
   return (
-    <View style={s.wrapper}>
-      {/* Left chevron — always visible */}
-      <TouchableOpacity style={[s.arrowLeft, { width: arrowWidth }]} onPress={() => navigateTab(-1)} activeOpacity={0.7}>
-        <PulsingChevron direction="left" size={chevronIconSize} circleSize={chevronCircleSize} />
-      </TouchableOpacity>
-
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[s.container, { paddingHorizontal: containerPaddingH }]}
-        style={s.bar}
-        onScroll={(e) => { scrollXRef.current = e.nativeEvent.contentOffset.x; }}
-        scrollEventThrottle={16}
-      >
+    <View style={[s.wrapper, { paddingTop: wrapperPadTop, paddingBottom: wrapperPadBot }]}>
+      <View style={[
+        s.pillsRow,
+        { paddingHorizontal: containerPadH, gap: pillGap },
+      ]}>
         {tabs.map(tab => {
           const isActive = tab.id === activeTab;
           return (
             <TouchableOpacity
               key={tab.id}
-              style={[s.tab, { paddingHorizontal: tabPaddingH, paddingVertical: tabPaddingV }, isActive && s.tabActive]}
+              style={[
+                s.pill,
+                { paddingHorizontal: tabPadH, paddingVertical: tabPadV },
+                isActive ? s.pillActive : s.pillInactive,
+              ]}
               onPress={() => onTabChange(tab.id)}
               activeOpacity={0.7}
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: isActive }}
+              hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
             >
-              <Text style={[s.tabText, { fontSize: tabFontSize }, isActive && s.tabTextActive]}>
+              {tab.icon ? (
+                <MaterialCommunityIcons
+                  name={tab.icon}
+                  size={iconSize}
+                  color={isActive ? '#0A0A0A' : DarkColors.gold}
+                  style={{ marginRight: iconMarginR }}
+                />
+              ) : null}
+              <Text style={[
+                s.pillText,
+                { fontSize: tabFontSize },
+                isActive ? s.pillTextActive : s.pillTextInactive,
+              ]}>
                 {tab.label}
               </Text>
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
-
-      {/* Right chevron — always visible */}
-      <TouchableOpacity style={[s.arrowRight, { width: arrowWidth }]} onPress={() => navigateTab(1)} activeOpacity={0.7}>
-        <PulsingChevron direction="right" size={chevronIconSize} circleSize={chevronCircleSize} />
-      </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
   wrapper: {
-    position: 'relative',
+    backgroundColor: DarkColors.bg,
     borderBottomWidth: 1,
     borderBottomColor: DarkColors.borderCard,
-    backgroundColor: DarkColors.bg,
   },
-  bar: {
-    flexGrow: 0,
+
+  // Wrapping row — pills fall to a second (or third) row automatically
+  // when they don't fit. Left-aligned so the user's reading flow starts
+  // from the natural top-left anchor (matches how lists below the bar
+  // also begin at the left edge).
+  pillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
   },
-  container: {
-    paddingHorizontal: 40,
-    gap: 2,
+
+  pill: {
+    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 24,
+    borderWidth: 1,
   },
-  tab: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+  pillActive: {
+    backgroundColor: DarkColors.saffron,
+    borderColor: DarkColors.saffron,
   },
-  tabActive: {
-    borderBottomColor: DarkColors.saffron,
+  pillInactive: {
+    backgroundColor: DarkColors.bgCard,
+    borderColor: DarkColors.borderCard,
   },
-  tabText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: DarkColors.textMuted,
-  },
-  tabTextActive: {
-    color: DarkColors.saffron,
-    fontWeight: '800',
-  },
-  arrowLeft: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 34,
-    zIndex: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: DarkColors.bg,
-  },
-  arrowRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 34,
-    zIndex: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: DarkColors.bg,
-  },
-  chevronCircle: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: DarkColors.saffron, alignItems: 'center', justifyContent: 'center',
-    elevation: 4,
-    ...(Platform.OS === 'web'
-      ? { boxShadow: '0px 2px 4px rgba(232,117,26,0.3)' }
-      : { shadowColor: DarkColors.saffron, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4 }),
-  },
+  pillText: { fontWeight: '700', letterSpacing: 0.2 },
+  pillTextActive: { color: '#0A0A0A', fontWeight: '600' },
+  pillTextInactive: { color: DarkColors.gold },
 });

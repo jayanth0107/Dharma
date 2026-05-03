@@ -221,10 +221,10 @@ export function QuizScreen() {
               if (isAnswered) {
                 if (isCorrectOpt) {
                   optStyle = [s.option, s.optCorrect];
-                  optTextStyle = [s.optText, { color: '#FFFFFF', fontWeight: '800' }];
+                  optTextStyle = [s.optText, { color: '#FFFFFF', fontWeight: '600' }];
                 } else if (isSelected && !isCorrectOpt) {
                   optStyle = [s.option, s.optWrong];
-                  optTextStyle = [s.optText, { color: '#FFFFFF', fontWeight: '800' }];
+                  optTextStyle = [s.optText, { color: '#FFFFFF', fontWeight: '600' }];
                 }
               } else if (isSelected) {
                 optStyle = [s.option, s.optSelected];
@@ -305,7 +305,7 @@ const s = StyleSheet.create({
 
   // Progress
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
-  progressText: { fontSize: 14, fontWeight: '800', color: DarkColors.gold, minWidth: 45 },
+  progressText: { fontSize: 14, fontWeight: '600', color: DarkColors.gold, minWidth: 45 },
   progressBar: { flex: 1, height: 6, backgroundColor: DarkColors.bgElevated, borderRadius: 3 },
   progressFill: { height: 6, borderRadius: 3, backgroundColor: DarkColors.gold },
   scoreText: { fontSize: 12, fontWeight: '700', color: DarkColors.tulasiGreen },
@@ -316,7 +316,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard, marginBottom: 16,
   },
   qHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
-  qNumber: { fontSize: 14, fontWeight: '900' },
+  qNumber: { fontSize: 14, fontWeight: '700' },
   qText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', lineHeight: 26, marginBottom: 20 },
 
   // Options
@@ -329,7 +329,7 @@ const s = StyleSheet.create({
   optSelected: { borderColor: DarkColors.gold, backgroundColor: 'rgba(212,160,23,0.08)' },
   optCorrect: { borderColor: DarkColors.tulasiGreen, backgroundColor: DarkColors.tulasiGreen },
   optWrong: { borderColor: DarkColors.kumkum, backgroundColor: DarkColors.kumkum },
-  optLetter: { fontSize: 14, fontWeight: '900', color: DarkColors.textMuted, width: 22 },
+  optLetter: { fontSize: 14, fontWeight: '700', color: DarkColors.textMuted, width: 22 },
   optText: { flex: 1, fontSize: 15, fontWeight: '600', color: DarkColors.silver },
 
   // Navigation
@@ -343,7 +343,7 @@ const s = StyleSheet.create({
     flex: 1, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14,
     backgroundColor: DarkColors.gold, alignItems: 'center',
   },
-  navBtnNextText: { fontSize: 16, fontWeight: '800', color: '#0A0A0A' },
+  navBtnNextText: { fontSize: 16, fontWeight: '600', color: '#0A0A0A' },
   tapHint: { fontSize: 15, color: DarkColors.textMuted, textAlign: 'center', marginBottom: 16, fontWeight: '600' },
 
   // Question dots
@@ -362,16 +362,16 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 20, padding: 28,
     alignItems: 'center', borderWidth: 1, borderColor: DarkColors.borderCard, marginBottom: 20,
   },
-  resultScore: { fontSize: 48, fontWeight: '900', marginTop: 12 },
+  resultScore: { fontSize: 48, fontWeight: '700', marginTop: 12 },
   resultPercent: { fontSize: 20, fontWeight: '700', color: DarkColors.silver, marginTop: 4 },
-  resultGrade: { fontSize: 22, fontWeight: '900', marginTop: 8 },
+  resultGrade: { fontSize: 22, fontWeight: '700', marginTop: 8 },
   resultBar: { width: '100%', height: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 4, marginTop: 16 },
   resultBarFill: { height: 8, borderRadius: 4 },
   resultStats: { flexDirection: 'row', gap: 24, marginTop: 16 },
   statItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statText: { fontSize: 14, fontWeight: '700', color: DarkColors.silver },
 
-  reviewTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.gold, marginBottom: 12 },
+  reviewTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.gold, marginBottom: 12 },
   reviewItem: {
     backgroundColor: DarkColors.bgCard, borderRadius: 12, padding: 14, marginBottom: 8,
     borderLeftWidth: 3, borderWidth: 1, borderColor: DarkColors.borderCard,
@@ -391,6 +391,6 @@ const s = StyleSheet.create({
     paddingVertical: 14, borderRadius: 14,
     backgroundColor: DarkColors.gold,
   },
-  newSetBtnText: { fontSize: 14, fontWeight: '800', color: '#0A0A0A' },
+  newSetBtnText: { fontSize: 14, fontWeight: '600', color: '#0A0A0A' },
   setIndicator: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, textAlign: 'center', marginBottom: 8, letterSpacing: 0.5 },
 });

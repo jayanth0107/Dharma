@@ -1,7 +1,7 @@
 // ధర్మ — Pramana Trayam Data (ప్రమాణ త్రయం)
 // Every deity, festival, vrata has three scriptural authorities:
 //   1. Shruti (శ్రుతి) — Vedas
-//   2. Smriti (స్మృతి) — Puranas, Itihasas, Dharmasutras
+//   2. Smriti (స్మృతి) — Puranas, Ithihaasas, Dharmasutras
 //   3. Shishtachara (శిష్టాచారం) — Traditional practice of elders
 
 // ── DEITY PRAMANAS ──

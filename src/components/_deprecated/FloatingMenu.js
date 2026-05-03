@@ -147,7 +147,7 @@ const s = StyleSheet.create({
     backgroundColor: '#ccc', alignSelf: 'center', marginBottom: 12,
   },
   title: {
-    fontSize: 20, fontWeight: '800', color: Colors.darkBrown,
+    fontSize: 20, fontWeight: '600', color: Colors.darkBrown,
     textAlign: 'center',
   },
   closeBtn: {

@@ -265,7 +265,7 @@ const gs = StyleSheet.create({
   },
   headerOrnamentLine: { flex: 1, height: 1.5, backgroundColor: DarkColors.gold, opacity: 0.3, borderRadius: 1 },
   sectionTitle: {
-    fontSize: 19, fontWeight: '800', color: DarkColors.goldLight, textAlign: 'center', letterSpacing: 1,
+    fontSize: 19, fontWeight: '600', color: DarkColors.goldLight, textAlign: 'center', letterSpacing: 1,
   },
   sectionSubRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 14,
@@ -314,7 +314,7 @@ const gs = StyleSheet.create({
   priceCol: { flex: 1, alignItems: 'center' },
   priceCenter: { marginHorizontal: 8 },
   priceLabel: { ...Type.small, color: DarkColors.textSecondary, fontWeight: '700', marginBottom: 5, letterSpacing: 0.5 },
-  priceValue: { ...Type.h2, fontWeight: '900' },
+  priceValue: { ...Type.h2, fontWeight: '700' },
 
   // Live badge
   liveBadge: {
@@ -322,12 +322,12 @@ const gs = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
   },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4CAF50' },
-  liveText: { ...Type.caption, fontWeight: '800', color: '#4CAF50', letterSpacing: 0.5 },
+  liveText: { ...Type.caption, fontWeight: '600', color: '#4CAF50', letterSpacing: 0.5 },
 
   // Loading
   loadingWrap: { borderRadius: 20, overflow: 'hidden', marginBottom: 12 },
   loadingGradient: { alignItems: 'center', paddingVertical: 30 },
-  loadingTitle: { fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, marginTop: 10, letterSpacing: 0.5 },
+  loadingTitle: { fontSize: 18, fontWeight: '600', color: DarkColors.goldLight, marginTop: 10, letterSpacing: 0.5 },
   loadingText: { ...Type.body, color: DarkColors.textSecondary, marginTop: 8 },
 
   // Footer

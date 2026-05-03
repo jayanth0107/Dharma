@@ -59,10 +59,10 @@ const s = StyleSheet.create({
   },
   bannerRewarded: { backgroundColor: 'rgba(46,125,50,0.08)', borderColor: 'rgba(46,125,50,0.2)' },
   bannerContent: { flexDirection: 'row', alignItems: 'center' },
-  title: { fontSize: 13, fontWeight: '800', color: DarkColors.gold },
+  title: { fontSize: 13, fontWeight: '600', color: DarkColors.gold },
   sub: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2 },
   rewardedText: { fontSize: 13, fontWeight: '700', color: DarkColors.tulasiGreen, marginLeft: 8 },
   progressBar: { height: 4, backgroundColor: DarkColors.bgElevated, borderRadius: 2, marginTop: 6 },
   progressFill: { height: 4, backgroundColor: DarkColors.gold, borderRadius: 2 },
-  count: { fontSize: 18, fontWeight: '900', color: DarkColors.gold, marginLeft: 10 },
+  count: { fontSize: 18, fontWeight: '700', color: DarkColors.gold, marginLeft: 10 },
 });

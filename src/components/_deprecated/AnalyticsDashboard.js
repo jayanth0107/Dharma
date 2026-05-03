@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     width: '48%', backgroundColor: Colors.white, borderRadius: 12, padding: 14,
     marginBottom: 10, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)',
   },
-  metricValue: { fontSize: 24, fontWeight: '800', color: Colors.saffron },
+  metricValue: { fontSize: 24, fontWeight: '600', color: Colors.saffron },
   metricLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '600', marginTop: 4 },
 
   chartContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-end', height: 120, paddingTop: 10 },

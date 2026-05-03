@@ -35,14 +35,18 @@ export function MahabharataScreen() {
   const storyFs = usePick({ default: 16, md: 17, xl: 19 });
   const storyLh = usePick({ default: 28, md: 30, xl: 34 });
 
-  const buildShareText = (ep) => (
-    `🙏 *ధర్మ — మహాభారతం*\n\n` +
-    `📖 ${ep.parva.te} — ${t(ep.title.te, ep.title.en)}\n\n` +
-    `${ep.story.te}\n\n` +
-    `💡 *నీతి:* ${ep.moral.te}\n\n` +
-    `🤔 *తెలుసా?* ${ep.didYouKnow.te}\n\n` +
-    `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`
-  );
+  const buildShareText = (ep) => {
+    const isEn = lang === 'en';
+    const L = isEn
+      ? { hdr: 'Dharma — Mahabharata', moral: 'Moral', trivia: 'Did you know?' }
+      : { hdr: 'ధర్మ — మహాభారతం',       moral: 'నీతి',  trivia: 'తెలుసా?'      };
+    return `🙏 *${L.hdr}*\n\n` +
+      `📖 ${t(ep.parva.te, ep.parva.en)} — ${t(ep.title.te, ep.title.en)}\n\n` +
+      `${t(ep.story.te, ep.story.en)}\n\n` +
+      `💡 *${L.moral}:* ${t(ep.moral.te, ep.moral.en)}\n\n` +
+      `🤔 *${L.trivia}* ${t(ep.didYouKnow.te, ep.didYouKnow.en)}\n\n` +
+      `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+  };
 
   const renderEpisode = (ep, isToday = false) => (
     <View key={ep.id} style={[s.card, isToday && s.cardToday]}>
@@ -73,9 +77,11 @@ export function MahabharataScreen() {
       </View>
 
       <View style={s.dykBox}>
-        <MaterialCommunityIcons name="help-circle" size={16} color="#9B6FCF" />
-        <Text style={s.dykLabel}>{t('తెలుసా?', 'Did you know?')}</Text>
-        <Text style={s.dykText}>{t(ep.didYouKnow.te, ep.didYouKnow.en)}</Text>
+        <MaterialCommunityIcons name="help-circle" size={18} color="#9B6FCF" style={s.dykIcon} />
+        <View style={s.dykContent}>
+          <Text style={s.dykLabel}>{t('తెలుసా?', 'Did you know?')}</Text>
+          <Text style={s.dykText}>{t(ep.didYouKnow.te, ep.didYouKnow.en)}</Text>
+        </View>
       </View>
 
       <View style={s.charRow}>
@@ -96,7 +102,7 @@ export function MahabharataScreen() {
         <View style={s.header}>
           <MaterialCommunityIcons name="sword-cross" size={28} color="#9B6FCF" />
           <Text style={s.headerTitle}>{t('మహాభారతం — నేటి ఎపిసోడ్', 'Mahabharata — Today\'s Episode')}</Text>
-          <Text style={s.headerSub}>{t('ప్రతి రోజు ఒక కథ — 30 రోజుల్లో మహాభారతం', 'One story every day — Mahabharata in 30 days')}</Text>
+          <Text style={s.headerSub}>{t('ప్రతి రోజు ఒక ఘట్టం — 30 రోజుల్లో మహాభారతం', 'One episode every day — Mahabharata in 30 days')}</Text>
         </View>
 
         {fallbackNote && (
@@ -115,7 +121,7 @@ export function MahabharataScreen() {
         </TouchableOpacity>
 
         {showAll && MAHABHARATA_EPISODES.filter(e => e.id !== episode.id).map(ep => renderEpisode(ep, false))}
-        <SacredContentDisclaimer />
+        <SacredContentDisclaimer source="mahabharata" />
         <View style={{ height: 30 }} />
       </ScrollView>
     </View>
@@ -128,26 +134,26 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '900', color: '#9B6FCF', textAlign: 'center' },
-  headerSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#9B6FCF', textAlign: 'center' },
+  headerSub: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 22 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   cardToday: { borderColor: '#9B6FCF', borderWidth: 1.5 },
-  parvaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  parvaBadge: { backgroundColor: 'rgba(155,111,207,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  parvaText: { fontSize: 12, fontWeight: '800', color: '#9B6FCF' },
-  episodeNum: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted },
-  todayBadge: { backgroundColor: '#9B6FCF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  todayText: { fontSize: 10, fontWeight: '800', color: '#FFFFFF' },
+  parvaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  parvaBadge: { backgroundColor: 'rgba(155,111,207,0.15)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  parvaText: { fontSize: 14, fontWeight: '700', color: '#9B6FCF' },
+  episodeNum: { fontSize: 14, fontWeight: '700', color: DarkColors.silverLight },
+  todayBadge: { backgroundColor: '#9B6FCF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  todayText: { fontSize: 12, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.3 },
   speakerBtn: {
     marginLeft: 'auto', width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(155,111,207,0.1)', borderWidth: 1, borderColor: 'rgba(155,111,207,0.3)',
   },
   speakerBtnActive: { backgroundColor: '#9B6FCF', borderColor: '#9B6FCF' },
-  title: { fontSize: 20, fontWeight: '900', color: '#FFFFFF', marginBottom: 12, lineHeight: 30 },
+  title: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginBottom: 12, lineHeight: 30 },
   story: { fontSize: 16, fontWeight: '500', color: DarkColors.silver, lineHeight: 28, marginBottom: 14 },
   moralBox: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
@@ -155,14 +161,25 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   moralText: { flex: 1, fontSize: 14, fontWeight: '700', color: DarkColors.gold, lineHeight: 22 },
+  // "Did you know?" — row layout (icon left, content column right) so
+  // it matches the Moral box and avoids the orphaned-icon look.
   dykBox: {
-    backgroundColor: 'rgba(155,111,207,0.06)', borderRadius: 10, padding: 10, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(155,111,207,0.2)',
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: 'rgba(155,111,207,0.06)', borderRadius: 12, padding: 12, marginBottom: 10,
+    borderWidth: 1, borderColor: 'rgba(155,111,207,0.25)',
   },
-  dykLabel: { fontSize: 12, fontWeight: '800', color: '#9B6FCF', marginBottom: 4, marginLeft: 24 },
-  dykText: { fontSize: 13, fontWeight: '500', color: DarkColors.silver, lineHeight: 20, marginLeft: 24 },
-  charRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  charText: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted },
+  dykIcon: { marginTop: 1 },
+  dykContent: { flex: 1 },
+  dykLabel: {
+    fontSize: 13, fontWeight: '600', color: '#9B6FCF',
+    marginBottom: 4, letterSpacing: 0.3, textTransform: 'uppercase',
+  },
+  dykText: {
+    fontSize: 14, fontWeight: '500', color: DarkColors.silver,
+    lineHeight: 22,
+  },
+  charRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  charText: { fontSize: 14, fontWeight: '600', color: DarkColors.silverLight },
   browseBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 14, marginVertical: 8,

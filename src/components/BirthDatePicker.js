@@ -11,7 +11,7 @@
 //   visible, selectedDate, selectedTime?, showTime?, lang, title,
 //   onSelect(date) | onSelect(date, "HH:MM"), onClose
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView,
   Platform, KeyboardAvoidingView,
@@ -30,8 +30,10 @@ const VISIBLE_ITEMS = 3;
 const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CURRENT_YEAR = new Date().getFullYear();
-// Year range — covers everyone including centenarian elders
-// for Family / Matchmaking flows.
+// Default year range — covers everyone including centenarian elders
+// for Family / Matchmaking flows. Callers can override via the
+// `yearStart` / `yearEnd` props (e.g. Muhurtam picker allows the
+// upcoming year so users can plan future auspicious dates).
 const YEAR_START = 1923;
 const YEARS = Array.from({ length: CURRENT_YEAR - YEAR_START + 1 }, (_, i) => YEAR_START + i);
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -70,9 +72,24 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
   }, [selectedIndex]);
 
   // Compute index from a given scroll Y, clamped to data bounds.
+  // Use a ref for length so the callback always sees the latest length
+  // even when data shrinks between renders (e.g. month change 31→28).
+  const dataLenRef = useRef(data.length);
+  dataLenRef.current = data.length;
   const indexFromY = useCallback((y) => (
-    Math.max(0, Math.min(Math.round(y / ITEM_HEIGHT), data.length - 1))
-  ), [data.length]);
+    Math.max(0, Math.min(Math.round(y / ITEM_HEIGHT), dataLenRef.current - 1))
+  ), []);
+
+  // When data length shrinks below the current selection (Jan→Feb with
+  // day 31), re-snap the wheel to the new max so the highlighted row
+  // matches what the parent computes for effectiveDay.
+  useEffect(() => {
+    if (selectedIndex >= data.length && scrollRef.current) {
+      const target = Math.max(0, data.length - 1);
+      scrollRef.current.scrollTo({ y: target * ITEM_HEIGHT, animated: true });
+      lastSnapped.current = target;
+    }
+  }, [data.length, selectedIndex]);
 
   // Live update: fires while the user is actively dragging or
   // momentum-scrolling. We only call onSelect when the centred item
@@ -133,7 +150,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
         >
           {data.map((item, i) => (
             <TouchableOpacity
-              key={i}
+              key={`${item}-${i}`}
               style={ws.item}
               onPress={() => handleItemTap(i)}
               activeOpacity={0.7}
@@ -177,26 +194,50 @@ export function BirthDatePicker({
   visible = true,
   lang = 'te',
   showTime = false,
+  yearStart,   // optional override (default: 1923)
+  yearEnd,     // optional override (default: current year)
 }) {
+  // Build the year list dynamically per instance so each caller can
+  // open up its own range (e.g., Muhurtam picker = current ± 1).
+  const ys = yearStart ?? YEAR_START;
+  const ye = yearEnd   ?? CURRENT_YEAR;
+  const yearsArr = React.useMemo(
+    () => Array.from({ length: ye - ys + 1 }, (_, i) => ys + i),
+    [ys, ye]
+  );
   const btnPadV = usePick({ default: 14, lg: 16, xl: 18 });
   const titleSize = usePick({ default: 18, lg: 20, xl: 22 });
-  const monthColWidth = usePick({ default: 80, lg: 90, xl: 100 });
-  const dayColWidth = usePick({ default: 60, lg: 70, xl: 80 });
-  const yearColWidth = usePick({ default: 80, lg: 90, xl: 100 });
-  const timeColWidth = usePick({ default: 65, lg: 75, xl: 85 });
+  // Day column is wider than month/year — day is the most-changed
+  // axis when looking up a panchangam, so the wheel that drives the
+  // primary input gets visual dominance + a larger tap target.
+  const dayColWidth   = usePick({ default: 100, lg: 120, xl: 140 });
+  const monthColWidth = usePick({ default: 80,  lg: 90,  xl: 100 });
+  const yearColWidth  = usePick({ default: 80,  lg: 90,  xl: 100 });
+  const timeColWidth  = usePick({ default: 65,  lg: 75,  xl: 85  });
 
   // ── Source-of-truth state ──
+  // Clamp inputs at the boundary: years outside [ys, ye] would leave
+  // yearsArr.indexOf returning -1 and the wheel showing a value that
+  // doesn't match the chip. Same for minutes if a caller ever hands
+  // in a malformed "06:75".
+  const clampYear = (y) => Math.max(ys, Math.min(ye, y));
+  const clampMinute = (m) => {
+    const n = Number(m);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(59, Math.floor(n)));
+  };
+
   const initDate = selectedDate || new Date(1990, 0, 1);
   const [day, setDay] = useState(initDate.getDate());
   const [month, setMonth] = useState(initDate.getMonth());
-  const [year, setYear] = useState(initDate.getFullYear());
+  const [year, setYear] = useState(clampYear(initDate.getFullYear()));
 
   const [h24Init, mInit] = (selectedTime || '06:00').split(':').map(Number);
   const [hour12, setHour12] = useState(() => {
     const h = (h24Init || 6) % 12;
     return h === 0 ? 12 : h;
   });
-  const [minute, setMinute] = useState(() => (mInit || 0));
+  const [minute, setMinute] = useState(() => clampMinute(mInit));
   const [isPm, setIsPm] = useState(() => (h24Init || 6) >= 12);
 
   // Which chip the user last tapped — used as a visual highlight to
@@ -207,7 +248,7 @@ export function BirthDatePicker({
     if (selectedDate) {
       setDay(selectedDate.getDate());
       setMonth(selectedDate.getMonth());
-      setYear(selectedDate.getFullYear());
+      setYear(clampYear(selectedDate.getFullYear()));
     }
   }, [selectedDate]);
 
@@ -216,21 +257,28 @@ export function BirthDatePicker({
       const [h24, m] = selectedTime.split(':').map(Number);
       const h = h24 % 12;
       setHour12(h === 0 ? 12 : h);
-      setMinute(m);
+      setMinute(clampMinute(m));
       setIsPm(h24 >= 12);
     }
   }, [selectedTime]);
 
   const maxDays = getDaysInMonth(month, year);
   const effectiveDay = Math.min(day, maxDays);
-  const yearIndex = YEARS.indexOf(year);
+  // Memoise the day array — passing a fresh array reference each
+  // render breaks WheelColumn's stable-data assumption and forces
+  // unnecessary re-snaps. New ref only when maxDays actually changes.
+  const dayData = useMemo(
+    () => Array.from({ length: maxDays }, (_, i) => i + 1),
+    [maxDays],
+  );
+  const yearIndex = yearsArr.indexOf(year);
   const dayIndex = effectiveDay - 1;
   const hourIndex = HOURS_12.indexOf(hour12);
-  const minuteIndex = MINUTES_ALL.indexOf(minute >= 60 ? 0 : minute);
+  const minuteIndex = MINUTES_ALL.indexOf(minute);
   const periodIndex = isPm ? 1 : 0;
 
   const timeDisplay = showTime
-    ? `${pad2(hour12)}:${pad2(minute % 60)} ${isPm ? 'PM' : 'AM'}`
+    ? `${pad2(hour12)}:${pad2(minute)} ${isPm ? 'PM' : 'AM'}`
     : '';
 
   const handleConfirm = () => {
@@ -238,8 +286,8 @@ export function BirthDatePicker({
     if (showTime) {
       let h24 = hour12 % 12;
       if (isPm) h24 += 12;
-      const timeStr = `${pad2(h24)}:${pad2(minute % 60)}`;
-      d.setHours(h24, minute % 60, 0, 0);
+      const timeStr = `${pad2(h24)}:${pad2(minute)}`;
+      d.setHours(h24, minute, 0, 0);
       onSelect(d, timeStr);
     } else {
       onSelect(d);
@@ -260,7 +308,12 @@ export function BirthDatePicker({
           >
             {/* Header */}
             <View style={ws.header}>
-              <TouchableOpacity onPress={onClose} style={ws.closeBtn}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={ws.closeBtn}
+                hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }}
+                accessibilityLabel="Close picker"
+              >
                 <MaterialCommunityIcons name="close" size={22} color={DarkColors.textMuted} />
               </TouchableOpacity>
               <Text style={[ws.title, { fontSize: titleSize }]}>
@@ -334,6 +387,9 @@ export function BirthDatePicker({
                         style={[ws.amPmBtn, !isPm && ws.amPmBtnActive]}
                         onPress={() => setIsPm(false)}
                         activeOpacity={0.7}
+                        hitSlop={{ top: 8, right: 4, bottom: 8, left: 4 }}
+                        accessibilityLabel="AM"
+                        accessibilityState={{ selected: !isPm }}
                       >
                         <Text style={[ws.amPmText, !isPm && ws.amPmTextActive]}>AM</Text>
                       </TouchableOpacity>
@@ -341,6 +397,9 @@ export function BirthDatePicker({
                         style={[ws.amPmBtn, isPm && ws.amPmBtnActive]}
                         onPress={() => setIsPm(true)}
                         activeOpacity={0.7}
+                        hitSlop={{ top: 8, right: 4, bottom: 8, left: 4 }}
+                        accessibilityLabel="PM"
+                        accessibilityState={{ selected: isPm }}
                       >
                         <Text style={[ws.amPmText, isPm && ws.amPmTextActive]}>PM</Text>
                       </TouchableOpacity>
@@ -353,7 +412,7 @@ export function BirthDatePicker({
             {/* ── Date wheels ── */}
             <View style={ws.wheelsRow}>
               <WheelColumn
-                data={Array.from({ length: maxDays }, (_, i) => i + 1)}
+                data={dayData}
                 selectedIndex={dayIndex}
                 onSelect={(i) => { setDay(i + 1); setFocusField('day'); }}
                 label={lang === 'te' ? 'రోజు' : 'Day'}
@@ -376,11 +435,11 @@ export function BirthDatePicker({
                 highlight={focusField === 'month'}
               />
               <WheelColumn
-                data={YEARS}
-                selectedIndex={yearIndex >= 0 ? yearIndex : YEARS.length - 31}
+                data={yearsArr}
+                selectedIndex={yearIndex >= 0 ? yearIndex : Math.max(0, yearsArr.indexOf(1990))}
                 onSelect={(i) => {
-                  setYear(YEARS[i]);
-                  const newMax = getDaysInMonth(month, YEARS[i]);
+                  setYear(yearsArr[i]);
+                  const newMax = getDaysInMonth(month, yearsArr[i]);
                   if (day > newMax) setDay(newMax);
                   setFocusField('year');
                 }}
@@ -467,19 +526,19 @@ const ws = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   closeBtn: { position: 'absolute', left: 16, top: 16, padding: 4 },
-  title: { fontWeight: '800', color: DarkColors.gold, textAlign: 'center' },
+  title: { fontWeight: '600', color: DarkColors.gold, textAlign: 'center' },
   preview: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: 12,
     backgroundColor: DarkColors.goldDim,
     marginHorizontal: 20, marginTop: 12, borderRadius: 12,
   },
-  previewText: { fontSize: 18, fontWeight: '800', color: DarkColors.goldLight, letterSpacing: 1 },
+  previewText: { fontSize: 18, fontWeight: '600', color: DarkColors.goldLight, letterSpacing: 1 },
 
   // Field blocks (date / time)
   fieldsBlock: { paddingHorizontal: 20, paddingTop: 14 },
   blockLabel: {
-    fontSize: 12, fontWeight: '800', color: DarkColors.silver,
+    fontSize: 12, fontWeight: '600', color: DarkColors.silver,
     textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8,
   },
   chipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -496,7 +555,7 @@ const ws = StyleSheet.create({
     backgroundColor: DarkColors.goldDim,
   },
   chipValue: {
-    fontSize: 22, fontWeight: '900', color: '#FFFFFF',
+    fontSize: 22, fontWeight: '700', color: '#FFFFFF',
     letterSpacing: 1,
   },
   chipValueFocus: { color: DarkColors.goldLight },
@@ -510,7 +569,7 @@ const ws = StyleSheet.create({
   },
 
   sepText: {
-    fontSize: 22, fontWeight: '900', color: DarkColors.gold,
+    fontSize: 22, fontWeight: '700', color: DarkColors.gold,
     paddingHorizontal: 2, paddingTop: 6,
   },
   miniLabel: {
@@ -529,7 +588,7 @@ const ws = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   amPmBtnActive: { backgroundColor: DarkColors.gold },
-  amPmText: { fontSize: 13, fontWeight: '800', color: DarkColors.silver, letterSpacing: 0.5 },
+  amPmText: { fontSize: 13, fontWeight: '600', color: DarkColors.silver, letterSpacing: 0.5 },
   amPmTextActive: { color: '#0A0A0A' },
 
   wheelsRow: {
@@ -537,7 +596,7 @@ const ws = StyleSheet.create({
     paddingVertical: 12, gap: 8,
   },
   colonText: {
-    fontSize: 28, fontWeight: '900', color: DarkColors.gold,
+    fontSize: 28, fontWeight: '700', color: DarkColors.gold,
     alignSelf: 'center', marginTop: 24,
   },
   timeDivider: {
@@ -576,7 +635,7 @@ const ws = StyleSheet.create({
   },
   item: { height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center' },
   itemText: { fontSize: 20, fontWeight: '600', color: DarkColors.textPrimary },
-  itemTextSelected: { fontSize: 26, fontWeight: '900', color: DarkColors.gold },
+  itemTextSelected: { fontSize: 26, fontWeight: '700', color: DarkColors.gold },
   itemTextDim: { color: DarkColors.silver, fontSize: 17 },
   actions: {
     flexDirection: 'row', gap: 12,
@@ -593,5 +652,5 @@ const ws = StyleSheet.create({
     flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingVertical: 14, borderRadius: 14, backgroundColor: DarkColors.gold,
   },
-  confirmText: { fontSize: 16, fontWeight: '800', color: '#0A0A0A' },
+  confirmText: { fontSize: 16, fontWeight: '600', color: '#0A0A0A' },
 });

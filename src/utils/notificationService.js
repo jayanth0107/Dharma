@@ -1,21 +1,19 @@
 // Dharma Daily — Notification Service
 //
-// Design principle: less is more. With 27+ features, we deliberately ship
-// only TWO daily notifications by default + two event-driven reminders.
-// Push is for "open the app for X" — not a feature catalogue.
+// Design principle: user controls what they hear from. Wisdom-content
+// notifications (Neethi Sukta, Ramayana, Gita, Mahabharata) are
+// individually toggleable. Neethi Sukta is ON by default — testers said
+// it's the gentlest daily nudge without being preachy. Ithihaasa /
+// scripture notifications are OFF by default so users opt in only to
+// the texts they want to follow.
 //
-//   1. Morning Briefing  (~6 AM, default ON)
-//      Title:  🙏 Dharma — Today's Panchangam (with festival/ekadashi badge)
-//      Body:   Tithi · Nakshatra · Yoga · Sunrise · Sunset · Muhurtams
-//              + Today's festival/ekadashi if any
-//              + Today's Neethi Sukta (one-line wisdom)
-//              + User's rashi prediction if set
-//
-//   2. Daily Neethi Sukta  (~12 PM, default ON)
-//      Lunch-time wisdom nudge — full sukta with meaning.
-//
-//   3. Festival reminder   (1 day before, 6 PM)  — event-driven
-//   4. Ekadashi reminder   (1 day before, 6 PM)  — event-driven
+//   1. Morning Briefing  (~6 AM, default ON)        — Panchangam digest
+//   2. Ramayana episode  (~7 AM, default OFF)       — daily Ithihaasa
+//   3. Gita sloka        (~9 AM, default OFF)       — daily verse
+//   4. Neethi Sukta      (~12 PM, default ON)       — wisdom nudge
+//   5. Mahabharata       (~6 PM, default OFF)       — evening Ithihaasa
+//   6. Festival reminder (1 day before, 6 PM)       — event-driven
+//   7. Ekadashi reminder (1 day before, 6 PM)       — event-driven
 //
 // All notifications are bilingual — content is rendered in the user's
 // chosen language (read from @dharma_lang at schedule time). Switching
@@ -30,21 +28,35 @@ import { getTodayFestival, getTodayFestivals, getUpcomingFestivals } from '../da
 import { getTodayEkadashi, getUpcomingEkadashis } from '../data/ekadashi';
 import { getUpcomingHolidays } from '../data/holidays';
 import { getUpcomingObservances } from '../data/observances';
+import { getTodayRamayanaEpisode } from '../data/ramayanaData';
+import { getTodayMahabharataEpisode } from '../data/mahabharataData';
+import { getTodayGitaSloka } from '../data/bhagavadGita';
 
 // Storage keys
 const NOTIF_SETTINGS_KEY = '@dharma_notif_settings';
 const LANG_KEY = '@dharma_lang';
 
-// Default settings — all daily notifications ON, master toggle off in one tap.
+// Default settings — Neethi Sukta + Panchangam + event reminders ON;
+// Ithihaasa / Gita OFF so users opt-in to texts they want to follow.
 const DEFAULT_SETTINGS = {
   enabled: true,
-  dailyPanchangam: true,      // Morning briefing
-  dailyQuote: true,           // Daily Neethi Sukta at noon
+  dailyPanchangam: true,      // Morning briefing — 6 AM
+  dailyRamayana: false,       // Daily Ramayana episode — 7 AM
+  dailyGita: false,           // Daily Gita sloka — 9 AM
+  dailyQuote: true,           // Daily Neethi Sukta — 12 PM
+  dailyMahabharata: false,    // Daily Mahabharata episode — 6 PM
   festivalReminder: true,     // 1 day before festivals
   ekadashiReminder: true,     // 1 day before ekadashi
-  notifHour: 6,               // Morning briefing time
+  notifHour: 6,               // Morning briefing time (user-adjustable)
   notifMinute: 0,
 };
+
+// Fixed notification slots for the wisdom-content streams. Spread
+// across the day so users get one nudge at a time, not a barrage.
+const SLOT_RAMAYANA    = { hour: 7,  minute: 0 };
+const SLOT_GITA        = { hour: 9,  minute: 0 };
+const SLOT_NEETHI      = { hour: 12, minute: 0 };
+const SLOT_MAHABHARATA = { hour: 18, minute: 0 };
 
 // ─────────────────────────────────────────────────────────────────────────
 // Storage helpers
@@ -251,6 +263,62 @@ function buildSuktaNotif(today, lang) {
   return { title, body };
 }
 
+// Daily Ramayana episode — title + opening lines of the story + moral.
+function buildRamayanaNotif(today, lang) {
+  const ep = getTodayRamayanaEpisode(today);
+  if (!ep) return null;
+  const kanda = pickL(lang, ep.kanda.te, ep.kanda.en);
+  const title = pickL(lang, ep.title.te, ep.title.en);
+  const story = pickL(lang, ep.story.te, ep.story.en);
+  const moral = pickL(lang, ep.moral.te, ep.moral.en);
+  // Trim story to keep notification readable (~140 chars)
+  const storyShort = story.length > 140 ? story.slice(0, 138) + '…' : story;
+  return {
+    title: pickL(lang,
+      `🏹 రామాయణం — ${title}`,
+      `🏹 Ramayana — ${title}`,
+    ),
+    body: `📖 ${kanda}\n${storyShort}\n\n${pickL(lang, '🪷 నీతి', '🪷 Moral')}: ${moral}`,
+  };
+}
+
+// Daily Gita sloka — chapter:verse + Telugu meaning + theme.
+function buildGitaNotif(today, lang) {
+  const sloka = getTodayGitaSloka(today);
+  if (!sloka) return null;
+  const meaning = pickL(lang, sloka.telugu, sloka.english);
+  const theme = sloka.theme || '';
+  const meaningShort = meaning.length > 200 ? meaning.slice(0, 198) + '…' : meaning;
+  return {
+    title: pickL(lang,
+      `📖 భగవద్గీత ${sloka.chapter}.${sloka.verse}`,
+      `📖 Bhagavad Gita ${sloka.chapter}.${sloka.verse}`,
+    ),
+    body: `${theme ? `🏷️ ${theme}\n` : ''}${meaningShort}`,
+  };
+}
+
+// Daily Mahabharata episode — title + opening lines of the story + moral.
+function buildMahabharataNotif(today, lang) {
+  const ep = getTodayMahabharataEpisode(today);
+  if (!ep) return null;
+  // Mahabharata data uses parva (not kanda) — fall back gracefully.
+  const parva = ep.parva
+    ? pickL(lang, ep.parva.te || '', ep.parva.en || '')
+    : '';
+  const title = pickL(lang, ep.title.te, ep.title.en);
+  const story = pickL(lang, ep.story.te, ep.story.en);
+  const moral = pickL(lang, ep.moral.te, ep.moral.en);
+  const storyShort = story.length > 140 ? story.slice(0, 138) + '…' : story;
+  return {
+    title: pickL(lang,
+      `⚔️ మహాభారతం — ${title}`,
+      `⚔️ Mahabharata — ${title}`,
+    ),
+    body: `${parva ? `📖 ${parva}\n` : ''}${storyShort}\n\n${pickL(lang, '🪷 నీతి', '🪷 Moral')}: ${moral}`,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // Schedulers
 // ─────────────────────────────────────────────────────────────────────────
@@ -297,7 +365,47 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
       });
     }
 
-    // ── Daily Neethi Sukta at noon ──
+    // ── Daily Ramayana episode (7 AM) — opt-in ──
+    if (settings.dailyRamayana) {
+      const ram = buildRamayanaNotif(today, lang);
+      if (ram) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: ram.title,
+            body:  ram.body,
+            data:  { type: 'daily_ramayana', screen: 'Ramayana' },
+          },
+          trigger: {
+            type: 'daily',
+            hour: SLOT_RAMAYANA.hour,
+            minute: SLOT_RAMAYANA.minute,
+            ...(channelId && { channelId }),
+          },
+        });
+      }
+    }
+
+    // ── Daily Gita sloka (9 AM) — opt-in ──
+    if (settings.dailyGita) {
+      const gita = buildGitaNotif(today, lang);
+      if (gita) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: gita.title,
+            body:  gita.body,
+            data:  { type: 'daily_gita', screen: 'Gita' },
+          },
+          trigger: {
+            type: 'daily',
+            hour: SLOT_GITA.hour,
+            minute: SLOT_GITA.minute,
+            ...(channelId && { channelId }),
+          },
+        });
+      }
+    }
+
+    // ── Daily Neethi Sukta at noon (default ON) ──
     if (settings.dailyQuote) {
       const { title, body } = buildSuktaNotif(today, lang);
       await Notifications.scheduleNotificationAsync({
@@ -308,11 +416,31 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
         },
         trigger: {
           type: 'daily',
-          hour: 12,
-          minute: 0,
+          hour: SLOT_NEETHI.hour,
+          minute: SLOT_NEETHI.minute,
           ...(channelId && { channelId }),
         },
       });
+    }
+
+    // ── Daily Mahabharata episode (6 PM) — opt-in ──
+    if (settings.dailyMahabharata) {
+      const mb = buildMahabharataNotif(today, lang);
+      if (mb) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: mb.title,
+            body:  mb.body,
+            data:  { type: 'daily_mahabharata', screen: 'Mahabharata' },
+          },
+          trigger: {
+            type: 'daily',
+            hour: SLOT_MAHABHARATA.hour,
+            minute: SLOT_MAHABHARATA.minute,
+            ...(channelId && { channelId }),
+          },
+        });
+      }
     }
 
     // ── Festival reminders — 1 day before, 6 PM ──

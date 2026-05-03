@@ -1,12 +1,55 @@
-// ధర్మ — Google Places API helper
-// Uses Places API (New) — supports CORS from browsers directly
-// Falls back to legacy Places API on native for additional coverage
+// ధర్మ — Places lookup helper
+//
+// Server-first: every provider call (Geoapify, LocationIQ, Google Places)
+// is routed through the `placesSearch` Cloud Function so API keys stay
+// off the client and out of shipped APKs. Direct-API code paths below
+// are kept ONLY as a safety net for releases where the function isn't
+// reachable (older clients, network outage, function not yet deployed).
+//
+// Deployment of the proxy is a one-time chore (see functions/index.js
+// header comment). After it's live and verified, the GOOGLE_API_KEY /
+// GEOAPIFY_API_KEY / LOCATIONIQ_API_KEY constants below should be
+// stripped in a follow-up commit and the direct fallbacks removed.
 
 import { Platform } from 'react-native';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, isConfigured } from '../config/firebase';
 
 const GOOGLE_API_KEY = 'AIzaSyDqy71oBsK7g-F0W9_FZ-jUt55gC31S7II';
 
+// ── Cloud Function client wrapper ─────────────────────────────
+// Calls the `placesSearch` callable function in asia-south1 and returns
+// its data on success. Returns `null` on any failure so callers can
+// transparently fall back to the direct provider API (legacy path).
+let _functionsRef = null;
+function getPlacesFn() {
+  if (!isConfigured || !app) return null;
+  if (!_functionsRef) _functionsRef = getFunctions(app, 'asia-south1');
+  return httpsCallable(_functionsRef, 'placesSearch');
+}
+
+async function callPlacesProxy(payload) {
+  const fn = getPlacesFn();
+  if (!fn) return null;
+  try {
+    const out = await fn(payload);
+    return out?.data || null;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[placesProxy] cloud function unavailable:', e?.code || e?.message);
+    return null; // signals caller to use direct fallback
+  }
+}
+
 // ── Places API (New) — works on web without CORS proxy ──
+
+// Centralised logger for provider failures so they don't go silent.
+// In production a 403 from Geoapify or 429 from LocationIQ would
+// previously surface as "no results" with no clue at the dev console.
+function logProviderError(provider, op, err) {
+  // eslint-disable-next-line no-console
+  console.warn(`[placesProxy] ${provider} ${op} failed:`, err?.message || err);
+}
 
 function calcDist(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -31,6 +74,14 @@ function parsePlacesNew(data, lat, lon) {
 
 // Nearby Search (New) — type-based, best for "all temples near me"
 export async function googlePlacesNearbyNew(lat, lon, radius = 10000) {
+  // Prefer cloud function proxy (no client-side API key).
+  const proxied = await callPlacesProxy({ op: 'nearby', lat, lon });
+  if (proxied?.results) {
+    return proxied.results.map(p => ({
+      ...p,
+      distance: calcDist(lat, lon, p.lat, p.lon),
+    }));
+  }
   try {
     const resp = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
       method: 'POST',
@@ -49,13 +100,23 @@ export async function googlePlacesNearbyNew(lat, lon, radius = 10000) {
       }),
       signal: AbortSignal.timeout(10000),
     });
-    if (!resp.ok) return [];
+    if (!resp.ok) {
+      logProviderError('google-places-new', 'searchNearby', `HTTP ${resp.status}`);
+      return [];
+    }
     return parsePlacesNew(await resp.json(), lat, lon);
-  } catch { return []; }
+  } catch (e) { logProviderError('google-places-new', 'searchNearby', e); return []; }
 }
 
 // Text Search (New) — finds temples by name
 export async function googlePlacesTextSearchNew(lat, lon, query = 'hindu temple', radius = 10000) {
+  const proxied = await callPlacesProxy({ op: 'textSearch', lat, lon, query });
+  if (proxied?.results) {
+    return proxied.results.map(p => ({
+      ...p,
+      distance: calcDist(lat, lon, p.lat, p.lon),
+    }));
+  }
   try {
     const resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
@@ -74,15 +135,20 @@ export async function googlePlacesTextSearchNew(lat, lon, query = 'hindu temple'
       }),
       signal: AbortSignal.timeout(10000),
     });
-    if (!resp.ok) return [];
+    if (!resp.ok) {
+      logProviderError('google-places-new', 'searchText', `HTTP ${resp.status}`);
+      return [];
+    }
     return parsePlacesNew(await resp.json(), lat, lon);
-  } catch { return []; }
+  } catch (e) { logProviderError('google-places-new', 'searchText', e); return []; }
 }
 
 // ── Autocomplete + Place Details — for location search (birth place, etc.) ──
 
 export async function googlePlacesAutocomplete(input, regionCode = 'in') {
   if (!input || input.length < 2) return [];
+  const proxied = await callPlacesProxy({ op: 'autocomplete', query: input });
+  if (proxied?.results) return proxied.results;
   try {
     const resp = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
       method: 'POST',
@@ -97,7 +163,10 @@ export async function googlePlacesAutocomplete(input, regionCode = 'in') {
       }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!resp.ok) return [];
+    if (!resp.ok) {
+      logProviderError('google-places-new', 'autocomplete', `HTTP ${resp.status}`);
+      return [];
+    }
     const data = await resp.json();
     return (data.suggestions || []).filter(s => s.placePrediction).map(s => {
       const p = s.placePrediction;
@@ -108,11 +177,13 @@ export async function googlePlacesAutocomplete(input, regionCode = 'in') {
         displayName: p.text?.text || '',
       };
     });
-  } catch { return []; }
+  } catch (e) { logProviderError('google-places-new', 'autocomplete', e); return []; }
 }
 
 export async function googlePlaceDetails(placeId) {
   if (!placeId) return null;
+  const proxied = await callPlacesProxy({ op: 'details', placeId });
+  if (proxied?.result) return proxied.result;
   try {
     const resp = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
       headers: {
@@ -121,7 +192,10 @@ export async function googlePlaceDetails(placeId) {
       },
       signal: AbortSignal.timeout(8000),
     });
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      logProviderError('google-places-new', 'details', `HTTP ${resp.status}`);
+      return null;
+    }
     const data = await resp.json();
     return {
       name: data.displayName?.text || '',
@@ -130,7 +204,7 @@ export async function googlePlaceDetails(placeId) {
       longitude: data.location?.longitude || 0,
       altitude: 0,
     };
-  } catch { return null; }
+  } catch (e) { logProviderError('google-places-new', 'details', e); return null; }
 }
 
 // ── Fallback geocoders — Geoapify + LocationIQ ──
@@ -162,7 +236,10 @@ export async function geoapifySearch(input) {
       + `&format=json&limit=10`
       + `&apiKey=${GEOAPIFY_API_KEY}`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!resp.ok) return [];
+    if (!resp.ok) {
+      logProviderError('geoapify', 'search', `HTTP ${resp.status}`);
+      return [];
+    }
     const data = await resp.json();
     return (data.results || [])
       .filter(p => p.lat != null && p.lon != null)
@@ -176,7 +253,7 @@ export async function geoapifySearch(input) {
         isCustom: true,
         source: 'geoapify',
       }));
-  } catch { return []; }
+  } catch (e) { logProviderError('geoapify', 'search', e); return []; }
 }
 
 export async function locationIQSearch(input) {
@@ -191,7 +268,10 @@ export async function locationIQSearch(input) {
       headers: { 'Accept': 'application/json' },
       signal: AbortSignal.timeout(8000),
     });
-    if (!resp.ok) return [];
+    if (!resp.ok) {
+      logProviderError('locationiq', 'search', `HTTP ${resp.status}`);
+      return [];
+    }
     const data = await resp.json();
     if (!Array.isArray(data)) return [];
     return data
@@ -206,12 +286,18 @@ export async function locationIQSearch(input) {
         isCustom: true,
         source: 'locationiq',
       }));
-  } catch { return []; }
+  } catch (e) { logProviderError('locationiq', 'search', e); return []; }
 }
 
-// Cascade: Geoapify → LocationIQ. First non-empty result wins.
+// Cascade: Geoapify → LocationIQ. The cloud function does the cascade
+// server-side; if the function isn't reachable we fall back to direct
+// per-provider calls (which still have client-side keys for now).
 // Returns [] only if BOTH providers are keyless OR both fail.
 export async function fallbackSearch(input) {
+  if (!input || input.length < 2) return [];
+  const proxied = await callPlacesProxy({ op: 'search', query: input });
+  if (proxied?.results?.length) return proxied.results;
+  // Direct fallback (legacy path)
   const geo = await geoapifySearch(input);
   if (geo.length) return geo;
   return await locationIQSearch(input);
@@ -222,13 +308,23 @@ export async function fallbackSearch(input) {
 export async function googlePlacesNearby(lat, lon, keyword = 'hindu temple', radius = 10000) {
   if (Platform.OS === 'web') return { status: 'WEB_USE_NEW_API', results: [] };
   const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lon}&radius=${radius}&type=hindu_temple&keyword=${encodeURIComponent(keyword)}&language=en&key=${GOOGLE_API_KEY}`;
-  const resp = await fetch(url);
-  return await resp.json();
+  try {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    return await resp.json();
+  } catch (e) {
+    logProviderError('google-places-legacy', 'nearby', e);
+    return { status: 'ERROR', results: [] };
+  }
 }
 
 export async function googlePlacesTextSearch(lat, lon, query = 'hindu temple', radius = 5000) {
   if (Platform.OS === 'web') return { status: 'WEB_USE_NEW_API', results: [] };
   const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&location=${lat},${lon}&radius=${radius}&language=en&key=${GOOGLE_API_KEY}`;
-  const resp = await fetch(url);
-  return await resp.json();
+  try {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    return await resp.json();
+  } catch (e) {
+    logProviderError('google-places-legacy', 'textSearch', e);
+    return { status: 'ERROR', results: [] };
+  }
 }

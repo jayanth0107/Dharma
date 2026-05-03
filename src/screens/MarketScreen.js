@@ -184,7 +184,7 @@ const s = StyleSheet.create({
   statusText: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, flex: 1 },
   statusTime: { fontSize: 12, color: DarkColors.textMuted },
   // Section
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: DarkColors.gold, marginTop: 8, marginBottom: 10 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold, marginTop: 8, marginBottom: 10 },
   // Price card
   priceCard: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -195,7 +195,7 @@ const s = StyleSheet.create({
   priceName: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
   priceSymbol: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
   priceRight: { alignItems: 'flex-end' },
-  priceValue: { fontSize: 17, fontWeight: '800', color: DarkColors.textPrimary },
+  priceValue: { fontSize: 17, fontWeight: '600', color: DarkColors.textPrimary },
   changeBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
   changeText: { fontSize: 12, fontWeight: '700' },
   // Footer

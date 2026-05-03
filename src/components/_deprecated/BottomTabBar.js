@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     fontSize: 10, fontWeight: '600',
     marginTop: 3, textAlign: 'center', lineHeight: 12,
   },
-  labelActive: { fontWeight: '800' },
+  labelActive: { fontWeight: '600' },
 
   // Center reminder button
   centerSpacer: { width: 100 },
@@ -233,13 +233,13 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   zoomText: {
-    fontSize: 13, fontWeight: '900', color: '#fff',
+    fontSize: 13, fontWeight: '700', color: '#fff',
   },
   zoomTextDisabled: {
     color: '#999',
   },
   zoomPercent: {
-    fontSize: 10, fontWeight: '800', color: Colors.darkBrown,
+    fontSize: 10, fontWeight: '600', color: Colors.darkBrown,
   },
 
   // Menu modal
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     width: 40, height: 4, borderRadius: 2, backgroundColor: Colors.vibhuti,
     alignSelf: 'center', marginTop: 12, marginBottom: 16,
   },
-  menuTitle: { fontSize: 20, fontWeight: '800', color: Colors.darkBrown, textAlign: 'center', marginBottom: 16 },
+  menuTitle: { fontSize: 20, fontWeight: '600', color: Colors.darkBrown, textAlign: 'center', marginBottom: 16 },
   menuCloseX: {
     position: 'absolute', top: 10, right: 16,
     width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.06)',

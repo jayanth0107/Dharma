@@ -1,4 +1,4 @@
-# Google Play Store Listing — Dharma v2.4.1
+# Google Play Store Listing — Dharma v2.4.2 (versionCode 10)
 
 ## App Name (30 chars max)
 Dharma: Sacred Stories Daily

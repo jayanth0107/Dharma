@@ -93,7 +93,7 @@ export function MantraAudioScreen({ route }) {
 
           {/* ⚠️ Disclaimer */}
           <View style={s.disclaimerBox}>
-            <MaterialCommunityIcons name="alert-circle" size={16} color={DarkColors.kumkum} />
+            <MaterialCommunityIcons name="alert-circle" size={20} color={DarkColors.kumkum} style={{ marginTop: 2 }} />
             <Text style={s.disclaimerText}>
               {t(
                 'సంస్కృత మంత్రాలు సరైన ఉచ్చారణతో పఠించాలి. తప్పు ఉచ్చారణ హానికరం. దయచేసి వేద పండితుల ఆడియో వినండి.',
@@ -110,11 +110,13 @@ export function MantraAudioScreen({ route }) {
               openYouTube(m.youtubeQuery || m.name.en + ' vedic chanting');
             }}
             activeOpacity={0.7}
+            accessibilityLabel="Listen on YouTube"
+            hitSlop={{ top: 4, right: 4, bottom: 4, left: 4 }}
           >
             <MaterialCommunityIcons name="youtube" size={24} color="#FF0000" />
             <View style={{ flex: 1 }}>
               <Text style={s.youtubeBtnTitle}>{t('వేద పండితుల పఠనం వినండి', 'Listen to Vedic Pandit Recitation')}</Text>
-              <Text style={s.youtubeBtnSub}>{t('YouTube లో ప్రామాణిక ఆడియో', 'Authentic audio on YouTube')}</Text>
+              <Text style={s.youtubeBtnSub} numberOfLines={1}>{m.youtubeQuery || t('YouTube లో ప్రామాణిక ఆడియో', 'Authentic audio on YouTube')}</Text>
             </View>
             <MaterialCommunityIcons name="open-in-new" size={18} color={DarkColors.textMuted} />
           </TouchableOpacity>
@@ -158,6 +160,26 @@ export function MantraAudioScreen({ route }) {
             </View>
           </View>
 
+          {/* Source attribution */}
+          {m.sourceUrl && (
+            <TouchableOpacity
+              style={s.sourceRow}
+              onPress={() => {
+                trackEvent('mantra_source_open', { mantra_id: m.id });
+                Linking.openURL(m.sourceUrl).catch(() => {});
+              }}
+              activeOpacity={0.7}
+              hitSlop={{ top: 6, right: 6, bottom: 6, left: 6 }}
+              accessibilityLabel="View canonical Sanskrit source"
+            >
+              <MaterialCommunityIcons name="book-open-variant" size={14} color={DarkColors.textMuted} />
+              <Text style={s.sourceText}>
+                {t('ప్రామాణిక సంస్కృత మూలం (sanskritdocuments.org)', 'View canonical Sanskrit source')}
+              </Text>
+              <MaterialCommunityIcons name="open-in-new" size={12} color={DarkColors.textMuted} />
+            </TouchableOpacity>
+          )}
+
           {/* Share */}
           <SectionShareRow section={`mantra_${m.id}`} buildText={getShareText} />
 
@@ -188,7 +210,7 @@ export function MantraAudioScreen({ route }) {
 
         {/* Disclaimer */}
         <View style={s.disclaimerBoxSmall}>
-          <MaterialCommunityIcons name="information" size={14} color={DarkColors.saffron} />
+          <MaterialCommunityIcons name="information" size={18} color={DarkColors.saffron} style={{ marginTop: 1 }} />
           <Text style={s.disclaimerTextSmall}>
             {t('సంస్కృత మంత్రాలు సరైన ఉచ్చారణతో పఠించాలి. అందుకే app లో TTS వాడము — వేద పండితుల recordings వినండి.', 'Sanskrit mantras need correct pronunciation. That\'s why we don\'t use TTS — listen to Vedic pandit recordings instead.')}
           </Text>
@@ -210,21 +232,27 @@ const s = StyleSheet.create({
   libraryContent: { paddingBottom: 20 },
   playerContent: { paddingBottom: 20 },
 
-  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  sectionTitle: { fontSize: 20, fontWeight: '900', color: DarkColors.gold },
-  sectionSubtitle: { fontSize: 14, fontWeight: '500', color: DarkColors.textMuted, marginBottom: 12, lineHeight: 20 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
+  sectionTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.3 },
+  sectionSubtitle: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, marginBottom: 14, lineHeight: 23 },
 
-  // Disclaimer
+  // Disclaimer — red text on dark fails the eye test. Keep the red icon
+  // + red left-accent as the warning cue, but the body text is now
+  // silverLight for readability. Body bumped 13 → 16 with lh 24.
   disclaimerBox: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8, padding: 12, marginBottom: 14,
-    backgroundColor: 'rgba(232,73,90,0.06)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(232,73,90,0.2)',
+    flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 14, marginBottom: 14,
+    backgroundColor: 'rgba(232,73,90,0.06)', borderRadius: 12,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+    borderLeftWidth: 4, borderLeftColor: DarkColors.kumkum,
   },
-  disclaimerText: { flex: 1, fontSize: 13, fontWeight: '600', color: DarkColors.kumkum, lineHeight: 20 },
+  disclaimerText: { flex: 1, fontSize: 16, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 24 },
   disclaimerBoxSmall: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 6, padding: 10, marginBottom: 12,
-    backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 10, borderWidth: 1, borderColor: 'rgba(232,117,26,0.15)',
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, marginBottom: 14,
+    backgroundColor: 'rgba(232,117,26,0.05)', borderRadius: 10,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
+    borderLeftWidth: 3, borderLeftColor: DarkColors.saffron,
   },
-  disclaimerTextSmall: { flex: 1, fontSize: 12, fontWeight: '500', color: DarkColors.saffron, lineHeight: 18 },
+  disclaimerTextSmall: { flex: 1, fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 22 },
 
   // Library card
   card: {
@@ -234,7 +262,7 @@ const s = StyleSheet.create({
   },
   cardIconWrap: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   cardBody: { flex: 1, marginLeft: 12, marginRight: 8 },
-  cardName: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
+  cardName: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
   cardDeity: { fontSize: 13, fontWeight: '600', color: DarkColors.textSecondary, marginTop: 2 },
   cardDuration: { fontSize: 12, fontWeight: '500', color: DarkColors.textMuted, marginTop: 2 },
 
@@ -244,7 +272,7 @@ const s = StyleSheet.create({
 
   playerHeader: { alignItems: 'center', marginBottom: 16 },
   playerIconWrap: { width: 72, height: 72, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  playerTitle: { fontSize: 22, fontWeight: '900', textAlign: 'center', marginBottom: 4 },
+  playerTitle: { fontSize: 22, fontWeight: '700', textAlign: 'center', marginBottom: 4 },
   playerDeity: { fontSize: 15, fontWeight: '600', color: DarkColors.textSecondary, textAlign: 'center' },
 
   benefitBox: {
@@ -260,12 +288,12 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 16, marginBottom: 16,
     borderWidth: 2, borderColor: 'rgba(255,0,0,0.2)',
   },
-  youtubeBtnTitle: { fontSize: 15, fontWeight: '800', color: '#FFFFFF' },
+  youtubeBtnTitle: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
   youtubeBtnSub: { fontSize: 12, fontWeight: '500', color: DarkColors.textMuted, marginTop: 2 },
 
   // Lyrics
   lyricsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  lyricsHeaderText: { fontSize: 16, fontWeight: '800', color: DarkColors.gold },
+  lyricsHeaderText: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
 
   lyricsContainer: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16, marginBottom: 16,
@@ -275,7 +303,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
     paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: DarkColors.borderCard,
   },
-  lyricNum: { fontSize: 14, fontWeight: '800', width: 20, textAlign: 'center', marginTop: 4 },
+  lyricNum: { fontSize: 14, fontWeight: '600', width: 20, textAlign: 'center', marginTop: 4 },
   lyricTexts: { flex: 1 },
   lyricTe: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, lineHeight: 30 },
   lyricEn: { fontSize: 14, fontWeight: '500', color: DarkColors.textMuted, marginTop: 4, fontStyle: 'italic' },
@@ -285,7 +313,15 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.04)', borderRadius: 14, padding: 16, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  howToTitle: { fontSize: 15, fontWeight: '800', color: DarkColors.gold, marginBottom: 10 },
+  howToTitle: { fontSize: 15, fontWeight: '600', color: DarkColors.gold, marginBottom: 10 },
   howToRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 8 },
   howToText: { flex: 1, fontSize: 14, fontWeight: '500', color: DarkColors.silver, lineHeight: 22 },
+
+  // Source attribution
+  sourceRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 12, marginBottom: 8,
+    borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
+  },
+  sourceText: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, fontStyle: 'italic' },
 });

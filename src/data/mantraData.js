@@ -1,6 +1,8 @@
 // ధర్మ — Mantra Library Data
-// 15 popular mantras/stotras with line-by-line karaoke timing
-// Each line has a `pause` (ms) matching natural recitation speed
+// 15 popular mantras/stotras with line-by-line karaoke timing.
+// Each line has a `pause` (ms) matching natural recitation speed.
+// `youtubeQuery` opens a search for a curated authentic Vedic recitation.
+// `sourceUrl` points to the canonical Sanskrit text on sanskritdocuments.org.
 
 export const MANTRAS = [
   {
@@ -11,6 +13,8 @@ export const MANTRAS = [
     color: '#E8751A',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'బుద్ధి, మేధస్సు పెరుగుతుంది', en: 'Enhances intellect and wisdom' },
+    youtubeQuery: 'Gayatri Mantra 108 times Anuradha Paudwal',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/veda/',
     lines: [
       { te: 'ఓం భూర్భువః స్వః', en: 'Om Bhur Bhuvah Svah', pause: 3000 },
       { te: 'తత్సవితుర్వరేణ్యం', en: 'Tat Savitur Varenyam', pause: 3000 },
@@ -26,6 +30,8 @@ export const MANTRAS = [
     color: '#9B6FCF',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'ఆరోగ్యం, దీర్ఘాయువు ప్రసాదిస్తుంది', en: 'Bestows health and longevity' },
+    youtubeQuery: 'Maha Mrityunjaya Mantra 108 times Suresh Wadkar',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/veda/',
     lines: [
       { te: 'ఓం త్ర్యంబకం యజామహే', en: 'Om Tryambakam Yajamahe', pause: 3000 },
       { te: 'సుగంధిం పుష్టివర్ధనమ్', en: 'Sugandhim Pushtivardhanam', pause: 3000 },
@@ -41,6 +47,8 @@ export const MANTRAS = [
     color: '#9B6FCF',
     duration: { te: '1 నిమిషం', en: '1 minute' },
     benefit: { te: 'మనశ్శాంతి, పాపనాశనం', en: 'Inner peace and purification' },
+    youtubeQuery: 'Om Namah Shivaya 108 times Krishna Das',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/shiva/',
     lines: [
       { te: 'ఓం నమః శివాయ', en: 'Om Namah Shivaya', pause: 3000 },
       { te: 'శివాయ నమః ఓం', en: 'Shivaya Namah Om', pause: 3000 },
@@ -56,6 +64,8 @@ export const MANTRAS = [
     color: '#4A90D9',
     duration: { te: '1 నిమిషం', en: '1 minute' },
     benefit: { te: 'సకల కష్టాలు తొలగును', en: 'Removes all difficulties' },
+    youtubeQuery: 'Om Namo Narayanaya chanting 108 times',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/vishhnu/',
     lines: [
       { te: 'ఓం నమో నారాయణాయ', en: 'Om Namo Narayanaya', pause: 3000 },
       { te: 'నారాయణాయ నమః', en: 'Narayanaya Namah', pause: 2500 },
@@ -71,6 +81,8 @@ export const MANTRAS = [
     color: '#E8751A',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'భయ నివారణ, ధైర్యం పెరుగును', en: 'Removes fear, grants courage' },
+    youtubeQuery: 'Hanuman Chalisa Hariharan',
+    sourceUrl: 'https://sanskritdocuments.org/doc_hanumaana/hanumAnachAlisAsaMskRRita.html',
     lines: [
       { te: 'శ్రీగురు చరణ సరోజ రజ నిజమను ముకురు సుధారి', en: 'Shri Guru Charan Saroj Raj, Nij Manu Mukuru Sudhari', pause: 4000 },
       { te: 'బరనఊ రఘుబర బిమల జసు జో దాయకు ఫల చారి', en: 'Baranau Raghubar Bimal Jasu, Jo Dayaku Phal Chari', pause: 4000 },
@@ -86,6 +98,8 @@ export const MANTRAS = [
     color: '#4A90D9',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'సర్వ పాపహరం, మోక్షప్రదం', en: 'Destroys all sins, grants liberation' },
+    youtubeQuery: 'Vishnu Sahasranamam M.S. Subbulakshmi',
+    sourceUrl: 'https://sanskritdocuments.org/doc_vishhnu/vsahasranew.html',
     lines: [
       { te: 'ఓం విశ్వం విష్ణుర్వషట్కారో భూతభవ్యభవత్ప్రభుః', en: 'Om Vishvam Vishnur Vashatkaro Bhuta-Bhavya-Bhavat-Prabhuh', pause: 4000 },
       { te: 'భూతకృద్ భూతభృద్ భావో భూతాత్మా భూతభావనః', en: 'Bhutakrit Bhutabhrit Bhavo Bhutatma Bhutabhavanah', pause: 4000 },
@@ -101,6 +115,8 @@ export const MANTRAS = [
     color: '#E8495A',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'సౌభాగ్యం, శక్తి ప్రసాదం', en: 'Grants prosperity and divine energy' },
+    youtubeQuery: 'Lalitha Sahasranamam Bombay Sisters',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/devii/',
     lines: [
       { te: 'శ్రీమాతా శ్రీమహారాజ్ఞీ శ్రీమత్సింహాసనేశ్వరీ', en: 'Sri Mata Sri Maharajni Srimat Simhasaneshvari', pause: 4000 },
       { te: 'చిదగ్నికుండసంభూతా దేవకార్యసముద్యతా', en: 'Chidagni Kunda Sambhuta Devakarya Samudyata', pause: 4000 },
@@ -116,6 +132,8 @@ export const MANTRAS = [
     color: '#E8751A',
     duration: { te: '1 నిమిషం', en: '1 minute' },
     benefit: { te: 'విఘ్న నివారణ, శుభారంభం', en: 'Removes obstacles, auspicious beginnings' },
+    youtubeQuery: 'Vakratunda Mahakaya Ganesh Mantra 108 times',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/ganesha/',
     lines: [
       { te: 'వక్రతుండ మహాకాయ', en: 'Vakratunda Mahakaya', pause: 2500 },
       { te: 'సూర్యకోటి సమప్రభ', en: 'Suryakoti Samaprabha', pause: 2500 },
@@ -131,6 +149,8 @@ export const MANTRAS = [
     color: '#D4A017',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'శాంతి, సౌహార్దం పెరుగును', en: 'Promotes peace and harmony' },
+    youtubeQuery: 'Saha Nau Avatu Shanti Mantra Vedic chanting',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/veda/',
     lines: [
       { te: 'ఓం సహనావవతు', en: 'Om Sahana Vavatu', pause: 2500 },
       { te: 'సహ నౌ భునక్తు', en: 'Saha Nau Bhunaktu', pause: 2500 },
@@ -148,6 +168,8 @@ export const MANTRAS = [
     color: '#D4A017',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'జ్ఞానం, గురు కృప లభించును', en: 'Grants knowledge and Guru\'s grace' },
+    youtubeQuery: 'Guru Brahma Guru Vishnu mantra chanting',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/shankara/',
     lines: [
       { te: 'గురుర్బ్రహ్మా గురుర్విష్ణుః', en: 'Gurur Brahma Gurur Vishnuh', pause: 3000 },
       { te: 'గురుర్దేవో మహేశ్వరః', en: 'Gurur Devo Maheshvarah', pause: 3000 },
@@ -163,6 +185,8 @@ export const MANTRAS = [
     color: '#E8495A',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'రక్షణ, శక్తి, సౌభాగ్యం', en: 'Protection, strength, and prosperity' },
+    youtubeQuery: 'Sarva Mangala Mangalye Devi mantra chanting',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/devii/',
     lines: [
       { te: 'సర్వమంగళ మాంగల్యే', en: 'Sarva Mangala Mangalye', pause: 3000 },
       { te: 'శివే సర్వార్థ సాధికే', en: 'Shive Sarvartha Sadhike', pause: 3000 },
@@ -178,6 +202,8 @@ export const MANTRAS = [
     color: '#E8751A',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'శత్రు జయం, ఆరోగ్యం', en: 'Victory over enemies, good health' },
+    youtubeQuery: 'Aditya Hridayam M.S. Subbulakshmi',
+    sourceUrl: 'https://shlokam.org/adityahrudayam/',
     lines: [
       { te: 'తతో యుద్ధపరిశ్రాంతం సమరే చింతయా స్థితమ్', en: 'Tato Yuddha Parishrantam Samare Chintaya Sthitam', pause: 4000 },
       { te: 'రావణం చాగ్రతో దృష్ట్వా యుద్ధాయ సముపస్థితమ్', en: 'Ravanam Chagrato Drishtva Yuddhaya Samupasthitam', pause: 4000 },
@@ -193,6 +219,8 @@ export const MANTRAS = [
     color: '#4CAF50',
     duration: { te: '1 నిమిషం', en: '1 minute' },
     benefit: { te: 'ధర్మ మార్గం, మనశ్శాంతి', en: 'Righteous path and inner peace' },
+    youtubeQuery: 'Sri Rama Jayam dhun Anuradha Paudwal',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/raama/',
     lines: [
       { te: 'శ్రీ రామ జయ రామ జయ జయ రామ', en: 'Sri Rama Jaya Rama Jaya Jaya Rama', pause: 3500 },
       { te: 'శ్రీ రామ జయ రామ జయ జయ రామ', en: 'Sri Rama Jaya Rama Jaya Jaya Rama', pause: 3500 },
@@ -204,10 +232,12 @@ export const MANTRAS = [
     id: 'hare_krishna',
     name: { te: 'హరే కృష్ణ మంత్రం', en: 'Hare Krishna Mantra' },
     deity: { te: 'శ్రీకృష్ణుడు', en: 'Lord Krishna' },
-    icon: 'flute',
+    icon: 'music-clef-treble',
     color: '#4A90D9',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'భక్తి, ఆనందం, మోక్షం', en: 'Devotion, bliss, and liberation' },
+    youtubeQuery: 'Hare Krishna Maha Mantra ISKCON kirtan',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/krishna/',
     lines: [
       { te: 'హరే కృష్ణ హరే కృష్ణ', en: 'Hare Krishna Hare Krishna', pause: 3000 },
       { te: 'కృష్ణ కృష్ణ హరే హరే', en: 'Krishna Krishna Hare Hare', pause: 3000 },
@@ -223,6 +253,8 @@ export const MANTRAS = [
     color: '#4CAF50',
     duration: { te: '2 నిమిషాలు', en: '2 minutes' },
     benefit: { te: 'విశ్వశాంతి, సమస్త ప్రాణుల సుఖం', en: 'Universal peace and well-being of all' },
+    youtubeQuery: 'Yajurveda Shanti Mantra Om Dyauh Shantih',
+    sourceUrl: 'https://sanskritdocuments.org/sanskrit/veda/',
     lines: [
       { te: 'ఓం ద్యౌః శాంతిః అంతరిక్షం శాంతిః', en: 'Om Dyauh Shantih Antarikshagam Shantih', pause: 3500 },
       { te: 'పృథివీ శాంతిః ఆపః శాంతిః', en: 'Prithvi Shantih Apah Shantih', pause: 3000 },

@@ -19,6 +19,15 @@ export function TopTabBar() {
   const scrollNodeRef = useRef(null);
   const { width: screenW } = useWindow();
 
+  // Drag-vs-tap discriminator. When the user mouse-drags the bar to
+  // scroll horizontally, RN-Web's TouchableOpacity still fires onPress
+  // on whichever tab the pointer was over at release. We watch raw
+  // pointer events on the DOM node and swallow the synthetic click in
+  // the capture phase if the pointer moved beyond DRAG_THRESHOLD —
+  // intercepting before TouchableOpacity sees it. The earlier
+  // React-state approach lost the race against onPress on web.
+  const DRAG_THRESHOLD = 5;
+
   // Responsive sizing — bigger on tablets, tighter on tiny phones.
   const tabPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 18, xl: 22 });
   const tabPadV      = usePick({ default: 8,  sm: 8,  md: 10, lg: 12, xl: 14 });
@@ -40,20 +49,79 @@ export function TopTabBar() {
     scrollRef.current.scrollTo({ x: targetX, animated: true });
   }, [activeRouteName, screenW]);
 
-  // Enable mouse wheel horizontal scrolling on web
+  // Wire up wheel-scroll + drag-vs-tap suppression on the DOM node.
+  // Two pieces:
+  //   1. wheel handler — vertical wheel scrolls the bar horizontally
+  //   2. capture-phase click swallower — if the pointer was dragged
+  //      beyond threshold, eat the click before TouchableOpacity hears
+  //      it. We track via pointerdown / pointermove / pointerup so the
+  //      same logic covers both mouse and touch.
   const onScrollViewRef = useCallback((node) => {
     scrollRef.current = node;
     if (Platform.OS === 'web' && node) {
-      const inner = node.getInnerViewNode?.() || node.getScrollableNode?.();
-      const el = inner || (node._nativeTag ? undefined : node);
+      // Resolve the underlying DOM node defensively. getInnerViewNode /
+      // getScrollableNode are deprecated in react-native-web and may
+      // disappear in a future release — wrap in try/catch so a missing
+      // method downgrades to "no drag suppression / no wheel scroll"
+      // rather than crashing the whole bar.
+      let el = null;
+      try {
+        const inner = (typeof node.getInnerViewNode === 'function' && node.getInnerViewNode())
+                   || (typeof node.getScrollableNode === 'function' && node.getScrollableNode())
+                   || null;
+        el = inner || (node._nativeTag ? null : node);
+      } catch {
+        el = null;
+      }
       if (el && el.addEventListener && !scrollNodeRef.current) {
         scrollNodeRef.current = el;
+
+        // Mouse wheel → horizontal scroll
         el.addEventListener('wheel', (e) => {
           if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
             e.preventDefault();
             el.scrollLeft += e.deltaY;
           }
         }, { passive: false });
+
+        // Drag tracking
+        let pointerDownX = null;
+        let dragged = false;
+        let suppressUntil = 0;
+
+        el.addEventListener('pointerdown', (e) => {
+          pointerDownX = e.clientX;
+          dragged = false;
+        }, true);
+
+        el.addEventListener('pointermove', (e) => {
+          if (pointerDownX != null && Math.abs(e.clientX - pointerDownX) > DRAG_THRESHOLD) {
+            dragged = true;
+          }
+        }, true);
+
+        const endPointer = () => {
+          if (dragged) {
+            // Click event fires AFTER pointerup; give it a small window
+            // to arrive and then we'll swallow it.
+            suppressUntil = Date.now() + 350;
+          }
+          pointerDownX = null;
+        };
+        el.addEventListener('pointerup', endPointer, true);
+        el.addEventListener('pointercancel', endPointer, true);
+        // pointerleave doesn't always end the gesture cleanly across
+        // browsers — covered by pointerup/cancel above.
+
+        // Capture phase: runs BEFORE TouchableOpacity's bubble-phase
+        // click handler. If we're in the suppression window, kill it.
+        el.addEventListener('click', (e) => {
+          if (Date.now() < suppressUntil) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
       }
     }
   }, []);
@@ -82,6 +150,9 @@ export function TopTabBar() {
                 }
               }}
               onPress={() => {
+                // Drag-vs-tap suppression happens in the DOM capture
+                // phase (see onScrollViewRef) — by the time we get here,
+                // we know the user actually tapped, not dragged.
                 if (section.params) {
                   navigation.navigate(section.name, { ...section.params, _ts: Date.now() });
                 } else {
@@ -134,6 +205,6 @@ const s = StyleSheet.create({
   },
   labelActive: {
     color: DarkColors.gold,
-    fontWeight: '800',
+    fontWeight: '600',
   },
 });

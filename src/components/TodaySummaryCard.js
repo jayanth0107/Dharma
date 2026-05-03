@@ -1,8 +1,12 @@
 // ధర్మ — Today's Summary Card (Home Screen at-a-glance digest)
+//
+// CANONICAL EXAMPLE of the new theme rule: every Text composes from a
+// `Type.X` token. To change all body / label / value weights across the
+// app, edit src/theme/typography.js — never inline fontSize/fontWeight.
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { DarkColors } from '../theme/colors';
+import { DarkColors, Type } from '../theme';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 
@@ -22,11 +26,11 @@ export function TodaySummaryCard({ onNavigate, streak }) {
       <View style={s.topRow}>
         <View style={{ flex: 1 }}>
           <Text style={s.dateText}>{t(dateStr, dateStrEn)}</Text>
-          <Text style={s.yearText}>{panchangam.teluguYear} · {t(panchangam.teluguMonth?.telugu, panchangam.teluguMonth?.english)}</Text>
+          <Text style={s.yearText}>{t(panchangam.teluguYear?.te, panchangam.teluguYear?.en)} · {t(panchangam.teluguMonth?.telugu, panchangam.teluguMonth?.english)}</Text>
         </View>
         {streak > 0 && (
           <View style={s.streakBadge}>
-            <MaterialCommunityIcons name="fire" size={16} color={DarkColors.saffron} />
+            <MaterialCommunityIcons name="fire" size={14} color={DarkColors.saffron} />
             <Text style={s.streakText}>{streak}</Text>
           </View>
         )}
@@ -53,22 +57,35 @@ export function TodaySummaryCard({ onNavigate, streak }) {
         </View>
       </View>
 
-      {/* Timings — palette-matched: gold = auspicious, silver = inauspicious shadow.
-          Keeps the chips readable on dark bg without the harsh "success / error
-          toast" feel that pure tulasi-green and kumkum-red produced. */}
+      {/* Timings — icon on the left, label and time stacked on the right.
+          Both lines run at the same 14 px so the chip reads as a clean
+          two-row pair without the cramped middle-dot the single-line
+          layout had. */}
       <View style={s.timingsRow}>
         {panchangam.abhijitMuhurtam && (
           <View style={[s.timingChip, s.timingChipGood]}>
-            <MaterialCommunityIcons name="check-circle" size={12} color={DarkColors.goldLight} />
-            <Text style={[s.timingLabel, { color: DarkColors.goldLight }]}>{t('శుభ కాలం', 'Good Time')}</Text>
-            <Text style={[s.timingTime, { color: DarkColors.goldLight }]}>{panchangam.abhijitMuhurtam.startFormatted}–{panchangam.abhijitMuhurtam.endFormatted}</Text>
+            <MaterialCommunityIcons name="check-circle" size={16} color={DarkColors.goldLight} />
+            <View style={s.timingTextCol}>
+              <Text style={[s.timingLabel, { color: DarkColors.goldLight }]} numberOfLines={1}>
+                {t('శుభ కాలం', 'Good Time')}
+              </Text>
+              <Text style={[s.timingTime, { color: DarkColors.goldLight }]} numberOfLines={1}>
+                {panchangam.abhijitMuhurtam.startFormatted}–{panchangam.abhijitMuhurtam.endFormatted}
+              </Text>
+            </View>
           </View>
         )}
         {panchangam.rahuKalam && (
           <View style={[s.timingChip, s.timingChipBad]}>
-            <MaterialCommunityIcons name="close-circle" size={12} color={DarkColors.silverLight} />
-            <Text style={[s.timingLabel, { color: DarkColors.silverLight }]}>{t('రాహు కాలం', 'Rahu Kalam')}</Text>
-            <Text style={[s.timingTime, { color: DarkColors.silverLight }]}>{panchangam.rahuKalam.startFormatted}–{panchangam.rahuKalam.endFormatted}</Text>
+            <MaterialCommunityIcons name="close-circle" size={16} color={DarkColors.silverLight} />
+            <View style={s.timingTextCol}>
+              <Text style={[s.timingLabel, { color: DarkColors.silverLight }]} numberOfLines={1}>
+                {t('రాహు కాలం', 'Rahu Kalam')}
+              </Text>
+              <Text style={[s.timingTime, { color: DarkColors.silverLight }]} numberOfLines={1}>
+                {panchangam.rahuKalam.startFormatted}–{panchangam.rahuKalam.endFormatted}
+              </Text>
+            </View>
           </View>
         )}
       </View>
@@ -85,46 +102,61 @@ export function TodaySummaryCard({ onNavigate, streak }) {
 }
 
 const s = StyleSheet.create({
+  // Card vertical rhythm tightened — was 16 padding + 12 row gaps;
+  // now 12 padding + 8 row gaps. Saves ~14 px so a couple more tile
+  // rows are visible above the fold on the home screen.
   card: {
-    marginHorizontal: 16, marginBottom: 12, padding: 16,
+    marginHorizontal: 16, marginBottom: 10, padding: 12,
     backgroundColor: DarkColors.bgCard, borderRadius: 16,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  topRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  dateText: { fontSize: 18, fontWeight: '900', color: '#FFFFFF' },
-  yearText: { fontSize: 14, color: DarkColors.gold, fontWeight: '700', marginTop: 3 },
+  topRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  // Date — was 20/medium, dropped to 18/medium per tester feedback that
+  // it dominated the card. Year/samvatsara line dropped 18 → 16 so the
+  // hierarchy reads date > year > info row, not date == year.
+  dateText:    { fontSize: 18, fontWeight: '500', color: '#FFFFFF', lineHeight: 24 },
+  yearText:    { fontSize: 15, fontWeight: '500', color: DarkColors.gold, marginTop: 2, lineHeight: 21 },
+  // Streak: explicit lineHeight on text equal to icon size keeps the
+  // fire and number on the same baseline. Without this the 18 px text
+  // node has natural lineHeight ~27 and slid the number lower than the
+  // icon in the row.
   streakBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: DarkColors.saffronDim, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16,
+    backgroundColor: DarkColors.saffronDim, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 14,
     borderWidth: 1, borderColor: 'rgba(232,117,26,0.30)',
   },
-  streakText: { fontSize: 18, fontWeight: '900', color: DarkColors.saffron },
-  infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  infoItem: { flex: 1, alignItems: 'center', gap: 3 },
+  streakText:  { fontSize: 17, fontWeight: '600', lineHeight: 17, color: DarkColors.saffron },
+  infoRow:     { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  infoItem:    { flex: 1, alignItems: 'center', gap: 3 },
   infoDivider: { width: 1, height: 32, backgroundColor: DarkColors.borderCard },
-  infoLabel: { fontSize: 12, color: '#BBBBBB', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  infoValue: { fontSize: 15, color: '#FFFFFF', fontWeight: '800', textAlign: 'center' },
-  timingsRow: { flexDirection: 'row', gap: 6, marginBottom: 8 },
-  timingChip: {
-    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3,
-    paddingHorizontal: 6, paddingVertical: 8, borderRadius: 10,
+  infoLabel:   { ...Type.dataLabel, color: '#BBBBBB' },                       // 15/semibold uppercase
+  infoValue:   { ...Type.dataValue, color: '#FFFFFF', textAlign: 'center' },  // 18/medium
+  timingsRow:  { flexDirection: 'row', gap: 6, marginBottom: 0 },
+  // Chip: icon on the left, two-line column on the right (label / time).
+  timingChip:  {
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10,
     borderWidth: 1,
   },
-  // Auspicious: gold-tinted (sacred warmth)
   timingChipGood: {
     borderColor: DarkColors.borderGold,
     backgroundColor: DarkColors.goldDim,
   },
-  // Inauspicious: silver-on-shadow (Rahu = shadow planet — dimmed neutral)
   timingChipBad: {
     borderColor: 'rgba(192,192,192,0.22)',
     backgroundColor: 'rgba(192,192,192,0.06)',
   },
-  timingLabel: { fontSize: 12, fontWeight: '700' },
-  timingTime: { fontSize: 14, fontWeight: '900' },
+  // Column wrapper — small `gap` between label and time gives the two
+  // lines clear visual separation without enlarging the chip overall.
+  timingTextCol: { flex: 1, flexDirection: 'column', gap: 3 },
+  // Two-line chip text — label semibold (slightly heavier), time
+  // medium. Both at 14 px / line-height 18 so the pair fits cleanly
+  // alongside a 16 px icon without making the chip too tall.
+  timingLabel: { fontSize: 14, fontWeight: '600', lineHeight: 18 },
+  timingTime:  { fontSize: 14, fontWeight: '500', lineHeight: 18 },
   festivalRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8,
-    paddingTop: 10, borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
+    paddingTop: 8, borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
   },
-  festivalText: { fontSize: 15, fontWeight: '800', color: DarkColors.gold },
+  festivalText: { ...Type.dataValue, color: DarkColors.gold },
 });

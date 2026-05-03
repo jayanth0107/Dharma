@@ -30,15 +30,24 @@ export function SanskritWordScreen() {
 
   const wordFs = usePick({ default: 42, md: 48, xl: 56 });
 
-  const buildShareText = (w) => (
-    `🙏 *ధర్మ — సంస్కృత పదం*\n\n` +
-    `📜 *${w.word}* (${w.transliteration}) — ${w.telugu}\n\n` +
-    `💡 *అర్థం:* ${w.meaning.te}\n` +
-    `🌱 *మూలం:* ${w.root.te}\n` +
-    `📖 *ఉదాహరణ:* ${w.usage.te}\n\n` +
-    `🤔 *Fun Fact:* ${w.funFact.te}\n\n` +
-    `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`
-  );
+  const buildShareText = (w) => {
+    const isEn = lang === 'en';
+    const L = isEn
+      ? { hdr: 'Dharma — Sanskrit Word', meaning: 'Meaning', root: 'Root', usage: 'Example', fun: 'Fun fact' }
+      : { hdr: 'ధర్మ — సంస్కృత పదం',     meaning: 'అర్థం',    root: 'మూలం',  usage: 'ఉదాహరణ', fun: 'తెలుసా'   };
+    // Word + transliteration is always Sanskrit-source. Telugu translation
+    // shown only in Telugu mode; in English the meaning takes its place.
+    const wordLine = isEn
+      ? `📜 *${w.word}* (${w.transliteration})`
+      : `📜 *${w.word}* (${w.transliteration}) — ${w.telugu}`;
+    return `🙏 *${L.hdr}*\n\n` +
+      `${wordLine}\n\n` +
+      `💡 *${L.meaning}:* ${t(w.meaning.te, w.meaning.en)}\n` +
+      `🌱 *${L.root}:* ${t(w.root.te, w.root.en)}\n` +
+      `📖 *${L.usage}:* ${t(w.usage.te, w.usage.en)}\n\n` +
+      `🤔 *${L.fun}:* ${t(w.funFact.te, w.funFact.en)}\n\n` +
+      `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+  };
 
   const renderWord = (w, isToday = false) => (
     <View key={w.id} style={[s.card, isToday && s.cardToday]}>
@@ -133,7 +142,7 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '900', color: DarkColors.gold, textAlign: 'center' },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
   headerSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center', lineHeight: 20 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 20, marginBottom: 14,
@@ -141,7 +150,7 @@ const s = StyleSheet.create({
   },
   cardToday: { borderColor: DarkColors.borderGold, borderWidth: 1.5 },
   wordRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  devanagari: { fontSize: 48, fontWeight: '800', color: DarkColors.gold, letterSpacing: 2 },
+  devanagari: { fontSize: 48, fontWeight: '600', color: DarkColors.gold, letterSpacing: 2 },
   speakerBtn: {
     width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
     backgroundColor: 'rgba(212,160,23,0.1)', borderWidth: 1, borderColor: DarkColors.borderGold,
@@ -150,10 +159,10 @@ const s = StyleSheet.create({
   transliteration: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginTop: 4, letterSpacing: 1 },
   teluguWord: { fontSize: 16, fontWeight: '600', color: DarkColors.saffron, marginTop: 2 },
   todayTag: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8, marginTop: 8 },
-  todayTagText: { fontSize: 10, fontWeight: '800', color: '#0A0A0A', letterSpacing: 1 },
+  todayTagText: { fontSize: 10, fontWeight: '600', color: '#0A0A0A', letterSpacing: 1 },
   section: { width: '100%', marginTop: 14 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  sectionLabel: { fontSize: 13, fontWeight: '800', color: DarkColors.gold, letterSpacing: 0.5 },
+  sectionLabel: { fontSize: 13, fontWeight: '600', color: DarkColors.gold, letterSpacing: 0.5 },
   sectionText: { fontSize: 15, fontWeight: '500', color: DarkColors.silver, lineHeight: 24, paddingLeft: 22 },
   usageBox: {
     width: '100%', flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 14,

@@ -95,7 +95,29 @@
       "Bash(python:*)",
       "Bash(tasklist)",
       "Bash(taskkill //F //IM node.exe)",
-      "Bash(taskkill /F /IM node.exe)"
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(find:*)",
+      "Read(//c/Users/bujji/Desktop/**)",
+      "Bash(awk -F\"'\" '{print $2}')",
+      "Bash(command -v eas)",
+      "Bash(EXPO_DEBUG=1 eas build --platform android --profile preview --non-interactive --no-wait)",
+      "WebFetch(domain:www.drikpanchang.com)",
+      "Bash(git checkout *)",
+      "WebFetch(domain:www.timeanddate.com)",
+      "WebFetch(domain:sanskritdocuments.org)",
+      "Bash(cp \"Absolute Sale Deed.pdf\" \"_Send_To_Buyer/01_Sale_Deed.pdf\")",
+      "Bash(cp \"Registration Document.pdf\" \"_Send_To_Buyer/01b_Sale_Deed_Registration_Receipt.pdf\")",
+      "Bash(cp \"ECC-05122023-5510123.pdf\" \"_Send_To_Buyer/03_EC_30yr_Latest.pdf\")",
+      "Bash(cp \"e-Khata villa 108.pdf\" \"_Send_To_Buyer/04_Khata_Extract.pdf\")",
+      "Bash(cp \"PublicviewForm9LandwithDocNo_rp_pwd-515286.pdf\" \"_Send_To_Buyer/05_Form9_Title.pdf\")",
+      "Bash(awk 'NR>1 {printf \"%-50s %s\\\\n\", $NF, $5}')",
+      "Read(//tmp/**)",
+      "Bash(cp \"/c/Users/bujji/Downloads/om.mp3\" \"/c/Users/bujji/Desktop/DharmaDaily/assets/audio/om.mp3\")",
+      "Bash(cp \"/c/Users/bujji/Downloads/shiva.mp3\" \"/c/Users/bujji/Desktop/DharmaDaily/assets/audio/shiva.mp3\")",
+      "Bash(cp \"/c/Users/bujji/Downloads/krishna.mp3\" \"/c/Users/bujji/Desktop/DharmaDaily/assets/audio/krishna.mp3\")",
+      "Bash(cp \"/c/Users/bujji/Downloads/om chant powerful.mp3\" \"/c/Users/bujji/Desktop/DharmaDaily/assets/audio/soham.mp3\")",
+      "Bash(ffmpeg -version)",
+      "Bash(xargs -I {} stat -c \"%s %n\" \"{}\")"
     ]
   }
 }

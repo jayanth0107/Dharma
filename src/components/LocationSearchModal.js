@@ -3,7 +3,7 @@
 // Inspired by AstroSage's full-screen Search Place with tabs.
 // Uses Google Places API for reliable location search across the app.
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity, TextInput,
   FlatList, ActivityIndicator, Platform, KeyboardAvoidingView,
@@ -53,17 +53,33 @@ export function LocationSearchModal({
   const [searching, setSearching] = useState(false);
   const [activeTab, setActiveTab] = useState('search'); // 'search' | 'popular'
   const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState(null);
+  const [searchError, setSearchError] = useState(null);
   const searchTimer = useRef(null);
   const inputRef = useRef(null);
+  // Track the most recent search "epoch" so out-of-order responses from
+  // slow networks don't overwrite newer results. (Keystroke 1 may take
+  // 3 s; keystroke 2 takes 200 ms — without this guard, keystroke 1's
+  // older results land last and clobber the right list.)
+  const searchEpoch = useRef(0);
+
+  // Clean up on unmount: cancel any pending debounce timer so a late
+  // response from a closed modal doesn't try to setState.
+  useEffect(() => () => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+  }, []);
 
   const handleSearch = (text) => {
     setQuery(text);
+    setSearchError(null);
     if (searchTimer.current) clearTimeout(searchTimer.current);
     if (text.length < 2) {
       setResults([]);
+      setSearching(false);
       return;
     }
     searchTimer.current = setTimeout(async () => {
+      const myEpoch = ++searchEpoch.current;
       setSearching(true);
       try {
         let res = await searchFn(text);
@@ -71,19 +87,33 @@ export function LocationSearchModal({
         if ((!res || !res.length) && fallbackSearchFn) {
           res = await fallbackSearchFn(text);
         }
+        // Drop results from a stale request — newer keystroke already
+        // bumped the epoch; let that response be the one that lands.
+        if (myEpoch !== searchEpoch.current) return;
         setResults(Array.isArray(res) ? res.slice(0, 12) : []);
       } catch (e) {
+        if (myEpoch !== searchEpoch.current) return;
         // Primary failed — try fallback
         if (fallbackSearchFn) {
           try {
             const fallbackRes = await fallbackSearchFn(text);
+            if (myEpoch !== searchEpoch.current) return;
             setResults(Array.isArray(fallbackRes) ? fallbackRes.slice(0, 12) : []);
-          } catch { setResults([]); }
+          } catch (fe) {
+            if (myEpoch !== searchEpoch.current) return;
+            setResults([]);
+            setSearchError(fe?.message || 'search failed');
+            // eslint-disable-next-line no-console
+            console.warn('[LocationSearchModal] fallback search failed', fe);
+          }
         } else {
           setResults([]);
+          setSearchError(e?.message || 'search failed');
+          // eslint-disable-next-line no-console
+          console.warn('[LocationSearchModal] primary search failed', e);
         }
       }
-      setSearching(false);
+      if (myEpoch === searchEpoch.current) setSearching(false);
     }, 300);
   };
 
@@ -106,6 +136,7 @@ export function LocationSearchModal({
 
   const handleGPS = async () => {
     setGpsLoading(true);
+    setGpsError(null);
     try {
       const { autoDetectLocation } = require('../utils/geolocation');
       const loc = await autoDetectLocation();
@@ -118,8 +149,22 @@ export function LocationSearchModal({
           altitude: loc.altitude || 0,
         });
         handleClose();
+      } else {
+        // No coordinates returned — surface a useful message rather
+        // than spinning forever.
+        setGpsError(lang === 'te'
+          ? 'స్థానం గుర్తించలేకపోయింది. వెతుకు ద్వారా ప్రయత్నించండి.'
+          : 'Could not detect location. Please use search instead.');
       }
-    } catch {} finally { setGpsLoading(false); }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[LocationSearchModal] GPS detect failed', e);
+      setGpsError(lang === 'te'
+        ? 'GPS అనుమతి లేదు లేదా అందుబాటులో లేదు. వెతుకు ద్వారా ప్రయత్నించండి.'
+        : 'GPS unavailable or permission denied. Please use search instead.');
+    } finally {
+      setGpsLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -169,7 +214,12 @@ export function LocationSearchModal({
       >
         {/* Header */}
         <View style={[ls.header, { paddingHorizontal: pad }]}>
-          <TouchableOpacity onPress={handleClose} style={ls.backBtn}>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={ls.backBtn}
+            hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }}
+            accessibilityLabel="Close location search"
+          >
             <MaterialCommunityIcons name="arrow-left" size={24} color={DarkColors.silver} />
           </TouchableOpacity>
           <Text style={ls.headerTitle}>
@@ -223,6 +273,14 @@ export function LocationSearchModal({
                 autoFocus
                 autoCorrect={false}
                 returnKeyType="search"
+                onSubmitEditing={() => {
+                  // Keyboard "search" key — flush any pending debounce so the
+                  // user gets immediate results instead of waiting 300 ms.
+                  if (searchTimer.current && query.length >= 2) {
+                    clearTimeout(searchTimer.current);
+                    handleSearch(query);
+                  }
+                }}
               />
               {query.length > 0 && (
                 <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
@@ -237,16 +295,21 @@ export function LocationSearchModal({
               <FlatList
                 data={results}
                 renderItem={renderResultItem}
-                keyExtractor={(item, i) => `${item.latitude}-${item.longitude}-${i}`}
+                keyExtractor={(item, i) => `${item.placeId || ''}|${item.latitude}|${item.longitude}|${i}`}
                 style={ls.resultsList}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
+                removeClippedSubviews={Platform.OS === 'android'}
+                maxToRenderPerBatch={8}
+                initialNumToRender={8}
               />
             ) : query.length >= 3 && !searching ? (
               <View style={ls.emptyState}>
                 <MaterialCommunityIcons name="map-search" size={48} color={DarkColors.textMuted} />
                 <Text style={ls.emptyText}>
-                  {lang === 'te' ? 'ఫలితాలు లేవు. ఆంగ్లంలో ప్రయత్నించండి.' : 'No results. Try in English.'}
+                  {searchError
+                    ? (lang === 'te' ? 'వెతుకులో సమస్య. మళ్ళీ ప్రయత్నించండి.' : 'Search service unavailable. Please try again.')
+                    : (lang === 'te' ? 'ఫలితాలు లేవు. ఆంగ్లంలో ప్రయత్నించండి.' : 'No results. Try in English.')}
                 </Text>
               </View>
             ) : query.length === 0 ? (
@@ -274,14 +337,20 @@ export function LocationSearchModal({
               </>
             ) : (
               <>
-                <MaterialCommunityIcons name="crosshairs-gps" size={48} color={DarkColors.gold} />
+                <MaterialCommunityIcons
+                  name={gpsError ? 'crosshairs-question' : 'crosshairs-gps'}
+                  size={48}
+                  color={gpsError ? DarkColors.kumkum : DarkColors.gold}
+                />
                 <Text style={ls.gpsText}>
-                  {lang === 'te' ? 'GPS ద్వారా మీ ప్రస్తుత స్థానం గుర్తించండి' : 'Detect your current location via GPS'}
+                  {gpsError || (lang === 'te' ? 'GPS ద్వారా మీ ప్రస్తుత స్థానం గుర్తించండి' : 'Detect your current location via GPS')}
                 </Text>
                 <TouchableOpacity style={ls.gpsBtn} onPress={handleGPS}>
                   <MaterialCommunityIcons name="crosshairs-gps" size={20} color="#0A0A0A" />
                   <Text style={ls.gpsBtnText}>
-                    {lang === 'te' ? 'స్థానం గుర్తించండి' : 'Detect Location'}
+                    {gpsError
+                      ? (lang === 'te' ? 'మళ్ళీ ప్రయత్నించండి' : 'Try Again')
+                      : (lang === 'te' ? 'స్థానం గుర్తించండి' : 'Detect Location')}
                   </Text>
                 </TouchableOpacity>
               </>
@@ -325,7 +394,7 @@ const ls = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '600',
     color: DarkColors.textPrimary,
   },
   tabs: {
@@ -463,7 +532,7 @@ const ls = StyleSheet.create({
   },
   gpsBtnText: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '600',
     color: '#0A0A0A',
   },
   popularItem: {

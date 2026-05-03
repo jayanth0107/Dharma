@@ -148,7 +148,7 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: DarkColors.bg },
   scroll: { flex: 1 },
   content: {},
-  sectionTitle: { fontWeight: '800', color: DarkColors.gold },
+  sectionTitle: { fontWeight: '600', color: DarkColors.gold },
   sectionSub: { color: DarkColors.textMuted, marginBottom: 14, marginTop: 4 },
   serviceCard: {
     flexDirection: 'row', alignItems: 'center',
@@ -156,10 +156,10 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   serviceIcon: { alignItems: 'center', justifyContent: 'center' },
-  serviceName: { fontWeight: '800', color: DarkColors.textPrimary },
+  serviceName: { fontWeight: '600', color: DarkColors.textPrimary },
   serviceDesc: { color: DarkColors.textMuted, marginTop: 2 },
   serviceMeta: { flexDirection: 'row', marginTop: 6 },
-  servicePrice: { fontWeight: '800', color: DarkColors.gold },
+  servicePrice: { fontWeight: '600', color: DarkColors.gold },
   serviceDuration: { color: DarkColors.textSecondary, fontWeight: '600' },
   pujaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   pujaCard: {
@@ -168,7 +168,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   pujaName: { fontWeight: '700', color: DarkColors.textPrimary, textAlign: 'center', marginTop: 8 },
-  pujaPrice: { fontWeight: '800', color: DarkColors.gold, marginTop: 4 },
+  pujaPrice: { fontWeight: '600', color: DarkColors.gold, marginTop: 4 },
   comingSoon: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 20,
     backgroundColor: DarkColors.bgCard,

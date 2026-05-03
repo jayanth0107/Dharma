@@ -67,13 +67,19 @@ export function DharmaPollScreen() {
   };
 
   const buildShareText = (poll, userVote) => {
+    const isEn = lang === 'en';
+    const sideA = t(poll.sideA.label.te, poll.sideA.label.en);
+    const sideB = t(poll.sideB.label.te, poll.sideB.label.en);
     const results = getSimulatedResults(poll.id);
-    const votedSide = userVote === 'A' ? poll.sideA.label.te : poll.sideB.label.te;
-    return `🙏 *ధర్మ — ధర్మ చర్చ*\n\n` +
-      `❓ ${poll.question.te}\n\n` +
-      `🅰️ ${poll.sideA.label.te} — ${results.sideA}%\n` +
-      `🅱️ ${poll.sideB.label.te} — ${results.sideB}%\n\n` +
-      `✅ నా ఎంపిక: ${votedSide}\n\n` +
+    const votedSide = userVote === 'A' ? sideA : sideB;
+    const L = isEn
+      ? { hdr: 'Dharma — Dharma Debate',  myChoice: 'My choice' }
+      : { hdr: 'ధర్మ — ధర్మ చర్చ',          myChoice: 'నా ఎంపిక' };
+    return `🙏 *${L.hdr}*\n\n` +
+      `❓ ${t(poll.question.te, poll.question.en)}\n\n` +
+      `🅰️ ${sideA} — ${results.sideA}%\n` +
+      `🅱️ ${sideB} — ${results.sideB}%\n\n` +
+      `✅ ${L.myChoice}: ${votedSide}\n\n` +
       `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
   };
 
@@ -116,7 +122,7 @@ export function DharmaPollScreen() {
 
         {/* Context */}
         <View style={s.contextBox}>
-          <MaterialCommunityIcons name="information-outline" size={16} color={DarkColors.silver} />
+          <MaterialCommunityIcons name="information-outline" size={18} color={DarkColors.gold} style={{ marginTop: 2 }} />
           <Text style={s.contextText}>{t(poll.context.te, poll.context.en)}</Text>
         </View>
 
@@ -264,7 +270,7 @@ const s = StyleSheet.create({
   content: { padding: 16 },
 
   sectionHeader: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  sectionTitle: { fontSize: 20, fontWeight: '900', color: DarkColors.gold, textAlign: 'center' },
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
   sectionSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center', lineHeight: 20 },
 
   card: {
@@ -278,11 +284,11 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
   },
-  todayText: { fontSize: 11, fontWeight: '800', color: '#0A0A0A' },
+  todayText: { fontSize: 11, fontWeight: '600', color: '#0A0A0A' },
   idBadge: {
     backgroundColor: 'rgba(212,160,23,0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
   },
-  idText: { fontSize: 12, fontWeight: '800', color: DarkColors.gold },
+  idText: { fontSize: 12, fontWeight: '600', color: DarkColors.gold },
   speakerBtn: {
     marginLeft: 'auto', width: 36, height: 36, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center',
@@ -295,10 +301,11 @@ const s = StyleSheet.create({
   },
 
   contextBox: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
-    backgroundColor: 'rgba(212,160,23,0.04)', borderRadius: 12, padding: 12, marginBottom: 16,
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12, padding: 14, marginBottom: 16,
+    borderLeftWidth: 3, borderLeftColor: DarkColors.borderGold,
   },
-  contextText: { flex: 1, fontSize: 13, fontWeight: '500', color: DarkColors.silver, lineHeight: 20 },
+  contextText: { flex: 1, fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 23 },
 
   voteRow: { gap: 10, marginBottom: 8 },
   voteBtn: {
@@ -308,7 +315,7 @@ const s = StyleSheet.create({
   },
   voteBtnText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', flex: 1 },
   vsText: {
-    textAlign: 'center', fontSize: 13, fontWeight: '800', color: DarkColors.textMuted,
+    textAlign: 'center', fontSize: 13, fontWeight: '600', color: DarkColors.textMuted,
     letterSpacing: 1, paddingVertical: 2,
   },
 
@@ -320,7 +327,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 3,
     backgroundColor: DarkColors.tulasiGreen, paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6,
   },
-  yourVoteText: { fontSize: 9, fontWeight: '800', color: '#0A0A0A' },
+  yourVoteText: { fontSize: 11, fontWeight: '600', color: '#0A0A0A', letterSpacing: 0.3 },
   barTrack: {
     height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.06)', overflow: 'hidden',
   },
@@ -330,7 +337,7 @@ const s = StyleSheet.create({
   barFillB: {
     height: '100%', borderRadius: 5, backgroundColor: DarkColors.saffron,
   },
-  percentText: { fontSize: 28, fontWeight: '900', color: '#FFFFFF' },
+  percentText: { fontSize: 28, fontWeight: '700', color: '#FFFFFF' },
 
   argSection: { gap: 10, marginTop: 4 },
   argBox: {
@@ -338,7 +345,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   argHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  argTitle: { fontSize: 13, fontWeight: '800', color: DarkColors.gold },
+  argTitle: { fontSize: 13, fontWeight: '600', color: DarkColors.gold },
   argText: { fontSize: 14, fontWeight: '500', color: DarkColors.silver, lineHeight: 22 },
 
   sourceRow: {

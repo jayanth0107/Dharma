@@ -90,21 +90,33 @@ export const VASTU_TIPS = [
 ];
 
 // ── Daily mantras (1 per day of week) ──────────────────────────────
+// `sanskrit` is the Sanskrit mantra in Telugu script (the natural reading
+// for our primary audience). `roman` is an IAST-lite transliteration so
+// English-mode users — and anyone who can't read Telugu — can still
+// chant along correctly. Both are rendered together; meaning explains
+// the intent in the user's selected language.
 export const DAILY_MANTRAS = [
   // Sunday
-  { sanskrit: 'ఓం సూర్యాయ నమః', meaning: { te: 'ఆరోగ్యం, శక్తి కోసం', en: 'For health and vitality' }, count: 108 },
+  { sanskrit: 'ఓం సూర్యాయ నమః', roman: 'Om Suryaya Namah',
+    meaning: { te: 'ఆరోగ్యం, శక్తి కోసం', en: 'For health and vitality' }, count: 108 },
   // Monday
-  { sanskrit: 'ఓం నమః శివాయ', meaning: { te: 'శాంతి, ధ్యానం కోసం', en: 'For peace and meditation' }, count: 108 },
+  { sanskrit: 'ఓం నమః శివాయ', roman: 'Om Namah Shivaya',
+    meaning: { te: 'శాంతి, ధ్యానం కోసం', en: 'For peace and meditation' }, count: 108 },
   // Tuesday
-  { sanskrit: 'ఓం హనుమతే నమః', meaning: { te: 'శక్తి, ధైర్యం కోసం', en: 'For strength and courage' }, count: 108 },
+  { sanskrit: 'ఓం హనుమతే నమః', roman: 'Om Hanumate Namah',
+    meaning: { te: 'శక్తి, ధైర్యం కోసం', en: 'For strength and courage' }, count: 108 },
   // Wednesday
-  { sanskrit: 'ఓం గణేశాయ నమః', meaning: { te: 'విజ్ఞానం, విజయం కోసం', en: 'For wisdom and success' }, count: 108 },
+  { sanskrit: 'ఓం గణేశాయ నమః', roman: 'Om Ganeshaya Namah',
+    meaning: { te: 'విజ్ఞానం, విజయం కోసం', en: 'For wisdom and success' }, count: 108 },
   // Thursday
-  { sanskrit: 'ఓం బృహస్పతయే నమః', meaning: { te: 'జ్ఞానం, సంపద కోసం', en: 'For knowledge and prosperity' }, count: 108 },
+  { sanskrit: 'ఓం బృహస్పతయే నమః', roman: 'Om Brihaspataye Namah',
+    meaning: { te: 'జ్ఞానం, సంపద కోసం', en: 'For knowledge and prosperity' }, count: 108 },
   // Friday
-  { sanskrit: 'ఓం మహాలక్ష్మ్యై నమః', meaning: { te: 'సంపద, శ్రేయస్సు కోసం', en: 'For wealth and well-being' }, count: 108 },
+  { sanskrit: 'ఓం మహాలక్ష్మ్యై నమః', roman: 'Om Maha-Lakshmyai Namah',
+    meaning: { te: 'సంపద, శ్రేయస్సు కోసం', en: 'For wealth and well-being' }, count: 108 },
   // Saturday
-  { sanskrit: 'ఓం శనైశ్చరాయ నమః', meaning: { te: 'గ్రహ దోషాల నివారణకు', en: 'To remove planetary afflictions' }, count: 108 },
+  { sanskrit: 'ఓం శనైశ్చరాయ నమః', roman: 'Om Shanaishcharaya Namah',
+    meaning: { te: 'గ్రహ దోషాల నివారణకు', en: 'To remove planetary afflictions' }, count: 108 },
 ];
 
 export function getTodayMantra(date = new Date()) {

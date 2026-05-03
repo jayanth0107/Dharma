@@ -88,7 +88,7 @@ export function buildPanchangamShareText(panchangam, date, locationName) {
   text += `📿 *వారం:* ${panchangam.vaaram?.telugu || ''} (${panchangam.vaaram?.english || ''})\n`;
   if (panchangam.vaaram?.deity) text += `   🙏 వారదేవత: ${panchangam.vaaram.deity}\n`;
   text += `📅 *మాసం:* ${panchangam.teluguMonth?.telugu || ''} (${panchangam.teluguMonth?.english || ''})\n`;
-  text += `🗓️ *సంవత్సరం:* ${panchangam.teluguYear || ''}\n\n`;
+  text += `🗓️ *సంవత్సరం:* ${panchangam.teluguYear?.te || ''} (${panchangam.teluguYear?.en || ''})\n\n`;
 
   text += `🌙 *తిథి:* ${panchangam.tithi?.telugu || ''} (${panchangam.tithi?.english || ''})\n`;
   text += `   ${paksha}\n`;

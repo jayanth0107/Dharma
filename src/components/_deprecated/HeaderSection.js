@@ -478,7 +478,7 @@ const s = StyleSheet.create({
   },
   titleSide: { zIndex: 2 },
   appTitle: {
-    fontSize: 52, fontWeight: '900', color: '#FFD700',
+    fontSize: 52, fontWeight: '700', color: '#FFD700',
     letterSpacing: 5, textAlign: 'center', zIndex: 1,
     fontFamily: 'Noto Sans Telugu, sans-serif',
     textShadowColor: 'rgba(255,185,0,0.4)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 18,
@@ -497,7 +497,7 @@ const s = StyleSheet.create({
     borderRadius: 10, marginTop: 6, borderWidth: 1, borderColor: 'rgba(255,215,0,0.3)', zIndex: 1,
   },
   premiumBadgeText: {
-    fontSize: 9, fontWeight: '800', color: '#FFD700', letterSpacing: 2,
+    fontSize: 9, fontWeight: '600', color: '#FFD700', letterSpacing: 2,
   },
   // Sub row — location centered with decorative lines
   subRow: {
@@ -546,20 +546,20 @@ const s = StyleSheet.create({
   },
   dateCol: { alignItems: 'center' },
   dayName: { fontSize: 16, fontWeight: '700', color: Colors.saffron, letterSpacing: 0.5 },
-  dateNum: { fontSize: 56, fontWeight: '900', color: Colors.kumkum, lineHeight: 60 },
+  dateNum: { fontSize: 56, fontWeight: '700', color: Colors.kumkum, lineHeight: 60 },
   monthName: { fontSize: 16, fontWeight: '700', color: '#3A2A1A' },
   monthEn: { fontSize: 14, fontWeight: '700', color: '#6B5B4B', marginTop: 2 },
 
   // Center: Year + Month
   centerCol: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
-  centerYear: { fontSize: 18, fontWeight: '900', color: Colors.darkBrown, marginTop: 4, textAlign: 'center', letterSpacing: 0.5 },
+  centerYear: { fontSize: 18, fontWeight: '700', color: Colors.darkBrown, marginTop: 4, textAlign: 'center', letterSpacing: 0.5 },
   centerYearSub: { fontSize: 12, color: '#8A7A6A', fontWeight: '600' },
   centerDivider: { width: 24, height: 1, backgroundColor: Colors.gold, opacity: 0.3, marginVertical: 6, borderRadius: 1 },
-  centerMonth: { fontSize: 18, fontWeight: '900', color: Colors.darkBrown, textAlign: 'center', letterSpacing: 0.5 },
+  centerMonth: { fontSize: 18, fontWeight: '700', color: Colors.darkBrown, textAlign: 'center', letterSpacing: 0.5 },
   centerMonthSub: { fontSize: 12, color: '#8A7A6A', fontWeight: '600' },
 
   moonCol: { alignItems: 'center', marginRight: 4 },
-  moonLabel: { fontSize: 15, fontWeight: '800', marginTop: 8, textAlign: 'center', letterSpacing: 0.5 },
+  moonLabel: { fontSize: 15, fontWeight: '600', marginTop: 8, textAlign: 'center', letterSpacing: 0.5 },
 
   // Sunrise & Sunset
   sunRow: {
@@ -574,7 +574,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   sunLabel: { fontSize: 13, color: '#6B5B4B', fontWeight: '700' },
-  sunTime: { fontSize: 24, fontWeight: '900', color: '#2C1810', letterSpacing: 0.5 },
+  sunTime: { fontSize: 24, fontWeight: '700', color: '#2C1810', letterSpacing: 0.5 },
   sunDivider: { width: 1.5, height: 44, backgroundColor: 'rgba(0,0,0,0.06)', marginHorizontal: 6 },
 
 });

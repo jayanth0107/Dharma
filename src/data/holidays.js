@@ -1,5 +1,7 @@
-// ధర్మ — Public Holidays 2026 (India / Telangana & AP)
-// Verified against timeanddate.com gazetted holidays list
+// ధర్మ — Public Holidays (India / Telangana & AP)
+// Verified against drikpanchang.com + timeanddate.com gazetted holidays list.
+// Religious holidays (Eid, Muharram, Milad) are tentative until officially
+// announced — moon sighting may shift dates by ±1 day.
 
 export const PUBLIC_HOLIDAYS_2026 = [
   { date: '2026-01-14', telugu: 'మకర సంక్రాంతి', english: 'Makar Sankranti', teluguMonth: 'పుష్య' },
@@ -26,11 +28,39 @@ export const PUBLIC_HOLIDAYS_2026 = [
   { date: '2026-12-25', telugu: 'క్రిస్మస్', english: 'Christmas', teluguMonth: 'పుష్య' },
 ];
 
-// Year-aware lookup. Add PUBLIC_HOLIDAYS_2027 etc. and register here when
-// generated; the getter falls back to the closest-available year so the UI
+// 2027 — verified against drikpanchang.com (Hyderabad) on 2026-04-28.
+// 2027 is NOT an Adhika Masa year, so the lunar festival cadence is back
+// to its normal 12-cycle rhythm (compare to 2026 which had Adhika Jyeshtha).
+export const PUBLIC_HOLIDAYS_2027 = [
+  { date: '2027-01-14', telugu: 'మకర సంక్రాంతి', english: 'Makar Sankranti', teluguMonth: 'పుష్య' },
+  { date: '2027-01-26', telugu: 'గణతంత్ర దినోత్సవం', english: 'Republic Day', teluguMonth: 'మాఘ' },
+  { date: '2027-03-06', telugu: 'మహాశివరాత్రి', english: 'Maha Shivaratri', teluguMonth: 'మాఘ కృ. 14' },
+  { date: '2027-03-10', telugu: 'రంజాన్ ఈద్', english: 'Eid ul-Fitr', teluguMonth: 'ఫాల్గుణ' },
+  { date: '2027-03-22', telugu: 'హోళీ', english: 'Holi', teluguMonth: 'ఫాల్గుణ పూర్ణిమ' },
+  { date: '2027-03-26', telugu: 'గుడ్ ఫ్రైడే', english: 'Good Friday', teluguMonth: 'చైత్ర' },
+  { date: '2027-04-07', telugu: 'ఉగాది', english: 'Ugadi', teluguMonth: 'చైత్ర శు. 1' },
+  { date: '2027-04-14', telugu: 'డా. అంబేడ్కర్ జయంతి', english: 'Dr. Ambedkar Jayanti', teluguMonth: 'చైత్ర' },
+  { date: '2027-04-15', telugu: 'శ్రీరామనవమి', english: 'Sri Rama Navami', teluguMonth: 'చైత్ర శు. 9' },
+  { date: '2027-04-19', telugu: 'మహావీర జయంతి', english: 'Mahavir Jayanti', teluguMonth: 'చైత్ర శు. 13' },
+  { date: '2027-05-01', telugu: 'మే దినం', english: 'May Day', teluguMonth: 'వైశాఖ' },
+  { date: '2027-05-17', telugu: 'బక్రీద్', english: 'Eid ul-Adha (Bakrid)', teluguMonth: 'వైశాఖ' },
+  { date: '2027-05-20', telugu: 'బుద్ధ పూర్ణిమ', english: 'Buddha Purnima', teluguMonth: 'వైశాఖ పూర్ణిమ' },
+  { date: '2027-06-15', telugu: 'ముహర్రం', english: 'Muharram', teluguMonth: 'జ్యేష్ఠ' },
+  { date: '2027-08-15', telugu: 'స్వాతంత్ర్య దినోత్సవం / మిలాద్-ఉన్-నబీ', english: 'Independence Day / Milad un-Nabi', teluguMonth: 'శ్రావణ' },
+  { date: '2027-08-25', telugu: 'కృష్ణ జన్మాష్టమి', english: 'Krishna Janmashtami', teluguMonth: 'భాద్రపద కృ. 8' },
+  { date: '2027-09-04', telugu: 'వినాయక చవితి', english: 'Vinayaka Chavithi', teluguMonth: 'భాద్రపద శు. 4' },
+  { date: '2027-10-02', telugu: 'గాంధీ జయంతి', english: 'Gandhi Jayanti', teluguMonth: 'ఆశ్వయుజ' },
+  { date: '2027-10-09', telugu: 'దసరా / విజయదశమి', english: 'Dussehra', teluguMonth: 'ఆశ్వయుజ శు. 10' },
+  { date: '2027-10-29', telugu: 'దీపావళి', english: 'Deepavali', teluguMonth: 'ఆశ్వయుజ అమావాస్య' },
+  { date: '2027-11-14', telugu: 'గురునానక్ జయంతి', english: 'Guru Nanak Jayanti', teluguMonth: 'కార్తీక పూర్ణిమ' },
+  { date: '2027-12-25', telugu: 'క్రిస్మస్', english: 'Christmas', teluguMonth: 'మార్గశిర' },
+];
+
+// Year-aware lookup. Falls back to closest available year so the UI
 // never goes silently empty after a year rollover.
 const HOLIDAYS_BY_YEAR = {
   2026: PUBLIC_HOLIDAYS_2026,
+  2027: PUBLIC_HOLIDAYS_2027,
 };
 const HOLIDAY_YEARS = Object.keys(HOLIDAYS_BY_YEAR).map(Number).sort((a, b) => a - b);
 
