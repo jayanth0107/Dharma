@@ -113,6 +113,11 @@ const CLOUD_EVENTS = new Set([
   'horoscope_pay_tap',
   'donate_initiated',
   'donate_upi_copied',
+  'donate_completed',
+  'donate_failed',
+  'donate_unconfirmed',
+  // Tile-level usage (uniform event for every FeatureTile tap)
+  'tile_tap',
 
   // Core features
   'horoscope_generate',
@@ -243,4 +248,144 @@ export async function logEventToCloud(eventName, params = {}) {
  */
 export function isCloudEvent(eventName) {
   return CLOUD_EVENTS.has(eventName);
+}
+
+// ── Admin: read-side queries against Firestore ────────────────────────
+// These are the queries the SettingsModal admin panel uses to roll up
+// cross-device usage. All are best-effort — return null/empty on
+// failure so the admin UI can fall back to local stats. NOT for
+// regular users; gated behind the admin passcode in SettingsModal.
+let _readyFns = false;
+async function loadReadFns() {
+  if (_readyFns) return true;
+  if (!isConfigured || !db) return false;
+  try {
+    const mod = await import('firebase/firestore');
+    // Re-use existing fns + load read-side ones
+    addDocFn = addDocFn || mod.addDoc;
+    collectionFn = collectionFn || mod.collection;
+    serverTimestampFn = serverTimestampFn || mod.serverTimestamp;
+    _readMod = mod;  // stash for later helpers
+    _readyFns = true;
+    return true;
+  } catch {
+    return false;
+  }
+}
+let _readMod = null;
+
+/**
+ * Pull recent analytics events for the admin panel. Default last 7 days,
+ * capped at maxResults. Returns [] on any failure.
+ */
+export async function adminFetchRecentEvents({ maxResults = 1000, sinceDays = 7 } = {}) {
+  try {
+    const ok = await loadReadFns();
+    if (!ok || !_readMod) return [];
+    const { query, where, orderBy, limit, getDocs, collection: col } = _readMod;
+    const sinceIso = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000).toISOString();
+    const q = query(
+      col(db, 'analytics_events'),
+      where('clientTs', '>=', sinceIso),
+      orderBy('clientTs', 'desc'),
+      limit(maxResults)
+    );
+    const snap = await getDocs(q);
+    const out = [];
+    snap.forEach((d) => out.push({ id: d.id, ...d.data() }));
+    return out;
+  } catch (err) {
+    if (__DEV__) console.warn('[adminFetchRecentEvents]', err?.message || err);
+    return [];
+  }
+}
+
+/**
+ * Roll up the recent-events feed into the dashboard view. Pure function
+ * over the array returned by adminFetchRecentEvents — keeps the UI
+ * dumb and easy to unit-test.
+ */
+export function aggregateAdminStats(events = []) {
+  if (!Array.isArray(events) || events.length === 0) {
+    return {
+      totalEvents: 0,
+      uniqueDevices: 0,
+      uniqueUsers: 0,
+      sessionsToday: 0,
+      sessions7d: 0,
+      topTiles: [],
+      topEvents: [],
+      topLocations: [],
+      browsers: {},
+      platforms: {},
+      userStatusBreakdown: {},
+      recentErrors: [],
+      languages: {},
+    };
+  }
+  const todayKey = new Date().toISOString().split('T')[0];
+  const devices = new Set();
+  const users = new Set();
+  let sessionsToday = 0;
+  let sessions7d = 0;
+  const tileCounts = {};
+  const eventCounts = {};
+  const locCounts = {};
+  const browsers = {};
+  const platforms = {};
+  const userStatusBreakdown = {};
+  const languages = {};
+  const errors = [];
+
+  for (const e of events) {
+    if (e.deviceId) devices.add(e.deviceId);
+    if (e.userId) users.add(e.userId);
+    eventCounts[e.event] = (eventCounts[e.event] || 0) + 1;
+
+    if (e.event === 'session_start') {
+      sessions7d += 1;
+      if ((e.clientTs || '').startsWith(todayKey)) sessionsToday += 1;
+    }
+    if (e.event === 'tile_tap') {
+      const k = e.params?.tile || 'unknown';
+      tileCounts[k] = (tileCounts[k] || 0) + 1;
+    }
+    if (e.event === 'location_changed' || e.event === 'location_auto_detected') {
+      const k = e.params?.city || e.params?.location || 'unknown';
+      locCounts[k] = (locCounts[k] || 0) + 1;
+    }
+    if (e.event === 'app_crash') {
+      errors.push({
+        screen: e.params?.screen || 'unknown',
+        message: e.params?.message || '',
+        clientTs: e.clientTs,
+        platform: e.platform,
+        appVersion: e.appVersion,
+      });
+    }
+
+    if (e.platform) platforms[e.platform] = (platforms[e.platform] || 0) + 1;
+    if (e.browser)  browsers[e.browser]   = (browsers[e.browser]   || 0) + 1;
+    if (e.userStatus) userStatusBreakdown[e.userStatus] = (userStatusBreakdown[e.userStatus] || 0) + 1;
+    if (e.lang)     languages[e.lang]     = (languages[e.lang]     || 0) + 1;
+  }
+
+  const sortDesc = (obj, n = 10) =>
+    Object.entries(obj).sort(([, a], [, b]) => b - a).slice(0, n);
+
+  return {
+    totalEvents: events.length,
+    uniqueDevices: devices.size,
+    uniqueUsers: users.size,
+    sessionsToday,
+    sessions7d,
+    topTiles: sortDesc(tileCounts),
+    topEvents: sortDesc(eventCounts),
+    topLocations: sortDesc(locCounts),
+    browsers,
+    platforms,
+    userStatusBreakdown,
+    recentErrors: errors.slice(0, 20),
+    languages,
+  };
 }

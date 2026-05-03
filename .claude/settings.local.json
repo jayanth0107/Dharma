@@ -117,7 +117,9 @@
       "Bash(cp \"/c/Users/bujji/Downloads/krishna.mp3\" \"/c/Users/bujji/Desktop/DharmaDaily/assets/audio/krishna.mp3\")",
       "Bash(cp \"/c/Users/bujji/Downloads/om chant powerful.mp3\" \"/c/Users/bujji/Desktop/DharmaDaily/assets/audio/soham.mp3\")",
       "Bash(ffmpeg -version)",
-      "Bash(xargs -I {} stat -c \"%s %n\" \"{}\")"
+      "Bash(xargs -I {} stat -c \"%s %n\" \"{}\")",
+      "Bash(npx eas-cli@latest whoami)",
+      "Bash(npx eas-cli@latest build --platform android --profile preview --non-interactive --no-wait)"
     ]
   }
 }

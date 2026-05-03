@@ -11,6 +11,7 @@ import { loadNotifSettings, saveNotifSettings, setupDailyNotifications } from '.
 import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
 import { getPaymentStats } from '../utils/paymentSync';
 import { getAnalyticsSummary } from '../utils/analytics';
+import { adminFetchRecentEvents, aggregateAdminStats } from '../utils/analyticsSync';
 import { setAdConfig } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
@@ -61,6 +62,11 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
   const [cloudStats, setCloudStats] = useState(null);
   const [showCloud, setShowCloud] = useState(false);
   const [cloudLoading, setCloudLoading] = useState(false);
+  // Cross-device analytics rolled up from Firestore — lazy-loaded.
+  const [showCloudAnalytics, setShowCloudAnalytics] = useState(false);
+  const [cloudAnalytics, setCloudAnalytics] = useState(null);
+  const [cloudAnalyticsLoading, setCloudAnalyticsLoading] = useState(false);
+  const [cloudAnalyticsRange, setCloudAnalyticsRange] = useState(7); // days
 
   useEffect(() => {
     if (visible) {
@@ -431,6 +437,212 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     <Text style={{ fontSize: 10, color: DarkColors.textMuted, textAlign: 'center', marginTop: 12, lineHeight: 14 }}>
                       {t('ఇది ఈ పరికరం యొక్క స్థానిక డేటా. క్రాస్-యూజర్ గణాంకాలు Firebase Console లో.',
                          'Local data on this device only. Cross-user analytics in Firebase Console.')}
+                    </Text>
+                  </View>
+                )}
+
+                {/* ── Cross-Device Cloud Analytics — rolls up Firestore
+                    analytics_events. Admin-only (already inside
+                    adminUnlocked branch). ── */}
+                <TouchableOpacity
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: settingRowPad }]}
+                  onPress={async () => {
+                    if (!showCloudAnalytics) {
+                      setCloudAnalyticsLoading(true);
+                      const events = await adminFetchRecentEvents({ maxResults: 1500, sinceDays: cloudAnalyticsRange });
+                      setCloudAnalytics(aggregateAdminStats(events));
+                      setCloudAnalyticsLoading(false);
+                    }
+                    setShowCloudAnalytics(!showCloudAnalytics);
+                  }}
+                >
+                  <MaterialCommunityIcons name="earth" size={settingIconSize} color={DarkColors.tulasiGreen} style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{t('క్రాస్-డివైస్ గణాంకాలు', 'Cross-Device Analytics')}</Text>
+                    <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{t('అన్ని యూజర్లు, తేలికపాటి గత 7 రోజులు', 'All users · Firestore · last 7 days')}</Text>
+                  </View>
+                  <MaterialCommunityIcons name={showCloudAnalytics ? 'chevron-up' : 'chevron-down'} size={20} color={DarkColors.textMuted} />
+                </TouchableOpacity>
+
+                {showCloudAnalytics && (
+                  <View style={{ marginTop: 8, backgroundColor: DarkColors.bgElevated, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: DarkColors.borderCard }}>
+                    {/* Range chips */}
+                    <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                      {[1, 7, 30].map((days) => (
+                        <TouchableOpacity
+                          key={days}
+                          onPress={async () => {
+                            if (days === cloudAnalyticsRange) return;
+                            setCloudAnalyticsRange(days);
+                            setCloudAnalyticsLoading(true);
+                            const events = await adminFetchRecentEvents({ maxResults: 1500, sinceDays: days });
+                            setCloudAnalytics(aggregateAdminStats(events));
+                            setCloudAnalyticsLoading(false);
+                          }}
+                          style={{
+                            paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12,
+                            borderWidth: 1,
+                            borderColor: days === cloudAnalyticsRange ? DarkColors.gold : DarkColors.borderCard,
+                            backgroundColor: days === cloudAnalyticsRange ? 'rgba(212,160,23,0.15)' : 'transparent',
+                          }}
+                        >
+                          <Text style={{ fontSize: 12, fontWeight: '700', color: days === cloudAnalyticsRange ? DarkColors.gold : DarkColors.textMuted }}>
+                            {days === 1 ? t('నేడు', 'Today') : `${days}d`}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {cloudAnalyticsLoading ? (
+                      <Text style={{ textAlign: 'center', color: DarkColors.textMuted, paddingVertical: 16 }}>{t('లోడ్ అవుతోంది…', 'Loading…')}</Text>
+                    ) : !cloudAnalytics || cloudAnalytics.totalEvents === 0 ? (
+                      <Text style={{ textAlign: 'center', color: DarkColors.textMuted, paddingVertical: 16 }}>{t('డేటా లేదు', 'No events in range')}</Text>
+                    ) : (
+                      <>
+                        {/* Headline tiles — 4 across */}
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 }}>
+                          {[
+                            { label: t('పరికరాలు', 'Devices'),    value: cloudAnalytics.uniqueDevices, color: DarkColors.gold },
+                            { label: t('సెషన్లు 7d', 'Sessions 7d'), value: cloudAnalytics.sessions7d,   color: DarkColors.tulasiGreen },
+                            { label: t('సెషన్లు నేడు', 'Today'),     value: cloudAnalytics.sessionsToday, color: DarkColors.saffron },
+                            { label: t('ఈవెంట్లు', 'Events'),       value: cloudAnalytics.totalEvents,   color: '#9B6FCF' },
+                          ].map((tile, i) => (
+                            <View key={i} style={{ width: '48%', alignItems: 'center', paddingVertical: 10, backgroundColor: DarkColors.bgCard, borderRadius: 10 }}>
+                              <Text style={{ fontSize: 22, fontWeight: '700', color: tile.color }}>{tile.value}</Text>
+                              <Text style={{ fontSize: 11, color: DarkColors.silver, fontWeight: '600', marginTop: 2 }}>{tile.label}</Text>
+                            </View>
+                          ))}
+                        </View>
+
+                        {/* Top tiles tapped */}
+                        {cloudAnalytics.topTiles.length > 0 && (
+                          <View style={{ marginTop: 14 }}>
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                              {t('అత్యధికంగా తాపిన టైల్స్', 'Top Tiles Tapped')}
+                            </Text>
+                            {cloudAnalytics.topTiles.slice(0, 8).map(([name, count], i) => {
+                              const max = cloudAnalytics.topTiles[0][1] || 1;
+                              const pct = (count / max) * 100;
+                              return (
+                                <View key={i} style={{ marginBottom: 6 }}>
+                                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+                                    <Text style={{ fontSize: 12, color: DarkColors.silverLight, fontWeight: '600' }} numberOfLines={1}>{name}</Text>
+                                    <Text style={{ fontSize: 12, color: DarkColors.gold, fontWeight: '700' }}>{count}</Text>
+                                  </View>
+                                  <View style={{ height: 4, backgroundColor: DarkColors.bgCard, borderRadius: 2, overflow: 'hidden' }}>
+                                    <View style={{ width: `${pct}%`, height: 4, backgroundColor: DarkColors.gold, borderRadius: 2 }} />
+                                  </View>
+                                </View>
+                              );
+                            })}
+                          </View>
+                        )}
+
+                        {/* User status breakdown */}
+                        {Object.keys(cloudAnalytics.userStatusBreakdown).length > 0 && (
+                          <View style={{ marginTop: 14 }}>
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                              {t('యూజర్ స్థితి', 'User Status')}
+                            </Text>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                              {Object.entries(cloudAnalytics.userStatusBreakdown).map(([status, count]) => (
+                                <View key={status} style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.borderCard }}>
+                                  <Text style={{ fontSize: 12, color: DarkColors.silverLight, fontWeight: '600' }}>{status}: <Text style={{ color: DarkColors.gold, fontWeight: '700' }}>{count}</Text></Text>
+                                </View>
+                              ))}
+                            </View>
+                          </View>
+                        )}
+
+                        {/* Locations */}
+                        {cloudAnalytics.topLocations.length > 0 && (
+                          <View style={{ marginTop: 14 }}>
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                              {t('అగ్ర ప్రదేశాలు', 'Top Locations')}
+                            </Text>
+                            {cloudAnalytics.topLocations.slice(0, 6).map(([loc, count], i) => (
+                              <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+                                <Text style={{ fontSize: 12, color: DarkColors.silverLight, fontWeight: '500' }} numberOfLines={1}>{loc}</Text>
+                                <Text style={{ fontSize: 12, color: DarkColors.tulasiGreen, fontWeight: '700' }}>{count}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* Browser / platform */}
+                        {(Object.keys(cloudAnalytics.browsers).length > 0 || Object.keys(cloudAnalytics.platforms).length > 0) && (
+                          <View style={{ marginTop: 14 }}>
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                              {t('పరికరం & బ్రౌజర్', 'Devices & Browsers')}
+                            </Text>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                              {Object.entries(cloudAnalytics.platforms).map(([k, v]) => (
+                                <View key={k} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(76,175,80,0.12)', borderWidth: 1, borderColor: 'rgba(76,175,80,0.25)' }}>
+                                  <Text style={{ fontSize: 11, color: DarkColors.tulasiGreen, fontWeight: '700' }}>{k}: {v}</Text>
+                                </View>
+                              ))}
+                              {Object.entries(cloudAnalytics.browsers).map(([k, v]) => (
+                                <View key={k} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(155,111,207,0.12)', borderWidth: 1, borderColor: 'rgba(155,111,207,0.25)' }}>
+                                  <Text style={{ fontSize: 11, color: '#9B6FCF', fontWeight: '700' }}>{k}: {v}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          </View>
+                        )}
+
+                        {/* Recent crashes */}
+                        {cloudAnalytics.recentErrors.length > 0 && (
+                          <View style={{ marginTop: 14 }}>
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.kumkum, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                              {t('ఇటీవలి క్రాష్‌లు', 'Recent Crashes')} ({cloudAnalytics.recentErrors.length})
+                            </Text>
+                            {cloudAnalytics.recentErrors.slice(0, 5).map((err, i) => (
+                              <View key={i} style={{ paddingVertical: 6, borderBottomWidth: i < 4 ? 1 : 0, borderBottomColor: DarkColors.borderCard }}>
+                                <Text style={{ fontSize: 12, color: DarkColors.kumkum, fontWeight: '700' }}>{err.screen} · {err.platform || '?'}</Text>
+                                <Text style={{ fontSize: 11, color: DarkColors.silverLight, marginTop: 2 }} numberOfLines={2}>{err.message}</Text>
+                                <Text style={{ fontSize: 10, color: DarkColors.textMuted, marginTop: 2 }}>{err.clientTs?.slice(0, 16).replace('T', ' ') || ''}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+
+                        {/* Donations summary — derive from topEvents */}
+                        {(() => {
+                          const find = (k) => (cloudAnalytics.topEvents.find(([n]) => n === k) || [, 0])[1];
+                          const initiated = find('donate_initiated');
+                          const completed = find('donate_completed');
+                          const failed    = find('donate_failed');
+                          if (initiated + completed + failed === 0) return null;
+                          return (
+                            <View style={{ marginTop: 14 }}>
+                              <Text style={{ fontSize: 13, fontWeight: '700', color: DarkColors.gold, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                                {t('దానాలు', 'Donations')}
+                              </Text>
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                                <View style={{ alignItems: 'center' }}>
+                                  <Text style={{ fontSize: 18, fontWeight: '700', color: DarkColors.silverLight }}>{initiated}</Text>
+                                  <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t('ప్రారంభం', 'initiated')}</Text>
+                                </View>
+                                <View style={{ alignItems: 'center' }}>
+                                  <Text style={{ fontSize: 18, fontWeight: '700', color: DarkColors.tulasiGreen }}>{completed}</Text>
+                                  <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t('పూర్తి', 'completed')}</Text>
+                                </View>
+                                <View style={{ alignItems: 'center' }}>
+                                  <Text style={{ fontSize: 18, fontWeight: '700', color: DarkColors.kumkum }}>{failed}</Text>
+                                  <Text style={{ fontSize: 10, color: DarkColors.textMuted }}>{t('విఫలం', 'failed')}</Text>
+                                </View>
+                              </View>
+                              <Text style={{ fontSize: 10, color: DarkColors.textMuted, textAlign: 'center', marginTop: 8 }}>
+                                {t('₹ మొత్తాలు Payments విభాగంలో', 'Amounts in Payments section above')}
+                              </Text>
+                            </View>
+                          );
+                        })()}
+                      </>
+                    )}
+
+                    <Text style={{ fontSize: 10, color: DarkColors.textMuted, textAlign: 'center', marginTop: 12, lineHeight: 14 }}>
+                      {t('క్రాస్-డివైస్ Firestore డేటా', 'Live Firestore data — all devices · last events capped at 1500')}
                     </Text>
                   </View>
                 )}

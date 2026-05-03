@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Linking, Alert,
-  Modal, ScrollView, Platform, Share, Image,
+  Modal, ScrollView, Platform, Share, Image, AppState,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { ModalOrView } from './ModalOrView';
 import { trackEvent } from '../utils/analytics';
+import { syncPaymentToCloud } from '../utils/paymentSync';
 import { useLanguage } from '../context/LanguageContext';
 import { usePick } from '../theme/responsive';
 import { TR } from '../data/translations';
@@ -64,10 +65,99 @@ function getGenericQrCodeUrl() {
   return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
 }
 
+// ── Donation completion tracking ─────────────────────────────────────
+// UPI deep links hand off to a third-party app; there's no return
+// callback. To capture donation completion we listen for the next
+// AppState 'active' transition after a deep-link launch and prompt
+// the user. On YES we write to Firestore `payments`. On NO/dismiss
+// we fire a `donate_failed` event (intent-only). Without this loop
+// we'd see donate_initiated but never know how many actually paid.
+let _pendingConfirm = null;        // { amount, label, launchedAt }
+let _appStateSub = null;
+const CONFIRM_WINDOW_MS = 30 * 60 * 1000; // 30 min — covers slow OTP flows
+
+function disarmConfirmListener() {
+  if (_appStateSub) {
+    try { _appStateSub.remove(); } catch {}
+    _appStateSub = null;
+  }
+  _pendingConfirm = null;
+}
+
+async function recordCompletedDonation(amount, label) {
+  // Local + cloud event so admin dashboard sees it.
+  trackEvent('donate_completed', { amount, label });
+  // Firestore `payments` doc — same shape as premium/horoscope buys.
+  await syncPaymentToCloud({
+    source: 'donate',
+    amount,
+    label,
+    plan: 'donation',
+    timestamp: new Date().toISOString(),
+  });
+}
+
+function showDonationConfirmAlert(t) {
+  const { amount, label } = _pendingConfirm || {};
+  if (amount == null) return;
+  const finishCleanup = () => disarmConfirmListener();
+  Alert.alert(
+    t('చెల్లింపు పూర్తయిందా?', 'Did your payment go through?'),
+    `₹${amount}${label ? ` — ${label}` : ''}\n\n` +
+    t('మీ సహకారానికి ధన్యవాదాలు 🙏', 'Thank you for supporting Dharma 🙏'),
+    [
+      {
+        text: t('లేదు', 'No'),
+        style: 'cancel',
+        onPress: () => {
+          trackEvent('donate_failed', { amount, label });
+          finishCleanup();
+        },
+      },
+      {
+        text: t('తర్వాత చెబుతా', 'Maybe later'),
+        onPress: () => {
+          trackEvent('donate_unconfirmed', { amount, label });
+          finishCleanup();
+        },
+      },
+      {
+        text: t('అవును', 'Yes'),
+        onPress: () => {
+          recordCompletedDonation(amount, label);
+          finishCleanup();
+        },
+      },
+    ],
+    { cancelable: false }
+  );
+}
+
+function armConfirmListener(amount, label, t) {
+  // Disarm any previous one — only the most recent attempt matters.
+  disarmConfirmListener();
+  _pendingConfirm = { amount, label, launchedAt: Date.now() };
+
+  _appStateSub = AppState.addEventListener('change', (nextState) => {
+    if (nextState !== 'active') return;
+    // Ignore stale armings (user came back hours later).
+    const age = Date.now() - (_pendingConfirm?.launchedAt || 0);
+    if (age > CONFIRM_WINDOW_MS) {
+      disarmConfirmListener();
+      return;
+    }
+    // Small delay so the foreground transition settles before the Alert.
+    setTimeout(() => showDonationConfirmAlert(t), 600);
+  });
+}
+
 async function openUpiPayment(amount, label, t = (te) => te) {
   trackEvent('donate_initiated', { amount, label });
 
-  // On web, UPI deep links don't work — show QR code instead
+  // On web, UPI deep links don't work — show QR code instead.
+  // No AppState transition happens on web, so no confirmation prompt
+  // is wired here; the QR-scan + manual-confirm flow is documented
+  // separately for web donors.
   if (Platform.OS === 'web') {
     Alert.alert(
       t(TR.upiPaymentTitle.te, TR.upiPaymentTitle.en),
@@ -75,6 +165,10 @@ async function openUpiPayment(amount, label, t = (te) => te) {
     );
     return;
   }
+
+  // Arm the post-return confirmation listener BEFORE launching, so we
+  // never miss the AppState event even on slow UPI handoffs.
+  armConfirmListener(amount, label, t);
 
   // On mobile — try UPI deep link first
   const deepLink = buildUpiDeepLink(amount);
@@ -97,6 +191,10 @@ async function openUpiPayment(amount, label, t = (te) => te) {
       }
     } catch { /* try next */ }
   }
+
+  // No UPI app available → disarm; the manual-copy fallback below
+  // doesn't background the app, so AppState will never fire.
+  disarmConfirmListener();
 
   // Nothing worked — show UPI ID for manual payment
   Alert.alert(
