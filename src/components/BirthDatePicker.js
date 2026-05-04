@@ -25,12 +25,8 @@ const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
-// Bigger wheels — 5 visible rows × 50 px = 250 px tall each. Earlier
-// 3×44 = 132 px felt cramped and made scroll-target tiny on real
-// devices. The center row is the "selected" highlight; 2 rows above
-// + 2 below give peripheral context (yesterday/last month/etc.).
-const ITEM_HEIGHT = 50;
-const VISIBLE_ITEMS = 5;
+const ITEM_HEIGHT = 44;
+const VISIBLE_ITEMS = 3;
 const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const CURRENT_YEAR = new Date().getFullYear();
@@ -48,17 +44,15 @@ const pad2 = (n) => String(n).padStart(2, '0');
 const getDaysInMonth = (m, y) => new Date(y, m + 1, 0).getDate();
 
 // ── WheelColumn ────────────────────────────────────────────────────
-function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, highlight, itemFs, labelFs, labelMb }) {
+function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, highlight }) {
   const scrollRef = useRef(null);
   const lastSnapped = useRef(selectedIndex);
   const isFirstMount = useRef(true);
-  // Controlled-scroll fight prevention: track whether the user is
-  // actively driving the wheel. While true, we IGNORE parent's
-  // selectedIndex prop changes and never fire scrollTo() back at
-  // them — otherwise a fast flick gets snapped back to the last
-  // committed position, which feels like "hard pushes only move
-  // a few numbers". Without this guard, RN's controlled scroll
-  // pattern fights the user.
+  // Controlled-scroll fight prevention: while the user is mid-flick we
+  // ignore any parent-driven scrollTo so the wheel doesn't snap back
+  // to a stale selectedIndex value. Without this guard a fast flick
+  // gets yanked back to the last committed position, which feels like
+  // "I push hard but only a few numbers change".
   const isUserScrolling = useRef(false);
 
   useEffect(() => {
@@ -100,7 +94,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
   // When data length shrinks below the current selection (Jan→Feb with
   // day 31), re-snap the wheel to the new max so the highlighted row
   // matches what the parent computes for effectiveDay. Skipped while
-  // user is scrolling.
+  // user is scrolling so we don't fight a fast flick.
   useEffect(() => {
     if (isUserScrolling.current) return;
     if (selectedIndex >= data.length && scrollRef.current) {
@@ -128,8 +122,9 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
   }, []);
 
   // Final snap when momentum/drag ends — same logic, also a safety
-  // net in case the last onScroll event landed off-grid. AND clears
-  // the isUserScrolling flag so parent-driven scrolls work again.
+  // net in case the last onScroll event landed off-grid. Clears the
+  // isUserScrolling flag so parent-driven scrolls (e.g. day clamp on
+  // month change) work again.
   const handleSnapEnd = useCallback((e) => {
     const idx = indexFromY(e.nativeEvent.contentOffset.y);
     if (idx !== lastSnapped.current) {
@@ -151,11 +146,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
 
   return (
     <View style={[ws.column, { width: width || 80 }]}>
-      {label ? (
-        <Text style={[ws.columnLabel, labelFs && { fontSize: labelFs }, labelMb != null && { marginBottom: labelMb }]} numberOfLines={1}>
-          {label}
-        </Text>
-      ) : null}
+      {label ? <Text style={ws.columnLabel}>{label}</Text> : null}
       <View style={[ws.wheelContainer, { height: PICKER_HEIGHT }, highlight && ws.wheelContainerHighlight]}>
         <View style={ws.selectionHighlight} pointerEvents="none" />
         <ScrollView
@@ -163,15 +154,15 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
           showsVerticalScrollIndicator={false}
           snapToInterval={ITEM_HEIGHT}
           snapToAlignment="start"
-          // 'normal' deceleration lets long flicks travel further. Earlier
-          // 'fast' + disableIntervalMomentum killed flick momentum and
-          // forced one-row-at-a-time drags — testers couldn't get past
-          // a few items even on hard scrolls.
-          decelerationRate="normal"
+          // Numeric deceleration — 'normal'/'fast' map to different
+          // values on iOS vs Android. Explicit 0.997 gives long-flick
+          // travel parity across platforms.
+          decelerationRate={0.997}
           bounces={Platform.OS === 'ios'}
-          // Larger touch slop so an accidental horizontal twitch doesn't
-          // cancel a vertical drag (Android default is fairly tight).
           nestedScrollEnabled
+          // Disable Android's overscroll glow that swallows drag
+          // gestures at the list ends.
+          overScrollMode="never"
           contentOffset={{ x: 0, y: selectedIndex * ITEM_HEIGHT }}
           onScroll={handleScroll}
           scrollEventThrottle={16}
@@ -192,7 +183,6 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
             >
               <Text style={[
                 ws.itemText,
-                itemFs && { fontSize: itemFs },
                 i === selectedIndex && ws.itemTextSelected,
                 i !== selectedIndex && ws.itemTextDim,
               ]}>
@@ -241,29 +231,15 @@ export function BirthDatePicker({
     () => Array.from({ length: ye - ys + 1 }, (_, i) => ys + i),
     [ys, ye]
   );
-  // Full responsive ladder — each token scales sm→xl so the picker
-  // looks proportionate on a 360 dp Android phone, a 414 dp iPhone,
-  // and a 768 dp tablet without code branches.
-  const btnPadV       = usePick({ default: 14, sm: 14, md: 15, lg: 17, xl: 20 });
-  const titleSize     = usePick({ default: 18, sm: 18, md: 19, lg: 21, xl: 24 });
-  // Day column is wider than month/year — day is the most-changed axis.
-  // On smallest phones the picker is squeezed; we keep the day column
-  // at 90 px there so 3 columns + paddings still fit.
-  const dayColWidth   = usePick({ default: 92,  sm: 92,  md: 100, lg: 120, xl: 144 });
-  const monthColWidth = usePick({ default: 78,  sm: 78,  md: 84,  lg: 96,  xl: 112 });
-  const yearColWidth  = usePick({ default: 80,  sm: 80,  md: 86,  lg: 100, xl: 116 });
-  const timeColWidth  = usePick({ default: 70,  sm: 70,  md: 78,  lg: 90,  xl: 104 });
-  // New block fonts/icons — propagate to JSX via inline style.
-  const blockHeaderIconSz   = usePick({ default: 18, sm: 18, md: 19, lg: 21, xl: 24 });
-  const blockLabelFs        = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 17 });
-  const blockValueFs        = usePick({ default: 16, sm: 16, md: 17, lg: 19, xl: 22 });
-  // Wheel item label / item text — size scales but ITEM_HEIGHT is
-  // fixed (the wheel snap math depends on it).
-  const wheelItemFs         = usePick({ default: 18, sm: 18, md: 19, lg: 21, xl: 24 });
-  const wheelLabelFs        = usePick({ default: 12, sm: 12, md: 13, lg: 14, xl: 16 });
-  const wheelLabelMb        = usePick({ default: 6,  sm: 6,  md: 8,  lg: 10, xl: 12 });
-  // Buttons (Cancel / Confirm) at the bottom.
-  const actionFontSize      = usePick({ default: 16, sm: 16, md: 17, lg: 19, xl: 22 });
+  const btnPadV = usePick({ default: 14, lg: 16, xl: 18 });
+  const titleSize = usePick({ default: 18, lg: 20, xl: 22 });
+  // Day column is wider than month/year — day is the most-changed
+  // axis when looking up a panchangam, so the wheel that drives the
+  // primary input gets visual dominance + a larger tap target.
+  const dayColWidth   = usePick({ default: 100, lg: 120, xl: 140 });
+  const monthColWidth = usePick({ default: 80,  lg: 90,  xl: 100 });
+  const yearColWidth  = usePick({ default: 80,  lg: 90,  xl: 100 });
+  const timeColWidth  = usePick({ default: 65,  lg: 75,  xl: 85  });
 
   // ── Source-of-truth state ──
   // Clamp inputs at the boundary: years outside [ys, ye] would leave
@@ -371,77 +347,145 @@ export function BirthDatePicker({
               </Text>
             </View>
 
-            {/* ── DATE BLOCK ── compact display chip pinned to its
-                wheels so the user always sees the current value
-                directly above the scroll surface that drives it. */}
-            <View style={ws.block}>
-              <View style={ws.blockHeaderRow}>
-                <MaterialCommunityIcons name="calendar" size={blockHeaderIconSz} color={DarkColors.gold} />
-                <Text style={[ws.blockLabel, { fontSize: blockLabelFs }]}>{lang === 'te' ? 'తేదీ' : 'Date'}</Text>
-                <Text style={[ws.blockValueInline, { fontSize: blockValueFs }]} numberOfLines={1}>
-                  {pad2(effectiveDay)} · {MONTHS[month]} · {year}
-                </Text>
-              </View>
-              <View style={ws.wheelsRow}>
-                <WheelColumn
-                  data={dayData}
-                  selectedIndex={dayIndex}
-                  onSelect={(i) => { setDay(i + 1); setFocusField('day'); }}
-                  label={lang === 'te' ? 'రోజు' : 'Day'}
-                  renderItem={(d) => pad2(d)}
-                  width={dayColWidth}
-                  highlight={focusField === 'day'}
-                  itemFs={wheelItemFs}
-                  labelFs={wheelLabelFs}
-                  labelMb={wheelLabelMb}
-                />
-                <WheelColumn
-                  data={MONTHS}
-                  selectedIndex={month}
-                  onSelect={(i) => {
-                    setMonth(i);
-                    const newMax = getDaysInMonth(i, year);
-                    if (day > newMax) setDay(newMax);
-                    setFocusField('month');
-                  }}
-                  label={lang === 'te' ? 'నెల' : 'Month'}
-                  renderItem={(m) => m}
-                  width={monthColWidth}
-                  highlight={focusField === 'month'}
-                  itemFs={wheelItemFs}
-                  labelFs={wheelLabelFs}
-                  labelMb={wheelLabelMb}
-                />
-                <WheelColumn
-                  data={yearsArr}
-                  selectedIndex={yearIndex >= 0 ? yearIndex : Math.max(0, yearsArr.indexOf(1990))}
-                  onSelect={(i) => {
-                    setYear(yearsArr[i]);
-                    const newMax = getDaysInMonth(month, yearsArr[i]);
-                    if (day > newMax) setDay(newMax);
-                    setFocusField('year');
-                  }}
-                  label={lang === 'te' ? 'సంవత్సరం' : 'Year'}
-                  renderItem={(y) => String(y)}
-                  width={yearColWidth}
-                  highlight={focusField === 'year'}
-                  itemFs={wheelItemFs}
-                  labelFs={wheelLabelFs}
-                  labelMb={wheelLabelMb}
-                />
-              </View>
+            {/* Live preview */}
+            <View style={ws.preview}>
+              <MaterialCommunityIcons name="calendar-star" size={20} color={DarkColors.gold} />
+              <Text style={ws.previewText}>
+                {pad2(effectiveDay)} {MONTHS[month]} {year}
+                {showTime ? `  ·  ${timeDisplay}` : ''}
+              </Text>
             </View>
 
-            {/* ── TIME BLOCK ── same layout pattern, pinned to its
-                wheels right below the time display. */}
+            {/* ── Date display chips — DD - MM - YYYY ── */}
+            <View style={ws.fieldsBlock}>
+              <Text style={ws.blockLabel}>{lang === 'te' ? 'తేదీ' : 'Date'}</Text>
+              <View style={ws.chipRow}>
+                <ValueChip
+                  value={pad2(effectiveDay)}
+                  sublabel={lang === 'te' ? 'రోజు' : 'Day'}
+                  onPress={() => setFocusField('day')}
+                  isFocus={focusField === 'day'}
+                />
+                <Text style={ws.sepText}>−</Text>
+                <ValueChip
+                  value={pad2(month + 1)}
+                  sublabel={lang === 'te' ? 'నెల' : 'Month'}
+                  onPress={() => setFocusField('month')}
+                  isFocus={focusField === 'month'}
+                />
+                <Text style={ws.sepText}>−</Text>
+                <View style={ws.chipWide}>
+                  <ValueChip
+                    value={String(year)}
+                    sublabel={lang === 'te' ? 'సంవత్సరం' : 'Year'}
+                    onPress={() => setFocusField('year')}
+                    isFocus={focusField === 'year'}
+                  />
+                </View>
+              </View>
+              <Text style={ws.scrollHint}>
+                {lang === 'te' ? '↓ క్రింద చక్రాలు స్క్రోల్ చేయండి' : '↓ Scroll the wheels below to change'}
+              </Text>
+            </View>
+
+            {/* ── Time display chips — HH : MM  AM/PM ── */}
             {showTime && (
-              <View style={ws.block}>
-                <View style={ws.blockHeaderRow}>
-                  <MaterialCommunityIcons name="clock-outline" size={blockHeaderIconSz} color={DarkColors.gold} />
-                  <Text style={[ws.blockLabel, { fontSize: blockLabelFs }]}>{lang === 'te' ? 'సమయం' : 'Time'}</Text>
-                  <Text style={[ws.blockValueInline, { fontSize: blockValueFs }]} numberOfLines={1}>
-                    {pad2(hour12)}:{pad2(minute % 60)} {isPm ? 'PM' : 'AM'}
-                  </Text>
+              <View style={ws.fieldsBlock}>
+                <Text style={ws.blockLabel}>{lang === 'te' ? 'సమయం' : 'Time'}</Text>
+                <View style={ws.chipRow}>
+                  <ValueChip
+                    value={pad2(hour12)}
+                    sublabel={lang === 'te' ? 'గంట' : 'Hour'}
+                    onPress={() => setFocusField('hour')}
+                    isFocus={focusField === 'hour'}
+                  />
+                  <Text style={ws.sepText}>:</Text>
+                  <ValueChip
+                    value={pad2(minute % 60)}
+                    sublabel={lang === 'te' ? 'నిమిషం' : 'Min'}
+                    onPress={() => setFocusField('minute')}
+                    isFocus={focusField === 'minute'}
+                  />
+                  <View style={ws.amPmGroup}>
+                    <Text style={ws.miniLabel}>{lang === 'te' ? 'కాలం' : 'AM/PM'}</Text>
+                    <View style={ws.amPmRow}>
+                      <TouchableOpacity
+                        style={[ws.amPmBtn, !isPm && ws.amPmBtnActive]}
+                        onPress={() => setIsPm(false)}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 8, right: 4, bottom: 8, left: 4 }}
+                        accessibilityLabel="AM"
+                        accessibilityState={{ selected: !isPm }}
+                      >
+                        <Text style={[ws.amPmText, !isPm && ws.amPmTextActive]}>AM</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[ws.amPmBtn, isPm && ws.amPmBtnActive]}
+                        onPress={() => setIsPm(true)}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 8, right: 4, bottom: 8, left: 4 }}
+                        accessibilityLabel="PM"
+                        accessibilityState={{ selected: isPm }}
+                      >
+                        <Text style={[ws.amPmText, isPm && ws.amPmTextActive]}>PM</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* ── Date wheels ── */}
+            <View style={ws.wheelsRow}>
+              <WheelColumn
+                data={dayData}
+                selectedIndex={dayIndex}
+                onSelect={(i) => { setDay(i + 1); setFocusField('day'); }}
+                label={lang === 'te' ? 'రోజు' : 'Day'}
+                renderItem={(d) => pad2(d)}
+                width={dayColWidth}
+                highlight={focusField === 'day'}
+              />
+              <WheelColumn
+                data={MONTHS}
+                selectedIndex={month}
+                onSelect={(i) => {
+                  setMonth(i);
+                  const newMax = getDaysInMonth(i, year);
+                  if (day > newMax) setDay(newMax);
+                  setFocusField('month');
+                }}
+                label={lang === 'te' ? 'నెల' : 'Month'}
+                renderItem={(m) => m}
+                width={monthColWidth}
+                highlight={focusField === 'month'}
+              />
+              <WheelColumn
+                data={yearsArr}
+                selectedIndex={yearIndex >= 0 ? yearIndex : Math.max(0, yearsArr.indexOf(1990))}
+                onSelect={(i) => {
+                  setYear(yearsArr[i]);
+                  const newMax = getDaysInMonth(month, yearsArr[i]);
+                  if (day > newMax) setDay(newMax);
+                  setFocusField('year');
+                }}
+                label={lang === 'te' ? 'సంవత్సరం' : 'Year'}
+                renderItem={(y) => String(y)}
+                width={yearColWidth}
+                highlight={focusField === 'year'}
+              />
+            </View>
+
+            {/* ── Time wheels ── */}
+            {showTime && (
+              <>
+                <View style={ws.timeDivider}>
+                  <View style={ws.timeDividerLine} />
+                  <View style={ws.timeDividerBadge}>
+                    <MaterialCommunityIcons name="clock-outline" size={16} color={DarkColors.gold} />
+                    <Text style={ws.timeDividerText}>{lang === 'te' ? 'జన్మ సమయం' : 'Birth Time'}</Text>
+                  </View>
+                  <View style={ws.timeDividerLine} />
                 </View>
                 <View style={ws.wheelsRow}>
                   <WheelColumn
@@ -452,10 +496,8 @@ export function BirthDatePicker({
                     renderItem={(h) => pad2(h)}
                     width={timeColWidth}
                     highlight={focusField === 'hour'}
-                    itemFs={wheelItemFs}
-                    labelFs={wheelLabelFs}
-                    labelMb={wheelLabelMb}
                   />
+                  <Text style={ws.colonText}>:</Text>
                   <WheelColumn
                     data={MINUTES_ALL}
                     selectedIndex={minuteIndex >= 0 ? minuteIndex : 0}
@@ -464,34 +506,28 @@ export function BirthDatePicker({
                     renderItem={(m) => pad2(m)}
                     width={timeColWidth}
                     highlight={focusField === 'minute'}
-                    itemFs={wheelItemFs}
-                    labelFs={wheelLabelFs}
-                    labelMb={wheelLabelMb}
                   />
                   <WheelColumn
                     data={PERIODS}
                     selectedIndex={periodIndex}
                     onSelect={(i) => setIsPm(i === 1)}
-                    label={lang === 'te' ? 'కాలం' : 'AM/PM'}
+                    label={lang === 'te' ? 'కాలం' : 'Period'}
                     width={timeColWidth}
-                    itemFs={wheelItemFs}
-                    labelFs={wheelLabelFs}
-                    labelMb={wheelLabelMb}
                   />
                 </View>
-              </View>
+              </>
             )}
 
             <View style={ws.actions}>
               <TouchableOpacity style={ws.cancelBtn} onPress={onClose}>
-                <Text style={[ws.cancelText, { fontSize: actionFontSize }]}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
+                <Text style={ws.cancelText}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[ws.confirmBtn, { paddingVertical: btnPadV }]}
                 onPress={handleConfirm}
               >
                 <MaterialCommunityIcons name="check" size={20} color="#0A0A0A" />
-                <Text style={[ws.confirmText, { fontSize: actionFontSize }]}>{lang === 'te' ? 'ఎంచుకోండి' : 'Select'}</Text>
+                <Text style={ws.confirmText}>{lang === 'te' ? 'ఎంచుకోండి' : 'Select'}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -525,35 +561,12 @@ const ws = StyleSheet.create({
   },
   previewText: { fontSize: 18, fontWeight: '600', color: DarkColors.goldLight, letterSpacing: 1 },
 
-  // ── New compact block layout ──
-  // Each block = a single header row (icon + label + value) pinned
-  // directly above its 3-column wheel cluster. Removes the redundant
-  // big preview row and the separate display-chips row from the v1
-  // design — saves ~80 vertical px and pairs each value with the
-  // wheel that drives it.
-  block: {
-    marginHorizontal: 16, marginTop: 12,
-    paddingTop: 10, paddingBottom: 6, paddingHorizontal: 8,
-    backgroundColor: DarkColors.bgCard,
-    borderRadius: 14,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
-  },
-  blockHeaderRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingHorizontal: 6, paddingBottom: 8,
-    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
-  },
-  blockLabel: {
-    fontSize: 13, fontWeight: '700', color: DarkColors.gold,
-    letterSpacing: 0.5, textTransform: 'uppercase',
-  },
-  blockValueInline: {
-    flex: 1, textAlign: 'right',
-    fontSize: 16, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.4,
-  },
-
-  // Field blocks (date / time) — legacy, retained for any other caller
+  // Field blocks (date / time)
   fieldsBlock: { paddingHorizontal: 20, paddingTop: 14 },
+  blockLabel: {
+    fontSize: 12, fontWeight: '600', color: DarkColors.silver,
+    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8,
+  },
   chipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   chipWide: { flex: 1.6 },
   chip: {
@@ -606,7 +619,7 @@ const ws = StyleSheet.create({
 
   wheelsRow: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start',
-    paddingVertical: 6, gap: 8,
+    paddingVertical: 12, gap: 8,
   },
   colonText: {
     fontSize: 28, fontWeight: '700', color: DarkColors.gold,
