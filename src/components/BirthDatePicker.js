@@ -598,10 +598,16 @@ const ws = StyleSheet.create({
 
   // Field blocks (date / time). Reduced horizontal padding 20 → 14
   // so chips claim more horizontal real estate; labels grow into it.
-  fieldsBlock: { paddingHorizontal: 14, paddingTop: 8 },
+  fieldsBlock: { paddingHorizontal: 14, paddingTop: 12 },
+  // Block heading (DATE / TIME) gets a hairline divider below with
+  // breathing room — visually separates the heading from the chip
+  // row beneath it. paddingBottom holds the divider away from the
+  // text; marginBottom adds space between the divider and the chips.
   blockLabel: {
     fontSize: 13, fontWeight: '700', color: DarkColors.gold,
-    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 6,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+    paddingBottom: 8, marginBottom: 10,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   chipRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   chipWide: { flex: 1.6 },
@@ -628,9 +634,12 @@ const ws = StyleSheet.create({
     fontSize: 13, fontWeight: '700', color: DarkColors.silverLight,
     marginTop: 4, letterSpacing: 0.4, textTransform: 'uppercase',
   },
+  // Scroll hint — was 12pt textMuted (textMuted ~ 4.4:1 on dark bg,
+  // borderline). Now 14pt silverLight (~6:1, comfortably readable).
+  // No italic — italic Telugu glyphs are hard on the eye.
   scrollHint: {
-    fontSize: 12, color: DarkColors.textMuted, fontWeight: '500',
-    textAlign: 'center', marginTop: 6, fontStyle: 'italic',
+    fontSize: 14, color: DarkColors.silverLight, fontWeight: '600',
+    textAlign: 'center', marginTop: 10, lineHeight: 20,
   },
 
   sepText: {
