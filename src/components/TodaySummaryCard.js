@@ -30,8 +30,10 @@ export function TodaySummaryCard({ onNavigate, streak }) {
   const timingPadH     = usePick({ default: 10, md: 12, lg: 14, xl: 18 });
   const timingPadV     = usePick({ default: 8,  md: 9,  lg: 11, xl: 13 });
   const timingIconSz   = usePick({ default: 16, md: 17, lg: 19, xl: 22 });
-  const timingLabelFs  = usePick({ default: 13, md: 14, lg: 15, xl: 17 });
-  const timingTimeFs   = usePick({ default: 15, md: 16, lg: 18, xl: 20 });
+  // Dropped 15/16/18/20 → 13/14/16/18 so "10:30 AM–11:30 AM" fits
+  // without ellipsis on 360 dp phones. Label proportionally trimmed.
+  const timingLabelFs  = usePick({ default: 12, md: 13, lg: 14, xl: 16 });
+  const timingTimeFs   = usePick({ default: 13, md: 14, lg: 16, xl: 18 });
   const festIconSz     = usePick({ default: 14, md: 15, lg: 17, xl: 20 });
   const festFs         = usePick({ default: 16, md: 17, lg: 18, xl: 21 });
   const rowGap         = usePick({ default: 8, md: 10, lg: 12, xl: 16 });
@@ -188,7 +190,10 @@ const s = StyleSheet.create({
   // Label slightly smaller than time so the time reads as the
   // primary data. 13 label / 15 time — both fit comfortably.
   timingLabel: { fontWeight: '700', letterSpacing: 0.2 },
-  timingTime:  { fontWeight: '600', letterSpacing: 0.3, marginTop: 1 },
+  // No letter-spacing on the time string — it stretches the chars
+  // horizontally for no readability benefit and pushes the range
+  // to overflow into ellipsis.
+  timingTime:  { fontWeight: '600', marginTop: 1 },
   festivalRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8,
     paddingTop: 8, borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
