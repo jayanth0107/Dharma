@@ -327,13 +327,18 @@ const gs = StyleSheet.create({
   priceLabel: { ...Type.small, color: DarkColors.textSecondary, fontWeight: '700', marginBottom: 5, letterSpacing: 0.5 },
   priceValue: { ...Type.h2, fontWeight: '700' },
 
-  // Live badge
+  // Live badge — was Material green (#4CAF50), didn't match the
+  // dark + saffron/gold theme. Switched to saffron — matches the
+  // brand palette + reads as "active broadcast" without competing
+  // with the gold price values around it.
   liveBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
+    borderWidth: 1, borderColor: 'rgba(232,117,26,0.4)',
   },
-  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4CAF50' },
-  liveText: { ...Type.caption, fontWeight: '600', color: '#4CAF50', letterSpacing: 0.5 },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: DarkColors.saffron },
+  liveText: { ...Type.caption, fontWeight: '700', color: DarkColors.saffronLight, letterSpacing: 0.5 },
 
   // Loading
   loadingWrap: { borderRadius: 20, overflow: 'hidden', marginBottom: 12 },
