@@ -657,9 +657,15 @@ const ws = StyleSheet.create({
   amPmText: { fontSize: 15, fontWeight: '700', color: DarkColors.silverLight, letterSpacing: 0.5 },
   amPmTextActive: { color: '#0A0A0A' },
 
+  // wheelsRow gets explicit top spacing + a hairline rule above so
+  // the visual transition from chip-row → wheel-labels is clear.
+  // Without this, "Day / Month / Year" labels hugged the chips below
+  // and read as if they were chip captions, not wheel headings.
   wheelsRow: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start',
-    paddingVertical: 6, gap: 8,
+    paddingTop: 14, paddingBottom: 6, gap: 8,
+    marginHorizontal: 14, marginTop: 12,
+    borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
   },
   colonText: {
     fontSize: 28, fontWeight: '700', color: DarkColors.gold,
@@ -677,9 +683,11 @@ const ws = StyleSheet.create({
   },
   timeDividerText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
   column: { alignItems: 'center' },
+  // Wheel column labels (Day / Month / Year / Hour / Min / కాలం).
+  // Bumped 12 → 13 to match chipSub for visual consistency, weight up.
   columnLabel: {
-    fontSize: 12, fontWeight: '700', color: DarkColors.silver,
-    marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1,
+    fontSize: 13, fontWeight: '700', color: DarkColors.silverLight,
+    marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8,
   },
   wheelContainer: {
     overflow: 'hidden', borderRadius: 12,
