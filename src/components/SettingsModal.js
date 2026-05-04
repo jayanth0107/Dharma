@@ -12,6 +12,19 @@ import { getTierInfo, getPaymentRecords } from '../utils/premiumService';
 import { getPaymentStats } from '../utils/paymentSync';
 import { getAnalyticsSummary } from '../utils/analytics';
 import { adminFetchRecentEvents, aggregateAdminStats } from '../utils/analyticsSync';
+import Constants from 'expo-constants';
+
+// Read live version from app.json so the Settings panel never lies.
+// Falls back to '?.?.?' so a misconfigured build doesn't crash the row.
+const APP_VERSION =
+  Constants.expoConfig?.version ||
+  Constants.manifest?.version ||
+  Constants.expoConfig?.android?.versionCode ||
+  '?.?.?';
+const APP_VERSION_CODE =
+  Constants.expoConfig?.android?.versionCode ||
+  Constants.manifest?.android?.versionCode ||
+  '?';
 import { setAdConfig } from './AdBanner';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
@@ -710,7 +723,9 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
             <TouchableOpacity onPress={handleVersionTap} activeOpacity={1}>
               <View style={s.infoRow}>
                 <Text style={[s.infoLabel, { fontSize: infoFontSize }]}>{t(TR.versionLabel.te, TR.versionLabel.en)}</Text>
-                <Text style={[s.infoValue, { fontSize: infoFontSize }]}>2.2.0</Text>
+                <Text style={[s.infoValue, { fontSize: infoFontSize }]}>
+                  {APP_VERSION}{APP_VERSION_CODE !== '?' ? ` (${APP_VERSION_CODE})` : ''}
+                </Text>
               </View>
             </TouchableOpacity>
             <View style={s.infoRow}>

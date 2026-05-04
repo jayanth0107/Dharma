@@ -130,7 +130,10 @@
       "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node -e \"const a=require\\('firebase-admin'\\);a.initializeApp\\({projectId:'dharmadaily-1fa89'}\\);a.firestore\\(\\).collection\\('analytics_events'\\).limit\\(1\\).get\\(\\).then\\(s=>console.log\\('OK total docs in collection probe:', s.size, 'first event:', s.docs[0]?.data\\(\\).event\\)\\).catch\\(e=>console.error\\('ERR:',e.message\\)\\);\")",
       "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node analytics-probe.js)",
       "Bash(cp /tmp/enable-api.js \"C:\\\\Users\\\\bujji\\\\Desktop\\\\DharmaDaily\\\\functions\\\\enable-api.js\")",
-      "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node enable-api.js)"
+      "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node enable-api.js)",
+      "Bash(npx eas-cli@latest build --platform android --profile production --non-interactive --no-wait)",
+      "Bash(npx eas-cli@latest build:cancel d8eea8fc-8a23-4074-8498-41aa5fc402fe)",
+      "Bash(npx eas-cli@latest build:view a54d69b4-93d3-48e9-87e4-c69747cbf95e)"
     ]
   }
 }
