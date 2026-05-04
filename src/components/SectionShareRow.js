@@ -95,7 +95,15 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
   const platformNameSize = usePick({ default: 15, lg: 16, xl: 17 });
   const platformBtnPad = usePick({ default: 12, lg: 14, xl: 16 });
   const platformIconWrap = usePick({ default: 42, lg: 46, xl: 50 });
-  const previewFontSize = usePick({ default: 13, lg: 14, xl: 15 });
+  // Bumped 13/14/15 → 14/15/16 — preview text was undersized for
+  // long Horoscope payloads (30+ lines). Now legible at arm's length.
+  const previewFontSize = usePick({ default: 14, md: 15, lg: 16, xl: 18 });
+  // Preview window height scales with phone class. Was hard-coded 160 px
+  // (maybe 7 lines visible) — wasted the modal's 85% screen height
+  // budget. Horoscope share is ~30 lines; with 360–480 px the user
+  // can scan most of it without scrolling and still scroll for the
+  // tail. Modal still stays at maxHeight: '85%' so fits on every phone.
+  const previewMaxHeight = usePick({ default: 320, md: 360, lg: 420, xl: 540 });
   const cancelFontSize = usePick({ default: 14, lg: 15, xl: 16 });
 
   // Auto-open on mount if requested
@@ -218,8 +226,8 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
             {/* Preview of what will be shared */}
             <View style={[s.previewWrap, { marginHorizontal: modalPadH }]}>
               <Text style={s.previewLabel}>What will be shared:</Text>
-              <ScrollView style={s.previewScroll} nestedScrollEnabled>
-                <Text style={[s.previewText, { fontSize: previewFontSize }]} selectable>{shareText}</Text>
+              <ScrollView style={[s.previewScroll, { maxHeight: previewMaxHeight }]} nestedScrollEnabled>
+                <Text style={[s.previewText, { fontSize: previewFontSize, lineHeight: previewFontSize + 7 }]} selectable>{shareText}</Text>
               </ScrollView>
             </View>
 
@@ -312,12 +320,15 @@ const s = StyleSheet.create({
 
   // Preview
   previewWrap: { marginBottom: 10 },
-  previewLabel: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, marginBottom: 6 },
+  // Bumped 12 → 13 to match the new preview text scale.
+  previewLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.silverLight, marginBottom: 8, letterSpacing: 0.3 },
+  // maxHeight injected at render time from previewMaxHeight (responsive).
   previewScroll: {
-    maxHeight: 160, backgroundColor: DarkColors.bgElevated, borderRadius: 14,
-    borderWidth: 1, borderColor: DarkColors.borderCard, padding: 12,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard, padding: 14,
   },
-  previewText: { color: DarkColors.textSecondary, lineHeight: 20 },
+  // lineHeight injected inline so it scales with previewFontSize.
+  previewText: { color: DarkColors.textPrimary },
 
   // Consent
   consentRow: {
