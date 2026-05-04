@@ -152,9 +152,25 @@ export function LocationSearchModal({
       const { autoDetectLocation } = require('../utils/geolocation');
       const loc = await autoDetectLocation();
       if (loc && loc.latitude) {
+        // Bug fix (May 2026): was `loc.area || loc.name`, which put
+        // the suburb (e.g., "Hitech City") in the name slot — users
+        // read that as the wrong location. autoDetectLocation returns
+        // both: name=city, area=suburb. The right primary is the city.
+        const city  = loc.name || '';
+        const area  = loc.area || '';
+        const state = loc.state || '';
+        const primaryName =
+          city || area || loc.displayName || 'Current Location';
+        const fullName =
+          loc.displayName ||
+          [area, city, state].filter(Boolean).join(', ') ||
+          primaryName;
         onSelect({
-          name: loc.area || loc.name || 'Current Location',
-          displayName: `${loc.area || ''}, ${loc.name || ''}`.replace(/^, /, ''),
+          name: primaryName,
+          area,
+          state,
+          country: loc.country || '',
+          displayName: fullName,
           latitude: loc.latitude,
           longitude: loc.longitude,
           altitude: loc.altitude || 0,
