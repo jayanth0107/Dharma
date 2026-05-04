@@ -111,7 +111,7 @@ export function TodaySummaryCard({ onNavigate, streak }) {
               </Text>
             </View>
             <Text style={[s.timingTime, { fontSize: timingTimeFs, color: DarkColors.goldLight }]} numberOfLines={1}>
-              {panchangam.abhijitMuhurtam.startFormatted}–{panchangam.abhijitMuhurtam.endFormatted}
+              {panchangam.abhijitMuhurtam.startFormatted} – {panchangam.abhijitMuhurtam.endFormatted}
             </Text>
           </View>
         )}
@@ -124,7 +124,7 @@ export function TodaySummaryCard({ onNavigate, streak }) {
               </Text>
             </View>
             <Text style={[s.timingTime, { fontSize: timingTimeFs, color: DarkColors.silverLight }]} numberOfLines={1}>
-              {panchangam.rahuKalam.startFormatted}–{panchangam.rahuKalam.endFormatted}
+              {panchangam.rahuKalam.startFormatted} – {panchangam.rahuKalam.endFormatted}
             </Text>
           </View>
         )}
