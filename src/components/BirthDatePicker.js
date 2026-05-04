@@ -223,6 +223,23 @@ export function BirthDatePicker({
   yearStart,   // optional override (default: 1923)
   yearEnd,     // optional override (default: current year)
 }) {
+  // Outer scroll-view ref so we can force-snap to top on every open.
+  // On Android, when WheelColumn's scrollTo() runs after mount to
+  // position the wheel at the selected year (e.g., 1990 = 67 rows
+  // down), the inner scroll's focus event can bubble and drag this
+  // outer ScrollView too, hiding the chips. Belt-and-suspenders fix:
+  // also force the outer ScrollView to (0,0) right after mount.
+  const outerScrollRef = useRef(null);
+  useEffect(() => {
+    if (!visible) return;
+    // Two-frame defer ensures inner WheelColumn scrollTo's have
+    // already completed before we reset the outer scroll.
+    const t = setTimeout(() => {
+      try { outerScrollRef.current?.scrollTo({ x: 0, y: 0, animated: false }); } catch {}
+    }, 50);
+    return () => clearTimeout(t);
+  }, [visible]);
+
   // Build the year list dynamically per instance so each caller can
   // open up its own range (e.g., Muhurtam picker = current ± 1).
   const ys = yearStart ?? YEAR_START;
@@ -332,9 +349,18 @@ export function BirthDatePicker({
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
         <View style={ws.container}>
           <ScrollView
+            ref={outerScrollRef}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={ws.scrollContent}
+            // Critical for Android nested wheels: without this, when an
+            // inner WheelColumn's scrollTo() fires on mount (to position
+            // at the selected year), the focus event bubbles up here and
+            // scrolls the outer container, pushing the date/time chips
+            // OFF-SCREEN. Caused S23+ "chips not visible" report.
+            nestedScrollEnabled
+            scrollEnabled={true}
+            overScrollMode="never"
           >
             {/* Header */}
             <View style={ws.header}>
