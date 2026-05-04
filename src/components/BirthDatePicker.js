@@ -236,10 +236,14 @@ export function BirthDatePicker({
   // Day column is wider than month/year — day is the most-changed
   // axis when looking up a panchangam, so the wheel that drives the
   // primary input gets visual dominance + a larger tap target.
-  const dayColWidth   = usePick({ default: 100, lg: 120, xl: 140 });
-  const monthColWidth = usePick({ default: 80,  lg: 90,  xl: 100 });
-  const yearColWidth  = usePick({ default: 80,  lg: 90,  xl: 100 });
-  const timeColWidth  = usePick({ default: 65,  lg: 75,  xl: 85  });
+  // Wheels widened slightly per Samsung S23+ tester feedback — old
+  // 100/80/80/65 felt too tight on a wider phone class. Bumped ~10 dp
+  // per column. Total date row: 100+80+80+8gap+8gap+40pad = 316 →
+  // 110+90+90+8gap+8gap+40pad = 346 dp. Still fits 360 dp phones.
+  const dayColWidth   = usePick({ default: 110, md: 116, lg: 130, xl: 150 });
+  const monthColWidth = usePick({ default: 92,  md: 96,  lg: 100, xl: 110 });
+  const yearColWidth  = usePick({ default: 92,  md: 96,  lg: 100, xl: 110 });
+  const timeColWidth  = usePick({ default: 76,  md: 80,  lg: 86,  xl: 96  });
 
   // ── Source-of-truth state ──
   // Clamp inputs at the boundary: years outside [ys, ye] would leave
@@ -546,33 +550,37 @@ const ws = StyleSheet.create({
     maxHeight: '92%',
   },
   scrollContent: { paddingBottom: 8 },
+  // Vertical real estate trimmed aggressively for Samsung S23+ where
+  // the static date/time chip sections were getting pushed off-screen
+  // by the modal's effective max-height. Trimmed ~50 px combined
+  // across header + preview + chip blocks.
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingVertical: 16, paddingHorizontal: 16,
+    paddingVertical: 10, paddingHorizontal: 16,
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
-  closeBtn: { position: 'absolute', left: 16, top: 16, padding: 4 },
+  closeBtn: { position: 'absolute', left: 16, top: 10, padding: 4 },
   title: { fontWeight: '600', color: DarkColors.gold, textAlign: 'center' },
   preview: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: 12,
+    gap: 8, paddingVertical: 8,
     backgroundColor: DarkColors.goldDim,
-    marginHorizontal: 20, marginTop: 12, borderRadius: 12,
+    marginHorizontal: 20, marginTop: 8, borderRadius: 12,
   },
-  previewText: { fontSize: 18, fontWeight: '600', color: DarkColors.goldLight, letterSpacing: 1 },
+  previewText: { fontSize: 16, fontWeight: '600', color: DarkColors.goldLight, letterSpacing: 1 },
 
-  // Field blocks (date / time)
-  fieldsBlock: { paddingHorizontal: 20, paddingTop: 14 },
+  // Field blocks (date / time) — paddingTop trimmed 14 → 8.
+  fieldsBlock: { paddingHorizontal: 20, paddingTop: 8 },
   blockLabel: {
-    fontSize: 12, fontWeight: '600', color: DarkColors.silver,
-    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8,
+    fontSize: 11, fontWeight: '600', color: DarkColors.silver,
+    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4,
   },
   chipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   chipWide: { flex: 1.6 },
   chip: {
     flex: 1,
     backgroundColor: DarkColors.bgElevated,
-    borderRadius: 10, paddingVertical: 12, paddingHorizontal: 8,
+    borderRadius: 10, paddingVertical: 8, paddingHorizontal: 8,
     borderWidth: 1.5, borderColor: DarkColors.borderCard,
     alignItems: 'center',
   },
@@ -581,7 +589,7 @@ const ws = StyleSheet.create({
     backgroundColor: DarkColors.goldDim,
   },
   chipValue: {
-    fontSize: 22, fontWeight: '700', color: '#FFFFFF',
+    fontSize: 20, fontWeight: '700', color: '#FFFFFF',
     letterSpacing: 1,
   },
   chipValueFocus: { color: DarkColors.goldLight },
@@ -590,13 +598,13 @@ const ws = StyleSheet.create({
     marginTop: 2, letterSpacing: 0.5, textTransform: 'uppercase',
   },
   scrollHint: {
-    fontSize: 12, color: DarkColors.silver, fontWeight: '600',
-    textAlign: 'center', marginTop: 8, fontStyle: 'italic',
+    fontSize: 11, color: DarkColors.silver, fontWeight: '600',
+    textAlign: 'center', marginTop: 4, fontStyle: 'italic',
   },
 
   sepText: {
-    fontSize: 22, fontWeight: '700', color: DarkColors.gold,
-    paddingHorizontal: 2, paddingTop: 6,
+    fontSize: 20, fontWeight: '700', color: DarkColors.gold,
+    paddingHorizontal: 2, paddingTop: 4,
   },
   miniLabel: {
     fontSize: 10, fontWeight: '700', color: DarkColors.silver,
@@ -619,7 +627,7 @@ const ws = StyleSheet.create({
 
   wheelsRow: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start',
-    paddingVertical: 12, gap: 8,
+    paddingVertical: 6, gap: 8,
   },
   colonText: {
     fontSize: 28, fontWeight: '700', color: DarkColors.gold,
@@ -665,7 +673,7 @@ const ws = StyleSheet.create({
   itemTextDim: { color: DarkColors.silver, fontSize: 17 },
   actions: {
     flexDirection: 'row', gap: 12,
-    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8,
+    paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8,
   },
   cancelBtn: {
     flex: 1, alignItems: 'center', justifyContent: 'center',
