@@ -295,6 +295,7 @@ export function HomeScreen({ navigation }) {
         <FeatureGrid>
           <FeatureTile icon="pot-mix"      label={t('పంచాంగం', 'Panchangam')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
           <FeatureTile icon="party-popper" label={t('పండుగలు', 'Festivals')}  onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
+          <FeatureTile icon="calendar-star" label={t('ముహూర్తం', 'Muhurtam')}   onPress={() => navigation.navigate('Muhurtam')} />
           <FeatureTile icon="star-circle"  label={t('రాశి', 'Rashi')}        onPress={() => navigation.navigate('DailyRashi')} />
           <FeatureTile icon="gold"         label={t('బంగారం', 'Gold')}        onPress={() => navigation.navigate('Gold')} />
           <FeatureTile icon="chart-line"   label={t('మార్కెట్', 'Market')}    onPress={() => navigation.navigate('Market')} />
@@ -335,10 +336,9 @@ export function HomeScreen({ navigation }) {
 
         <SectionDivider icon="account-star" te="జ్యోతిష్యం" en="Astrology" />
 
-        {/* 4. Life Decisions — Match moved to Youth */}
+        {/* 4. Life Decisions — Match moved to Youth, Muhurtam moved to Daily */}
         <FeatureGrid>
           <FeatureTile icon="account-star"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
-          <FeatureTile icon="calendar-star"  label={t('ముహూర్తం', 'Muhurtam')} onPress={() => navigation.navigate('Muhurtam')} />
           <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family')}    onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
 

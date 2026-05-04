@@ -4,6 +4,7 @@
 // Fallback: Free public APIs
 
 import { Platform } from 'react-native';
+import { timeoutSignal } from './timeoutSignal';
 
 // Kite API key stored for future use when backend is ready
 // const KITE_API_KEY = 'poru5ol4nr0pto5l';
@@ -29,14 +30,14 @@ async function fetchYahooSymbol(sym) {
   // Native — direct call
   if (Platform.OS !== 'web') {
     try {
-      const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const resp = await fetch(url, { signal: timeoutSignal(8000) });
       return resp.ok ? await resp.json() : null;
     } catch { return null; }
   }
   // Web — race the CORS proxies
   for (const wrap of WEB_CORS_PROXIES) {
     try {
-      const resp = await fetch(wrap(url), { signal: AbortSignal.timeout(7000) });
+      const resp = await fetch(wrap(url), { signal: timeoutSignal(7000) });
       if (resp.ok) {
         const txt = await resp.text();
         try { return JSON.parse(txt); } catch { /* try next proxy */ }
@@ -83,7 +84,7 @@ async function fetchFromYahoo(symbols) {
 async function fetchFromGroww() {
   try {
     const resp = await fetch('https://groww.in/v1/api/stocks_data/v1/tr_live_prices/exchange/NSE/segment/CASH/latest_prices_ohlc', {
-      signal: AbortSignal.timeout(5000),
+      signal: timeoutSignal(5000),
     });
     if (!resp.ok) return null;
     return await resp.json();

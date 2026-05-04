@@ -5,10 +5,11 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu **sacred-stories + panchangam + Vedic astrology** mobile app. Daily Ramayana / Mahabharata episode, Bhagavad Gita sloka, Neethi Sukta wisdom, Sanskrit word, Dharma debate / quiz, Stotras + Mantras with pandit recordings, animated meditation; full Drik-Ganita panchangam (Tithi, Nakshatra, Yoga, Karana, Muhurtams), festivals + Ekadashi + Pournami / Amavasya / Pradosham observances, Vedic horoscope (జాతకం), 8-Kuta matchmaking, Muhurtam finder, daily rashi predictions, Vedic personality profile, live gold/silver prices, Indian market indices, nearby-temple finder.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.4.2 (versionCode 10)
+**Version:** 2.4.3 (versionCode 11)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 **EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
+**Firebase project:** `dharmadaily-1fa89` (asia-south1 Mumbai)
 
 ## Tech stack
 
@@ -271,10 +272,59 @@ npm install                                       # Install dependencies
 npx expo start                                    # Dev server (all platforms)
 npx expo start --web                              # Web only
 npx expo start --android                          # Android only
-eas build --platform android --profile preview    # Test APK
-eas build --platform android --profile production # Play Store AAB
+npx expo install --check                          # Verify deps match SDK 54
+eas build --platform android --profile preview    # Test APK (internal distribution)
+eas build --platform android --profile production # Play Store AAB (autoIncrement versionCode)
 eas submit --platform android                     # Submit to Play Store (internal track)
 ```
+
+## Operational tooling (admin / diagnostics)
+
+- **`functions/analytics-probe.js`** — Node script that reads recent
+  `analytics_events` from Firestore and rolls up app_crash counts,
+  platform breakdown, top events, search-flow events. Requires the
+  Firebase Admin SDK service-account key at `.secrets/firebase-admin.json`
+  (see "Auth for Firestore probes" below). Run via:
+  ```bash
+  cd functions && GOOGLE_APPLICATION_CREDENTIALS="../.secrets/firebase-admin.json" node analytics-probe.js
+  ```
+- **`functions/enable-api.js`** — programmatically enable a Google
+  Cloud API on the project. Requires the service account to have
+  Service Usage Admin role (default Admin SDK key does NOT have it,
+  so most enables still need a click in Cloud Console).
+- **`.secrets/firebase-admin.json`** — Firebase Admin SDK service
+  account key. Gitignored (`*-firebase-adminsdk-*.json` pattern in
+  `.gitignore`). Generate via Firebase Console → Project Settings →
+  Service accounts → Generate new private key. Carries Firestore +
+  Storage + Auth scopes; does NOT carry Service Usage Admin.
+
+### Location-search provider chain (current)
+
+1. **Reverse geocoding** (lat/lng → city): Geoapify primary,
+   Google Geocoding fallback. Geoapify confirmed working;
+   Google requires both API enabled in Cloud Console AND key
+   whitelisted for Geocoding API (the latter is optional now
+   that Geoapify is primary).
+2. **IP geolocation** (no GPS → coarse city): ipwho.is primary,
+   ipinfo.io fallback. ipapi.co + ip-api.com both 403 in 2026
+   (free-tier crackdown). DO NOT add them back.
+3. **Place search** (typed birth-place lookup): Cloud Function
+   `placesSearch` (currently NOT deployed) → Google Places New
+   autocomplete (working) → Geoapify search → LocationIQ search
+   → static city fallback (~150 cities, offline).
+4. **`AbortSignal.timeout`** is unreliable on some Hermes builds
+   — every fetch uses `timeoutSignal()` from `src/utils/timeoutSignal.js`
+   instead. New fetch code MUST use the polyfill.
+
+### Auth for Firestore probes
+
+- Firebase CLI auth (`firebase login`) is used by `firebase functions:list`,
+  `eas` builds, and `eas submit`.
+- For programmatic Firestore reads (analytics-probe, ad-hoc scripts),
+  the Firebase Admin SDK key at `.secrets/firebase-admin.json` is
+  used via `GOOGLE_APPLICATION_CREDENTIALS` env var. NEVER commit
+  this file — `.gitignore` already covers `.secrets/` and any
+  `*-firebase-adminsdk-*.json`.
 
 ## Data scope
 

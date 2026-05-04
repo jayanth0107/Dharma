@@ -4,13 +4,14 @@
 // Uses panchangam calculations to suggest best dates.
 // Includes PDF generation and WhatsApp/native sharing.
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList, Platform,
   Share, Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { ModalOrView } from './ModalOrView';
@@ -21,7 +22,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
 import { TimingCard, MuhurthamCard } from './PanchangaCard';
 import { BirthDatePicker } from './BirthDatePicker';
-import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
 
 // Event types with their auspicious conditions
 const EVENT_TYPES = [
@@ -499,20 +499,24 @@ export function MuhurtamFinderModal({ visible, onClose, location, isPremium = fa
   const minYear = new Date().getFullYear() - 1;
   const maxYear = new Date().getFullYear() + 1;
 
-  // Load saved event selection on mount
-  useEffect(() => {
-    loadForm(FORM_KEYS.muhurtam).then(saved => {
-      if (saved?.selectedEventId) {
-        const evt = EVENT_TYPES.find(e => e.id === saved.selectedEventId);
-        if (evt) setSelectedEvent(evt);
-      }
-    });
-  }, []);
-
-  // Auto-save selected event
-  useEffect(() => {
-    if (selectedEvent) saveForm(FORM_KEYS.muhurtam, { selectedEventId: selectedEvent.id });
-  }, [selectedEvent]);
+  // Reset to the event-type grid every time the user leaves and comes
+  // back (Home button, swipe to another section, deep-link from a tile).
+  // Earlier behavior persisted the last-selected event so users coming
+  // from "House Warming" landed on House Warming again — confusing
+  // because the tile feels like an entry point. Run cleanup on BLUR
+  // (screen losing focus) so the next focus shows the grid.
+  useFocusEffect(
+    useCallback(() => {
+      // On focus: nothing — state was already cleared on prior blur.
+      return () => {
+        // On blur:
+        setSelectedEvent(null);
+        setResults([]);
+        setSelectedResult(null);
+        setSearching(false);
+      };
+    }, [])
+  );
 
   // Responsive values
   const headerPadV = usePick({ default: 18, md: 20, xl: 28 });

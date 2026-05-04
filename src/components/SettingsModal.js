@@ -646,6 +646,37 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                     </Text>
                   </View>
                 )}
+
+                {/* Reset onboarding — admin tool. Wipes the
+                    @dharma_onboarded flag so the language picker +
+                    welcome screens show on the next cold launch.
+                    Useful for QA, screenshots, demos. */}
+                <TouchableOpacity
+                  style={[s.settingRow, { marginTop: 12, backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: settingRowPad }]}
+                  onPress={async () => {
+                    try {
+                      if (Platform.OS === 'web') {
+                        if (typeof localStorage !== 'undefined') localStorage.removeItem('@dharma_onboarded');
+                      } else {
+                        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+                        await AsyncStorage.removeItem('@dharma_onboarded');
+                      }
+                      Alert.alert(
+                        t('ఆన్‌బోర్డింగ్ రీసెట్', 'Onboarding reset'),
+                        t('యాప్‌ను పూర్తిగా మూసి, మళ్లీ తెరిచిన తర్వాత భాషా ఎంపిక మళ్లీ కనిపిస్తుంది.',
+                          'Fully close the app and reopen — the language picker will show again on next cold launch.'),
+                      );
+                    } catch (e) {
+                      Alert.alert(t('దోషం', 'Error'), String(e?.message || e));
+                    }
+                  }}
+                >
+                  <MaterialCommunityIcons name="restart" size={settingIconSize} color={DarkColors.saffron} style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[s.settingLabel, { fontSize: settingLabelSize }]}>{t('ఆన్‌బోర్డింగ్ రీసెట్ చేయండి', 'Reset Onboarding')}</Text>
+                    <Text style={[s.settingSublabel, { fontSize: settingSublabelSize }]}>{t('భాషా ఎంపిక మళ్లీ చూపించు', 'Show language picker on next launch')}</Text>
+                  </View>
+                </TouchableOpacity>
               </>
             )}
 

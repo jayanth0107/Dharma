@@ -348,99 +348,95 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
     const today = new Date();
     const channelId = Platform.OS === 'android' ? 'dharma-daily' : undefined;
 
-    // ── Morning briefing ──
+    // ── Rolling-daily helper ──
+    // Expo's `type: 'daily'` trigger captures content at SCHEDULE time
+    // and replays the same body every day — so day N+1's panchangam
+    // notification still shows day N's tithi/nakshatra. Workaround:
+    // schedule N one-shot date triggers, each with the correct day's
+    // content. setupDailyNotifications is re-run on app launch and on
+    // location/lang change, which keeps the rolling window topped up.
+    const ROLLING_DAYS = 14;
+    async function scheduleRolling({ slot, dataType, screen, build }) {
+      for (let offset = 0; offset < ROLLING_DAYS; offset++) {
+        // Compute the target fire time for day [today + offset] at the slot's hour:minute
+        const target = new Date(today);
+        target.setDate(target.getDate() + offset);
+        target.setHours(slot.hour, slot.minute, 0, 0);
+        // Skip slots that have already passed today (offset === 0 only).
+        if (offset === 0 && target.getTime() <= Date.now()) continue;
+        // Build the day-correct content using the target date.
+        const built = build(target, lang);
+        if (!built) continue;
+        try {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: built.title,
+              body:  built.body,
+              data:  { type: dataType, screen },
+            },
+            trigger: {
+              type: 'date',
+              date: target,
+              ...(channelId && { channelId }),
+            },
+          });
+        } catch (e) {
+          if (__DEV__) console.warn('[notif] scheduleRolling failed', dataType, offset, e?.message);
+        }
+      }
+    }
+
+    // ── Morning briefing — content per fire date ──
     if (settings.dailyPanchangam) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: buildMorningTitle(today, lang),
-          body:  buildMorningBody(today, lang, location, myRashiIndex),
-          data:  { type: 'daily_panchangam', screen: 'Panchang' },
-        },
-        trigger: {
-          type: 'daily',
-          hour: settings.notifHour,
-          minute: settings.notifMinute,
-          ...(channelId && { channelId }),
-        },
+      await scheduleRolling({
+        slot: { hour: settings.notifHour, minute: settings.notifMinute },
+        dataType: 'daily_panchangam',
+        screen: 'Panchang',
+        build: (date, lang) => ({
+          title: buildMorningTitle(date, lang),
+          body:  buildMorningBody(date, lang, location, myRashiIndex),
+        }),
       });
     }
 
     // ── Daily Ramayana episode (7 AM) — opt-in ──
     if (settings.dailyRamayana) {
-      const ram = buildRamayanaNotif(today, lang);
-      if (ram) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: ram.title,
-            body:  ram.body,
-            data:  { type: 'daily_ramayana', screen: 'Ramayana' },
-          },
-          trigger: {
-            type: 'daily',
-            hour: SLOT_RAMAYANA.hour,
-            minute: SLOT_RAMAYANA.minute,
-            ...(channelId && { channelId }),
-          },
-        });
-      }
+      await scheduleRolling({
+        slot: SLOT_RAMAYANA,
+        dataType: 'daily_ramayana',
+        screen: 'Ramayana',
+        build: (date, lang) => buildRamayanaNotif(date, lang),
+      });
     }
 
     // ── Daily Gita sloka (9 AM) — opt-in ──
     if (settings.dailyGita) {
-      const gita = buildGitaNotif(today, lang);
-      if (gita) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: gita.title,
-            body:  gita.body,
-            data:  { type: 'daily_gita', screen: 'Gita' },
-          },
-          trigger: {
-            type: 'daily',
-            hour: SLOT_GITA.hour,
-            minute: SLOT_GITA.minute,
-            ...(channelId && { channelId }),
-          },
-        });
-      }
+      await scheduleRolling({
+        slot: SLOT_GITA,
+        dataType: 'daily_gita',
+        screen: 'Gita',
+        build: (date, lang) => buildGitaNotif(date, lang),
+      });
     }
 
     // ── Daily Neethi Sukta at noon (default ON) ──
     if (settings.dailyQuote) {
-      const { title, body } = buildSuktaNotif(today, lang);
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title,
-          body,
-          data: { type: 'daily_sukta', screen: 'NeethiSukta' },
-        },
-        trigger: {
-          type: 'daily',
-          hour: SLOT_NEETHI.hour,
-          minute: SLOT_NEETHI.minute,
-          ...(channelId && { channelId }),
-        },
+      await scheduleRolling({
+        slot: SLOT_NEETHI,
+        dataType: 'daily_sukta',
+        screen: 'NeethiSukta',
+        build: (date, lang) => buildSuktaNotif(date, lang),
       });
     }
 
     // ── Daily Mahabharata episode (6 PM) — opt-in ──
     if (settings.dailyMahabharata) {
-      const mb = buildMahabharataNotif(today, lang);
-      if (mb) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: mb.title,
-            body:  mb.body,
-            data:  { type: 'daily_mahabharata', screen: 'Mahabharata' },
-          },
-          trigger: {
-            type: 'daily',
-            hour: SLOT_MAHABHARATA.hour,
-            minute: SLOT_MAHABHARATA.minute,
-            ...(channelId && { channelId }),
-          },
-        });
-      }
+      await scheduleRolling({
+        slot: SLOT_MAHABHARATA,
+        dataType: 'daily_mahabharata',
+        screen: 'Mahabharata',
+        build: (date, lang) => buildMahabharataNotif(date, lang),
+      });
     }
 
     // ── Festival reminders — 1 day before, 6 PM ──

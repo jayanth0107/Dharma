@@ -4,7 +4,7 @@
 
 A comprehensive **React Native (Expo)** app delivering daily **sacred stories** (Ramayana, Mahabharata, Gita), **Neethi Sukta wisdom**, **mantras & stotras**, **meditation**, **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, daily Rashi predictions, Sanskrit word of the day, Dharma debate / quiz, Indian market data, live gold/silver prices, and nearby temple finder — built for Telugu-speaking Hindu communities worldwide.
 
-> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.2 (versionCode 10) &nbsp;|&nbsp; **Expo SDK:** 54
+> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.3 (versionCode 11) &nbsp;|&nbsp; **Expo SDK:** 54
 
 - **GitHub:** https://github.com/jayanth0107/Dharma
 - **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
@@ -434,8 +434,8 @@ Clear AsyncStorage (native) or `localStorage` (web) to wipe reminders, premium, 
 | App name | Dharma: Telugu Astro, Calendar & Gold |
 | Bundle ID (iOS) | `com.dharmadaily.app` |
 | Package (Android) | `com.dharmadaily.app` |
-| Version | 2.4.2 |
-| versionCode (Android) | 10 |
+| Version | 2.4.3 |
+| versionCode (Android) | 11 |
 | Expo SDK | 54 |
 | React Native | 0.81.5 |
 | Min Android | API 24 (Android 7.0) |

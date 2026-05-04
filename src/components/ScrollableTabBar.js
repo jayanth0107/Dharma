@@ -27,12 +27,14 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
   // (React-state approach lost the race against onPress.)
   const DRAG_THRESHOLD = 5;
 
-  // Responsive sizing — bigger pills on tablets, tighter on tiny phones.
-  const pillPadH    = usePick({ default: 10, sm: 10, md: 14, lg: 16, xl: 20 });
-  const pillPadV    = usePick({ default: 6,  sm: 6,  md: 8,  lg: 10, xl: 12 });
-  const pillMinW    = usePick({ default: 60, sm: 60, md: 70, lg: 80, xl: 92 });
-  const pillIconSz  = usePick({ default: 18, sm: 18, md: 20, lg: 22, xl: 24 });
-  const pillFontSz  = usePick({ default: 12, sm: 12, md: 13, lg: 14, xl: 15 });
+  // Responsive sizing — bumped 12/13/14/15 → 14/15/16/18 after tester
+  // said bottom-bar labels were too small to read in motion. Icons +
+  // padding bumped proportionally so the pill height keeps up.
+  const pillPadH    = usePick({ default: 12, sm: 12, md: 16, lg: 18, xl: 22 });
+  const pillPadV    = usePick({ default: 7,  sm: 7,  md: 9,  lg: 11, xl: 13 });
+  const pillMinW    = usePick({ default: 72, sm: 72, md: 82, lg: 92, xl: 104 });
+  const pillIconSz  = usePick({ default: 22, sm: 22, md: 24, lg: 26, xl: 30 });
+  const pillFontSz  = usePick({ default: 14, sm: 14, md: 15, lg: 16, xl: 18 });
 
   // Current active route name
   const activeRouteName = state.routes[state.index]?.name;
@@ -189,16 +191,15 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.10)',
   },
   label: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: DarkColors.tabInactive,
-    marginTop: 4,
+    fontWeight: '600',
+    color: DarkColors.silverLight,
+    marginTop: 5,
     textAlign: 'center',
     letterSpacing: 0.2,
-    lineHeight: 17,
+    lineHeight: 20,
   },
   labelActive: {
     color: DarkColors.gold,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

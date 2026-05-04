@@ -119,7 +119,18 @@
       "Bash(ffmpeg -version)",
       "Bash(xargs -I {} stat -c \"%s %n\" \"{}\")",
       "Bash(npx eas-cli@latest whoami)",
-      "Bash(npx eas-cli@latest build --platform android --profile preview --non-interactive --no-wait)"
+      "Bash(npx eas-cli@latest build --platform android --profile preview --non-interactive --no-wait)",
+      "Bash(npx eas-cli@latest build:view ecbbc091-543e-461c-bdbd-30f66dbda64e)",
+      "Bash(gcloud --version)",
+      "Bash(gcloud auth *)",
+      "PowerShell(Test-Path *)",
+      "Bash(env)",
+      "Bash(mv \"C:/Users/bujji/Downloads/dharmadaily-1fa89-firebase-adminsdk-fbsvc-b0cff2af26.json\" \".secrets/firebase-admin.json\")",
+      "Bash(git check-ignore *)",
+      "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node -e \"const a=require\\('firebase-admin'\\);a.initializeApp\\({projectId:'dharmadaily-1fa89'}\\);a.firestore\\(\\).collection\\('analytics_events'\\).limit\\(1\\).get\\(\\).then\\(s=>console.log\\('OK total docs in collection probe:', s.size, 'first event:', s.docs[0]?.data\\(\\).event\\)\\).catch\\(e=>console.error\\('ERR:',e.message\\)\\);\")",
+      "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node analytics-probe.js)",
+      "Bash(cp /tmp/enable-api.js \"C:\\\\Users\\\\bujji\\\\Desktop\\\\DharmaDaily\\\\functions\\\\enable-api.js\")",
+      "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node enable-api.js)"
     ]
   }
 }

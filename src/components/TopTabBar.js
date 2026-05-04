@@ -28,10 +28,11 @@ export function TopTabBar() {
   // React-state approach lost the race against onPress on web.
   const DRAG_THRESHOLD = 5;
 
-  // Responsive sizing — bigger on tablets, tighter on tiny phones.
-  const tabPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 18, xl: 22 });
-  const tabPadV      = usePick({ default: 8,  sm: 8,  md: 10, lg: 12, xl: 14 });
-  const tabFontSize  = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
+  // Responsive sizing — bumped 13/14/15/16 → 16/17/18/20 after tester
+  // said top-bar labels were not readable at arm's length on a phone.
+  const tabPadH      = usePick({ default: 14, sm: 14, md: 18, lg: 20, xl: 24 });
+  const tabPadV      = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
+  const tabFontSize  = usePick({ default: 16, sm: 16, md: 17, lg: 18, xl: 20 });
   // Per-tab measured layout: { x, width } keyed by section name
   const tabLayouts = useRef({});
 
@@ -198,13 +199,12 @@ const s = StyleSheet.create({
     borderBottomColor: DarkColors.gold,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: DarkColors.textMuted,
+    fontWeight: '600',
+    color: DarkColors.silverLight,
     letterSpacing: 0.2,
   },
   labelActive: {
     color: DarkColors.gold,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

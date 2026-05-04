@@ -43,10 +43,21 @@ export function LocationSearchModal({
   fallbackSearchFn, // Optional: fallback search if primary fails (e.g. searchLocation)
   showGPS = true,
 }) {
-  const inputSize = usePick({ default: 16, lg: 17, xl: 18 });
-  const resultNameSize = usePick({ default: 15, lg: 16, xl: 17 });
-  const resultSubSize = usePick({ default: 12, lg: 13, xl: 14 });
-  const pad = usePick({ default: 16, lg: 20, xl: 24 });
+  // Full responsive ladder — every text/icon/padding scales sm→xl.
+  const inputSize       = usePick({ default: 16, sm: 16, md: 17, lg: 18, xl: 20 });
+  const resultNameSize  = usePick({ default: 15, sm: 15, md: 16, lg: 17, xl: 19 });
+  const resultSubSize   = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
+  const pad             = usePick({ default: 12, sm: 12, md: 16, lg: 20, xl: 28 });
+  const titleSize       = usePick({ default: 18, sm: 18, md: 20, lg: 22, xl: 26 });
+  const hintSize        = usePick({ default: 12, sm: 12, md: 13, lg: 14, xl: 15 });
+  const sectionTitleFs  = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 17 });
+  const tabFs           = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 17 });
+  const tabIconSz       = usePick({ default: 16, sm: 16, md: 18, lg: 20, xl: 22 });
+  const searchIconSz    = usePick({ default: 20, sm: 20, md: 22, lg: 24, xl: 28 });
+  const closeIconSz     = usePick({ default: 24, sm: 24, md: 26, lg: 28, xl: 32 });
+  const popularRowFs    = usePick({ default: 14, sm: 14, md: 15, lg: 16, xl: 18 });
+  const emptyIconSz     = usePick({ default: 48, sm: 48, md: 56, lg: 64, xl: 72 });
+  const emptyTextFs     = usePick({ default: 14, sm: 14, md: 15, lg: 16, xl: 18 });
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -220,9 +231,9 @@ export function LocationSearchModal({
             hitSlop={{ top: 12, right: 12, bottom: 12, left: 12 }}
             accessibilityLabel="Close location search"
           >
-            <MaterialCommunityIcons name="arrow-left" size={24} color={DarkColors.silver} />
+            <MaterialCommunityIcons name="arrow-left" size={closeIconSz} color={DarkColors.silver} />
           </TouchableOpacity>
-          <Text style={ls.headerTitle}>
+          <Text style={[ls.headerTitle, { fontSize: titleSize }]} numberOfLines={2}>
             {title || (lang === 'te' ? 'జన్మ స్థలం వెతకండి' : 'Search Birth Place')}
           </Text>
         </View>
@@ -233,9 +244,9 @@ export function LocationSearchModal({
             style={[ls.tab, activeTab === 'search' && ls.tabActive]}
             onPress={() => setActiveTab('search')}
           >
-            <MaterialCommunityIcons name="magnify" size={16} color={activeTab === 'search' ? DarkColors.gold : DarkColors.textMuted} />
-            <Text style={[ls.tabText, activeTab === 'search' && ls.tabTextActive]}>
-              {lang === 'te' ? 'నగర వెతుకు' : 'City Search'}
+            <MaterialCommunityIcons name="magnify" size={tabIconSz} color={activeTab === 'search' ? DarkColors.gold : DarkColors.textMuted} />
+            <Text style={[ls.tabText, { fontSize: tabFs }, activeTab === 'search' && ls.tabTextActive]} numberOfLines={1}>
+              {lang === 'te' ? 'వెతుకు' : 'Search'}
             </Text>
           </TouchableOpacity>
           {showGPS && (
@@ -243,17 +254,17 @@ export function LocationSearchModal({
               style={[ls.tab, activeTab === 'gps' && ls.tabActive]}
               onPress={() => { setActiveTab('gps'); handleGPS(); }}
             >
-              <MaterialCommunityIcons name="crosshairs-gps" size={16} color={activeTab === 'gps' ? DarkColors.gold : DarkColors.textMuted} />
-              <Text style={[ls.tabText, activeTab === 'gps' && ls.tabTextActive]}>G.P.S.</Text>
+              <MaterialCommunityIcons name="crosshairs-gps" size={tabIconSz} color={activeTab === 'gps' ? DarkColors.gold : DarkColors.textMuted} />
+              <Text style={[ls.tabText, { fontSize: tabFs }, activeTab === 'gps' && ls.tabTextActive]} numberOfLines={1}>GPS</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity
             style={[ls.tab, activeTab === 'popular' && ls.tabActive]}
             onPress={() => setActiveTab('popular')}
           >
-            <MaterialCommunityIcons name="star" size={16} color={activeTab === 'popular' ? DarkColors.gold : DarkColors.textMuted} />
-            <Text style={[ls.tabText, activeTab === 'popular' && ls.tabTextActive]}>
-              {lang === 'te' ? 'ప్రముఖ నగరాలు' : 'Popular'}
+            <MaterialCommunityIcons name="star" size={tabIconSz} color={activeTab === 'popular' ? DarkColors.gold : DarkColors.textMuted} />
+            <Text style={[ls.tabText, { fontSize: tabFs }, activeTab === 'popular' && ls.tabTextActive]} numberOfLines={1}>
+              {lang === 'te' ? 'ప్రముఖ' : 'Popular'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -262,13 +273,16 @@ export function LocationSearchModal({
         {activeTab === 'search' && (
           <View style={[ls.searchSection, { paddingHorizontal: pad }]}>
             <View style={ls.searchBar}>
-              <MaterialCommunityIcons name="magnify" size={20} color={DarkColors.textMuted} />
+              <MaterialCommunityIcons name="magnify" size={searchIconSz} color={DarkColors.textMuted} />
               <TextInput
                 ref={inputRef}
                 style={[ls.searchInput, { fontSize: inputSize }]}
                 value={query}
                 onChangeText={handleSearch}
-                placeholder={lang === 'te' ? 'నగరం / గ్రామం / పట్టణం (కనీసం 3 అక్షరాలు)' : 'Search city / village / town (min 3 chars)'}
+                // Short placeholder — long version was getting clipped on
+                // narrow phones (cut off after "min 3"). The full hint
+                // now lives in the wrapping helper line below this bar.
+                placeholder={lang === 'te' ? 'వెతకండి…' : 'Search…'}
                 placeholderTextColor={DarkColors.textMuted}
                 autoFocus
                 autoCorrect={false}
@@ -284,11 +298,20 @@ export function LocationSearchModal({
               />
               {query.length > 0 && (
                 <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
-                  <MaterialCommunityIcons name="close-circle" size={20} color={DarkColors.textMuted} />
+                  <MaterialCommunityIcons name="close-circle" size={searchIconSz} color={DarkColors.textMuted} />
                 </TouchableOpacity>
               )}
               {searching && <ActivityIndicator size="small" color={DarkColors.gold} style={{ marginLeft: 6 }} />}
             </View>
+
+            {/* Helper hint — wraps freely (Text wraps by default unlike
+                placeholder which is single-line). Spells out the full
+                instruction that used to live in the placeholder. */}
+            <Text style={[ls.searchHelper, { fontSize: hintSize }]}>
+              {lang === 'te'
+                ? 'నగరం, గ్రామం, పట్టణం, లేదా జిల్లా టైప్ చేయండి (కనీసం 3 అక్షరాలు)'
+                : 'Type city, village, town, or district name (minimum 3 characters)'}
+            </Text>
 
             {/* Results */}
             {results.length > 0 ? (
@@ -305,8 +328,8 @@ export function LocationSearchModal({
               />
             ) : query.length >= 3 && !searching ? (
               <View style={ls.emptyState}>
-                <MaterialCommunityIcons name="map-search" size={48} color={DarkColors.textMuted} />
-                <Text style={ls.emptyText}>
+                <MaterialCommunityIcons name="map-search" size={emptyIconSz} color={DarkColors.textMuted} />
+                <Text style={[ls.emptyText, { fontSize: emptyTextFs }]}>
                   {searchError
                     ? (lang === 'te' ? 'వెతుకులో సమస్య. మళ్ళీ ప్రయత్నించండి.' : 'Search service unavailable. Please try again.')
                     : (lang === 'te' ? 'ఫలితాలు లేవు. ఆంగ్లంలో ప్రయత్నించండి.' : 'No results. Try in English.')}
@@ -314,8 +337,8 @@ export function LocationSearchModal({
               </View>
             ) : query.length === 0 ? (
               <View style={ls.hintSection}>
-                <MaterialCommunityIcons name="information-outline" size={18} color={DarkColors.textMuted} />
-                <Text style={ls.hintText}>
+                <MaterialCommunityIcons name="information-outline" size={tabIconSz} color={DarkColors.textMuted} />
+                <Text style={[ls.hintText, { fontSize: hintSize }]}>
                   {lang === 'te'
                     ? 'గ్రామాలు, మండలాలు, జిల్లాలు, నగరాలు — అన్ని ప్రదేశాలు అందుబాటులో ఉన్నాయి'
                     : 'Villages, towns, districts, cities — all locations available'}
@@ -393,9 +416,11 @@ const ls = StyleSheet.create({
     marginRight: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    flex: 1,
+    flexShrink: 1,
+    fontWeight: '700',
     color: DarkColors.textPrimary,
+    letterSpacing: 0.2,
   },
   tabs: {
     flexDirection: 'row',
@@ -420,7 +445,6 @@ const ls = StyleSheet.create({
     borderColor: DarkColors.borderGold,
   },
   tabText: {
-    fontSize: 13,
     fontWeight: '600',
     color: DarkColors.textMuted,
   },
@@ -445,9 +469,18 @@ const ls = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     paddingHorizontal: 10,
-    fontSize: 16,
     color: DarkColors.textPrimary,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+  },
+  // Wrapping helper line below the search bar — replaces the long
+  // placeholder that was getting cut off on narrow phones.
+  searchHelper: {
+    color: DarkColors.textMuted,
+    fontWeight: '500',
+    lineHeight: 20,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 4,
   },
   resultsList: {
     flex: 1,
@@ -468,12 +501,10 @@ const ls = StyleSheet.create({
     flex: 1,
   },
   resultName: {
-    fontSize: 15,
     fontWeight: '700',
     color: DarkColors.textPrimary,
   },
   resultSub: {
-    fontSize: 12,
     color: DarkColors.textMuted,
     marginTop: 2,
   },

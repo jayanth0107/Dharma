@@ -212,7 +212,7 @@ export function DailyRashiScreen() {
             onPress={() => { if (studentMode) toggleStudentMode(); }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="account-tie" size={20} color={!studentMode ? '#0A0A0A' : DarkColors.gold} />
+            <MaterialCommunityIcons name="account-tie" size={26} color={!studentMode ? '#0A0A0A' : DarkColors.gold} />
             <View>
               <Text style={[s.modeBtnText, !studentMode && s.modeBtnTextActiveSenior]}>{t('సీనియర్ మోడ్', 'Senior Mode')}</Text>
               <Text style={[s.modeBtnAge, !studentMode && s.modeBtnAgeActiveSenior]}>{t('25+ సంవత్సరాలు', '25+ years')}</Text>
@@ -223,7 +223,7 @@ export function DailyRashiScreen() {
             onPress={() => { if (!studentMode) toggleStudentMode(); }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="school" size={20} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
+            <MaterialCommunityIcons name="school" size={26} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
             <View>
               <Text style={[s.modeBtnText, { color: '#4A90D9' }, studentMode && s.modeBtnTextActiveStudent]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
               <Text style={[s.modeBtnAge, studentMode && s.modeBtnAgeActiveStudent]}>{t('15–25 సంవత్సరాలు', '15–25 years')}</Text>
@@ -524,8 +524,8 @@ const s = StyleSheet.create({
     flexDirection: 'row', gap: 8, marginBottom: 8,
   },
   modeBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 12, paddingHorizontal: 14, borderRadius: 14,
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 14, paddingHorizontal: 14, borderRadius: 14,
     backgroundColor: 'rgba(212,160,23,0.04)', borderWidth: 1.5, borderColor: DarkColors.borderCard,
   },
   modeBtnActive: { backgroundColor: DarkColors.gold, borderColor: DarkColors.gold },
@@ -535,9 +535,12 @@ const s = StyleSheet.create({
   modeBtnTextActiveSenior: { color: '#0A0A0A' },
   // Student active: white text on blue bg (AA contrast)
   modeBtnTextActiveStudent: { color: '#FFFFFF' },
-  modeBtnAge: { fontSize: 14, fontWeight: '600', color: DarkColors.silverLight, marginTop: 3 },
-  modeBtnAgeActiveSenior:  { color: 'rgba(10,10,10,0.75)' },
-  modeBtnAgeActiveStudent: { color: 'rgba(255,255,255,0.85)' },
+  modeBtnAge: { fontSize: 14, fontWeight: '700', color: DarkColors.silverLight, marginTop: 3 },
+  // Senior active: gold bg → was rgba(10,10,10,0.75) but the 75% alpha
+  // muddied the "25+ సంవత్సరాలు" subtitle against the gold fill.
+  // Solid #1F1500 (deep brown) reads cleanly: ~10.5:1 on #D4A017.
+  modeBtnAgeActiveSenior:  { color: '#1F1500', fontWeight: '700' },
+  modeBtnAgeActiveStudent: { color: '#FFFFFF', fontWeight: '700' },
   modeIndicator: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, marginBottom: 12,

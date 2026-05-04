@@ -24,6 +24,8 @@ Thumbs.db
 # Admin / Developer secrets
 ADMIN.md
 .claude/
+.secrets/
+*-firebase-adminsdk-*.json
 
 # Test files (contain API keys)
 test-*.html

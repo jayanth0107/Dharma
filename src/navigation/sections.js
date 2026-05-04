@@ -15,6 +15,7 @@ export const MAIN_SECTIONS = [
   // ── 1. Daily Habit (everyone) ──
   { name: 'Panchang',     icon: 'pot-mix',                te: 'నేటి పంచాంగం',       en: 'Panchangam', params: { tab: 'panchang' } },
   { name: 'Festivals',    icon: 'party-popper',           te: 'పండుగలు',            en: 'Festivals', params: { tab: 'festivals' } },
+  { name: 'Muhurtam',     icon: 'calendar-star',          te: 'శుభ ముహూర్తాలు',      en: 'Muhurtam' },
   { name: 'DailyRashi',   icon: 'star-circle',            te: 'మీ  రాశి',           en: 'Your Rashi' },
   { name: 'Gold',         icon: 'gold',                   te: 'బంగారం వెండి',       en: 'Gold & Silver' },
   { name: 'Market',       icon: 'chart-line',             te: 'మార్కెట్',           en: 'Market' },
@@ -37,7 +38,6 @@ export const MAIN_SECTIONS = [
 
   // ── 4. Life Decisions (adults / premium) ──
   { name: 'Horoscope',    icon: 'account-star',           te: 'వేద జాతకం',          en: 'Vedic Horoscope' },
-  { name: 'Muhurtam',     icon: 'calendar-star',          te: 'శుభ ముహూర్తాలు',      en: 'Muhurtam' },
   { name: 'Family',       icon: 'account-group',          te: 'కుటుంబ జాతకాలు',      en: 'Family Profiles' },
 
   // ── 5. Devotion & Service (elders, deeper practice) ──
