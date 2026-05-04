@@ -5,6 +5,8 @@
 A comprehensive **React Native (Expo)** app delivering daily **sacred stories** (Ramayana, Mahabharata, Gita), **Neethi Sukta wisdom**, **mantras & stotras**, **meditation**, **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, daily Rashi predictions, Sanskrit word of the day, Dharma debate / quiz, Indian market data, live gold/silver prices, and nearby temple finder — built for Telugu-speaking Hindu communities worldwide.
 
 > **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.3 (versionCode 11) &nbsp;|&nbsp; **Expo SDK:** 54
+>
+> **Note**: For developers using Claude Code or similar AI assistants — `.claudeignore` lists generated artefacts, secrets, and large binaries to skip during indexing. `CLAUDE.md` carries persistent project context including operational tooling, location-search provider chain, and design-intent notes for the BirthDatePicker.
 
 - **GitHub:** https://github.com/jayanth0107/Dharma
 - **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app

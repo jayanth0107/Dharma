@@ -1,0 +1,53 @@
+# Files Claude Code should skip when reading / searching the repo.
+# Same general philosophy as .gitignore — generated artefacts,
+# vendored deps, large binaries, and secrets — but tuned for what
+# wastes Claude's context vs what's worth indexing.
+
+# ── Vendored deps & build outputs ────────────────────────────
+node_modules/
+dist/
+web-build/
+.expo/
+android/app/build/
+ios/build/
+ios/Pods/
+
+# ── Secrets / credentials (also in .gitignore — defence in depth) ──
+.secrets/
+*-firebase-adminsdk-*.json
+google-play-service-account.json
+.env
+.env.local
+.env.production
+
+# ── Large binaries (waste tokens, not useful as text) ──
+*.apk
+*.aab
+*.ipa
+*.jks
+*.p8
+*.p12
+*.keystore
+*.mp3
+*.mp4
+*.wav
+*.zip
+*.tar
+*.tar.gz
+*.gz
+
+# ── Generated / lock files ──
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ── Editor / OS detritus ──
+.DS_Store
+Thumbs.db
+*.orig.*
+
+# ── Test scaffolds (often contain stale API keys / test creds) ──
+test-*.html
+
+# ── Claude's own session state ──
+.claude/

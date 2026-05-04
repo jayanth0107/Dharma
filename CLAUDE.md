@@ -309,12 +309,69 @@ eas submit --platform android                     # Submit to Play Store (intern
    ipinfo.io fallback. ipapi.co + ip-api.com both 403 in 2026
    (free-tier crackdown). DO NOT add them back.
 3. **Place search** (typed birth-place lookup): Cloud Function
-   `placesSearch` (currently NOT deployed) → Google Places New
-   autocomplete (working) → Geoapify search → LocationIQ search
-   → static city fallback (~150 cities, offline).
+   `placesSearch` (currently NOT deployed; `PROXY_ENABLED = false`
+   in `placesProxy.js` short-circuits the call to avoid CORS noise
+   + ~500 ms wasted latency per keystroke) → Google Places New
+   autocomplete → Geoapify search → LocationIQ search → static
+   city fallback (~150 cities, offline).
 4. **`AbortSignal.timeout`** is unreliable on some Hermes builds
    — every fetch uses `timeoutSignal()` from `src/utils/timeoutSignal.js`
    instead. New fetch code MUST use the polyfill.
+5. **GPS button surfaces city, not suburb.** `LocationSearchModal`'s
+   handleGPS uses `loc.name` (city) as primary, `loc.area` (suburb)
+   as secondary. Earlier bug had them flipped → users saw "Hitech
+   City" instead of "Hyderabad" and read it as wrong location.
+
+### BirthDatePicker design intent
+
+After a brief overhaul (cards-with-inline-headers + 5-row wheels)
+that the user reverted, the picker is **back to the v2.4.2 layout**
+— gold preview strip + DD/MM/YYYY display chips + AM/PM toggle
+buttons + 3-row wheels — with these PRESERVED bug fixes:
+
+  • `isUserScrolling` ref → blocks parent-driven scrollTo while user
+    is mid-flick. Eliminates the "hard push only moves a few numbers"
+    snap-back symptom.
+  • `decelerationRate={0.997}` numeric → Android no longer feels
+    sluggish (string 'normal'/'fast' map to different values
+    cross-platform).
+  • `disableIntervalMomentum` REMOVED → long flicks ride momentum
+    through 10–20 items.
+  • `overScrollMode="never"` → Android edge-glow no longer swallows
+    flicks at list ends.
+  • **Outer ScrollView gets `nestedScrollEnabled` + a force
+    scrollTo(0,0) on visible.** Without this, on Android the inner
+    WheelColumn's scrollTo() bubbles up and pushes the chip rows
+    OFF-SCREEN. Caused S23+ "chips not visible" report.
+  • Chip sublabels 10 → 13 pt, AM/PM toggle 13 → 15, hairline
+    divider under DATE/TIME headings + above wheel labels.
+  • Wheel widths bumped for thumb comfort
+    (day 110→120, month 92→100, year 92→110, time 76→90).
+
+If anyone proposes restructuring the picker again: confirm scope
+with the user first. Sensitivity fixes are universally welcome;
+visual layout changes need explicit approval.
+
+### Notification scheduling
+
+  • All five daily notifications use `scheduleRolling()` to schedule
+    14 one-shot date-triggers per slot, refreshed on every app launch.
+    Avoids the stale-content trap of Expo's repeating `daily` trigger.
+  • `setupDailyNotifications` has a re-entry guard
+    (`_setupInProgress` + `_setupRequestedAgain`) — AppContext fires
+    it on `[location?.latitude, lang]` changes, which can fire 2× in
+    100 ms on launch and produces duplicates without the guard.
+  • Neethi Sukta notification body uses `sukta.meaning` (translation),
+    not `sukta.quote` (original Sanskrit). Quote stays in the in-app
+    NeethiSukta reading view.
+
+### Rules-of-Hooks audit
+
+`grep -rnE "size=\{usePick|fontSize:\s*usePick|width=\{usePick" src/`
+should return ZERO matches. An inline `usePick()` call inside JSX
+that lives after an early `return` (e.g. `if (loading) return null`)
+makes the hook count vary between renders and crashes the screen
+on first mount. Caught once in `GoldPriceCard.js` (May 2026).
 
 ### Auth for Firestore probes
 
