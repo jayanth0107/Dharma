@@ -29,7 +29,22 @@ function getPlacesFn() {
   return httpsCallable(_functionsRef, 'placesSearch');
 }
 
+// Cloud Function `placesSearch` was designed to hide API keys server-side.
+// Setting it as a no-op while the function is NOT deployed — the
+// existing direct-provider chain (Google Places → Geoapify → LocationIQ
+// → static cities) works fine and the keys are already client-side
+// anyway. Calling the un-deployed URL was generating
+// "functions/internal" + CORS noise on every keystroke and adding
+// ~500 ms latency per search.
+//
+// To re-enable: deploy `placesSearch` (functions/index.js:284), set
+// the GEOAPIFY_KEY / LOCATIONIQ_KEY / GOOGLE_PLACES_KEY secrets via
+// `firebase functions:secrets:set`, configure CORS, then flip
+// PROXY_ENABLED to true below.
+const PROXY_ENABLED = false;
+
 async function callPlacesProxy(payload) {
+  if (!PROXY_ENABLED) return null;
   const fn = getPlacesFn();
   if (!fn) return null;
   try {
