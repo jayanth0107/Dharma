@@ -253,14 +253,15 @@ export function BirthDatePicker({
   // Day column is wider than month/year — day is the most-changed
   // axis when looking up a panchangam, so the wheel that drives the
   // primary input gets visual dominance + a larger tap target.
-  // Wheels widened slightly per Samsung S23+ tester feedback — old
-  // 100/80/80/65 felt too tight on a wider phone class. Bumped ~10 dp
-  // per column. Total date row: 100+80+80+8gap+8gap+40pad = 316 →
-  // 110+90+90+8gap+8gap+40pad = 346 dp. Still fits 360 dp phones.
-  const dayColWidth   = usePick({ default: 110, md: 116, lg: 130, xl: 150 });
-  const monthColWidth = usePick({ default: 92,  md: 96,  lg: 100, xl: 110 });
-  const yearColWidth  = usePick({ default: 92,  md: 96,  lg: 100, xl: 110 });
-  const timeColWidth  = usePick({ default: 76,  md: 80,  lg: 86,  xl: 96  });
+  // Wheel widths sized for comfortable finger touch (Apple HIG / Material
+  // recommend ≥44 dp min). Year wheel widest because it holds 4 digits;
+  // date wheels next; time wheels narrower because they hold 2 chars max.
+  // Total date row at 360 dp: 120+100+110 + 2×8gap = 346 — fits with slack.
+  // Total time row at 360 dp: 3×90 + colon + 2×8gap = ~315 — fits cleanly.
+  const dayColWidth   = usePick({ default: 120, md: 128, lg: 142, xl: 162 });
+  const monthColWidth = usePick({ default: 100, md: 106, lg: 114, xl: 126 });
+  const yearColWidth  = usePick({ default: 110, md: 116, lg: 124, xl: 138 });
+  const timeColWidth  = usePick({ default: 90,  md: 96,  lg: 104, xl: 116 });
 
   // ── Source-of-truth state ──
   // Clamp inputs at the boundary: years outside [ys, ye] would leave
@@ -595,18 +596,19 @@ const ws = StyleSheet.create({
   },
   previewText: { fontSize: 16, fontWeight: '600', color: DarkColors.goldLight, letterSpacing: 1 },
 
-  // Field blocks (date / time) — paddingTop trimmed 14 → 8.
-  fieldsBlock: { paddingHorizontal: 20, paddingTop: 8 },
+  // Field blocks (date / time). Reduced horizontal padding 20 → 14
+  // so chips claim more horizontal real estate; labels grow into it.
+  fieldsBlock: { paddingHorizontal: 14, paddingTop: 8 },
   blockLabel: {
-    fontSize: 11, fontWeight: '600', color: DarkColors.silver,
-    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4,
+    fontSize: 13, fontWeight: '700', color: DarkColors.gold,
+    textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 6,
   },
-  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   chipWide: { flex: 1.6 },
   chip: {
     flex: 1,
     backgroundColor: DarkColors.bgElevated,
-    borderRadius: 10, paddingVertical: 8, paddingHorizontal: 8,
+    borderRadius: 10, paddingVertical: 9, paddingHorizontal: 8,
     borderWidth: 1.5, borderColor: DarkColors.borderCard,
     alignItems: 'center',
   },
@@ -615,26 +617,30 @@ const ws = StyleSheet.create({
     backgroundColor: DarkColors.goldDim,
   },
   chipValue: {
-    fontSize: 20, fontWeight: '700', color: '#FFFFFF',
-    letterSpacing: 1,
+    fontSize: 22, fontWeight: '700', color: '#FFFFFF',
+    letterSpacing: 1, lineHeight: 26,
   },
   chipValueFocus: { color: DarkColors.goldLight },
+  // Chip sublabel — was 10/silver (almost unreadable). Now 13/silverLight
+  // with bumped weight + spacing. Day / Month / Year are now legible
+  // labels, not afterthoughts.
   chipSub: {
-    fontSize: 10, fontWeight: '700', color: DarkColors.silver,
-    marginTop: 2, letterSpacing: 0.5, textTransform: 'uppercase',
+    fontSize: 13, fontWeight: '700', color: DarkColors.silverLight,
+    marginTop: 4, letterSpacing: 0.4, textTransform: 'uppercase',
   },
   scrollHint: {
-    fontSize: 11, color: DarkColors.silver, fontWeight: '600',
-    textAlign: 'center', marginTop: 4, fontStyle: 'italic',
+    fontSize: 12, color: DarkColors.textMuted, fontWeight: '500',
+    textAlign: 'center', marginTop: 6, fontStyle: 'italic',
   },
 
   sepText: {
-    fontSize: 20, fontWeight: '700', color: DarkColors.gold,
+    fontSize: 22, fontWeight: '700', color: DarkColors.gold,
     paddingHorizontal: 2, paddingTop: 4,
   },
+  // AM/PM mini label — was 10pt, now matches chipSub (13/700).
   miniLabel: {
-    fontSize: 10, fontWeight: '700', color: DarkColors.silver,
-    marginBottom: 4, letterSpacing: 0.5,
+    fontSize: 13, fontWeight: '700', color: DarkColors.silverLight,
+    marginBottom: 4, letterSpacing: 0.4, textTransform: 'uppercase',
   },
   amPmGroup: { alignItems: 'center', flex: 1.4 },
   amPmRow: {
@@ -644,11 +650,11 @@ const ws = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   amPmBtn: {
-    flex: 1, paddingVertical: 9, borderRadius: 7,
+    flex: 1, paddingVertical: 10, borderRadius: 7,
     alignItems: 'center', justifyContent: 'center',
   },
   amPmBtnActive: { backgroundColor: DarkColors.gold },
-  amPmText: { fontSize: 13, fontWeight: '600', color: DarkColors.silver, letterSpacing: 0.5 },
+  amPmText: { fontSize: 15, fontWeight: '700', color: DarkColors.silverLight, letterSpacing: 0.5 },
   amPmTextActive: { color: '#0A0A0A' },
 
   wheelsRow: {
