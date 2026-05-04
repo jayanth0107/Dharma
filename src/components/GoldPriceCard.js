@@ -147,14 +147,25 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
 
 export function GoldSilverPriceCard({ prices, loading }) {
   const { t } = useLanguage();
-  const sectionTitleFs = usePick({ default: 17, md: 19, xl: 22 });
-  const sectionSubFs = usePick({ default: 13, md: 14, xl: 16 });
-  const headerIconSize = usePick({ default: 16, md: 18, xl: 22 });
-  const loadingIconSize = usePick({ default: 32, md: 36, xl: 42 });
-  const loadingTitleFs = usePick({ default: 16, md: 18, xl: 20 });
-  const subIconSize = usePick({ default: 11, md: 12, xl: 14 });
-  const sectionMb = usePick({ default: 12, md: 14, xl: 18 });
-  const footerIconSize = usePick({ default: 11, md: 12, xl: 14 });
+  // ALL usePick calls must run at top level on EVERY render — no
+  // conditionals, no early returns between hooks. The inline
+  // usePick() calls that used to live inside the JSX (lines 179/181)
+  // were a Rules-of-Hooks violation: they fired only when prices
+  // was loaded, but on first render with loading=true the component
+  // returned early before those JSX nodes existed. The hook count
+  // changed between renders → React threw "Rendered more hooks than
+  // during the previous render" → crash on first tap, fixed on retry.
+  const sectionTitleFs   = usePick({ default: 17, md: 19, xl: 22 });
+  const sectionSubFs     = usePick({ default: 13, md: 14, xl: 16 });
+  const headerIconSize   = usePick({ default: 16, md: 18, xl: 22 });
+  const loadingIconSize  = usePick({ default: 32, md: 36, xl: 42 });
+  const loadingTitleFs   = usePick({ default: 16, md: 18, xl: 20 });
+  const subIconSize      = usePick({ default: 11, md: 12, xl: 14 });
+  const sectionMb        = usePick({ default: 12, md: 14, xl: 18 });
+  const footerIconSize   = usePick({ default: 11, md: 12, xl: 14 });
+  // Pulled up from inline JSX usage — these decorate the section
+  // header diamond-stone icons. Now stable across all renders.
+  const headerDecoIconSz = usePick({ default: 9, md: 10, xl: 12 });
 
   if (loading) {
     return (
@@ -176,9 +187,9 @@ export function GoldSilverPriceCard({ prices, loading }) {
       {/* Section header — jewellery themed */}
       <View style={gs.sectionHeader}>
         <View style={gs.headerOrnamentLine} />
-        <MaterialCommunityIcons name="diamond-stone" size={usePick({ default: 9, md: 10, xl: 12 })} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="diamond-stone" size={headerDecoIconSz} color={DarkColors.gold} />
         <MaterialCommunityIcons name="gold" size={headerIconSize} color={DarkColors.gold} style={{ marginHorizontal: 8 }} />
-        <MaterialCommunityIcons name="diamond-stone" size={usePick({ default: 9, md: 10, xl: 12 })} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="diamond-stone" size={headerDecoIconSz} color={DarkColors.gold} />
         <View style={gs.headerOrnamentLine} />
       </View>
       <Text style={[gs.sectionTitle, { fontSize: sectionTitleFs }]}>{t(TR.goldSilverPrices.te, TR.goldSilverPrices.en)}</Text>
