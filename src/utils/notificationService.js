@@ -252,14 +252,19 @@ function buildSuktaNotif(today, lang) {
       body:  pickL(lang, 'యాప్ తెరిచి నేటి నీతి సూక్తం చదవండి.', 'Open the app to read today\'s wisdom.'),
     };
   }
-  const source = pickL(lang, sukta.source.te,  sukta.source.en);
-  const quote  = pickL(lang, sukta.quote.te,   sukta.quote.en);
-  const apply  = pickL(lang, sukta.applyToday.te, sukta.applyToday.en);
-  const title  = pickL(lang,
+  const source  = pickL(lang, sukta.source.te,  sukta.source.en);
+  // Use `meaning` (practical translation), NOT `quote` (original
+  // Sanskrit verse in Telugu lipi / literal English). User feedback:
+  // notifications should be skim-friendly translations, not full
+  // poetic source text. `quote` belongs in the in-app reading view
+  // where the user can dwell on it.
+  const meaning = pickL(lang, sukta.meaning.te, sukta.meaning.en);
+  const apply   = pickL(lang, sukta.applyToday.te, sukta.applyToday.en);
+  const title   = pickL(lang,
     `📜 ${source} — నేటి సూక్తం`,
     `📜 ${source} — Today's Wisdom`,
   );
-  const body = `${quote}\n\n${pickL(lang, '💡 నేడు ఆచరించండి', '💡 Apply today')}: ${apply}`;
+  const body = `${meaning}\n\n${pickL(lang, '💡 నేడు ఆచరించండి', '💡 Apply today')}: ${apply}`;
   return { title, body };
 }
 
@@ -323,6 +328,17 @@ function buildMahabharataNotif(today, lang) {
 // Schedulers
 // ─────────────────────────────────────────────────────────────────────────
 
+// Re-entry guard. AppContext fires this on `[location?.latitude, lang]`
+// changes — those can fire back-to-back during initial launch (default
+// location → detected location, then again on lang load), and Expo
+// Notifications has a known race where rapid cancel+schedule can
+// duplicate items. The guard ensures at most one setup runs at a time;
+// later calls coalesce by re-setting the "wanted" state and re-running
+// once the in-flight pass finishes.
+let _setupInProgress = false;
+let _setupRequestedAgain = false;
+let _lastSetupArgs = null;
+
 /**
  * Cancel all scheduled notifications and reschedule per current settings.
  * Called on app start, on settings change, and on language change.
@@ -333,6 +349,14 @@ function buildMahabharataNotif(today, lang) {
  */
 export async function setupDailyNotifications(settings, location, myRashiIndex) {
   if (Platform.OS === 'web') return;   // No push on web
+
+  // Coalesce concurrent calls.
+  _lastSetupArgs = { settings, location, myRashiIndex };
+  if (_setupInProgress) {
+    _setupRequestedAgain = true;
+    return;
+  }
+  _setupInProgress = true;
 
   try {
     const Notifications = require('expo-notifications');
@@ -498,6 +522,17 @@ export async function setupDailyNotifications(settings, location, myRashiIndex) 
     }
   } catch (e) {
     if (__DEV__) console.warn('Notification setup failed:', e);
+  } finally {
+    _setupInProgress = false;
+    // If another caller asked for a setup while we were running,
+    // run once more with the latest args. Drains a single follow-up;
+    // does not loop on burst calls (latest args win).
+    if (_setupRequestedAgain && _lastSetupArgs) {
+      _setupRequestedAgain = false;
+      const { settings: s, location: l, myRashiIndex: r } = _lastSetupArgs;
+      // Defer slightly so Expo's notification queue settles between runs.
+      setTimeout(() => setupDailyNotifications(s, l, r), 100);
+    }
   }
 }
 
