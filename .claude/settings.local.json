@@ -133,7 +133,9 @@
       "Bash(GOOGLE_APPLICATION_CREDENTIALS=\"../.secrets/firebase-admin.json\" node enable-api.js)",
       "Bash(npx eas-cli@latest build --platform android --profile production --non-interactive --no-wait)",
       "Bash(npx eas-cli@latest build:cancel d8eea8fc-8a23-4074-8498-41aa5fc402fe)",
-      "Bash(npx eas-cli@latest build:view a54d69b4-93d3-48e9-87e4-c69747cbf95e)"
+      "Bash(npx eas-cli@latest build:view a54d69b4-93d3-48e9-87e4-c69747cbf95e)",
+      "Bash(npx eas-cli@latest build:view f0cea759-63ef-4f80-9682-172d4a4e7e21)",
+      "PowerShell(Get-ChildItem *)"
     ]
   }
 }

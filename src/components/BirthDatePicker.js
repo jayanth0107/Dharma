@@ -52,6 +52,14 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
   const scrollRef = useRef(null);
   const lastSnapped = useRef(selectedIndex);
   const isFirstMount = useRef(true);
+  // Controlled-scroll fight prevention: track whether the user is
+  // actively driving the wheel. While true, we IGNORE parent's
+  // selectedIndex prop changes and never fire scrollTo() back at
+  // them — otherwise a fast flick gets snapped back to the last
+  // committed position, which feels like "hard pushes only move
+  // a few numbers". Without this guard, RN's controlled scroll
+  // pattern fights the user.
+  const isUserScrolling = useRef(false);
 
   useEffect(() => {
     if (isFirstMount.current) {
@@ -67,6 +75,11 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
           animated: false,
         });
       });
+      return;
+    }
+    // Don't yank the wheel back if the user is mid-flick.
+    if (isUserScrolling.current) {
+      lastSnapped.current = selectedIndex;
       return;
     }
     if (selectedIndex !== lastSnapped.current && scrollRef.current) {
@@ -86,8 +99,10 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
 
   // When data length shrinks below the current selection (Jan→Feb with
   // day 31), re-snap the wheel to the new max so the highlighted row
-  // matches what the parent computes for effectiveDay.
+  // matches what the parent computes for effectiveDay. Skipped while
+  // user is scrolling.
   useEffect(() => {
+    if (isUserScrolling.current) return;
     if (selectedIndex >= data.length && scrollRef.current) {
       const target = Math.max(0, data.length - 1);
       scrollRef.current.scrollTo({ y: target * ITEM_HEIGHT, animated: true });
@@ -98,8 +113,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
   // Live update: fires while the user is actively dragging or
   // momentum-scrolling. We only call onSelect when the centred item
   // *changes* (lastSnapped dedupe), so the parent re-renders ~5–10
-  // times per long scroll, not 60. Keeps the upper display chips in
-  // sync with the wheel position in real time.
+  // times per long scroll, not 60.
   const handleScroll = useCallback((e) => {
     const idx = indexFromY(e.nativeEvent.contentOffset.y);
     if (idx !== lastSnapped.current) {
@@ -108,14 +122,21 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
     }
   }, [indexFromY, onSelect]);
 
+  // Drag start → user is now driving. Block parent re-snaps.
+  const handleScrollBeginDrag = useCallback(() => {
+    isUserScrolling.current = true;
+  }, []);
+
   // Final snap when momentum/drag ends — same logic, also a safety
-  // net in case the last onScroll event landed off-grid.
+  // net in case the last onScroll event landed off-grid. AND clears
+  // the isUserScrolling flag so parent-driven scrolls work again.
   const handleSnapEnd = useCallback((e) => {
     const idx = indexFromY(e.nativeEvent.contentOffset.y);
     if (idx !== lastSnapped.current) {
       lastSnapped.current = idx;
       onSelect(idx);
     }
+    isUserScrolling.current = false;
   }, [indexFromY, onSelect]);
 
   const handleItemTap = (i) => {
@@ -154,6 +175,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
           contentOffset={{ x: 0, y: selectedIndex * ITEM_HEIGHT }}
           onScroll={handleScroll}
           scrollEventThrottle={16}
+          onScrollBeginDrag={handleScrollBeginDrag}
           onMomentumScrollEnd={handleSnapEnd}
           onScrollEndDrag={handleSnapEnd}
           contentContainerStyle={{
