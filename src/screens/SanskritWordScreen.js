@@ -62,7 +62,7 @@ export function SanskritWordScreen() {
             lang
           )}
         >
-          <MaterialCommunityIcons name={speakerIcon} size={20} color={isSpeaking ? '#FFFFFF' : DarkColors.gold} />
+          <MaterialCommunityIcons name={speakerIcon} size={22} color={isSpeaking ? '#FFFFFF' : DarkColors.gold} />
         </TouchableOpacity>
       </View>
       <Text style={s.transliteration}>{w.transliteration}</Text>
@@ -73,7 +73,7 @@ export function SanskritWordScreen() {
       {/* Meaning */}
       <View style={s.section}>
         <View style={s.sectionHeader}>
-          <MaterialCommunityIcons name="translate" size={16} color={DarkColors.gold} />
+          <MaterialCommunityIcons name="translate" size={18} color={DarkColors.gold} />
           <Text style={s.sectionLabel}>{t('అర్థం', 'Meaning')}</Text>
         </View>
         <Text style={s.sectionText}>{t(w.meaning.te, w.meaning.en)}</Text>
@@ -82,7 +82,7 @@ export function SanskritWordScreen() {
       {/* Root */}
       <View style={s.section}>
         <View style={s.sectionHeader}>
-          <MaterialCommunityIcons name="source-branch" size={16} color={DarkColors.saffron} />
+          <MaterialCommunityIcons name="source-branch" size={18} color={DarkColors.saffron} />
           <Text style={[s.sectionLabel, { color: DarkColors.saffron }]}>{t('మూలం', 'Root')}</Text>
         </View>
         <Text style={s.sectionText}>{t(w.root.te, w.root.en)}</Text>
@@ -90,13 +90,13 @@ export function SanskritWordScreen() {
 
       {/* Usage */}
       <View style={s.usageBox}>
-        <MaterialCommunityIcons name="format-quote-open" size={16} color={DarkColors.gold} />
+        <MaterialCommunityIcons name="format-quote-open" size={18} color={DarkColors.gold} />
         <Text style={s.usageText}>{t(w.usage.te, w.usage.en)}</Text>
       </View>
 
       {/* Fun Fact */}
       <View style={s.funFactBox}>
-        <MaterialCommunityIcons name="lightbulb-on" size={16} color="#E8751A" />
+        <MaterialCommunityIcons name="lightbulb-on" size={18} color="#E8751A" />
         <Text style={s.funFactText}>{t(w.funFact.te, w.funFact.en)}</Text>
       </View>
 
@@ -142,8 +142,8 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
-  headerSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center', lineHeight: 20 },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
+  headerSub: { fontSize: 15, color: DarkColors.silver, textAlign: 'center', lineHeight: 22 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 20, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard, alignItems: 'center',
@@ -156,33 +156,33 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.1)', borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   speakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
-  transliteration: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginTop: 4, letterSpacing: 1 },
-  teluguWord: { fontSize: 16, fontWeight: '600', color: DarkColors.saffron, marginTop: 2 },
-  todayTag: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 8, marginTop: 8 },
-  todayTagText: { fontSize: 10, fontWeight: '600', color: '#0A0A0A', letterSpacing: 1 },
-  section: { width: '100%', marginTop: 14 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  sectionLabel: { fontSize: 13, fontWeight: '600', color: DarkColors.gold, letterSpacing: 0.5 },
-  sectionText: { fontSize: 15, fontWeight: '500', color: DarkColors.silver, lineHeight: 24, paddingLeft: 22 },
+  transliteration: { fontSize: 22, fontWeight: '700', color: '#FFFFFF', marginTop: 6, letterSpacing: 1 },
+  teluguWord: { fontSize: 18, fontWeight: '600', color: DarkColors.saffron, marginTop: 4 },
+  todayTag: { backgroundColor: DarkColors.gold, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, marginTop: 10 },
+  todayTagText: { fontSize: 11, fontWeight: '700', color: '#0A0A0A', letterSpacing: 1 },
+  section: { width: '100%', marginTop: 16 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  sectionLabel: { fontSize: 15, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.5 },
+  sectionText: { fontSize: 17, fontWeight: '500', color: DarkColors.silver, lineHeight: 26, paddingLeft: 22 },
   usageBox: {
-    width: '100%', flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 14,
-    backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12, padding: 12,
+    width: '100%', flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 16,
+    backgroundColor: 'rgba(212,160,23,0.06)', borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  usageText: { flex: 1, fontSize: 14, fontWeight: '600', color: DarkColors.gold, fontStyle: 'italic', lineHeight: 22 },
+  usageText: { flex: 1, fontSize: 16, fontWeight: '600', color: DarkColors.gold, fontStyle: 'italic', lineHeight: 24 },
   funFactBox: {
-    width: '100%', flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 10,
-    backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 10, padding: 10,
+    width: '100%', flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12,
+    backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 10, padding: 12,
     borderWidth: 1, borderColor: 'rgba(232,117,26,0.2)',
   },
-  funFactText: { flex: 1, fontSize: 13, fontWeight: '500', color: DarkColors.saffron, lineHeight: 20 },
-  relatedRow: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: 10, gap: 4 },
-  relatedLabel: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted },
-  relatedWords: { fontSize: 12, fontWeight: '600', color: DarkColors.silver },
+  funFactText: { flex: 1, fontSize: 15, fontWeight: '500', color: DarkColors.saffron, lineHeight: 22 },
+  relatedRow: { width: '100%', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: 12, gap: 4 },
+  relatedLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.textMuted },
+  relatedWords: { fontSize: 14, fontWeight: '600', color: DarkColors.silver },
   browseBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    paddingVertical: 12, borderRadius: 14, marginVertical: 8,
+    paddingVertical: 14, borderRadius: 14, marginVertical: 10,
     backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  browseBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  browseBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 });

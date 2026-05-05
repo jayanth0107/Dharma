@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
-import { usePick } from '../theme/responsive';
+import { usePick, useWindow } from '../theme/responsive';
 import { trackEvent } from '../utils/analytics';
 
 const PLATFORMS = [
@@ -95,15 +95,23 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
   const platformNameSize = usePick({ default: 15, lg: 16, xl: 17 });
   const platformBtnPad = usePick({ default: 12, lg: 14, xl: 16 });
   const platformIconWrap = usePick({ default: 42, lg: 46, xl: 50 });
-  // Bumped 13/14/15 → 14/15/16 — preview text was undersized for
-  // long Horoscope payloads (30+ lines). Now legible at arm's length.
-  const previewFontSize = usePick({ default: 14, md: 15, lg: 16, xl: 18 });
-  // Preview window height scales with phone class. Was hard-coded 160 px
-  // (maybe 7 lines visible) — wasted the modal's 85% screen height
-  // budget. Horoscope share is ~30 lines; with 360–480 px the user
-  // can scan most of it without scrolling and still scroll for the
-  // tail. Modal still stays at maxHeight: '85%' so fits on every phone.
-  const previewMaxHeight = usePick({ default: 320, md: 360, lg: 420, xl: 540 });
+  // Preview text size — bumped again after horoscope tester said the
+  // share preview was still hard to read. Telugu glyphs render ~80% of
+  // em-square, so what looks like 16 to a Latin reader is ~13 to a
+  // Telugu reader. Now floored at 17 (sm), 18 (md), 20 (lg), 22 (xl).
+  const previewFontSize = usePick({ default: 17, md: 18, lg: 20, xl: 22 });
+  // 60/40 split between preview and "Share to" list, responsive to
+  // screen height. The modal is capped at 85% of the screen — minus
+  // ~280 px of fixed chrome (header + consent + label + cancel) leaves
+  // the flex area, which we split 60% preview / 40% platforms.
+  // Earlier the preview used absolute pixel heights (320–540 px) which
+  // ate the entire modal on tall phones and left the platform list
+  // squished into a tiny scroll strip.
+  const { height: screenH } = useWindow();
+  const FIXED_CHROME = 280;
+  const flexArea = Math.max(screenH * 0.85 - FIXED_CHROME, 320);
+  const previewMaxHeight = Math.round(flexArea * 0.6);
+  const platformListMaxHeight = Math.round(flexArea * 0.4);
   const cancelFontSize = usePick({ default: 14, lg: 15, xl: 16 });
 
   // Auto-open on mount if requested
@@ -227,7 +235,7 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
             <View style={[s.previewWrap, { marginHorizontal: modalPadH }]}>
               <Text style={s.previewLabel}>What will be shared:</Text>
               <ScrollView style={[s.previewScroll, { maxHeight: previewMaxHeight }]} nestedScrollEnabled>
-                <Text style={[s.previewText, { fontSize: previewFontSize, lineHeight: previewFontSize + 7 }]} selectable>{shareText}</Text>
+                <Text style={[s.previewText, { fontSize: previewFontSize, lineHeight: previewFontSize + 9 }]} selectable>{shareText}</Text>
               </ScrollView>
             </View>
 
@@ -239,9 +247,11 @@ export function SectionShareRow({ buildText, section, insideModal, autoOpen, onC
               </Text>
             </View>
 
-            {/* Platform buttons */}
+            {/* Platform buttons — sized to 40% of the flex area so the
+                share-to list always has room even when the preview text
+                is long (was getting squeezed to ~80 px on small phones). */}
             <Text style={[s.platformLabel, { marginHorizontal: modalPadH }]}>Share to:</Text>
-            <ScrollView style={[s.platformList, { paddingHorizontal: modalPadH }]} showsVerticalScrollIndicator={false}>
+            <ScrollView style={[s.platformList, { paddingHorizontal: modalPadH, maxHeight: platformListMaxHeight }]} showsVerticalScrollIndicator={false}>
               {PLATFORMS.map((p) => (
                 <TouchableOpacity
                   key={p.id}
@@ -321,14 +331,14 @@ const s = StyleSheet.create({
   // Preview
   previewWrap: { marginBottom: 10 },
   // Bumped 12 → 13 to match the new preview text scale.
-  previewLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.silverLight, marginBottom: 8, letterSpacing: 0.3 },
+  previewLabel: { fontSize: 14, fontWeight: '700', color: DarkColors.silverLight, marginBottom: 10, letterSpacing: 0.3 },
   // maxHeight injected at render time from previewMaxHeight (responsive).
   previewScroll: {
     backgroundColor: DarkColors.bgElevated, borderRadius: 14,
-    borderWidth: 1, borderColor: DarkColors.borderCard, padding: 14,
+    borderWidth: 1, borderColor: DarkColors.borderCard, padding: 16,
   },
-  // lineHeight injected inline so it scales with previewFontSize.
-  previewText: { color: DarkColors.textPrimary },
+  // fontSize + lineHeight injected inline so they scale together.
+  previewText: { color: DarkColors.textPrimary, fontWeight: '500' },
 
   // Consent
   consentRow: {

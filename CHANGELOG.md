@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.4.4] — 2026-05-05
+
+Live Market data via Cloud Function · Holidays + Darshan promoted to
+top-level tiles · readability bumps across Vedic Personality / Sanskrit
+Word / Market / share preview · Donate flow restructured · Secret
+Manager wiring for places APIs · safe-area + responsive fixes across
+the picker / onboarding / mode buttons.
+
+### Added
+
+- **`nseQuote` Cloud Function** — first-class market data backend for the Market screen. Hits NSE direct + 3 public CORS proxies in a parallel race (defeats Akamai's intermittent block on Cloud Function egress IPs), persists last-known-good to Firestore (`/cache/nseQuote`) so cold-start instances always have a fallback, always returns 200 even on total upstream failure (no more 503 in the network tab). Output normalized to `{ map: { [symbol]: { price, change, ... } } }`. Region: asia-south1.
+- **Holidays + Daily Darshan tiles** in the Home grid Utility section, promoted from Festivals sub-tab chips to first-class navigation entries. Top tab bar, bottom tab bar, swipe sequence, and home grid all pick them up via `MAIN_SECTIONS`. Both still render via `CalendarScreen` with the route's `params.tab` seeding the initial sub-tab.
+- **`placesSearch` Cloud Function deployed** with all three API keys in Secret Manager (Geoapify, LocationIQ, Google Places). Currently dormant from the client (`PROXY_ENABLED = false` in `placesProxy.js`); ready to flip once App Check is set up.
+- **Birth Date divider badge** in `BirthDatePicker` — mirrors the Birth Time divider with a calendar icon + label.
+
+### Changed
+
+- **Yahoo Finance + Groww removed from market data chain.** Yahoo's v8 endpoint became hostile to non-browser clients; Groww was confirmed (via direct probing) to not actually expose a public REST API for live quotes. NSE direct via Cloud Function is now primary for both web (CORS bypass) and mobile (TLS-fingerprint bypass).
+- **Sensex dropped, Bank Nifty added** to indices. Every BSE Sensex endpoint either redirects or returns HTML error pages.
+- **Vedic Personality typography** bumped throughout. Body 14/15/16 → 16/17/18 (Telugu floor), section titles 16 → 18, line-height 26 → 28. Daily Affirmation, Youth Tip, Shadow Work boxes use `bodyFs + 2` (18/19/20) so highlight blocks read decisively larger than ordinary paragraphs.
+- **Sanskrit Word screen typography** bumped throughout — section labels 13 → 15/700, body 15 → 17/lh26, transliteration 20 → 22, Telugu word 16 → 18.
+- **Market screen typography + cold-state polish.** Stale banner 12 → 15-17pt with 700 weight, status bar 14 → 16-18pt, section titles 16 → 18-22pt, price card name 15 → 17-20pt, price value 17 → 19-24pt.
+- **Daily Rashi screen** — Today's Lucky section removed. Senior / Student mode buttons restructured: `[icon + title]` on row 1, age subtitle on row 2, both rows centered, `numberOfLines=1` + `adjustsFontSizeToFit` so labels never overflow on narrow phones.
+- **Onboarding screen** wrapped in SafeAreaView + bordered card. Centered vertically with a 1.5px gold-bordered card capped at 480px width.
+- **App title subtitle ("సనాతనం") shown on every phone.** Was hidden by default below the `md=414` breakpoint, which excluded most Android phones.
+- **Embedded modal headers de-duplicated** — Horoscope, Donate, Premium, Reminder all drop their internal title row when `embedded={true}` (PageHeader + TopTabBar already carry the title).
+- **Donate flow** — amounts shown BEFORE UPI apps (universal donation pattern). Sticky header replaces bottom Close button. Sanskrit transliteration dropped; meaning line stands alone in the merged quote bar. Amount cards halved in height via 2-column horizontal layout.
+- **Share preview window 60/40 split** between preview text and platform list, screen-height-derived so the ratio holds across phone sizes. Preview text 14/15/16/18 → 17/18/20/22.
+- **`BirthDatePicker` redundant divider removed**, padding trimmed (~40-50px reclaimed vertical real estate). Bottom safe-area floor raised 12 → 28 on Android so the Cancel/Select row clears the gesture-nav pill.
+
+### Fixed
+
+- **Matchmaking PDF day-of-week incorrect** — `getDayOfBirth()` was passing `DD-MM-YYYY` to `new Date()`, which V8/Hermes parses as `MM-DD-YYYY`. `04-05-2026` resolved to April 5 (Sunday) instead of May 4 (Monday). Now parses `DD-MM-YYYY` explicitly via regex first.
+- **Today's Ayurveda tip benefit text rendering as black on Android** — `AstroScreen.js:386` referenced non-existent `DarkColors.tulasiLight` → fell back to system black. Fixed to `DarkColors.tulasiGreen`.
+- **`BirthDatePicker` Cancel/Select buttons overlapping mobile home navigation** — added `useSafeAreaInsets` with a 28px Android floor.
+
+### Operational
+
+- **Three secrets stored in Secret Manager** (`secretmanager.googleapis.com` auto-enabled): `GEOAPIFY_KEY`, `LOCATIONIQ_KEY`, `GOOGLE_PLACES_KEY`. Service account auto-granted `roles/secretmanager.secretAccessor` on each. Same key values still embedded in client code for the direct path until App Check is set up.
+- **CLAUDE.md** gets new "Cloud Functions inventory", "Secret Manager keys", and "Market data provider chain" sections.
+
+---
+
 ## [2.4.2] — 2026-04-27
 
 Onboarding redesign + notification overhaul + analytics instrumentation +

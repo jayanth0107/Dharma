@@ -91,8 +91,10 @@ function getSubTabs(t) {
     { id: 'pournami',  icon: 'moon-full',              label: t('పౌర్ణమి', 'Pournami') },
     { id: 'amavasya',  icon: 'moon-new',               label: t('అమావాస్య', 'Amavasya') },
     { id: 'pradosham', icon: 'om',                     label: t('ప్రదోషం', 'Pradosham') },
-    { id: 'holidays',  icon: 'flag-variant',           label: t(TR.holidays.te, TR.holidays.en) },
-    { id: 'darshan',   icon: 'temple-hindu',           label: t(TR.darshan.te, TR.darshan.en) },
+    // Holidays + Darshan moved out of the Festivals sub-tab strip to
+    // their own top-level tiles (see sections.js Utility tail). They
+    // still render via this screen, just driven by route name + the
+    // initial activeSubTab seed in the route's params.
   ];
 }
 
@@ -201,9 +203,13 @@ export function CalendarScreen({ route }) {
     routeName === 'Festivals' ? t('పండుగలు', 'Festivals') :
     routeName === 'GoodTimes' ? t('శుభ సమయాలు', 'Auspicious Times') :
     routeName === 'Kids'      ? t('పిల్లల కథలు', "Kid's Stories") :
+    routeName === 'Holidays'  ? t(TR.govtHolidays.te, TR.govtHolidays.en) :
+    routeName === 'Darshan'   ? t(TR.dailyDarshan.te, TR.dailyDarshan.en) :
                                  t('క్యాలెండర్', 'Calendar');
   // Sub-tabs only appear on Festivals — that's the only route where users
   // benefit from cross-jumping to Ekadashi/Chaturthi/etc. categories.
+  // Holidays/Darshan are now top-level tiles (see sections.js), so their
+  // route renders the corresponding section directly with no sub-tab strip.
   const showSubTabs = routeName === 'Festivals';
   const [festivalFilter, setFestivalFilter] = useState('all');
 

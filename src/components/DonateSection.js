@@ -411,22 +411,48 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Quote section with back + UPI copy */}
-            <View style={{ backgroundColor: 'rgba(212,160,23,0.08)', paddingBottom: 10, paddingTop: 6, paddingHorizontal: headerPadH }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                <TouchableOpacity onPress={onClose} accessibilityLabel={t(TR.back.te, TR.back.en)} accessibilityRole="button" style={{ padding: 4 }}>
-                  <Ionicons name="arrow-back" size={headerBackIcon} color={DarkColors.gold} />
-                </TouchableOpacity>
-                <MaterialCommunityIcons name="hand-heart" size={quoteIconSize} color={DarkColors.gold} />
-                <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(212,160,23,0.15)', paddingHorizontal: headerCopyPadH, paddingVertical: headerCopyPadV, borderRadius: 12, gap: 4 }}>
-                  <MaterialCommunityIcons name="content-copy" size={headerCopyIcon} color={DarkColors.gold} />
-                  <Text style={{ fontSize: headerCopyTextSize, fontWeight: '700', color: DarkColors.gold }}>UPI ID</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={[styles.modalQuote, { fontSize: quoteSize + 2, marginTop: 0 }]}>{t(TR.donateQuote.te, TR.donateQuote.en)}</Text>
-              <Text style={[styles.modalQuoteEn, { fontSize: quoteEnSize }]}>{t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}</Text>
+          {/* Sticky utility row.
+              When embedded inside DonateScreen, PageHeader + TopTabBar already
+              show the "Donate" title — repeating it is the third copy.
+              In embedded mode the quote ("Giving is the highest dharma")
+              sits inline next to the UPI-ID copy pill, replacing both the
+              old title row AND the separate quote block (one bar, not two).
+              Standalone modal keeps its close + title + copy header. */}
+          {embedded ? (
+            <View style={[styles.quoteBar, { paddingHorizontal: headerPadH }]}>
+              <Text style={[styles.quoteBarText, { fontSize: quoteEnSize + 4, lineHeight: quoteEnSize + 11 }]} numberOfLines={2}>
+                {t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}
+              </Text>
+              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={[styles.headerCopyBtn, { paddingHorizontal: headerCopyPadH, paddingVertical: headerCopyPadV }]}>
+                <MaterialCommunityIcons name="content-copy" size={headerCopyIcon} color={DarkColors.gold} />
+                <Text style={[styles.headerCopyText, { fontSize: headerCopyTextSize }]}>UPI ID</Text>
+              </TouchableOpacity>
             </View>
+          ) : (
+            <View style={[styles.stickyHeader, { paddingHorizontal: headerPadH }]}>
+              <TouchableOpacity onPress={onClose} accessibilityLabel={t(TR.close.te, TR.close.en)} accessibilityRole="button" style={styles.headerIconBtn}>
+                <Ionicons name="close" size={headerBackIcon} color={DarkColors.gold} />
+              </TouchableOpacity>
+              <Text style={[styles.headerTitle, { fontSize: headerTitleSize }]} numberOfLines={1}>
+                {t(TR.donateHeaderTitle.te, TR.donateHeaderTitle.en)}
+              </Text>
+              <TouchableOpacity onPress={handleCopyUpi} accessibilityLabel={`${t(TR.copy.te, TR.copy.en)} UPI ID`} accessibilityRole="button" style={[styles.headerCopyBtn, { paddingHorizontal: headerCopyPadH, paddingVertical: headerCopyPadV }]}>
+                <MaterialCommunityIcons name="content-copy" size={headerCopyIcon} color={DarkColors.gold} />
+                <Text style={[styles.headerCopyText, { fontSize: headerCopyTextSize }]}>UPI ID</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Quote block — only rendered in standalone modal; in embedded
+                mode the quote already sits in the sticky utility bar above. */}
+            {!embedded && (
+              <View style={styles.quoteBlock}>
+                <Text style={[styles.modalQuoteEn, { fontSize: quoteEnSize + 2 }]}>
+                  {t(TR.donateQuoteSub.te, TR.donateQuoteSub.en)}
+                </Text>
+              </View>
+            )}
 
             <View style={[styles.modalBody, { padding: bodyPad }]}>
               {/* Message — full width */}
@@ -442,21 +468,22 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
                     key={item.amount}
                     style={[
                       styles.amountCard,
-                      { padding: amtCardPad },
                       selectedAmount === item.amount && styles.amountCardActive,
                     ]}
                     onPress={() => handleDonate(item.amount)}
                     activeOpacity={0.7}
                   >
                     <Text style={[styles.amountEmoji, { fontSize: amtEmojiSize }]}>{item.emoji}</Text>
-                    <Text style={[
-                      styles.amountValue,
-                      { fontSize: amtValueSize },
-                      selectedAmount === item.amount && styles.amountValueActive,
-                    ]}>
-                      {item.label}
-                    </Text>
-                    <Text style={[styles.amountTelugu, { fontSize: amtTeluguSize }]}>{item.telugu}</Text>
+                    <View style={styles.amountTextCol}>
+                      <Text style={[
+                        styles.amountValue,
+                        { fontSize: amtValueSize },
+                        selectedAmount === item.amount && styles.amountValueActive,
+                      ]}>
+                        {item.label}
+                      </Text>
+                      <Text style={[styles.amountTelugu, { fontSize: amtTeluguSize }]} numberOfLines={1}>{item.telugu}</Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -536,11 +563,6 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
               </View>
             </View>
           </ScrollView>
-
-          {/* Close button */}
-          <TouchableOpacity style={[styles.closeBtn, { paddingVertical: closePadV, marginHorizontal: closePadH }]} onPress={onClose}>
-            <Text style={[styles.closeBtnText, { fontSize: closeTextSize }]}>{t(TR.close.te, TR.close.en)}</Text>
-          </TouchableOpacity>
     </ModalOrView>
   );
 }
@@ -653,12 +675,55 @@ const styles = StyleSheet.create({
   modalBody: { padding: 20 },
   modalMessage: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 8 },
 
-  // Amount selection
-  amountLabel: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 12, marginTop: 8, letterSpacing: 0.3 },
-  amountGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10 },
+  // Sticky header — replaces inline back/copy row that scrolled away
+  stickyHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 8,
+    backgroundColor: DarkColors.bgCard,
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
+  },
+  // Embedded variant — single horizontal bar combining the dharma quote
+  // and the UPI-ID copy pill. Replaces the prior 2-row layout
+  // (separate sticky header + separate quote block). PageHeader carries the title.
+  quoteBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(212,160,23,0.06)',
+    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
+  },
+  quoteBarText: {
+    flex: 1,
+    color: 'rgba(255,255,255,0.92)',
+    fontWeight: '700',
+    fontStyle: 'italic',
+    // fontSize + lineHeight set inline (responsive via quoteEnSize)
+  },
+  headerIconBtn: { padding: 6 },
+  headerTitle: {
+    flex: 1, textAlign: 'center',
+    color: DarkColors.gold, fontWeight: '700', letterSpacing: 0.4,
+  },
+  headerCopyBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(212,160,23,0.15)', borderRadius: 12,
+  },
+  headerCopyText: { fontWeight: '700', color: DarkColors.gold },
+
+  // Quote — meaning only (Sanskrit transliteration removed for shorter header)
+  quoteBlock: {
+    paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8,
+    backgroundColor: 'rgba(212,160,23,0.06)',
+    alignItems: 'center',
+  },
+
+  // Amount selection — compact card (emoji + amount on one row, label below)
+  amountLabel: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, marginBottom: 10, marginTop: 4, letterSpacing: 0.3 },
+  amountGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 },
   amountCard: {
-    width: '30%', backgroundColor: DarkColors.bgElevated, borderRadius: 14, padding: 14,
-    alignItems: 'center', borderWidth: 1.5, borderColor: DarkColors.borderCard,
+    width: '48%', flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 10,
+    borderWidth: 1.5, borderColor: DarkColors.borderCard,
   },
   amountCardActive: { borderColor: DarkColors.gold, backgroundColor: 'rgba(212,160,23,0.12)' },
   // UPI app buttons
@@ -678,10 +743,11 @@ const styles = StyleSheet.create({
   appLogoText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   appBtnText: { fontSize: 13, fontWeight: '700', flex: 1 },
 
-  amountEmoji: { fontSize: 22, marginBottom: 6 },
-  amountValue: { fontSize: 18, fontWeight: '600', color: DarkColors.textPrimary },
+  amountEmoji: { fontSize: 22 },
+  amountTextCol: { flex: 1 },
+  amountValue: { fontSize: 18, fontWeight: '700', color: DarkColors.textPrimary },
   amountValueActive: { color: DarkColors.gold },
-  amountTelugu: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600', marginTop: 4, textAlign: 'center' },
+  amountTelugu: { fontSize: 12, color: DarkColors.textMuted, fontWeight: '600', marginTop: 2 },
 
   // UPI box
   upiBox: {

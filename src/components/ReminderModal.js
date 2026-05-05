@@ -209,25 +209,34 @@ export function ReminderModal({ visible, onClose, selectedDate, embedded = false
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={onClose}>
-          {/* Header */}
+          {/* Header.
+              When embedded inside ReminderScreen, PageHeader already shows
+              the back arrow and the "Set Reminder" title. Drop the back +
+              close × in embedded mode; keep the contextual mode label
+              ("Reminders" vs "New Reminder") and the plus/list toggle —
+              these are functional, not duplicative. */}
           <View style={[styles.header, { paddingVertical: headerPadV, paddingHorizontal: headerPadH, borderTopLeftRadius: headerTopRadius, borderTopRightRadius: headerTopRadius }]}>
-            <TouchableOpacity onPress={onClose} accessibilityLabel="వెనక్కి" accessibilityRole="button">
-              <Ionicons name="arrow-back" size={headerIconSize} color={DarkColors.gold} />
-            </TouchableOpacity>
+            {!embedded && (
+              <TouchableOpacity onPress={onClose} accessibilityLabel="వెనక్కి" accessibilityRole="button">
+                <Ionicons name="arrow-back" size={headerIconSize} color={DarkColors.gold} />
+              </TouchableOpacity>
+            )}
             <Text style={[styles.headerTitle, { fontSize: headerFontSize }]}>
               {showList ? 'రిమైండర్లు' : 'కొత్త రిమైండర్'}
             </Text>
             <View style={{ flexDirection: 'row', gap: headerGap, alignItems: 'center' }}>
-            <TouchableOpacity onPress={() => setShowList(!showList)} accessibilityLabel={showList ? "కొత్తది జోడించు" : "జాబితా చూడు"} accessibilityRole="button">
-              <MaterialCommunityIcons
-                name={showList ? 'plus-circle' : 'format-list-bulleted'}
-                size={headerIconSize}
-                color={DarkColors.gold}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onClose} accessibilityLabel="మూసివేయండి" accessibilityRole="button">
-              <Ionicons name="close" size={headerIconSize} color={DarkColors.gold} />
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowList(!showList)} accessibilityLabel={showList ? "కొత్తది జోడించు" : "జాబితా చూడు"} accessibilityRole="button">
+                <MaterialCommunityIcons
+                  name={showList ? 'plus-circle' : 'format-list-bulleted'}
+                  size={headerIconSize}
+                  color={DarkColors.gold}
+                />
+              </TouchableOpacity>
+              {!embedded && (
+                <TouchableOpacity onPress={onClose} accessibilityLabel="మూసివేయండి" accessibilityRole="button">
+                  <Ionicons name="close" size={headerIconSize} color={DarkColors.gold} />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 

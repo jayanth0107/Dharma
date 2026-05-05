@@ -10,7 +10,7 @@
 //   4. Client reads users/{uid}.premium on login / startup and reflects state
 
 const { onDocumentUpdated, onDocumentCreated } = require('firebase-functions/v2/firestore');
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { defineSecret } = require('firebase-functions/params');
 const { setGlobalOptions } = require('firebase-functions/v2');
 const { logger } = require('firebase-functions/v2');
@@ -240,6 +240,10 @@ exports.onClaimRedemption = onDocumentUpdated('claim_codes/{code}', async (event
 //   'textSearch'    — Google Places (New) text search (temples)
 // ────────────────────────────────────────────────────────────────
 
+// Secret Manager API was auto-enabled when we wrote the first secret via
+// `firebase functions:secrets:set`. All three keys now live in Secret
+// Manager (versions 1) — the function code reads them via .value() at
+// invocation time so no key value ever ships in the deployed bundle.
 const GEOAPIFY_KEY = defineSecret('GEOAPIFY_KEY');
 const LOCATIONIQ_KEY = defineSecret('LOCATIONIQ_KEY');
 const GOOGLE_PLACES_KEY = defineSecret('GOOGLE_PLACES_KEY');
@@ -440,3 +444,276 @@ exports.onPaymentCreated = onDocumentCreated('payments/{paymentId}', async (even
   }
   return null;
 });
+
+// ─────────────────────────────────────────────────────────────────
+// NSE quote proxy
+//
+// Fixes two real problems for the Market screen:
+//   • Web: NSE doesn't send CORS headers, so direct calls from the
+//     browser fail. This proxy adds the headers.
+//   • Mobile: NSE's CDN (Akamai) does TLS fingerprinting and rejects
+//     React Native's OkHttp handshake even with browser-shaped User-
+//     Agent + Referer. Calling NSE from Cloud Functions bypasses this
+//     because Google's outbound TLS profile is browser-class.
+//
+// One backend serves both clients. Output is normalized so the client
+// can render without caring whether the upstream was indices, ETF, or
+// quote-equity — every entry is { symbol, name, price, change,
+// changePercent, prevClose, open, high, low, volume, marketState }.
+//
+// Cache: 60 seconds in-memory per cold instance. NSE rate-limits
+// aggressive callers, so we never refresh more often than once a
+// minute regardless of caller pressure.
+// ─────────────────────────────────────────────────────────────────
+
+const NSE_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'application/json, text/plain, */*',
+  'Accept-Language': 'en-US,en;q=0.9',
+  'Referer': 'https://www.nseindia.com/',
+  'X-Requested-With': 'XMLHttpRequest',
+};
+
+let _nseCookie = '';
+let _nseCookieMintedAt = 0;
+const COOKIE_TTL = 10 * 60 * 1000; // 10 min
+
+let _nseCache = null;
+let _nseCacheAt = 0;
+const NSE_CACHE_TTL = 60 * 1000;
+
+// Per-call timeout helper. Without this the function waits 30s for
+// Akamai-blocked requests, hanging the client.
+function withTimeout(ms) {
+  const c = new AbortController();
+  const id = setTimeout(() => c.abort(), ms);
+  return { signal: c.signal, clear: () => clearTimeout(id) };
+}
+
+async function mintNseCookie() {
+  if (_nseCookie && Date.now() - _nseCookieMintedAt < COOKIE_TTL) return;
+  const t = withTimeout(5000);
+  try {
+    const resp = await fetch('https://www.nseindia.com/', {
+      headers: { ...NSE_HEADERS, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+      signal: t.signal,
+    });
+    const setCookieRaw = resp.headers.getSetCookie ? resp.headers.getSetCookie() : (resp.headers.raw?.()['set-cookie'] || []);
+    const cookieJar = setCookieRaw.map(c => c.split(';')[0]).filter(Boolean).join('; ');
+    if (cookieJar) {
+      _nseCookie = cookieJar;
+      _nseCookieMintedAt = Date.now();
+    }
+  } catch (err) {
+    logger.warn('NSE cookie mint failed', { err: err.message });
+  } finally { t.clear(); }
+}
+
+// Public CORS proxies — used as a fallback when Akamai blocks the
+// Cloud Function's outbound IP. The proxies fetch NSE from their own
+// servers, so NSE sees the proxy's IP/TLS profile (browser-class)
+// instead of ours. Slightly slower, but defeats the block when direct
+// fails. Try in order; first successful JSON parse wins.
+const CORS_PROXIES = [
+  (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  (u) => `https://api.codetabs.com/v1/proxy?quest=${u}`,
+];
+
+async function nseFetchDirect(url) {
+  await mintNseCookie();
+  const headers = _nseCookie ? { ...NSE_HEADERS, Cookie: _nseCookie } : NSE_HEADERS;
+  const t = withTimeout(6000);
+  try {
+    const resp = await fetch(url, { headers, signal: t.signal });
+    if (resp.ok) return await resp.json();
+    if (resp.status === 401 || resp.status === 403) {
+      _nseCookie = '';
+      await mintNseCookie();
+      const t2 = withTimeout(6000);
+      try {
+        const retry = await fetch(url, {
+          headers: _nseCookie ? { ...NSE_HEADERS, Cookie: _nseCookie } : NSE_HEADERS,
+          signal: t2.signal,
+        });
+        return retry.ok ? await retry.json() : null;
+      } finally { t2.clear(); }
+    }
+    return null;
+  } catch (err) {
+    return null;
+  } finally { t.clear(); }
+}
+
+async function nseFetchViaProxy(url) {
+  for (const wrap of CORS_PROXIES) {
+    const t = withTimeout(8000);
+    try {
+      const resp = await fetch(wrap(url), { signal: t.signal, headers: { 'Accept': 'application/json' } });
+      if (resp.ok) {
+        const txt = await resp.text();
+        try { return JSON.parse(txt); } catch { /* try next */ }
+      }
+    } catch { /* try next */ }
+    finally { t.clear(); }
+  }
+  return null;
+}
+
+async function nseFetchJson(url) {
+  // Race direct + proxy concurrently — Akamai's block on the Cloud
+  // Function IP is now persistent, so waiting for direct to fail first
+  // (6s) before starting the proxy cascade (another 8s+) made every
+  // call take 14s+ and timed out clients. Whichever path returns first
+  // wins; both run in parallel so the worst case is now ~8s instead of ~14s.
+  const direct = nseFetchDirect(url).then(d => (d ? { kind: 'direct', d } : null));
+  const proxy  = nseFetchViaProxy(url).then(d => (d ? { kind: 'proxy', d } : null));
+  // Promise.any-style race (treating null as "rejection" in spirit).
+  // We can't use Promise.any because null isn't a rejection, so we
+  // implement the same semantic with Promise.race + a manual loser-watcher.
+  const winner = await Promise.race([
+    direct,
+    proxy,
+    // Both null: settle the race so we don't hang.
+    Promise.all([direct, proxy]).then(([a, b]) => a || b || null),
+  ]);
+  if (winner?.d) return winner.d;
+  // If race settled to null but one of them might still resolve later
+  // (rare but possible if both timed out at slightly different points),
+  // give them a moment to finish.
+  const all = await Promise.all([direct, proxy]);
+  const survivor = all.find(x => x?.d);
+  if (survivor) return survivor.d;
+  logger.warn('NSE both direct + proxy failed', { url: url.slice(0, 80) });
+  return null;
+}
+
+function normalizeIndex(idx) {
+  return {
+    symbol: idx.indexSymbol,
+    name: idx.indexSymbol,
+    price: Number(idx.last) || 0,
+    change: Number(idx.variation) || 0,
+    changePercent: Number(idx.percentChange) || 0,
+    prevClose: Number(idx.previousClose) || 0,
+    open: Number(idx.open) || 0,
+    high: Number(idx.high) || 0,
+    low: Number(idx.low) || 0,
+    volume: 0,
+    marketState: 'REGULAR',
+  };
+}
+
+function normalizeEtf(e) {
+  return {
+    symbol: e.symbol,
+    name: e.symbol,
+    price: Number(e.ltP) || 0,
+    change: Number(e.chn) || 0,
+    changePercent: Number(e.per) || 0,
+    prevClose: Number(e.prevClose) || 0,
+    open: Number(e.open) || 0,
+    high: Number(e.high) || 0,
+    low: Number(e.low) || 0,
+    volume: Number(e.qty) || 0,
+    marketState: 'REGULAR',
+  };
+}
+
+function normalizeStock(s) {
+  const sym = s?.info?.symbol;
+  const p = s?.priceInfo;
+  if (!sym || !p) return null;
+  return {
+    symbol: sym,
+    name: s.info.companyName || sym,
+    price: Number(p.lastPrice) || 0,
+    change: Number(p.change) || 0,
+    changePercent: Number(p.pChange) || 0,
+    prevClose: Number(p.previousClose) || 0,
+    open: Number(p.open) || 0,
+    high: Number(p.intraDayHighLow?.max) || 0,
+    low: Number(p.intraDayHighLow?.min) || 0,
+    volume: 0,
+    marketState: 'REGULAR',
+  };
+}
+
+const STOCK_SYMBOLS = ['RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ITC'];
+
+exports.nseQuote = onRequest(
+  { cors: true, memory: '256MiB', timeoutSeconds: 30 },
+  async (req, res) => {
+    // Serve the cache if fresh.
+    const now = Date.now();
+    if (_nseCache && now - _nseCacheAt < NSE_CACHE_TTL) {
+      res.set('Cache-Control', 'public, max-age=60');
+      return res.json({ ...(_nseCache), cached: true });
+    }
+
+    const [indicesRaw, etfRaw, ...stockResps] = await Promise.all([
+      nseFetchJson('https://www.nseindia.com/api/allIndices'),
+      nseFetchJson('https://www.nseindia.com/api/etf'),
+      ...STOCK_SYMBOLS.map(s => nseFetchJson(`https://www.nseindia.com/api/quote-equity?symbol=${encodeURIComponent(s)}`)),
+    ]);
+
+    const map = {};
+    if (indicesRaw?.data?.length) {
+      indicesRaw.data.forEach(i => { if (i?.indexSymbol) map[i.indexSymbol] = normalizeIndex(i); });
+    }
+    if (etfRaw?.data?.length) {
+      etfRaw.data.forEach(e => { if (e?.symbol) map[e.symbol] = normalizeEtf(e); });
+    }
+    stockResps.forEach(s => {
+      const norm = normalizeStock(s);
+      if (norm) map[norm.symbol] = norm;
+    });
+
+    // If NSE returned nothing this time, fall back to the last
+    // known-good snapshot persisted in Firestore. Each Cloud Function
+    // instance has its own in-memory cache (`_nseCache`) which doesn't
+    // help when a fresh cold instance gets blocked by Akamai. Firestore
+    // is shared across all instances and across cold starts.
+    if (!Object.keys(map).length) {
+      try {
+        const doc = await db.collection('cache').doc('nseQuote').get();
+        const cached = doc.exists ? doc.data() : null;
+        if (cached?.map && Object.keys(cached.map).length) {
+          res.set('Cache-Control', 'no-store');
+          return res.json({
+            map: cached.map,
+            lastUpdated: cached.lastUpdated,
+            source: cached.source ? `${cached.source} (cached)` : 'NSE India (cached)',
+            isStale: true,
+            cachedAt: cached.cachedAt || null,
+          });
+        }
+      } catch (err) {
+        logger.warn('Firestore cache read failed', { err: err.message });
+      }
+      // Truly nothing — empty 200 so client falls through to its own
+      // sample fallback cleanly (503 made the browser network tab
+      // confusing and looked like a real outage to testers).
+      res.set('Cache-Control', 'no-store');
+      return res.json({ map: {}, source: 'NSE upstream blocked, no cache', isStale: true });
+    }
+
+    const payload = {
+      map,
+      lastUpdated: new Date().toISOString(),
+      source: 'NSE India (via Cloud Function)',
+    };
+    _nseCache = payload;
+    _nseCacheAt = now;
+
+    // Persist to Firestore so other instances + cold starts have a
+    // fallback when NSE blocks. Best-effort, don't block the response.
+    db.collection('cache').doc('nseQuote').set({
+      ...payload,
+      cachedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }).catch(err => logger.warn('Firestore cache write failed', { err: err.message }));
+
+    res.set('Cache-Control', 'public, max-age=60');
+    return res.json(payload);
+  }
+);

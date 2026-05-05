@@ -383,7 +383,7 @@ const s = StyleSheet.create({
     paddingVertical: 8, paddingHorizontal: 10, marginBottom: 8,
     borderWidth: 1, borderColor: 'rgba(76,175,80,0.25)',
   },
-  benefitText: { flex: 1, fontSize: 15, color: DarkColors.tulasiLight, fontWeight: '500' },
+  benefitText: { flex: 1, fontSize: 15, color: DarkColors.tulasiGreen, fontWeight: '500' },
   howText: { fontSize: 16, color: DarkColors.silverLight, lineHeight: 26, fontWeight: '400' },
 
   // Mantra

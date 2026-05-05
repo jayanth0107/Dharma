@@ -45,31 +45,33 @@ export function MarketScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Responsive sizes
+  // Responsive sizes — bumped throughout. Telugu text on the stale
+  // banner (~30 chars) was being rendered at 12 pt with weight 600,
+  // which on dark bg was barely legible. New floor: 15.
   const contentPad = usePick({ default: 16, lg: 24, xl: 32 });
-  const sectionTitleSize = usePick({ default: 16, lg: 18, xl: 20 });
-  const statusTextSize = usePick({ default: 14, lg: 15, xl: 16 });
-  const statusTimeSize = usePick({ default: 12, lg: 13, xl: 14 });
-  const statusPad = usePick({ default: 12, lg: 16, xl: 20 });
-  const loadingTextSize = usePick({ default: 14, lg: 15, xl: 16 });
-  const staleTextSize = usePick({ default: 12, lg: 13, xl: 14 });
-  const stalePad = usePick({ default: 10, lg: 14, xl: 18 });
-  const staleIconSize = usePick({ default: 16, lg: 18, xl: 20 });
-  const sourceTextSize = usePick({ default: 11, lg: 12, xl: 13 });
+  const sectionTitleSize = usePick({ default: 18, lg: 20, xl: 22 });
+  const statusTextSize = usePick({ default: 16, lg: 17, xl: 18 });
+  const statusTimeSize = usePick({ default: 14, lg: 15, xl: 16 });
+  const statusPad = usePick({ default: 14, lg: 16, xl: 20 });
+  const loadingTextSize = usePick({ default: 16, lg: 17, xl: 18 });
+  const staleTextSize = usePick({ default: 15, lg: 16, xl: 17 });
+  const stalePad = usePick({ default: 14, lg: 16, xl: 20 });
+  const staleIconSize = usePick({ default: 22, lg: 24, xl: 26 });
+  const sourceTextSize = usePick({ default: 13, lg: 14, xl: 15 });
   const goldLinkPad = usePick({ default: 14, lg: 18, xl: 22 });
-  const goldIconSize = usePick({ default: 20, lg: 24, xl: 28 });
-  const goldLinkTextSize = usePick({ default: 13, lg: 14, xl: 16 });
+  const goldIconSize = usePick({ default: 22, lg: 26, xl: 30 });
+  const goldLinkTextSize = usePick({ default: 15, lg: 16, xl: 18 });
 
   const cardSizes = {
     cardPad: usePick({ default: 14, lg: 18, xl: 22 }),
     cardRadius: usePick({ default: 14, lg: 16, xl: 18 }),
-    iconSize: usePick({ default: 20, lg: 24, xl: 28 }),
+    iconSize: usePick({ default: 22, lg: 26, xl: 30 }),
     iconMargin: usePick({ default: 10, lg: 12, xl: 14 }),
-    nameSize: usePick({ default: 15, lg: 16, xl: 18 }),
-    symbolSize: usePick({ default: 11, lg: 12, xl: 13 }),
-    priceSize: usePick({ default: 17, lg: 19, xl: 22 }),
-    changeIcon: usePick({ default: 12, lg: 14, xl: 16 }),
-    changeSize: usePick({ default: 12, lg: 13, xl: 14 }),
+    nameSize: usePick({ default: 17, lg: 18, xl: 20 }),
+    symbolSize: usePick({ default: 13, lg: 14, xl: 15 }),
+    priceSize: usePick({ default: 19, lg: 21, xl: 24 }),
+    changeIcon: usePick({ default: 14, lg: 16, xl: 18 }),
+    changeSize: usePick({ default: 14, lg: 15, xl: 16 }),
     changePadH: usePick({ default: 8, lg: 10, xl: 12 }),
     changePadV: usePick({ default: 3, lg: 4, xl: 5 }),
   };
@@ -173,18 +175,18 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   loadingBox: { alignItems: 'center', paddingVertical: 60 },
-  loadingText: { fontSize: 14, color: DarkColors.textMuted, marginTop: 16 },
-  // Status bar
+  loadingText: { fontWeight: '600', color: DarkColors.textMuted, marginTop: 16 },
+  // Status bar — slightly larger dot + bolder text for at-a-glance reading
   statusBar: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: DarkColors.bgCard, borderRadius: 12, padding: 12, marginBottom: 16,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  statusDot: { width: 8, height: 8, borderRadius: 4 },
-  statusText: { fontSize: 14, fontWeight: '700', color: DarkColors.textPrimary, flex: 1 },
-  statusTime: { fontSize: 12, color: DarkColors.textMuted },
+  statusDot: { width: 10, height: 10, borderRadius: 5 },
+  statusText: { fontWeight: '700', color: DarkColors.textPrimary, flex: 1 },
+  statusTime: { color: DarkColors.silverLight, fontWeight: '600' },
   // Section
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold, marginTop: 8, marginBottom: 10 },
+  sectionTitle: { fontWeight: '700', color: DarkColors.gold, marginTop: 10, marginBottom: 12, letterSpacing: 0.3 },
   // Price card
   priceCard: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -192,32 +194,35 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   priceLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  priceName: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
-  priceSymbol: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
+  priceName: { fontWeight: '700', color: DarkColors.textPrimary },
+  priceSymbol: { color: DarkColors.textMuted, marginTop: 2, fontWeight: '600' },
   priceRight: { alignItems: 'flex-end' },
-  priceValue: { fontSize: 17, fontWeight: '600', color: DarkColors.textPrimary },
+  priceValue: { fontWeight: '700', color: DarkColors.textPrimary },
   changeBadge: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, marginTop: 4 },
-  changeText: { fontSize: 12, fontWeight: '700' },
+  changeText: { fontWeight: '700' },
   // Footer
-  sourceText: { fontSize: 11, color: DarkColors.textMuted, textAlign: 'center', marginTop: 16 },
+  sourceText: { color: DarkColors.textMuted, textAlign: 'center', marginTop: 16, fontWeight: '600' },
   goldLink: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: DarkColors.bgCard, borderRadius: 12, padding: 14, marginTop: 12,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  goldLinkText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
+  goldLinkText: { fontWeight: '700', color: DarkColors.gold },
   unavailableBox: {
     alignItems: 'center', gap: 10, padding: 20, marginBottom: 16,
     backgroundColor: DarkColors.bgCard, borderRadius: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  unavailableTitle: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary, textAlign: 'center' },
-  unavailableSub: { fontSize: 12, color: DarkColors.textMuted, textAlign: 'center' },
+  unavailableTitle: { fontSize: 17, fontWeight: '700', color: DarkColors.textPrimary, textAlign: 'center' },
+  unavailableSub: { fontSize: 14, color: DarkColors.textMuted, textAlign: 'center' },
+  // Stale banner — bumped padding/border for prominence; text size set
+  // inline (staleTextSize → 15 sm / 16 md / 17 xl) so it isn't a
+  // 12 pt afterthought on small phones.
   staleBanner: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(212,160,23,0.08)',
-    borderWidth: 1, borderColor: 'rgba(212,160,23,0.25)',
-    borderRadius: 10, padding: 10, marginBottom: 12,
+    backgroundColor: 'rgba(212,160,23,0.10)',
+    borderWidth: 1.5, borderColor: 'rgba(212,160,23,0.35)',
+    borderRadius: 12, padding: 14, marginBottom: 14,
   },
-  staleText: { flex: 1, fontSize: 12, color: DarkColors.gold, fontWeight: '600' },
+  staleText: { flex: 1, color: DarkColors.gold, fontWeight: '700', lineHeight: 22 },
 });

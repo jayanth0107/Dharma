@@ -344,16 +344,31 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
-          {/* Minimal Header */}
-          <View style={s.header}>
-            {step === 'result' && (
-              <TouchableOpacity style={s.backX} onPress={() => setStep('form')}>
-                <Ionicons name="arrow-back" size={20} color={DarkColors.silver} />
-              </TouchableOpacity>
-            )}
-            <MaterialCommunityIcons name="zodiac-leo" size={24} color={DarkColors.gold} />
-            <Text style={s.title}>{t('వేద జాతకం', 'Vedic Horoscope')}</Text>
-          </View>
+          {/* Minimal Header.
+              When embedded inside HoroscopeScreen, PageHeader + TopTabBar
+              already display the section title — repeating "Vedic Horoscope"
+              here was the third copy. Drop the title row in embedded mode;
+              keep only a back-to-form pill on the result step. */}
+          {embedded ? (
+            step === 'result' ? (
+              <View style={s.headerEmbedded}>
+                <TouchableOpacity style={s.backToFormBtn} onPress={() => setStep('form')}>
+                  <Ionicons name="arrow-back" size={18} color={DarkColors.gold} />
+                  <Text style={s.backToFormText}>{t('తిరిగి ఫారమ్‌కి', 'Back to Form')}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null
+          ) : (
+            <View style={s.header}>
+              {step === 'result' && (
+                <TouchableOpacity style={s.backX} onPress={() => setStep('form')}>
+                  <Ionicons name="arrow-back" size={20} color={DarkColors.silver} />
+                </TouchableOpacity>
+              )}
+              <MaterialCommunityIcons name="zodiac-leo" size={24} color={DarkColors.gold} />
+              <Text style={s.title}>{t('వేద జాతకం', 'Vedic Horoscope')}</Text>
+            </View>
+          )}
 
           <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
           <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
@@ -1397,6 +1412,16 @@ const s = StyleSheet.create({
   },
   backX: { position: 'absolute', left: 16 },
   title: { fontSize: 18, fontWeight: '600', color: DarkColors.gold },
+  // Embedded mode — no duplicate title; just a back-to-form pill on result step.
+  headerEmbedded: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 4 },
+  backToFormBtn: {
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 12, paddingVertical: 6,
+    backgroundColor: 'rgba(212,160,23,0.12)',
+    borderWidth: 1, borderColor: 'rgba(212,160,23,0.30)',
+    borderRadius: 14,
+  },
+  backToFormText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
 
   // Locked / Premium gate
   lockedWrap: {

@@ -240,6 +240,8 @@ Already responsive: home tile grid, branded header (icons, flag, title font, sub
 - Donate (UPI donation with bilingual amount picker)
 
 **Utility tail**
+- Holidays (CalendarScreen, `tab: holidays`) — promoted from Festivals sub-tab chip to first-class tile in 2.4.4
+- Darshan (CalendarScreen, `tab: darshan`) — same, daily deity card
 - Reminder
 - More
 
@@ -248,7 +250,9 @@ Settings, InfoPage (WebView for Privacy/Terms/About/Rate/Feedback), Login, Locat
 
 ### CalendarScreen routes & sub-tabs
 - `Panchang` — no sub-tabs; scroll-wheel date picker (any date), date dominates layout
-- `Festivals` — year-chip strip (current ± 1 — bundled 2025/2026/2027) + sub-tabs: Festivals, Ekadashi, Chaturthi, Pournami, Amavasya, Pradosham, Holidays, Darshan (chips wrap into ≤3 rows on phones; observances computed dynamically for any year via `lunarObservances.js`)
+- `Festivals` — year-chip strip (current ± 1 — bundled 2025/2026/2027) + sub-tabs: Festivals, Ekadashi, Chaturthi, Pournami, Amavasya, Pradosham (Holidays + Darshan chips were removed in 2.4.4 and promoted to top-level tiles; chips wrap into ≤3 rows on phones; observances computed dynamically for any year via `lunarObservances.js`)
+- `Holidays` — no sub-tabs; renders the holidays list directly (route registered in `TabNavigator.js` pointing at `CalendarScreen`, seeded with `tab: 'holidays'`)
+- `Darshan` — no sub-tabs; renders the daily deity card directly (same routing pattern)
 - `GoodTimes` — no sub-tabs
 - `Kids` — no sub-tabs
 
@@ -298,6 +302,89 @@ eas submit --platform android                     # Submit to Play Store (intern
   Service accounts → Generate new private key. Carries Firestore +
   Storage + Auth scopes; does NOT carry Service Usage Admin.
 
+### Cloud Functions inventory (asia-south1)
+
+All functions live in `functions/index.js`, deploy together via
+`firebase deploy --only functions`, and run in the asia-south1
+(Mumbai) region to match Firestore locality.
+
+| Function | Type | Status | Purpose |
+|---|---|---|---|
+| `onPaymentVerified` | Firestore trigger | Active | Activates premium when admin sets `verified: true` on a `payments/*` doc |
+| `onClaimRedemption` | Firestore trigger | Active | Anonymous users redeem claim codes minted by `onPaymentVerified` |
+| `onPaymentCreated` | Firestore trigger | Active | Stamps new `payments/*` docs with `verified: false` + `receivedAt` |
+| `placesSearch` | onCall | Deployed | Birth-place autocomplete + search. Reads 3 secrets from Secret Manager (Geoapify, LocationIQ, Google Places). Currently dormant from the client (`PROXY_ENABLED = false` in `placesProxy.js`); flip the flag to start using it. |
+| `nseQuote` | onRequest | Deployed | NSE market data proxy. Open endpoint with `cors: true`. Used by `marketService.js`. URL: `https://asia-south1-dharmadaily-1fa89.cloudfunctions.net/nseQuote` |
+
+For schema-shape changes that touch existing function signatures,
+re-deploy with `firebase deploy --only functions:NAME` (don't deploy
+all unless intentional — Firestore triggers re-execute briefly during
+deploy).
+
+### Secret Manager keys
+
+Three keys live in Google Secret Manager (`secretmanager.googleapis.com`),
+all in project `dharmadaily-1fa89`. Set / rotate via:
+
+```bash
+echo "<value>" | firebase functions:secrets:set NAME --data-file=-
+```
+
+| Secret | Used by | Used for |
+|---|---|---|
+| `GEOAPIFY_KEY` | `placesSearch` Cloud Function | Birth-place autocomplete (primary), reverse geocode |
+| `LOCATIONIQ_KEY` | `placesSearch` Cloud Function | Place search fallback when Geoapify is empty |
+| `GOOGLE_PLACES_KEY` | `placesSearch` Cloud Function | Google Places New autocomplete + details |
+
+Same key VALUES are also embedded in `src/utils/geolocation.js` and
+`src/utils/placesProxy.js` for direct client-side calls — that's
+intentional. Until `PROXY_ENABLED = true` flips in `placesProxy.js`,
+the client uses the embedded keys; once flipped, the Secret Manager
+copies take over server-side. Both paths return identical results.
+
+When deploying functions for the first time on a fresh clone, the
+deploy will auto-enable `secretmanager.googleapis.com` during the
+first `firebase functions:secrets:set` call. If you ever see a
+"Secret Manager API has not been used" error, just run the above
+`secrets:set` once and the deploy unblocks.
+
+### Market data provider chain
+
+Replaces the earlier Yahoo Finance + Groww attempts (both removed —
+Yahoo's v8 endpoint became hostile to non-browser clients, Groww
+doesn't actually expose a public REST API).
+
+1. **`nseQuote` Cloud Function** (primary, web + mobile). Inside
+   the function:
+   1. **Direct NSE** (`nseindia.com/api/{allIndices,etf,quote-equity}`)
+      with cookie minting from the homepage. Akamai sometimes flags
+      Cloud Function egress IPs.
+   2. **CORS-proxy fallback** in parallel race (`corsproxy.io` →
+      `allorigins.win` → `codetabs.com`). The proxy fetches NSE from
+      its own IP, defeating Akamai's block on us. Direct + proxy run
+      concurrently; first success wins. Worst case ~8s, typical 0.2-1s.
+   3. **In-memory cache** (60s TTL, per Cloud Function instance).
+   4. **Firestore-persisted cache** (`/cache/nseQuote`). Survives cold
+      starts and instance recycles. Last-known-good even when every
+      live upstream fails.
+2. **NSE direct from client** (native-only fallback if the Cloud
+   Function itself is unreachable — corporate firewalls, etc.). Web
+   gets nothing here (CORS).
+3. **Kite Connect** via Cloud Function proxy — stubbed behind
+   `KITE_DEPLOYED = false` in `marketService.js`. Production-grade
+   real-time alternative when ready (~2 hours: OAuth callback +
+   daily Pub/Sub cron for token refresh).
+4. **Sample fallback** in client. Static approximate prices so the
+   UI is never blank.
+
+The Cloud Function always returns 200 — even on total upstream
+failure it returns `{ map: {}, isStale: true, source: '...' }` so
+the client falls through to sample without a confusing 503 in the
+network tab. Indices shown: NIFTY 50, NIFTY BANK. Sensex was
+dropped because every BSE index endpoint either returns HTML error
+pages or 302s into a UI route. Stocks: RELIANCE, TCS, HDFCBANK,
+INFY, ITC. ETFs: GOLDBEES, SILVERBEES, NIFTYBEES.
+
 ### Location-search provider chain (current)
 
 1. **Reverse geocoding** (lat/lng → city): Geoapify primary,
@@ -309,11 +396,16 @@ eas submit --platform android                     # Submit to Play Store (intern
    ipinfo.io fallback. ipapi.co + ip-api.com both 403 in 2026
    (free-tier crackdown). DO NOT add them back.
 3. **Place search** (typed birth-place lookup): Cloud Function
-   `placesSearch` (currently NOT deployed; `PROXY_ENABLED = false`
-   in `placesProxy.js` short-circuits the call to avoid CORS noise
-   + ~500 ms wasted latency per keystroke) → Google Places New
-   autocomplete → Geoapify search → LocationIQ search → static
-   city fallback (~150 cities, offline).
+   `placesSearch` is **deployed** (since 2026-05-05) with all
+   three secrets in Secret Manager, but `PROXY_ENABLED = false`
+   in `placesProxy.js` keeps the client on direct API calls for
+   now — direct keys work on every device, eliminate a single
+   point of failure for a critical UX, and skip the ~200 ms hop
+   per keystroke. Cascade: direct Google Places New → Geoapify
+   → LocationIQ → static city fallback (~150 cities, offline).
+   When App Check is set up and you want keys off the client,
+   flip the flag to switch traffic to the Cloud Function (which
+   has the same cascade server-side).
 4. **`AbortSignal.timeout`** is unreliable on some Hermes builds
    — every fetch uses `timeoutSignal()` from `src/utils/timeoutSignal.js`
    instead. New fetch code MUST use the polyfill.

@@ -101,9 +101,13 @@ export function HomeScreen({ navigation }) {
   const headerSlotGap = usePick({ default: 2, sm: 2, md: 4, lg: 6, xl: 8 });
   const headerTitleFont = usePick({ default: 22, sm: 22, md: 26, lg: 30, xl: 34 });
   const headerHyphenFont = usePick({ default: 18, sm: 18, md: 22, lg: 26, xl: 30 });
-  const headerSubtitleFont = usePick({ default: 13, sm: 13, md: 16, lg: 18, xl: 20 });
-  // Hide subtitle ("సనాతనం") on the smallest phones so the main title fits.
-  const showSubtitle = usePick({ default: false, md: true });
+  const headerSubtitleFont = usePick({ default: 12, sm: 12, md: 16, lg: 18, xl: 20 });
+  // Subtitle ("సనాతనం") shown on every phone — earlier `default: false` was
+  // hiding it on most Android devices (Pixel/Galaxy S sit at 384–412dp,
+  // below the md=414 breakpoint). The outer Text has adjustsFontSizeToFit
+  // + minimumFontScale=0.55 so the full title squeezes to one line on tiny
+  // phones rather than dropping the subtitle altogether.
+  const showSubtitle = true;
 
   // Responsive sizing for location pill + language toggle row.
   const pillPadH      = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
@@ -355,9 +359,15 @@ export function HomeScreen({ navigation }) {
 
         <SectionDivider icon="tools" te="ఉపయుక్త" en="Utility" />
 
-        {/* Utility tail — Market moved to Daily */}
+        {/* Utility tail. Holidays + Darshan promoted from Festivals
+            sub-tab chips to first-class tiles so they're reachable in
+            one tap. Both still render via CalendarScreen, seeded with
+            the right initial sub-tab via the route params (the same
+            pattern Panchang / Festivals / Kids use). */}
         <FeatureGrid>
-          <FeatureTile icon="bell-plus"  label={t('రిమైండర్', 'Reminder')}  onPress={() => navigation.navigate('Reminder')} />
+          <FeatureTile icon="flag-variant"  label={t('సెలవులు', 'Holidays')}    onPress={() => navigation.navigate('Holidays', { tab: 'holidays', _ts: Date.now() })} />
+          <FeatureTile icon="temple-hindu"  label={t('దర్శనం', 'Darshan')}      onPress={() => navigation.navigate('Darshan',  { tab: 'darshan',  _ts: Date.now() })} />
+          <FeatureTile icon="bell-plus"     label={t('రిమైండర్', 'Reminder')}    onPress={() => navigation.navigate('Reminder')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />
       </ScrollView>

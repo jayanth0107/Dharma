@@ -17,7 +17,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
 import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
-import { getTodayLucky } from '../utils/astroFeatures';
 
 // Detect rashi from birth date using accurate Moon sidereal longitude
 function detectRashiFromDOB(date) {
@@ -169,38 +168,6 @@ export function DailyRashiScreen() {
           )}
         </View>
 
-        {/* Today's Lucky — moved here from Vedic Wisdom. This is weekday-
-            bound (Sun day, Moon day, …) and applies to everyone, on top
-            of each rashi's own lucky number/colour shown below. */}
-        {(() => {
-          const lucky = getTodayLucky(new Date());
-          return (
-            <View style={s.todayLuckyCard}>
-              <View style={s.todayLuckyHeader}>
-                <MaterialCommunityIcons name="star-shooting" size={18} color={DarkColors.gold} />
-                <Text style={s.todayLuckyTitle}>{t('నేటి అదృష్టం', "Today's Lucky")}</Text>
-                <Text style={s.todayLuckyDeity}>{t(`${lucky.deity.te} గ్రహ దినం`, `${lucky.deity.en} day`)}</Text>
-              </View>
-              <View style={s.todayLuckyRow}>
-                <View style={s.todayLuckyItem}>
-                  <Text style={s.todayLuckyLabel}>{t('రంగు', 'Colour')}</Text>
-                  <Text style={s.todayLuckyValue} numberOfLines={1}>{t(lucky.color.te, lucky.color.en)}</Text>
-                </View>
-                <View style={s.todayLuckyDivider} />
-                <View style={s.todayLuckyItem}>
-                  <Text style={s.todayLuckyLabel}>{t('దిశ', 'Direction')}</Text>
-                  <Text style={s.todayLuckyValue} numberOfLines={1}>{t(lucky.direction.te, lucky.direction.en)}</Text>
-                </View>
-                <View style={s.todayLuckyDivider} />
-                <View style={s.todayLuckyItem}>
-                  <Text style={s.todayLuckyLabel}>{t('దేవత', 'Deity')}</Text>
-                  <Text style={s.todayLuckyValue} numberOfLines={1}>{t(lucky.deity.te, lucky.deity.en)}</Text>
-                </View>
-              </View>
-            </View>
-          );
-        })()}
-
         {/* Mode selector — Student / Senior */}
         {/* Senior mode active: gold bg → DARK text (#0A0A0A) for AAA contrast.
             Student mode active: blue bg → white text (already AA contrast).
@@ -212,22 +179,22 @@ export function DailyRashiScreen() {
             onPress={() => { if (studentMode) toggleStudentMode(); }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="account-tie" size={26} color={!studentMode ? '#0A0A0A' : DarkColors.gold} />
-            <View>
-              <Text style={[s.modeBtnText, !studentMode && s.modeBtnTextActiveSenior]}>{t('సీనియర్ మోడ్', 'Senior Mode')}</Text>
-              <Text style={[s.modeBtnAge, !studentMode && s.modeBtnAgeActiveSenior]}>{t('25+ సంవత్సరాలు', '25+ years')}</Text>
+            <View style={s.modeBtnTopRow}>
+              <MaterialCommunityIcons name="account-tie" size={20} color={!studentMode ? '#0A0A0A' : DarkColors.gold} />
+              <Text style={[s.modeBtnText, !studentMode && s.modeBtnTextActiveSenior]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('సీనియర్ మోడ్', 'Senior Mode')}</Text>
             </View>
+            <Text style={[s.modeBtnAge, !studentMode && s.modeBtnAgeActiveSenior]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{t('25+ సంవత్సరాలు', '25+ years')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[s.modeBtn, studentMode && s.modeBtnActiveStudent]}
             onPress={() => { if (!studentMode) toggleStudentMode(); }}
             activeOpacity={0.7}
           >
-            <MaterialCommunityIcons name="school" size={26} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
-            <View>
-              <Text style={[s.modeBtnText, { color: '#4A90D9' }, studentMode && s.modeBtnTextActiveStudent]}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
-              <Text style={[s.modeBtnAge, studentMode && s.modeBtnAgeActiveStudent]}>{t('15–25 సంవత్సరాలు', '15–25 years')}</Text>
+            <View style={s.modeBtnTopRow}>
+              <MaterialCommunityIcons name="school" size={20} color={studentMode ? '#FFFFFF' : '#4A90D9'} />
+              <Text style={[s.modeBtnText, { color: '#4A90D9' }, studentMode && s.modeBtnTextActiveStudent]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{t('విద్యార్థి మోడ్', 'Student Mode')}</Text>
             </View>
+            <Text style={[s.modeBtnAge, studentMode && s.modeBtnAgeActiveStudent]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{t('15–25 సంవత్సరాలు', '15–25 years')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -453,40 +420,6 @@ const s = StyleSheet.create({
     paddingVertical: 10, paddingHorizontal: 12,
   },
 
-  // Today's Lucky — universal weekday-bound card (deity / colour /
-  // direction). Placed above the per-rashi list so every user sees it.
-  todayLuckyCard: {
-    backgroundColor: DarkColors.bgCard,
-    borderRadius: 14, padding: 12, marginBottom: 14,
-    borderWidth: 1, borderColor: DarkColors.borderGold,
-  },
-  todayLuckyHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
-    paddingBottom: 10,
-    borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
-  },
-  todayLuckyTitle: {
-    fontSize: 17, fontWeight: '700', color: DarkColors.gold,
-    letterSpacing: 0.4,
-  },
-  todayLuckyDeity: {
-    flex: 1, fontSize: 13, fontWeight: '700', color: DarkColors.saffron,
-    textAlign: 'right', fontStyle: 'italic',
-  },
-  todayLuckyRow: { flexDirection: 'row', alignItems: 'center' },
-  todayLuckyItem: { flex: 1, alignItems: 'center' },
-  todayLuckyDivider: {
-    width: 1, height: 40, backgroundColor: DarkColors.borderCard,
-  },
-  todayLuckyLabel: {
-    fontSize: 12, fontWeight: '700', color: DarkColors.textMuted,
-    letterSpacing: 0.5, marginBottom: 4, textTransform: 'uppercase',
-  },
-  todayLuckyValue: {
-    fontSize: 16, fontWeight: '600', color: '#FFFFFF',
-    textAlign: 'center', paddingHorizontal: 4,
-  },
-
   // Zodiac image
   rashiImg: { width: 50, height: 50, resizeMode: 'contain' },
 
@@ -523,19 +456,26 @@ const s = StyleSheet.create({
   modeSelectorRow: {
     flexDirection: 'row', gap: 8, marginBottom: 8,
   },
+  // Vertical stack: row 1 (icon + mode title), row 2 (age subtitle).
+  // Each row is centered so the layout reads as a tile rather than a
+  // squished horizontal row on narrow phones.
   modeBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 14, paddingHorizontal: 14, borderRadius: 14,
+    flex: 1, flexDirection: 'column', alignItems: 'center',
+    paddingVertical: 10, paddingHorizontal: 8, borderRadius: 14,
     backgroundColor: 'rgba(212,160,23,0.04)', borderWidth: 1.5, borderColor: DarkColors.borderCard,
+  },
+  modeBtnTopRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    width: '100%', justifyContent: 'center',
   },
   modeBtnActive: { backgroundColor: DarkColors.gold, borderColor: DarkColors.gold },
   modeBtnActiveStudent: { backgroundColor: '#4A90D9', borderColor: '#4A90D9' },
-  modeBtnText: { fontSize: 17, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.2 },
+  modeBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.2, flexShrink: 1 },
   // Senior active: dark text on gold bg (AAA contrast 8.4:1)
   modeBtnTextActiveSenior: { color: '#0A0A0A' },
   // Student active: white text on blue bg (AA contrast)
   modeBtnTextActiveStudent: { color: '#FFFFFF' },
-  modeBtnAge: { fontSize: 14, fontWeight: '700', color: DarkColors.silverLight, marginTop: 3 },
+  modeBtnAge: { fontSize: 12, fontWeight: '700', color: DarkColors.silverLight, marginTop: 4, textAlign: 'center' },
   // Senior active: gold bg → was rgba(10,10,10,0.75) but the 75% alpha
   // muddied the "25+ సంవత్సరాలు" subtitle against the gold fill.
   // Solid #1F1500 (deep brown) reads cleanly: ~10.5:1 on #D4A017.

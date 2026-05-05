@@ -10,11 +10,20 @@ const RASHI_LORD_NAMES = {
   en: ['Mars', 'Venus', 'Mercury', 'Moon', 'Sun', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Saturn', 'Jupiter'],
 };
 
-// Day of the week from DOB string
+// Day of the week from DOB string.
+// MatchmakingScreen passes DOB as "DD-MM-YYYY" (Indian format). new Date()
+// in V8/Hermes parses that string as MM-DD-YYYY → wrong weekday. Parse
+// explicitly first, fall back to native parsing for ISO/other inputs.
 function getDayOfBirth(dobStr) {
   if (!dobStr) return '';
   try {
-    const d = new Date(dobStr);
+    let d;
+    const m = String(dobStr).match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (m) {
+      d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    } else {
+      d = new Date(dobStr);
+    }
     if (isNaN(d.getTime())) return '';
     return d.toLocaleDateString('en-IN', { weekday: 'long' });
   } catch {

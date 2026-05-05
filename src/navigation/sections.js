@@ -48,6 +48,11 @@ export const MAIN_SECTIONS = [
   { name: 'Donate',       icon: 'hand-heart',             te: 'దానం',              en: 'Donate' },
 
   // ── Utility tail ──
+  // Holidays + Darshan were sub-tab chips inside Festivals; promoted to
+  // top-level tiles so users can reach them in one tap. Both still render
+  // via CalendarScreen, seeded with the right initial sub-tab via params.
+  { name: 'Holidays',     icon: 'flag-variant',           te: 'సెలవు దినాలు',        en: 'Holidays', params: { tab: 'holidays' } },
+  { name: 'Darshan',      icon: 'temple-hindu',           te: 'దైనిక దర్శనం',         en: 'Daily Darshan', params: { tab: 'darshan' } },
   { name: 'Reminder',     icon: 'bell-plus',              te: 'రిమైండర్',           en: 'Reminder' },
   { name: 'More',         icon: 'dots-horizontal',        te: 'మరిన్ని',            en: 'More' },
 ];

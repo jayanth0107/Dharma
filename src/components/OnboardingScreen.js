@@ -15,6 +15,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DarkColors } from '../theme/colors';
@@ -70,42 +71,49 @@ export function OnboardingScreen({ onDone }) {
   // ── Screen 1: Language picker ──
   if (step === 1) {
     return (
-      <View style={s.screen}>
-        <LinearGradient colors={[DarkColors.bg, '#1A1008', DarkColors.bg]} style={s.content}>
-          {/* Brand */}
-          <View style={s.brandRow}>
-            <FlagWithPole size={flagSize} />
-            <Text style={[s.brand, { fontSize: titleSize }]}>ధర్మ</Text>
-          </View>
-
-          {/* Bilingual prompt — user hasn't picked yet, show both */}
-          <Text style={[s.langPrompt, { fontSize: subTitleSize + 2 }]}>మీ భాష ఎంచుకోండి</Text>
-          <Text style={[s.langPromptEn, { fontSize: subTitleSize - 1 }]}>Choose your language</Text>
-
-          {/* Two big buttons */}
-          <TouchableOpacity
-            style={[s.langBtn, { paddingVertical: langBtnPadV }]}
-            onPress={() => handlePickLang('te')}
-            activeOpacity={0.8}
+      <LinearGradient colors={[DarkColors.bg, '#1A1008', DarkColors.bg]} style={s.screen}>
+        <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
+          <ScrollView
+            contentContainerStyle={s.scrollCenter}
+            showsVerticalScrollIndicator={false}
           >
-            <Text style={[s.langText, { fontSize: langTextSize }]}>తెలుగు</Text>
-            <Text style={[s.langSub, { fontSize: langSubSize }]}>నేను తెలుగులో చదువుతాను</Text>
-          </TouchableOpacity>
+            <View style={s.card}>
+              {/* Brand */}
+              <View style={s.brandRow}>
+                <FlagWithPole size={flagSize} />
+                <Text style={[s.brand, { fontSize: titleSize }]}>ధర్మ</Text>
+              </View>
 
-          <TouchableOpacity
-            style={[s.langBtn, { paddingVertical: langBtnPadV }]}
-            onPress={() => handlePickLang('en')}
-            activeOpacity={0.8}
-          >
-            <Text style={[s.langText, { fontSize: langTextSize }]}>English</Text>
-            <Text style={[s.langSub, { fontSize: langSubSize }]}>I'll read in English</Text>
-          </TouchableOpacity>
+              {/* Bilingual prompt — user hasn't picked yet, show both */}
+              <Text style={[s.langPrompt, { fontSize: subTitleSize + 2 }]}>మీ భాష ఎంచుకోండి</Text>
+              <Text style={[s.langPromptEn, { fontSize: subTitleSize - 1 }]}>Choose your language</Text>
 
-          <Text style={[s.changeHint, { fontSize: hintSize }]}>
-            సెట్టింగ్స్‌లో ఎప్పుడైనా మార్చవచ్చు / Change anytime in Settings
-          </Text>
-        </LinearGradient>
-      </View>
+              {/* Two big buttons */}
+              <TouchableOpacity
+                style={[s.langBtn, { paddingVertical: langBtnPadV }]}
+                onPress={() => handlePickLang('te')}
+                activeOpacity={0.8}
+              >
+                <Text style={[s.langText, { fontSize: langTextSize }]}>తెలుగు</Text>
+                <Text style={[s.langSub, { fontSize: langSubSize }]}>నేను తెలుగులో చదువుతాను</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[s.langBtn, { paddingVertical: langBtnPadV }]}
+                onPress={() => handlePickLang('en')}
+                activeOpacity={0.8}
+              >
+                <Text style={[s.langText, { fontSize: langTextSize }]}>English</Text>
+                <Text style={[s.langSub, { fontSize: langSubSize }]}>I'll read in English</Text>
+              </TouchableOpacity>
+
+              <Text style={[s.changeHint, { fontSize: hintSize }]}>
+                సెట్టింగ్స్‌లో ఎప్పుడైనా మార్చవచ్చు / Change anytime in Settings
+              </Text>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
@@ -114,84 +122,104 @@ export function OnboardingScreen({ onDone }) {
   const t = (te, en) => (lang === 'te' ? te : en);
 
   return (
-    <View style={s.screen}>
-      <LinearGradient colors={[DarkColors.bg, '#1A1008', DarkColors.bg]} style={s.content}>
+    <LinearGradient colors={[DarkColors.bg, '#1A1008', DarkColors.bg]} style={s.screen}>
+      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <ScrollView
-          contentContainerStyle={s.scrollContent}
+          contentContainerStyle={s.scrollCenter}
           showsVerticalScrollIndicator={false}
         >
-          {/* Brand */}
-          <View style={s.brandRow}>
-            <FlagWithPole size={flagSize} />
-            <Text style={[s.brand, { fontSize: titleSize }]}>ధర్మ</Text>
-          </View>
+          <View style={s.card}>
+            {/* Brand */}
+            <View style={s.brandRow}>
+              <FlagWithPole size={flagSize} />
+              <Text style={[s.brand, { fontSize: titleSize }]}>ధర్మ</Text>
+            </View>
 
-          {/* Tagline — inviting, not defensive */}
-          <Text style={[s.welcomeTitle, { fontSize: subTitleSize + 4 }]}>
-            {t('మీ రోజువారీ ఆధ్యాత్మిక సహచరి',
-               'Sacred wisdom, every day')}
-          </Text>
-          <Text style={[s.welcomeSub, { fontSize: subTitleSize - 2 }]}>
-            {t('మూల గ్రంథాల ఆధారంగా కథలు · అందరికీ ఉచితం · విద్యార్థులకు అనువైనది',
-               'Stories from the original texts · Free for all · School-friendly')}
-          </Text>
-
-          {/* 2-column highlight grid */}
-          <View style={s.tilesGrid}>
-            {HIGHLIGHTS.map((h, i) => (
-              <View key={i} style={s.tile}>
-                <View style={[s.tileIconWrap, { borderColor: h.color }]}>
-                  <MaterialCommunityIcons name={h.icon} size={tileIconSize} color={h.color} />
-                </View>
-                <Text style={[s.tileLabel, { fontSize: tileFontSize }]} numberOfLines={2}>
-                  {t(h.te, h.en)}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Get Started CTA */}
-          <TouchableOpacity style={s.startBtn} onPress={onDone} activeOpacity={0.85}>
-            <MaterialCommunityIcons name="check-circle" size={22} color="#0A0A0A" />
-            <Text style={[s.startText, { fontSize: ctaTextSize }]}>
-              {t('ప్రారంభించండి', 'Get Started')}
+            {/* Tagline — inviting, not defensive */}
+            <Text style={[s.welcomeTitle, { fontSize: subTitleSize + 4 }]}>
+              {t('మీ రోజువారీ ఆధ్యాత్మిక సహచరి',
+                 'Sacred wisdom, every day')}
             </Text>
-          </TouchableOpacity>
+            <Text style={[s.welcomeSub, { fontSize: subTitleSize - 2 }]}>
+              {t('మూల గ్రంథాల ఆధారంగా కథలు · అందరికీ ఉచితం · విద్యార్థులకు అనువైనది',
+                 'Stories from the original texts · Free for all · School-friendly')}
+            </Text>
+
+            {/* 2-column highlight grid */}
+            <View style={s.tilesGrid}>
+              {HIGHLIGHTS.map((h, i) => (
+                <View key={i} style={s.tile}>
+                  <View style={[s.tileIconWrap, { borderColor: h.color }]}>
+                    <MaterialCommunityIcons name={h.icon} size={tileIconSize} color={h.color} />
+                  </View>
+                  <Text style={[s.tileLabel, { fontSize: tileFontSize }]} numberOfLines={2}>
+                    {t(h.te, h.en)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Get Started CTA */}
+            <TouchableOpacity style={s.startBtn} onPress={onDone} activeOpacity={0.85}>
+              <MaterialCommunityIcons name="check-circle" size={22} color="#0A0A0A" />
+              <Text style={[s.startText, { fontSize: ctaTextSize }]}>
+                {t('ప్రారంభించండి', 'Get Started')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
-      </LinearGradient>
-    </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const s = StyleSheet.create({
-  screen:  { flex: 1, backgroundColor: DarkColors.bg },
-  content: { flex: 1 },
-  scrollContent: {
-    flexGrow: 1, justifyContent: 'center',
-    paddingHorizontal: 24, paddingVertical: 32,
+  screen: { flex: 1, backgroundColor: DarkColors.bg },
+  safe:   { flex: 1 },
+  scrollCenter: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: 'rgba(15,10,4,0.6)',
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: DarkColors.borderGold,
+    paddingHorizontal: 22,
+    paddingVertical: 28,
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 16,
+    elevation: 8,
   },
 
   // Brand
   brandRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 14, marginBottom: 28,
+    gap: 14, marginBottom: 24,
   },
   brand: { color: DarkColors.gold, fontWeight: '700', letterSpacing: 4 },
 
   // Screen 1 — language picker
   langPrompt:    { color: DarkColors.gold, fontWeight: '700', textAlign: 'center', marginBottom: 4 },
-  langPromptEn:  { color: DarkColors.silver, fontWeight: '600', textAlign: 'center', marginBottom: 32 },
+  langPromptEn:  { color: DarkColors.silver, fontWeight: '600', textAlign: 'center', marginBottom: 28 },
   langBtn: {
     backgroundColor: DarkColors.bgCard, borderRadius: 18,
     borderWidth: 1.5, borderColor: DarkColors.borderGold,
-    paddingHorizontal: 24, marginHorizontal: 24, marginBottom: 14,
+    paddingHorizontal: 24, marginBottom: 14,
     alignItems: 'center',
   },
   langText: { color: DarkColors.gold, fontWeight: '700', letterSpacing: 0.5 },
   langSub:  { color: DarkColors.silver, fontWeight: '600', marginTop: 6 },
   changeHint: {
     color: DarkColors.textMuted, fontWeight: '500', textAlign: 'center',
-    marginTop: 28, marginHorizontal: 24, lineHeight: 20,
+    marginTop: 22, lineHeight: 20,
   },
 
   // Screen 2 — value summary
@@ -224,7 +252,6 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     backgroundColor: DarkColors.gold,
     paddingVertical: 16, paddingHorizontal: 32, borderRadius: 16,
-    marginHorizontal: 12,
   },
   startText: { color: '#0A0A0A', fontWeight: '700', letterSpacing: 0.4 },
 });

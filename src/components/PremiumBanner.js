@@ -383,18 +383,27 @@ export function PremiumModal({ visible, onClose, onActivated, embedded = false }
 
   return (
     <ModalOrView embedded={embedded} visible={visible} onClose={handleClose}>
-          {/* Sticky Header — stays visible while scrolling */}
+          {/* Sticky Header — stays visible while scrolling.
+              When embedded under PageHeader + TopTabBar, the "Dharma Premium"
+              title is the third duplicate. Drop the title text + close × in
+              embedded mode; keep crown + subtitle for visual identity, and
+              keep the back arrow when a plan is selected (it's the only way
+              back to the plan list). */}
           <LinearGradient colors={[DarkColors.bgElevated, '#1A1008']} style={[s.header, { paddingVertical: headerPadV }, selectedPlan && { paddingVertical: headerPadV * 0.7 }]}>
-            <TouchableOpacity style={[s.closeX, { width: closeXSize, height: closeXSize, borderRadius: closeXSize / 2 }]} onPress={handleClose}>
-              <Ionicons name="close" size={closeIconSize} color="rgba(255,255,255,0.7)" />
-            </TouchableOpacity>
+            {!embedded && (
+              <TouchableOpacity style={[s.closeX, { width: closeXSize, height: closeXSize, borderRadius: closeXSize / 2 }]} onPress={handleClose}>
+                <Ionicons name="close" size={closeIconSize} color="rgba(255,255,255,0.7)" />
+              </TouchableOpacity>
+            )}
             {selectedPlan && (
               <TouchableOpacity style={[s.backX, { width: closeXSize, height: closeXSize, borderRadius: closeXSize / 2 }]} onPress={handleBack}>
                 <Ionicons name="arrow-back" size={backIconSize} color="rgba(255,255,255,0.7)" />
               </TouchableOpacity>
             )}
             <MaterialCommunityIcons name="crown" size={selectedPlan ? crownSizeCompact : crownSize} color={DarkColors.gold} />
-            <Text style={[s.title, { fontSize: titleFont }, selectedPlan && { fontSize: titleFontCompact, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
+            {!embedded && (
+              <Text style={[s.title, { fontSize: titleFont }, selectedPlan && { fontSize: titleFontCompact, marginTop: 4 }]}>{t(TR.premiumTitleBanner.te, TR.premiumTitleBanner.en)}</Text>
+            )}
             {!selectedPlan ? (
               <>
                 <Text style={[s.subtitle, { fontSize: subtitleFont }]}>మీ ఆధ్యాత్మిక ప్రయాణాన్ని మెరుగుపరచండి</Text>

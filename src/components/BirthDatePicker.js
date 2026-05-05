@@ -16,6 +16,7 @@ import {
   View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView,
   Platform, KeyboardAvoidingView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
@@ -223,6 +224,15 @@ export function BirthDatePicker({
   yearStart,   // optional override (default: 1923)
   yearEnd,     // optional override (default: current year)
 }) {
+  // Bottom safe-area inset — accounts for Android gesture-nav bar
+  // and iOS home indicator. Without this, the Cancel/Select row
+  // overlapped the system home/back buttons on phones with
+  // gesture nav. Android often reports a tiny or zero bottom inset
+  // even when a gesture pill is present, so we floor at 28 to
+  // leave breathing room.
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, Platform.OS === 'ios' ? 24 : 28);
+
   // Outer scroll-view ref so we can force-snap to top on every open.
   // On Android, when WheelColumn's scrollTo() runs after mount to
   // position the wheel at the selected year (e.g., 1990 = 67 rows
@@ -348,7 +358,7 @@ export function BirthDatePicker({
     <Modal transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={ws.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
-        <View style={ws.container}>
+        <View style={[ws.container, { paddingBottom: bottomInset }]}>
           <ScrollView
             ref={outerScrollRef}
             showsVerticalScrollIndicator={false}
@@ -414,9 +424,6 @@ export function BirthDatePicker({
                   />
                 </View>
               </View>
-              <Text style={ws.scrollHint}>
-                {lang === 'te' ? '↓ క్రింద చక్రాలు స్క్రోల్ చేయండి' : '↓ Scroll the wheels below to change'}
-              </Text>
             </View>
 
             {/* ── Time display chips — HH : MM  AM/PM ── */}
@@ -465,6 +472,16 @@ export function BirthDatePicker({
                 </View>
               </View>
             )}
+
+            {/* ── Date divider (matches the Birth Time divider below) ── */}
+            <View style={ws.timeDivider}>
+              <View style={ws.timeDividerLine} />
+              <View style={ws.timeDividerBadge}>
+                <MaterialCommunityIcons name="calendar-outline" size={16} color={DarkColors.gold} />
+                <Text style={ws.timeDividerText}>{lang === 'te' ? 'జన్మ తేది' : 'Birth Date'}</Text>
+              </View>
+              <View style={ws.timeDividerLine} />
+            </View>
 
             {/* ── Date wheels ── */}
             <View style={ws.wheelsRow}>
@@ -549,6 +566,12 @@ export function BirthDatePicker({
               </>
             )}
 
+            {/* Scroll hint — sits below the wheels (was previously above the
+                time picker, where it implied the date wheels only). */}
+            <Text style={ws.scrollHint}>
+              {lang === 'te' ? '↑ చక్రాలను స్క్రోల్ చేసి విలువలు మార్చండి' : '↑ Scroll the wheels above to change values'}
+            </Text>
+
             <View style={ws.actions}>
               <TouchableOpacity style={ws.cancelBtn} onPress={onClose}>
                 <Text style={ws.cancelText}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
@@ -573,7 +596,8 @@ const ws = StyleSheet.create({
   container: {
     backgroundColor: DarkColors.bgCard,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
+    // paddingBottom set inline from useSafeAreaInsets so it adapts to
+    // Android gesture-nav / iOS home-indicator on a per-device basis.
     maxHeight: '92%',
   },
   scrollContent: { paddingBottom: 8 },
@@ -598,7 +622,7 @@ const ws = StyleSheet.create({
 
   // Field blocks (date / time). Reduced horizontal padding 20 → 14
   // so chips claim more horizontal real estate; labels grow into it.
-  fieldsBlock: { paddingHorizontal: 14, paddingTop: 12 },
+  fieldsBlock: { paddingHorizontal: 14, paddingTop: 8 },
   // Block heading (DATE / TIME) gets a hairline divider below with
   // breathing room — visually separates the heading from the chip
   // row beneath it. paddingBottom holds the divider away from the
@@ -606,7 +630,7 @@ const ws = StyleSheet.create({
   blockLabel: {
     fontSize: 13, fontWeight: '700', color: DarkColors.gold,
     textTransform: 'uppercase', letterSpacing: 0.8,
-    paddingBottom: 8, marginBottom: 10,
+    paddingBottom: 5, marginBottom: 6,
     borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard,
   },
   chipRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -614,7 +638,7 @@ const ws = StyleSheet.create({
   chip: {
     flex: 1,
     backgroundColor: DarkColors.bgElevated,
-    borderRadius: 10, paddingVertical: 9, paddingHorizontal: 8,
+    borderRadius: 10, paddingVertical: 7, paddingHorizontal: 8,
     borderWidth: 1.5, borderColor: DarkColors.borderCard,
     alignItems: 'center',
   },
@@ -624,7 +648,7 @@ const ws = StyleSheet.create({
   },
   chipValue: {
     fontSize: 22, fontWeight: '700', color: '#FFFFFF',
-    letterSpacing: 1, lineHeight: 26,
+    letterSpacing: 1, lineHeight: 24,
   },
   chipValueFocus: { color: DarkColors.goldLight },
   // Chip sublabel — was 10/silver (almost unreadable). Now 13/silverLight
@@ -632,14 +656,14 @@ const ws = StyleSheet.create({
   // labels, not afterthoughts.
   chipSub: {
     fontSize: 13, fontWeight: '700', color: DarkColors.silverLight,
-    marginTop: 4, letterSpacing: 0.4, textTransform: 'uppercase',
+    marginTop: 2, letterSpacing: 0.4, textTransform: 'uppercase',
   },
   // Scroll hint — was 12pt textMuted (textMuted ~ 4.4:1 on dark bg,
   // borderline). Now 14pt silverLight (~6:1, comfortably readable).
   // No italic — italic Telugu glyphs are hard on the eye.
   scrollHint: {
     fontSize: 14, color: DarkColors.silverLight, fontWeight: '600',
-    textAlign: 'center', marginTop: 10, lineHeight: 20,
+    textAlign: 'center', marginTop: 6, lineHeight: 18,
   },
 
   sepText: {
@@ -666,15 +690,16 @@ const ws = StyleSheet.create({
   amPmText: { fontSize: 15, fontWeight: '700', color: DarkColors.silverLight, letterSpacing: 0.5 },
   amPmTextActive: { color: '#0A0A0A' },
 
-  // wheelsRow gets explicit top spacing + a hairline rule above so
-  // the visual transition from chip-row → wheel-labels is clear.
-  // Without this, "Day / Month / Year" labels hugged the chips below
-  // and read as if they were chip captions, not wheel headings.
+  // wheelsRow — slim vertical spacing, no border. The timeDivider badge
+  // (TIME row) and the blockLabel underline (DATE chip block above)
+  // already separate the chip area from the wheels — a borderTop here
+  // was rendering a SECOND hairline directly below the "జన్మ సమయం"
+  // badge, which read as a redundant divider. Padding/margin trimmed
+  // so the picker fits more comfortably on small phones.
   wheelsRow: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start',
-    paddingTop: 14, paddingBottom: 6, gap: 8,
-    marginHorizontal: 14, marginTop: 12,
-    borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
+    paddingTop: 6, paddingBottom: 4, gap: 8,
+    marginHorizontal: 14, marginTop: 4,
   },
   colonText: {
     fontSize: 28, fontWeight: '700', color: DarkColors.gold,
@@ -722,7 +747,7 @@ const ws = StyleSheet.create({
   itemTextDim: { color: DarkColors.silver, fontSize: 17 },
   actions: {
     flexDirection: 'row', gap: 12,
-    paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8,
+    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16,
   },
   cancelBtn: {
     flex: 1, alignItems: 'center', justifyContent: 'center',

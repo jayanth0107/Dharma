@@ -80,6 +80,10 @@ const SECTION_COMPONENTS = {
   PujaGuide:    withErrorBoundary(PujaGuideScreen, 'PujaGuide'),
   Family:       withErrorBoundary(FamilyScreen, 'Family'),
   Kids:         withErrorBoundary(CalendarScreen, 'Kids'),
+  // Promoted from Festivals sub-tab chips to top-level tiles. Both still
+  // share CalendarScreen — params seed the initial sub-tab.
+  Holidays:     withErrorBoundary(CalendarScreen, 'Holidays'),
+  Darshan:      withErrorBoundary(CalendarScreen, 'Darshan'),
   TempleNearby: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'),
   Donate:       DonateScreen,
   More:         withErrorBoundary(MoreScreen, 'More'),

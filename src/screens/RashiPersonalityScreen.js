@@ -78,10 +78,10 @@ export function RashiPersonalityScreen() {
   const { isSpeaking, toggle: toggleSpeak, speakerIcon } = useSpeaker();
 
   const imgSize = usePick({ default: 72, md: 80, xl: 96 });
-  const titleFs = usePick({ default: 22, md: 24, xl: 28 });
-  const sectionFs = usePick({ default: 15, md: 16, xl: 17 });
-  const bodyFs = usePick({ default: 14, md: 15, xl: 16 });
-  const pillFs = usePick({ default: 13, md: 14, xl: 15 });
+  const titleFs = usePick({ default: 24, md: 26, xl: 30 });
+  const sectionFs = usePick({ default: 17, md: 18, xl: 19 });
+  const bodyFs = usePick({ default: 16, md: 17, xl: 18 });
+  const pillFs = usePick({ default: 14, md: 15, xl: 16 });
   const gridImgSize = usePick({ default: 44, md: 48, xl: 56 });
 
   // Load saved rashi on mount
@@ -334,10 +334,10 @@ export function RashiPersonalityScreen() {
       {/* Daily Affirmation — gold-tinted highlight */}
       {p.dailyAffirmation && (
         <View style={s.affirmationBox}>
-          <MaterialCommunityIcons name="weather-sunset-up" size={18} color={DarkColors.gold} />
+          <MaterialCommunityIcons name="weather-sunset-up" size={22} color={DarkColors.gold} />
           <View style={{ flex: 1 }}>
             <Text style={s.affirmationLabel}>{t('దైనందిన ధ్యానవాక్యం', 'Daily Affirmation')}</Text>
-            <Text style={[s.affirmationText, { fontSize: bodyFs }]}>
+            <Text style={[s.affirmationText, { fontSize: bodyFs + 2, lineHeight: bodyFs + 12 }]}>
               {t(p.dailyAffirmation.te, p.dailyAffirmation.en)}
             </Text>
           </View>
@@ -346,20 +346,20 @@ export function RashiPersonalityScreen() {
 
       {/* Youth Tip — highlighted green */}
       <View style={s.youthBox}>
-        <MaterialCommunityIcons name="lightbulb-on" size={16} color={DarkColors.tulasiGreen} />
+        <MaterialCommunityIcons name="lightbulb-on" size={22} color={DarkColors.tulasiGreen} />
         <View style={{ flex: 1 }}>
           <Text style={s.youthLabel}>{t('యువతకు సలహా', 'Youth Tip')}</Text>
-          <Text style={[s.youthText, { fontSize: bodyFs }]}>{t(p.youthTip.te, p.youthTip.en)}</Text>
+          <Text style={[s.youthText, { fontSize: bodyFs + 2, lineHeight: bodyFs + 12 }]}>{t(p.youthTip.te, p.youthTip.en)}</Text>
         </View>
       </View>
 
       {/* Shadow Work — purple-tinted, the inner challenge to face */}
       {p.shadowWork && (
         <View style={s.shadowBox}>
-          <MaterialCommunityIcons name="moon-waning-crescent" size={16} color="#9B6FCF" />
+          <MaterialCommunityIcons name="moon-waning-crescent" size={22} color="#9B6FCF" />
           <View style={{ flex: 1 }}>
             <Text style={s.shadowLabel}>{t('అంతరంగ సాధన', 'Shadow Work')}</Text>
-            <Text style={[s.shadowText, { fontSize: bodyFs }]}>{t(p.shadowWork.te, p.shadowWork.en)}</Text>
+            <Text style={[s.shadowText, { fontSize: bodyFs + 2, lineHeight: bodyFs + 12 }]}>{t(p.shadowWork.te, p.shadowWork.en)}</Text>
           </View>
         </View>
       )}
@@ -499,22 +499,22 @@ const s = StyleSheet.create({
   content: { padding: 16 },
 
   sectionHeader: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
-  headerSub: { fontSize: 13, color: DarkColors.silver, textAlign: 'center', lineHeight: 20 },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
+  headerSub: { fontSize: 15, color: DarkColors.silver, textAlign: 'center', lineHeight: 22 },
 
   // DOB prompt card
   dobCard: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 24, marginBottom: 14,
     borderWidth: 1.5, borderColor: DarkColors.borderGold, alignItems: 'center', gap: 12,
   },
-  dobTitle: { fontSize: 18, fontWeight: '600', color: '#FFFFFF', textAlign: 'center' },
-  dobSub: { fontSize: 14, fontWeight: '500', color: DarkColors.silver, textAlign: 'center', lineHeight: 22 },
+  dobTitle: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
+  dobSub: { fontSize: 15, fontWeight: '500', color: DarkColors.silver, textAlign: 'center', lineHeight: 23 },
   dobBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: DarkColors.gold, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
     marginTop: 4,
   },
-  dobBtnText: { fontSize: 15, fontWeight: '600', color: '#0A0A0A' },
+  dobBtnText: { fontSize: 16, fontWeight: '700', color: '#0A0A0A' },
 
   // Profile card
   profileCard: {
@@ -524,8 +524,8 @@ const s = StyleSheet.create({
   profileTop: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 18 },
   rashiImg: { borderRadius: 12 },
   profileMeta: { flex: 1, gap: 4 },
-  rashiName: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
-  vedicType: { fontSize: 14, fontWeight: '700', color: DarkColors.saffron },
+  rashiName: { fontSize: 24, fontWeight: '700', color: '#FFFFFF' },
+  vedicType: { fontSize: 15, fontWeight: '700', color: DarkColors.saffron },
   badgeRow: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
   elementBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -535,7 +535,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(212,160,23,0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
   },
-  badgeText: { fontSize: 12, fontWeight: '700', color: DarkColors.silver },
+  badgeText: { fontSize: 13, fontWeight: '700', color: DarkColors.silver },
 
   speakerBtn: {
     width: 36, height: 36, borderRadius: 18,
@@ -554,8 +554,8 @@ const s = StyleSheet.create({
     borderBottomColor: 'rgba(212,160,23,0.18)',
   },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
-  bodyText: { fontSize: 16, fontWeight: '400', color: DarkColors.silverLight, lineHeight: 26 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: DarkColors.gold },
+  bodyText: { fontSize: 17, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 28 },
 
   // Trait pills
   pillsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -563,7 +563,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  pillText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
+  pillText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 
   // Famous people
   famousList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -571,7 +571,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(192,192,192,0.08)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  famousText: { fontSize: 13, fontWeight: '600', color: DarkColors.silver },
+  famousText: { fontSize: 15, fontWeight: '600', color: DarkColors.silver },
 
   // Mantra
   mantraBox: {
@@ -579,7 +579,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 12, padding: 14, marginBottom: 14,
     borderWidth: 1, borderColor: 'rgba(232,117,26,0.15)',
   },
-  mantraText: { flex: 1, fontSize: 16, fontWeight: '700', color: DarkColors.saffronLight, fontStyle: 'italic' },
+  mantraText: { flex: 1, fontSize: 18, fontWeight: '700', color: DarkColors.saffronLight, fontStyle: 'italic', lineHeight: 26 },
 
   // Life Mission — gold-tinted highlight at the top of the profile
   missionBox: {
@@ -588,10 +588,10 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   missionLabel: {
-    fontSize: 11, fontWeight: '600', color: DarkColors.gold,
-    letterSpacing: 0.5, marginBottom: 2, textTransform: 'uppercase',
+    fontSize: 12, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.5, marginBottom: 4, textTransform: 'uppercase',
   },
-  missionText: { fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 22 },
+  missionText: { fontSize: 16, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 24 },
 
   // Vedic Profile compact grid — bumped sizes for readability
   vedicGrid: {
@@ -606,13 +606,12 @@ const s = StyleSheet.create({
   },
   profileCellFull: { width: '100%' },
   profileCellLabel: {
-    fontSize: 12, fontWeight: '600', color: DarkColors.textMuted,
+    fontSize: 13, fontWeight: '700', color: DarkColors.textMuted,
     letterSpacing: 0.4, marginBottom: 4, textTransform: 'uppercase',
   },
   profileCellValue: {
-    // fontSize set inline by caller (was 14, now bodyFs+2 ≈ 16-17).
-    // Color WHITE (was, kept) for max readability against gold-tinted bg.
-    fontWeight: '500', color: '#FFFFFF', lineHeight: 22,
+    // fontSize set inline by caller (now bodyFs ≈ 16-18).
+    fontWeight: '600', color: '#FFFFFF', lineHeight: 24,
   },
 
   // Daily Affirmation — gold-tinted, sunrise icon
@@ -622,12 +621,13 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(212,160,23,0.20)',
   },
   affirmationLabel: {
-    fontSize: 11, fontWeight: '600', color: DarkColors.gold,
-    letterSpacing: 0.5, marginBottom: 2, textTransform: 'uppercase',
+    fontSize: 13, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase',
   },
   affirmationText: {
-    fontSize: 15, fontWeight: '500', color: DarkColors.goldLight,
-    lineHeight: 22, fontStyle: 'italic',
+    // fontSize + lineHeight set inline (bodyFs + 2) — slightly larger
+    // than body text so highlight boxes draw the eye.
+    fontWeight: '600', color: DarkColors.goldLight, fontStyle: 'italic',
   },
 
   // Youth tip — green highlight
@@ -636,8 +636,9 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(76,175,80,0.06)', borderRadius: 12, padding: 14, marginBottom: 14,
     borderWidth: 1, borderColor: 'rgba(76,175,80,0.2)',
   },
-  youthLabel: { fontSize: 11, fontWeight: '600', color: DarkColors.tulasiGreen, letterSpacing: 0.5, marginBottom: 2, textTransform: 'uppercase' },
-  youthText: { fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 22 },
+  youthLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.tulasiGreen, letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase' },
+  // fontSize + lineHeight set inline (bodyFs + 2)
+  youthText: { fontWeight: '500', color: DarkColors.silverLight },
 
   // Shadow Work — purple-tinted, moon-crescent icon
   shadowBox: {
@@ -646,10 +647,11 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(155,111,207,0.2)',
   },
   shadowLabel: {
-    fontSize: 11, fontWeight: '600', color: '#B98AE0',
-    letterSpacing: 0.5, marginBottom: 2, textTransform: 'uppercase',
+    fontSize: 13, fontWeight: '700', color: '#B98AE0',
+    letterSpacing: 0.5, marginBottom: 6, textTransform: 'uppercase',
   },
-  shadowText: { fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 22 },
+  // fontSize + lineHeight set inline (bodyFs + 2)
+  shadowText: { fontWeight: '500', color: DarkColors.silverLight },
 
   // Birth-date strip — sits at the top of the section. Shows the date
   // currently driving this profile, with a Change pill on the right.
@@ -662,8 +664,8 @@ const s = StyleSheet.create({
     marginBottom: 14,
   },
   dobStripInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dobStripLabel: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, letterSpacing: 0.5 },
-  dobStripValue: { fontSize: 16, fontWeight: '700', color: DarkColors.silverLight, marginTop: 2 },
+  dobStripLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.textMuted, letterSpacing: 0.5 },
+  dobStripValue: { fontSize: 17, fontWeight: '700', color: DarkColors.silverLight, marginTop: 2 },
 
   // Change DOB pill — visible button instead of small text link
   changeBtn: {
@@ -672,12 +674,12 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.12)',
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  changeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  changeBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
   backMyBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     paddingVertical: 10, marginBottom: 8,
   },
-  backMyText: { fontSize: 14, fontWeight: '700', color: DarkColors.tulasiGreen },
+  backMyText: { fontSize: 15, fontWeight: '700', color: DarkColors.tulasiGreen },
 
   // Browse all button
   browseBtn: {
@@ -685,7 +687,7 @@ const s = StyleSheet.create({
     paddingVertical: 12, borderRadius: 14, marginVertical: 8,
     backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  browseBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  browseBtnText: { fontSize: 15, fontWeight: '700', color: DarkColors.gold },
 
   // All 12 grid
   gridWrap: {
@@ -699,7 +701,7 @@ const s = StyleSheet.create({
   },
   gridItemActive: { borderColor: DarkColors.gold, borderWidth: 1.5 },
   gridImg: { borderRadius: 8 },
-  gridName: { fontSize: 13, fontWeight: '600', color: DarkColors.silver, textAlign: 'center' },
+  gridName: { fontSize: 14, fontWeight: '700', color: DarkColors.silver, textAlign: 'center' },
   gridNameActive: { color: DarkColors.gold },
-  gridType: { fontSize: 11, fontWeight: '600', color: DarkColors.textMuted, textAlign: 'center' },
+  gridType: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, textAlign: 'center' },
 });
