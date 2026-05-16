@@ -4,7 +4,7 @@
 
 A comprehensive **React Native (Expo)** app delivering daily **sacred stories** (Ramayana, Mahabharata, Gita), **Neethi Sukta wisdom**, **mantras & stotras**, **meditation**, **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, daily Rashi predictions, Sanskrit word of the day, Dharma debate / quiz, Indian market data, live gold/silver prices, and nearby temple finder — built for Telugu-speaking Hindu communities worldwide.
 
-> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.3 (versionCode 11) &nbsp;|&nbsp; **Expo SDK:** 54
+> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.5 (versionCode 13) &nbsp;|&nbsp; **Expo SDK:** 54
 >
 > **Note**: For developers using Claude Code or similar AI assistants — `.claudeignore` lists generated artefacts, secrets, and large binaries to skip during indexing. `CLAUDE.md` carries persistent project context including operational tooling, location-search provider chain, and design-intent notes for the BirthDatePicker.
 
@@ -41,7 +41,7 @@ A comprehensive **React Native (Expo)** app delivering daily **sacred stories** 
 - **Ekadashi & observances** — Ekadashi · Sankashti Chaturthi · Pournami · Amavasya · Pradosham — computed dynamically for any year via lunar-observance engine
 - **Daily Rashi** — per-sign predictions in **Senior** (career/finance/health/relationships) and **Student** (studies/exams/friendships) modes; bilingual; "Today's Lucky" weekday-bound colour/direction/deity
 - **Live gold & silver prices** — 3-API cascade with India premium, alert subscriptions, 2h cache
-- **Indian market** — NSE/BSE indices + ETFs (Yahoo Finance, mobile only)
+- **Stock Market** — NSE indices, popular stocks, ETFs via dedicated `nseQuote` Cloud Function (Akamai-resilient, last-known-good cached in Firestore)
 
 ### Ithihaasa (sacred history)
 
@@ -252,7 +252,7 @@ Old v1 navigation (`FloatingMenu`, `StickyNavTabs`, `BottomTabBar`, `ScreenHeade
 | Sunrise/Sunset | `astronomy-engine` + lat/lng/altitude |
 | Rahu Kalam | 8-period weekday split |
 | Gold/Silver prices | 3-API cascade + 2h cache |
-| Market indices | Yahoo Finance v8 chart endpoint (native only) |
+| Market indices | NSE direct via `nseQuote` Cloud Function (web + mobile) with parallel CORS-proxy race + Firestore last-known-good cache |
 
 ### Static (2026 scope)
 
@@ -302,9 +302,9 @@ Security enforced by `firestore.rules`: `payments` is create-only, all else bloc
 
 Production ad IDs are wired. Ads shown to free users only; hidden for Premium.
 
-### Market data on web
+### Stock Market data
 
-`src/utils/marketService.js` short-circuits on web (Yahoo Finance has no CORS; free proxies are unreliable). `MarketScreen.js` renders a friendly "Available in mobile app" fallback.
+`src/utils/marketService.js` proxies through the `nseQuote` Cloud Function (asia-south1) for both web and mobile. NSE direct + 3 CORS proxies run in a parallel race; results are cached in-memory (60 s) and persisted to Firestore (`/cache/nseQuote`) as a last-known-good fallback. The function always returns 200 — even on total upstream failure it returns `{ map: {}, isStale: true }` so the UI never sees a confusing 503. NIFTY 50 · NIFTY BANK · GOLDBEES · SILVERBEES · NIFTYBEES · RELIANCE · TCS · HDFCBANK · INFY · ITC.
 
 ### Location default
 
@@ -436,8 +436,8 @@ Clear AsyncStorage (native) or `localStorage` (web) to wipe reminders, premium, 
 | App name | Dharma: Telugu Astro, Calendar & Gold |
 | Bundle ID (iOS) | `com.dharmadaily.app` |
 | Package (Android) | `com.dharmadaily.app` |
-| Version | 2.4.3 |
-| versionCode (Android) | 11 |
+| Version | 2.4.5 |
+| versionCode (Android) | 13 |
 | Expo SDK | 54 |
 | React Native | 0.81.5 |
 | Min Android | API 24 (Android 7.0) |

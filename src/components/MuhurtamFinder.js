@@ -226,15 +226,15 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
       <div style="page-break-inside: avoid; border: 1px solid #e0d5c5; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: ${idx % 2 === 0 ? '#FFFDF8' : '#FFF8F0'};">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div>
-            <div style="font-size: 18px; font-weight: 800; color: #2C1810;">${idx + 1}. ${dateEn}</div>
-            <div style="font-size: 14px; color: #5A4A3A; margin-top: 2px;">${dateTe}</div>
+            <div style="font-size: 20px; font-weight: 800; color: #2C1810;">${idx + 1}. ${dateEn}</div>
+            <div style="font-size: 17px; color: #5A4A3A; margin-top: 2px;">${dateTe}</div>
           </div>
-          <div style="background: ${ratingColorMap[item.rating]}; color: white; padding: 4px 14px; border-radius: 16px; font-weight: 700; font-size: 13px;">
+          <div style="background: ${ratingColorMap[item.rating]}; color: white; padding: 4px 14px; border-radius: 16px; font-weight: 700; font-size: 17px;">
             ${item.ratingTelugu} — ${item.score}%
           </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px;">
+        <table style="width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 17px;">
           <tr style="background: #F5E6D3;">
             <td style="padding: 6px 10px; font-weight: 700; border-radius: 6px 0 0 6px;">తిథి / Tithi</td>
             <td style="padding: 6px 10px;">${p.tithi?.telugu || ''} (${p.tithi?.english || ''})</td>
@@ -257,12 +257,12 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
 
         <div style="display: flex; gap: 20px; margin-top: 6px;">
           <div style="flex: 1;">
-            <div style="font-size: 12px; font-weight: 700; color: #2E7D32; margin-bottom: 4px;">శుభ కారణాలు:</div>
-            <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.6;">${reasonsHtml}</ul>
+            <div style="font-size: 16px; font-weight: 700; color: #2E7D32; margin-bottom: 4px;">శుభ కారణాలు:</div>
+            <ul style="margin: 0; padding-left: 16px; font-size: 16px; line-height: 1.6;">${reasonsHtml}</ul>
           </div>
           <div style="flex: 1;">
-            <div style="font-size: 12px; font-weight: 700; color: #E8751A; margin-bottom: 4px;">హెచ్చరికలు:</div>
-            <ul style="margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.6;">${warningsHtml || '<li style="color:#999;">లేవు</li>'}</ul>
+            <div style="font-size: 16px; font-weight: 700; color: #E8751A; margin-bottom: 4px;">హెచ్చరికలు:</div>
+            <ul style="margin: 0; padding-left: 16px; font-size: 16px; line-height: 1.6;">${warningsHtml || '<li style="color:#999;">లేవు</li>'}</ul>
           </div>
         </div>
       </div>
@@ -278,10 +278,12 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
   <style>
     @page { margin: 20mm 15mm; }
     body {
-      font-family: 'Noto Sans Telugu', 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Telugu', sans-serif;
       color: #2C1810;
       background: #FFFFFF;
-      line-height: 1.5;
+      /* Baseline bumped 2026-05-16 — readable floor on phone PDF viewers. */
+      font-size: 18px;
+      line-height: 1.65;
       margin: 0; padding: 0;
     }
   </style>
@@ -290,21 +292,21 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
   <!-- Header -->
   <div style="background: linear-gradient(135deg, #2E7D32, #1B5E20); padding: 24px 30px; border-radius: 16px; margin-bottom: 20px; text-align: center;">
     <div style="font-size: 28px; font-weight: 800; color: #FFD700; letter-spacing: 2px;">🙏 ధర్మ</div>
-    <div style="font-size: 20px; font-weight: 700; color: #FFFFFF; margin-top: 8px;">ముహూర్తం నివేదిక — Muhurtam Report</div>
-    <div style="font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 6px;">
+    <div style="font-size: 22px; font-weight: 700; color: #FFFFFF; margin-top: 8px;">ముహూర్తం నివేదిక — Muhurtam Report</div>
+    <div style="font-size: 17px; color: rgba(255,255,255,0.8); margin-top: 6px;">
       ${eventType.telugu} / ${eventType.english}
     </div>
   </div>
 
   <!-- Info Bar -->
-  <div style="display: flex; justify-content: space-between; padding: 12px 16px; background: #F5E6D3; border-radius: 10px; margin-bottom: 16px; font-size: 13px;">
+  <div style="display: flex; justify-content: space-between; padding: 12px 16px; background: #F5E6D3; border-radius: 10px; margin-bottom: 16px; font-size: 17px;">
     <div><strong>స్థానం / Location:</strong> ${locationName || 'Hyderabad'}</div>
     <div><strong>తేదీ / Generated:</strong> ${generatedDate}</div>
     <div><strong>మొత్తం శుభ ముహూర్తాలు:</strong> ${results.length}</div>
   </div>
 
   <!-- Results -->
-  <div style="font-size: 16px; font-weight: 700; color: #2C1810; margin-bottom: 12px; border-bottom: 2px solid #E8751A; padding-bottom: 6px;">
+  <div style="font-size: 18px; font-weight: 700; color: #2C1810; margin-bottom: 12px; border-bottom: 2px solid #E8751A; padding-bottom: 6px;">
     🗓️ శుభ ముహూర్తాలు — Auspicious Dates (Top ${results.length})
   </div>
 
@@ -312,11 +314,11 @@ function buildMuhurtamPdfHtml(eventType, results, locationName) {
 
   <!-- Footer -->
   <div style="margin-top: 24px; padding: 16px; background: #F5E6D3; border-radius: 10px; text-align: center; page-break-inside: avoid;">
-    <div style="font-size: 14px; color: #E8751A; font-weight: 600; font-style: italic;">సర్వే జనాః సుఖినో భవంతు</div>
-    <div style="font-size: 11px; color: #8A7A6A; margin-top: 6px;">
+    <div style="font-size: 17px; color: #E8751A; font-weight: 600; font-style: italic;">సర్వే జనాః సుఖినో భవంతు</div>
+    <div style="font-size: 15px; color: #8A7A6A; margin-top: 6px;">
       Generated by ధర్మ App — Telugu Panchangam & Muhurtam Finder
     </div>
-    <div style="font-size: 10px; color: #AAA; margin-top: 4px;">
+    <div style="font-size: 14px; color: #AAA; margin-top: 4px;">
       Note: This is for reference only. Please consult a qualified pandit for important events.
     </div>
   </div>

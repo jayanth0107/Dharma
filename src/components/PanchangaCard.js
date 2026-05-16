@@ -7,47 +7,78 @@ import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { useSpeaker } from '../utils/speechService';
 
-// Icon mapping for panchangam elements
+// Icon mapping for panchangam elements — keyed by both the Telugu and
+// English label so the icon renders regardless of the current language.
+// Earlier this map had only the 7 Telugu keys + 3 English fallbacks
+// (Day/Month/Year), which left Tithi/Nakshatra/Yoga/Karana icon-less in
+// English mode. All 7 elements now have both-script keys.
 const PANCHANGA_ICONS = {
-  'తిథి': { name: 'moon-waxing-crescent', family: 'MaterialCommunityIcons' },
-  'నక్షత్రం': { name: 'star-four-points', family: 'MaterialCommunityIcons' },
-  'యోగం': { name: 'infinity', family: 'MaterialCommunityIcons' },
-  'కరణం': { name: 'flower-tulip', family: 'MaterialCommunityIcons' },
-  'వారం': { name: 'calendar-today', family: 'MaterialCommunityIcons' },
-  'మాసం': { name: 'calendar-month', family: 'MaterialCommunityIcons' },
-  'సంవత్సరం': { name: 'calendar-star', family: 'MaterialCommunityIcons' },
-  // English label fallbacks
-  'Day': { name: 'calendar-today', family: 'MaterialCommunityIcons' },
-  'Month': { name: 'calendar-month', family: 'MaterialCommunityIcons' },
-  'Year': { name: 'calendar-star', family: 'MaterialCommunityIcons' },
+  'తిథి':       'moon-waxing-crescent',
+  'Tithi':      'moon-waxing-crescent',
+  'నక్షత్రం':    'star-four-points',
+  'Nakshatra':  'star-four-points',
+  'యోగం':       'infinity',
+  'Yoga':       'infinity',
+  'కరణం':       'flower-tulip',
+  'Karana':     'flower-tulip',
+  'వారం':       'calendar-today',
+  'Day':        'calendar-today',
+  'మాసం':       'calendar-month',
+  'Month':      'calendar-month',
+  'సంవత్సరం':    'calendar-star',
+  'Year':       'calendar-star',
 };
 
 function PanchangaIcon({ label, size = 18, color }) {
-  const iconInfo = PANCHANGA_ICONS[label];
-  if (!iconInfo) return null;
-  return <MaterialCommunityIcons name={iconInfo.name} size={size} color={color} />;
+  const name = PANCHANGA_ICONS[label];
+  if (!name) return null;
+  return <MaterialCommunityIcons name={name} size={size} color={color} />;
 }
 
+// Compact stat card — icon + label on one row, then hairline gold
+// divider, then the value block. Uniform gold accent across all six
+// elements (Tithi, Nakshatra, Yoga, Karana, Vaaram, Maasam) — earlier
+// per-element accent colours (saffron / tulasi / kumkum / violet)
+// made the grid look like 6 different widgets rather than one set.
+// `accentColor` is accepted for back-compat but the card always uses
+// gold so the grid reads as a single unit.
 export function PanchangaCard({ icon, label, teluguValue, englishValue, sublabel, accentColor }) {
   const cardWidth = usePick({ default: '48%', lg: '31%', xl: '23%' });
-  const labelSize = usePick({ default: 13, lg: 14, xl: 15 });
-  const valueSize = usePick({ default: 20, lg: 22, xl: 24 });
-  const subSize = usePick({ default: 15, lg: 16, xl: 17 });
-  const iconSize = usePick({ default: 16, lg: 18, xl: 20 });
+  // Label (TITHI / NAKSHATRAM / YOGAM / KARANAM) bumped 2026-05-16 —
+  // user reported the header labels were hard to read at thumb distance.
+  // Now 16/17/18 (was 14/15/16). dataLabel uppercase + letter-spacing
+  // already maxes the visible glyph height.
+  const labelSize = usePick({ default: 16, lg: 17, xl: 18 });
+  const valueSize = usePick({ default: 19, lg: 21, xl: 23 });
+  // Sublabel (paksha / deity / year) bumped on 2026-05-16 — was 13/14/15
+  // muted-gray which testers said was unreadable next to the Telugu tithi
+  // value. Now 14/15/16 with silverLight color (10.9:1 on dark, AAA) and
+  // medium weight so "శుక్ల పక్షం" / "Krishna Paksha" lines stay legible
+  // at thumb distance.
+  const subSize   = usePick({ default: 14, lg: 15, xl: 16 });
+  const iconSize  = usePick({ default: 18, lg: 20, xl: 22 });
+  const accent = DarkColors.gold;
 
   return (
-    <View style={[styles.card, { width: cardWidth }]}>
-      <View style={styles.cardHeader}>
-        <PanchangaIcon label={label} size={iconSize} color={DarkColors.gold} />
-        <Text style={[styles.cardLabel, { fontSize: labelSize }]}>{' '}{label}</Text>
+    <View style={[styles.card, { width: cardWidth, borderLeftColor: accent }]}>
+      <View style={styles.headRow}>
+        <PanchangaIcon label={label} size={iconSize} color={accent} />
+        <Text style={[styles.cardLabel, { fontSize: labelSize }]} numberOfLines={1}>
+          {label}
+        </Text>
       </View>
-      <Text style={[styles.teluguValue, { fontSize: valueSize, lineHeight: valueSize + 6 }]}>{teluguValue}</Text>
-      {englishValue && (
-        <Text style={styles.englishValue}>{englishValue}</Text>
-      )}
-      {sublabel && (
-        <Text style={[styles.sublabel, { fontSize: subSize, lineHeight: subSize + 6 }]}>{sublabel}</Text>
-      )}
+      <View style={styles.cardDivider} />
+      <Text style={[styles.teluguValue, { fontSize: valueSize, lineHeight: valueSize + 6 }]} numberOfLines={2}>
+        {teluguValue}
+      </Text>
+      {englishValue ? (
+        <Text style={styles.englishValue} numberOfLines={1}>{englishValue}</Text>
+      ) : null}
+      {sublabel ? (
+        <Text style={[styles.sublabel, { fontSize: subSize, lineHeight: subSize + 6 }]} numberOfLines={2}>
+          {sublabel}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -180,29 +211,56 @@ export function SlokaCard({ sloka }) {
 }
 
 const styles = StyleSheet.create({
-  // Panchanga Info Card — clean, no box
+  // Panchanga Info Card — compact gold-bordered stat card. Icon + label
+  // on a single header row keeps the card short (was ~150 px with the
+  // icon circle, now ~110 px). Gold accent + hairline divider — uniform
+  // across all 6 elements so the grid reads as one unit.
   card: {
-    marginBottom: 16,
-    paddingVertical: 8,
+    marginBottom: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: DarkColors.gold,
+    backgroundColor: DarkColors.bgElevated,
+    borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1,
+    borderTopColor: DarkColors.borderCard,
+    borderRightColor: DarkColors.borderCard,
+    borderBottomColor: DarkColors.borderCard,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
+  headRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
   },
-  // All sizes pulled from Type tokens — bumped after tester said
-  // "tithi, nakshatram, yogam, karanam are all small in mee panchangam".
-  // Label was 13 → 15 (via dataLabel rebump in typography.js); the
-  // headline value goes from h3 (22) → h2 (24) so each panchanga card
-  // reads at the same visual weight as a screen heading.
-  cardLabel:    { ...Type.dataLabel,  color: DarkColors.textMuted },
-  teluguValue:  { ...Type.h2, fontWeight: '500', color: DarkColors.textPrimary, marginBottom: 3 },
-  englishValue: { ...Type.dataValueLg, color: DarkColors.textSecondary },
-  sublabel: {
+  cardLabel: {
+    ...Type.dataLabel,
+    color: DarkColors.gold,
+    fontWeight: '700',
+    flex: 1,
+  },
+  cardDivider:  {
+    height: 1, marginTop: 8, marginBottom: 10,
+    backgroundColor: 'rgba(212,160,23,0.35)',
+  },
+  teluguValue: {
+    ...Type.h3,
+    fontWeight: '600',
+    color: DarkColors.textPrimary,
+    marginBottom: 2,
+  },
+  englishValue: {
     ...Type.body,
     color: DarkColors.silverLight,
     fontWeight: '500',
+  },
+  // Sublabel (paksha / deity / Telugu year) reads as readable secondary
+  // info — silverLight (10.9:1 AAA on dark bg) + medium weight. Earlier
+  // textMuted gray was too dim to be read alongside the Telugu tithi.
+  sublabel: {
+    ...Type.small,
+    color: DarkColors.silverLight,
+    fontWeight: '600',
     marginTop: 6,
+    letterSpacing: 0.2,
   },
 
   // Timing Card — flat (no gradient bg). Strong colored left bar +

@@ -72,15 +72,31 @@ export function DharmaPollScreen() {
     const sideB = t(poll.sideB.label.te, poll.sideB.label.en);
     const results = getSimulatedResults(poll.id);
     const votedSide = userVote === 'A' ? sideA : sideB;
+    const context  = t(poll.context.te, poll.context.en);
+    const argA     = t(poll.sideA.args.te, poll.sideA.args.en);
+    const argB     = t(poll.sideB.args.te, poll.sideB.args.en);
     const L = isEn
-      ? { hdr: 'Dharma — Dharma Debate',  myChoice: 'My choice' }
-      : { hdr: 'ధర్మ — ధర్మ చర్చ',          myChoice: 'నా ఎంపిక' };
+      ? { hdr: 'Dharma — Dharma Debate', myChoice: 'My choice',
+          context: 'Context', source: 'Source' }
+      : { hdr: 'ధర్మ — ధర్మ చర్చ',         myChoice: 'నా ఎంపిక',
+          context: 'సందర్భం',              source: 'మూలం' };
+    const HR = '━━━━━━━━━━━━━━━━';
+    // Context ("hint") + side-specific arguments are visible inside the
+    // app once the user votes — including them in the share preview /
+    // PDF means the recipient gets the same reasoning, not just the
+    // headline vote split.
     return `🙏 *${L.hdr}*\n\n` +
       `❓ ${t(poll.question.te, poll.question.en)}\n\n` +
-      `🅰️ ${sideA} — ${results.sideA}%\n` +
-      `🅱️ ${sideB} — ${results.sideB}%\n\n` +
-      `✅ ${L.myChoice}: ${votedSide}\n\n` +
-      `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+      `💡 *${L.context}:* ${context}\n\n` +
+      `${HR}\n\n` +
+      `🅰️ *${sideA}* — ${results.sideA}%\n` +
+      `📖 ${argA}\n\n` +
+      `🅱️ *${sideB}* — ${results.sideB}%\n` +
+      `📖 ${argB}\n\n` +
+      `${HR}\n\n` +
+      `✅ ${L.myChoice}: *${votedSide}*\n` +
+      (poll.sourceRef ? `📚 ${L.source}: ${poll.sourceRef}\n` : '') +
+      `\n${HR}\n📲 *Dharma App*\n${PLAY_LINK}`;
   };
 
   const renderPoll = (poll, isToday = false) => {

@@ -128,37 +128,57 @@ function buildMorningTitle(today, lang) {
   return pickL(lang, '🙏 ధర్మ — నేటి పంచాంగం', "🙏 Dharma — Today's Panchangam");
 }
 
-// Body — multi-line: panchangam + special days + Neethi Sukta + rashi.
+// Body — panchangam tightened to 3 dot-separated lines so the Neethi
+// Sukta sits near the top of the notification (most Android panels
+// surface the first ~4 body lines without expand). Order:
+//   1. Panchangam        (3 lines, packed)
+//   2. Neethi Sukta      (header + meaning, ~240 char meaning)
+//   3. Special days      (festivals / ekadashi / holidays / observances, cap 2)
+//   4. Rashi prediction  (1 line, if user has rashi set)
 function buildMorningBody(today, lang, location, rashiIndex) {
   const lines = [];
   const SEP = '━━━━━━━━━━━━━━━━';
+  const DOT = ' · ';
 
-  // ── Panchangam ──
+  // ── Panchangam — 3 packed lines ──
   try {
     const { getDailyPanchangam } = require('./panchangamCalculator');
     const p = getDailyPanchangam(today, location);
     if (p?.tithi?.telugu) {
-      const tithi    = pickL(lang, p.tithi.telugu,    p.tithi.english    || p.tithi.telugu);
-      const naksh    = pickL(lang, p.nakshatra.telugu, p.nakshatra.english || p.nakshatra.telugu);
-      const yoga     = pickL(lang, p.yoga.telugu,     p.yoga.english     || p.yoga.telugu);
-      const vaaram   = pickL(lang, p.vaaram?.telugu || '', p.vaaram?.english || '');
-      const sunLabel = pickL(lang, '🌅', '🌅');
-      const setLabel = pickL(lang, '🌇', '🌇');
-      lines.push(`🌙 ${tithi}  ⭐ ${naksh}`);
-      lines.push(`🔮 ${yoga}  📿 ${vaaram}`);
-      lines.push(`${sunLabel} ${p.sunriseFormatted}  ${setLabel} ${p.sunsetFormatted}`);
+      const tithi  = pickL(lang, p.tithi.telugu,     p.tithi.english     || p.tithi.telugu);
+      const naksh  = pickL(lang, p.nakshatra.telugu, p.nakshatra.english || p.nakshatra.telugu);
+      const yoga   = pickL(lang, p.yoga.telugu,      p.yoga.english      || p.yoga.telugu);
+      const vaaram = pickL(lang, p.vaaram?.telugu || '', p.vaaram?.english || '');
+      const sunrise = p.sunriseFormatted;
+      const sunset  = p.sunsetFormatted;
+      const abhStart = p.abhijitMuhurtam?.startFormatted;
+      const abhEnd   = p.abhijitMuhurtam?.endFormatted;
+      const rahStart = p.rahuKalam?.startFormatted;
+      const rahEnd   = p.rahuKalam?.endFormatted;
+      lines.push(`🌙 ${tithi}${DOT}⭐ ${naksh}${DOT}🔮 ${yoga}`);
+      lines.push(`📿 ${vaaram}${DOT}🌅 ${sunrise}${DOT}🌇 ${sunset}`);
       lines.push(pickL(lang,
-        `✅ అభిజిత్: ${p.abhijitMuhurtam?.startFormatted}-${p.abhijitMuhurtam?.endFormatted}`,
-        `✅ Abhijit: ${p.abhijitMuhurtam?.startFormatted}-${p.abhijitMuhurtam?.endFormatted}`,
-      ));
-      lines.push(pickL(lang,
-        `❌ రాహు: ${p.rahuKalam?.startFormatted}-${p.rahuKalam?.endFormatted}`,
-        `❌ Rahu: ${p.rahuKalam?.startFormatted}-${p.rahuKalam?.endFormatted}`,
+        `✅ అభిజిత్ ${abhStart}-${abhEnd}${DOT}❌ రాహు ${rahStart}-${rahEnd}`,
+        `✅ Abhijit ${abhStart}-${abhEnd}${DOT}❌ Rahu ${rahStart}-${rahEnd}`,
       ));
     }
   } catch {}
 
-  // ── Festivals + Ekadashi + Holidays + Observances on today ──
+  // ── Neethi Sukta — promoted above special-days/rashi so it reads
+  //    above the Android collapsed-notification cutoff. Meaning cap
+  //    bumped 138→240 so the full Telugu sukta fits when expanded. ──
+  try {
+    const sukta = getTodayNeethiSukta(today);
+    if (sukta) {
+      lines.push(SEP);
+      const meaning = pickL(lang, sukta.meaning.te, sukta.meaning.en);
+      const source  = pickL(lang, sukta.source.te,  sukta.source.en);
+      lines.push(pickL(lang, `💡 నేటి నీతి — ${source}`, `💡 Today's Wisdom — ${source}`));
+      lines.push(meaning.length > 240 ? meaning.slice(0, 238) + '…' : meaning);
+    }
+  } catch {}
+
+  // ── Festivals / Ekadashi / Holidays / Observances on today (cap 2) ──
   const specialLines = [];
   try {
     const fests = getTodayFestivals(today);
@@ -177,7 +197,6 @@ function buildMorningBody(today, lang, location, rashiIndex) {
   } catch {}
   try {
     const dateStr = today.toISOString().split('T')[0];
-    // Today-only holiday check via the upcoming-getter (filters by date >= today).
     const todays = getUpcomingHolidays(today, 1).filter(h => h.date === dateStr);
     todays.forEach(h => {
       specialLines.push(pickL(lang,
@@ -203,21 +222,8 @@ function buildMorningBody(today, lang, location, rashiIndex) {
   } catch {}
   if (specialLines.length) {
     lines.push(SEP);
-    specialLines.forEach(l => lines.push(l));
+    specialLines.slice(0, 2).forEach(l => lines.push(l));
   }
-
-  // ── Today's Neethi Sukta (one-liner — full text in the noon notification) ──
-  try {
-    const sukta = getTodayNeethiSukta(today);
-    if (sukta) {
-      lines.push(SEP);
-      const meaning = pickL(lang, sukta.meaning.te, sukta.meaning.en);
-      const source  = pickL(lang, sukta.source.te,  sukta.source.en);
-      lines.push(pickL(lang, `💡 నేటి నీతి (${source})`, `💡 Today's Wisdom (${source})`));
-      // Trim long meanings to keep notification readable
-      lines.push(meaning.length > 140 ? meaning.slice(0, 138) + '…' : meaning);
-    }
-  } catch {}
 
   // ── User's rashi prediction (if set) ──
   try {

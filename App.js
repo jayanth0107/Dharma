@@ -3,7 +3,7 @@
 
 import React, { Component, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
@@ -103,6 +103,11 @@ if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharm
   document.head.appendChild(style);
 }
 
+// Navigation ref so the notification-tap handler can route from outside
+// the React tree (cold start may fire before any screen has mounted).
+const navigationRef = createNavigationContainerRef();
+const _handledNotifIds = new Set();
+
 // --- Error Boundary (catches component crashes) ---
 class ErrorBoundary extends Component {
   state = { hasError: false, error: null };
@@ -181,6 +186,33 @@ function useOnboarding() {
 export default function App() {
   const { showOnboarding, checked, dismiss } = useOnboarding();
 
+  // Route notification taps to the screen named in payload `data.screen`.
+  // Cold-start: getLastNotificationResponseAsync() returns the tap that
+  // launched the app; navigationRef may not be ready yet, so poll briefly.
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    let Notifications;
+    try { Notifications = require('expo-notifications'); } catch { return; }
+
+    const go = (response) => {
+      const req = response?.notification?.request;
+      const id = req?.identifier;
+      if (id && _handledNotifIds.has(id)) return;
+      if (id) _handledNotifIds.add(id);
+      const screen = req?.content?.data?.screen;
+      if (!screen) return;
+      const tryNavigate = (attempts = 0) => {
+        if (navigationRef.isReady()) navigationRef.navigate(screen);
+        else if (attempts < 30) setTimeout(() => tryNavigate(attempts + 1), 100);
+      };
+      tryNavigate();
+    };
+
+    Notifications.getLastNotificationResponseAsync().then((r) => { if (r) go(r); }).catch(() => {});
+    const sub = Notifications.addNotificationResponseReceivedListener(go);
+    return () => sub.remove();
+  }, []);
+
   // Preload icon glyphs so they paint instantly on first render.
   // (Text fonts come from System on native and Google Fonts CSS on web —
   // see the IS_WEB style block above.)
@@ -216,6 +248,7 @@ export default function App() {
         <AuthProvider>
         <AppProvider>
           <NavigationContainer
+          ref={navigationRef}
           linking={{
             prefixes: ['dharmadaily://', 'https://dharma.app'],
             config: {

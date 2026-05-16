@@ -104,7 +104,7 @@ export function FamilyScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Family">
     <View style={s.screen}>
-      <PageHeader title={t('కుటుంబ జాతకాలు', 'Family Profiles')} />
+      <PageHeader title={t('కుటుంబ జాతకాలు', 'Family Horoscopes')} />
       <TopTabBar />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">

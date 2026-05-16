@@ -64,7 +64,7 @@ export function PramanaScreen() {
   return (
     <SwipeWrapper screenName="Pramana">
     <View style={s.screen}>
-      <PageHeader title={t('ధర్మ ప్రమాణం', 'Dharma Pramana')} />
+      <PageHeader title={t('ధర్మ ప్రమాణం', 'Knowledge')} />
       <TopTabBar />
 
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>

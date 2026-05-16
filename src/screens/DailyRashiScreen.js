@@ -15,7 +15,7 @@ import { getAllDailyRashi, RASHIS } from '../utils/dailyRashiService';
 import { getTeenPrediction } from '../data/teenPredictions';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SectionShareRow } from '../components/SectionShareRow';
-import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
+import { loadForm, saveForm, clearForm, loadBirthProfile, saveBirthProfile, FORM_KEYS } from '../utils/formStorage';
 import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
 
 // Detect rashi from birth date using accurate Moon sidereal longitude
@@ -77,9 +77,16 @@ export function DailyRashiScreen() {
     saveForm(FORM_KEYS.teenStudentMode, next);
   };
 
-  // Always recalculate rashi from DOB — never trust cached index
+  // Always recalculate rashi from DOB — never trust cached index.
+  // Fall back to the shared birth profile if this screen's own key is
+  // empty, so DOB entered in Personality / Horoscope prefills here.
   useEffect(() => {
-    loadForm(FORM_KEYS.myRashi).then(saved => {
+    (async () => {
+      let saved = await loadForm(FORM_KEYS.myRashi);
+      if (!saved?.dob) {
+        const shared = await loadBirthProfile();
+        if (shared) saved = { dob: shared.date.toISOString(), birthTime: shared.birthTime };
+      }
       if (saved?.dob) {
         try {
           const { rashiIndex } = getNakshatraRashiFromDate(new Date(saved.dob));
@@ -88,7 +95,7 @@ export function DailyRashiScreen() {
       } else {
         setMyRashi(saved);
       }
-    });
+    })();
   }, []);
 
   const handleDobSelect = async (date) => {
@@ -103,6 +110,10 @@ export function DailyRashiScreen() {
       };
       setMyRashi(data);
       await saveForm(FORM_KEYS.myRashi, data);
+      // Daily Rashi doesn't ask for birth time; preserve any existing
+      // time from a prior shared profile rather than overwriting it.
+      const existing = await loadBirthProfile();
+      await saveBirthProfile(date, existing?.birthTime);
       setExpanded(null); // Reset expanded
     }
   };
@@ -120,7 +131,7 @@ export function DailyRashiScreen() {
   return (
     <SwipeWrapper screenName="DailyRashi">
     <View style={s.screen}>
-      <PageHeader title={t('మీ  రాశి', 'Your Rashi')} />
+      <PageHeader title={t('మీ  రాశి', 'Your Zodiac Sign')} />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 

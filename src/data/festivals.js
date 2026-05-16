@@ -40,7 +40,7 @@ export const FESTIVALS_2026 = [
   { date: '2026-03-26', telugu: 'శ్రీ రామ నవమి', english: 'Sri Rama Navami', description: 'శ్రీరాముని జన్మదినం. చైత్ర శుక్ల నవమి. రామాయణ పారాయణం. సీతారామ కళ్యాణం.' },
 
   // ── April ──
-  { date: '2026-04-02', telugu: 'హనుమాన్ జయంతి', english: 'Hanuman Jayanti', description: 'హనుమంతుని జన్మదినం. చైత్ర పూర్ణిమ. హనుమాన్ చాలీసా పారాయణం, సుందరకాండ పఠనం.' },
+  { date: '2026-04-02', telugu: 'హనుమాన్ జయంతి (చైత్ర)', english: 'Hanuman Jayanti (Chaitra Purnima — N. Indian)', description: 'హనుమంతుని జన్మదినం — చైత్ర పూర్ణిమ. ఉత్తర భారత సంప్రదాయం. తెలుగు సంప్రదాయంలో హనుమ జయంతి వైశాఖ కృష్ణ దశమి (మే 12) నాడు ఆచరిస్తారు. హనుమాన్ చాలీసా పారాయణం, సుందరకాండ పఠనం.' },
   { date: '2026-04-14', telugu: 'వైశాఖి / మేషాది', english: 'Vaisakhi / Mesadi', description: 'సూర్యుడు మేష రాశిలో ప్రవేశించే రోజు. సౌర నూతన సంవత్సరం. కొత్త పంటల ఉత్సవం.' },
   { date: '2026-04-19', telugu: 'అక్షయ తృతీయ / పరశురామ జయంతి', english: 'Akshaya Tritiya / Parashurama Jayanti', description: 'వైశాఖ శుక్ల తృతీయ. అత్యంత శుభదినం. బంగారం కొనుగోలుకు శ్రేష్ఠం. దానధర్మాలు, పూజలు చేయడం మంచిది. ఈ రోజు చేసిన పుణ్యం అక్షయం (తరగనిది). పరశురామ జయంతి.' },
   { date: '2026-04-21', telugu: 'శంకరాచార్య జయంతి', english: 'Adi Shankaracharya Jayanti', description: 'ఆది శంకరాచార్య జన్మదినం. వైశాఖ శుక్ల పంచమి. అద్వైత వేదాంత ప్రవక్త.' },
@@ -49,6 +49,11 @@ export const FESTIVALS_2026 = [
 
   // ── May ──
   { date: '2026-05-01', telugu: 'బుద్ధ పూర్ణిమ', english: 'Buddha Purnima', description: 'వైశాఖ పూర్ణిమ. బుద్ధుని జన్మదినం, జ్ఞానోదయం మరియు మహాపరినిర్వాణం.' },
+  // Telugu / Andhra-Karnataka Hanuman Jayanthi — Vaisakha Krishna Dashami.
+  // Date verified 2026-05-12 by `scripts/verify-hanuman-jayanthi-2026.js`
+  // (Drik Ganita + Lahiri Ayanamsa, sunrise IST). Matches drikpanchang.com
+  // published date for Vaisakha Krishna Dashami 2026.
+  { date: '2026-05-12', telugu: 'హనుమ జయంతి (వైశాఖ)', english: 'Hanuman Jayanti (Vaisakha — Telugu)', description: 'హనుమంతుని జన్మదినం — తెలుగు సంప్రదాయం. వైశాఖ కృష్ణ దశమి. ఆంధ్ర-కర్ణాటక ప్రాంతాల్లో ఆచరించే హనుమ జయంతి. హనుమాన్ చాలీసా, సుందరకాండ పారాయణం. తైలాభిషేకం, సింధూర అర్చన.' },
   { date: '2026-05-25', telugu: 'గంగా దశహరా', english: 'Ganga Dussehra', description: 'జ్యేష్ఠ శుక్ల దశమి. గంగా దేవి భువికి దిగి వచ్చిన రోజు. గంగా స్నానం, తర్పణం.' },
   { date: '2026-05-27', telugu: 'పద్మినీ ఏకాదశి', english: 'Padmini Ekadashi', description: 'అధిక మాస శుక్ల ఏకాదశి. అధిక మాసంలో మాత్రమే వచ్చే విశేష ఏకాదశి. పూర్ణ ఫల ప్రదాయిని.' },
   { date: '2026-05-31', telugu: 'జ్యేష్ఠ అధిక పూర్ణిమ', english: 'Jyeshtha Adhika Purnima', description: 'అధిక మాస పూర్ణిమ. విష్ణు పూజ, దానధర్మాలు, స్నానం.' },
@@ -112,15 +117,26 @@ export const FESTIVALS_2025 = [
   { date: '2025-03-14', telugu: 'హోలీ', english: 'Holi', description: 'రంగుల పండుగ. ఆనందం, సమానత్వం, ప్రేమ పండుగ.' },
   { date: '2025-03-30', telugu: 'ఉగాది', english: 'Ugadi', description: 'తెలుగు నూతన సంవత్సరం (విశ్వావసు). షడ్రుచుల భోజనం. పంచాంగ శ్రవణం.' },
   { date: '2025-04-06', telugu: 'శ్రీ రామ నవమి', english: 'Sri Rama Navami', description: 'శ్రీరాముని జన్మదినం. చైత్ర శుక్ల నవమి. రామాయణ పారాయణం.' },
-  { date: '2025-04-12', telugu: 'హనుమాన్ జయంతి', english: 'Hanuman Jayanti', description: 'హనుమంతుని జన్మదినం. చైత్ర పూర్ణిమ. హనుమాన్ చాలీసా పారాయణం.' },
+  { date: '2025-04-12', telugu: 'హనుమాన్ జయంతి (చైత్ర)', english: 'Hanuman Jayanti (Chaitra Purnima — N. Indian)', description: 'హనుమంతుని జన్మదినం — చైత్ర పూర్ణిమ. ఉత్తర భారత సంప్రదాయం. తెలుగు సంప్రదాయంలో వైశాఖ కృష్ణ దశమి (మే 22) నాడు ఆచరిస్తారు. హనుమాన్ చాలీసా పారాయణం.' },
   { date: '2025-04-30', telugu: 'అక్షయ తృతీయ', english: 'Akshaya Tritiya', description: 'వైశాఖ శుక్ల తృతీయ. బంగారం కొనుగోలుకు శ్రేష్ఠం. దానధర్మాలు.' },
+  // Telugu Hanuman Jayanthi 2025 — Vaisakha Krishna Dashami.
+  // Verified by `node scripts/verify-hanuman-jayanthi-2026.js 2025` (Drik Ganita).
+  { date: '2025-05-22', telugu: 'హనుమ జయంతి (వైశాఖ)', english: 'Hanuman Jayanti (Vaisakha — Telugu)', description: 'హనుమంతుని జన్మదినం — తెలుగు సంప్రదాయం. వైశాఖ కృష్ణ దశమి. ఆంధ్ర-కర్ణాటక ప్రాంత ఆచారం. హనుమాన్ చాలీసా, సుందరకాండ పారాయణం. తైలాభిషేకం, సింధూర అర్చన.' },
+  // Buddha Purnima 2025 — Vaisakha Shukla Purnima.
+  // Verified by `node scripts/verify-festivals.js 2025` (Drik Ganita).
+  { date: '2025-05-12', telugu: 'బుద్ధ పూర్ణిమ', english: 'Buddha Purnima', description: 'వైశాఖ పూర్ణిమ. బుద్ధుని జన్మదినం, జ్ఞానోదయం మరియు మహాపరినిర్వాణం.' },
   { date: '2025-07-10', telugu: 'గురు పౌర్ణమి', english: 'Guru Purnima', description: 'వ్యాస జయంతి. ఆషాఢ పూర్ణిమ. గురువును ఆరాధించే రోజు.' },
   { date: '2025-08-09', telugu: 'రాఖీ పౌర్ణమి / రక్షా బంధన్', english: 'Raksha Bandhan', description: 'శ్రావణ పూర్ణిమ. సోదర-సోదరీ బంధం పండుగ.' },
   { date: '2025-08-16', telugu: 'శ్రీ కృష్ణ జన్మాష్టమి', english: 'Krishna Janmashtami', description: 'శ్రీ కృష్ణుని జన్మదినం. శ్రావణ కృష్ణ అష్టమి. మధ్యరాత్రి పూజ.' },
   { date: '2025-08-27', telugu: 'వినాయక చవితి', english: 'Vinayaka Chavithi', description: 'గణేశ చతుర్థి. భాద్రపద శుక్ల చతుర్థి. విగ్రహ ప్రతిష్ఠ.' },
-  { date: '2025-09-29', telugu: 'శారద నవరాత్రి ప్రారంభం', english: 'Sharad Navratri begins', description: 'ఆశ్వయుజ శుక్ల పాడ్యమి. దుర్గా దేవి తొమ్మిది రోజుల పూజ.' },
+  // Corrected 2026-05-12 — was 2025-09-29 (off by 7 days). Verified against
+  // drikpanchang.com Hindu Calendar September 2025: "Navratri Begins: 2025-09-22".
+  { date: '2025-09-22', telugu: 'శారద నవరాత్రి ప్రారంభం', english: 'Sharad Navratri begins', description: 'ఆశ్వయుజ శుక్ల పాడ్యమి. దుర్గా దేవి తొమ్మిది రోజుల పూజ.' },
   { date: '2025-10-02', telugu: 'విజయదశమి / దసరా', english: 'Vijayadashami / Dasara', description: 'ఆశ్వయుజ శుక్ల దశమి. చెడుపై మంచి విజయం. ఆయుధ పూజ.' },
   { date: '2025-10-21', telugu: 'దీపావళి / లక్ష్మీ పూజ', english: 'Diwali / Lakshmi Puja', description: 'కార్తిక అమావాస్య. దీపాల పండుగ. మహాలక్ష్మి పూజ.' },
+  // Vaikunta Ekadashi 2025 — Margashira Shukla Ekadashi.
+  // Verified by `node scripts/verify-festivals.js 2025` (Drik Ganita).
+  { date: '2025-12-01', telugu: 'వైకుంఠ ఏకాదశి / గీతా జయంతి', english: 'Vaikunta Ekadashi / Geeta Jayanti', description: 'మార్గశిర శుక్ల ఏకాదశి. వైకుంఠ ద్వారం తెరుచుకునే రోజు. ముక్తి ప్రదాయిని. భగవద్గీత అవతరించిన రోజు. తిరుమల, శ్రీరంగం విశేష దర్శనం.' },
 ];
 
 // ─── 2027 — projected dates (Drik Panchang convention, Hyderabad IST) ───
@@ -131,20 +147,33 @@ export const FESTIVALS_2027 = [
   { date: '2027-01-14', telugu: 'మకర సంక్రాంతి / పొంగల్', english: 'Makar Sankranti / Pongal', description: 'సూర్యుడు మకర రాశిలో ప్రవేశించే పండుగ. పొంగళ్ళు.' },
   { date: '2027-01-15', telugu: 'కనుమ', english: 'Kanuma', description: 'పశువులను పూజించే రోజు.' },
   { date: '2027-02-11', telugu: 'వసంత పంచమి / సరస్వతీ పూజ', english: 'Vasant Panchami / Saraswati Puja', description: 'సరస్వతీ దేవి పూజ. విద్యారంభం శుభదినం.' },
-  { date: '2027-03-06', telugu: 'మహా శివరాత్రి', english: 'Maha Shivaratri', description: 'శివుని ఆరాధనకు అత్యంత పవిత్రమైన రాత్రి.' },
+  { date: '2027-03-06', telugu: 'మహా శివరాత్రి', english: 'Maha Shivaratri', description: 'శివుని ఆరాధనకు అత్యంత పవిత్రమైన రాత్రి. ఉపవాసం, జాగరణ. బిల్వ పత్రి పూజ.' },
   { date: '2027-03-21', telugu: 'హోలికా దహనం', english: 'Holika Dahan', description: 'హోలికా దహనం. చెడుపై మంచి విజయం.' },
   { date: '2027-03-22', telugu: 'హోలీ', english: 'Holi', description: 'రంగుల పండుగ.' },
   { date: '2027-04-07', telugu: 'ఉగాది', english: 'Ugadi', description: 'తెలుగు నూతన సంవత్సరం. పంచాంగ శ్రవణం.' },
   { date: '2027-04-15', telugu: 'శ్రీ రామ నవమి', english: 'Sri Rama Navami', description: 'శ్రీరాముని జన్మదినం. చైత్ర శుక్ల నవమి.' },
-  { date: '2027-04-21', telugu: 'హనుమాన్ జయంతి', english: 'Hanuman Jayanti', description: 'హనుమంతుని జన్మదినం. చైత్ర పూర్ణిమ.' },
+  { date: '2027-04-21', telugu: 'హనుమాన్ జయంతి (చైత్ర)', english: 'Hanuman Jayanti (Chaitra Purnima — N. Indian)', description: 'హనుమంతుని జన్మదినం — చైత్ర పూర్ణిమ. ఉత్తర భారత సంప్రదాయం. తెలుగు సంప్రదాయంలో వైశాఖ కృష్ణ దశమి (మే 31) నాడు ఆచరిస్తారు.' },
   { date: '2027-05-09', telugu: 'అక్షయ తృతీయ', english: 'Akshaya Tritiya', description: 'వైశాఖ శుక్ల తృతీయ. బంగారం కొనుగోలుకు శ్రేష్ఠం.' },
+  // Telugu Hanuman Jayanthi 2027 — Vaisakha Krishna Dashami.
+  // Verified by `node scripts/verify-hanuman-jayanthi-2026.js 2027` (Drik Ganita).
+  { date: '2027-05-31', telugu: 'హనుమ జయంతి (వైశాఖ)', english: 'Hanuman Jayanti (Vaisakha — Telugu)', description: 'హనుమంతుని జన్మదినం — తెలుగు సంప్రదాయం. వైశాఖ కృష్ణ దశమి. ఆంధ్ర-కర్ణాటక ప్రాంత ఆచారం. హనుమాన్ చాలీసా, సుందరకాండ పారాయణం.' },
+  // Buddha Purnima 2027 — Vaisakha Shukla Purnima.
+  // Verified by `node scripts/verify-festivals.js 2027` (Drik Ganita).
+  { date: '2027-05-20', telugu: 'బుద్ధ పూర్ణిమ', english: 'Buddha Purnima', description: 'వైశాఖ పూర్ణిమ. బుద్ధుని జన్మదినం, జ్ఞానోదయం మరియు మహాపరినిర్వాణం.' },
   { date: '2027-07-19', telugu: 'గురు పౌర్ణమి', english: 'Guru Purnima', description: 'వ్యాస జయంతి. ఆషాఢ పూర్ణిమ.' },
   { date: '2027-08-17', telugu: 'రాఖీ పౌర్ణమి / రక్షా బంధన్', english: 'Raksha Bandhan', description: 'శ్రావణ పూర్ణిమ.' },
   { date: '2027-08-25', telugu: 'శ్రీ కృష్ణ జన్మాష్టమి', english: 'Krishna Janmashtami', description: 'శ్రీ కృష్ణుని జన్మదినం.' },
   { date: '2027-09-04', telugu: 'వినాయక చవితి', english: 'Vinayaka Chavithi', description: 'గణేశ చతుర్థి.' },
-  { date: '2027-10-09', telugu: 'శారద నవరాత్రి ప్రారంభం', english: 'Sharad Navratri begins', description: 'ఆశ్వయుజ శుక్ల పాడ్యమి.' },
-  { date: '2027-10-18', telugu: 'విజయదశమి / దసరా', english: 'Vijayadashami / Dasara', description: 'చెడుపై మంచి విజయం. ఆయుధ పూజ.' },
+  // Corrected 2026-05-12 — was 2027-10-09 (off by 9 days). Verified against
+  // drikpanchang.com Hindu Calendar October 2027: "Navratri Begins: 2027-09-30".
+  { date: '2027-09-30', telugu: 'శారద నవరాత్రి ప్రారంభం', english: 'Sharad Navratri begins', description: 'ఆశ్వయుజ శుక్ల పాడ్యమి.' },
+  // Corrected 2026-05-12 — was 2027-10-18 (off by 9 days). Verified against
+  // drikpanchang.com Vijayadashami 2027 page: "Vijayadashami on Saturday, October 9, 2027".
+  { date: '2027-10-09', telugu: 'విజయదశమి / దసరా', english: 'Vijayadashami / Dasara', description: 'చెడుపై మంచి విజయం. ఆయుధ పూజ.' },
   { date: '2027-11-08', telugu: 'దీపావళి / లక్ష్మీ పూజ', english: 'Diwali / Lakshmi Puja', description: 'కార్తిక అమావాస్య. దీపాల పండుగ.' },
+  // Vaikunta Ekadashi 2027 — Margashira Shukla Ekadashi.
+  // Verified by `node scripts/verify-festivals.js 2027` (Drik Ganita).
+  { date: '2027-12-09', telugu: 'వైకుంఠ ఏకాదశి / గీతా జయంతి', english: 'Vaikunta Ekadashi / Geeta Jayanti', description: 'మార్గశిర శుక్ల ఏకాదశి. వైకుంఠ ద్వారం తెరుచుకునే రోజు. ముక్తి ప్రదాయిని. భగవద్గీత అవతరించిన రోజు.' },
 ];
 
 // Year-aware lookup. Falls back to closest-available year so the UI

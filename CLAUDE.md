@@ -5,7 +5,7 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu **sacred-stories + panchangam + Vedic astrology** mobile app. Daily Ramayana / Mahabharata episode, Bhagavad Gita sloka, Neethi Sukta wisdom, Sanskrit word, Dharma debate / quiz, Stotras + Mantras with pandit recordings, animated meditation; full Drik-Ganita panchangam (Tithi, Nakshatra, Yoga, Karana, Muhurtams), festivals + Ekadashi + Pournami / Amavasya / Pradosham observances, Vedic horoscope (జాతకం), 8-Kuta matchmaking, Muhurtam finder, daily rashi predictions, Vedic personality profile, live gold/silver prices, Indian market indices, nearby-temple finder.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.4.3 (versionCode 11)
+**Version:** 2.4.5 (versionCode 13)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 **EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
@@ -416,33 +416,169 @@ INFY, ITC. ETFs: GOLDBEES, SILVERBEES, NIFTYBEES.
 
 ### BirthDatePicker design intent
 
-After a brief overhaul (cards-with-inline-headers + 5-row wheels)
-that the user reverted, the picker is **back to the v2.4.2 layout**
-— gold preview strip + DD/MM/YYYY display chips + AM/PM toggle
-buttons + 3-row wheels — with these PRESERVED bug fixes:
+Wheel-only interaction (user-approved rewrite on 2026-05-09). Layout
+top → bottom: **no title bar, just a floating close X at top-right**
+→ "Birth Date" badge divider → date wheels (Day / Month / Year)
+→ "Birth Time" badge divider + time wheels (Hour / Min / AM-PM) when
+`showTime` → **single gold result pill showing the chosen date/time
+BELOW the wheels** → Cancel / Select.
 
+The title bar ("Select Date of Birth") was removed on 2026-05-16
+because every parent screen (Astro, Personality, Horoscope,
+Matchmaking, Family, Muhurtam) already renders a section header that
+names the picker — repeating the title inside the sheet was ~60 px
+of wasted vertical space. The inner "Birth Date" / "Birth Time"
+badge dividers stay (they identify the two halves of the wheel
+block); only the top header row went.
+
+The old read-only DD/MM/YYYY chips and the duplicate AM/PM toggle
+buttons that sat ABOVE the wheels were removed — users tried to tap
+them and got confused that they only mirrored the wheels. AM/PM is
+now only the bottom-right Period wheel.
+
+PRESERVED scroll-sensitivity fixes (do NOT regress):
   • `isUserScrolling` ref → blocks parent-driven scrollTo while user
     is mid-flick. Eliminates the "hard push only moves a few numbers"
     snap-back symptom.
   • `decelerationRate={0.997}` numeric → Android no longer feels
     sluggish (string 'normal'/'fast' map to different values
     cross-platform).
-  • `disableIntervalMomentum` REMOVED → long flicks ride momentum
+  • `disableIntervalMomentum` is NOT set → long flicks ride momentum
     through 10–20 items.
   • `overScrollMode="never"` → Android edge-glow no longer swallows
     flicks at list ends.
-  • **Outer ScrollView gets `nestedScrollEnabled` + a force
+  • **Outer ScrollView keeps `nestedScrollEnabled` + a force
     scrollTo(0,0) on visible.** Without this, on Android the inner
-    WheelColumn's scrollTo() bubbles up and pushes the chip rows
-    OFF-SCREEN. Caused S23+ "chips not visible" report.
-  • Chip sublabels 10 → 13 pt, AM/PM toggle 13 → 15, hairline
-    divider under DATE/TIME headings + above wheel labels.
-  • Wheel widths bumped for thumb comfort
-    (day 110→120, month 92→100, year 92→110, time 76→90).
+    WheelColumn's scrollTo() bubbles up and pushes the result pill
+    OFF-SCREEN. Originally caused S23+ "chips not visible" report.
+  • **5 visible rows** per wheel (2 dim above, selected center, 2 dim
+    below). VISIBLE_ITEMS must stay ODD so the highlight band sits on a
+    true center row — even values (4, 6) put the selection off-center.
+  • Wheel widths sized for thumb comfort: day 130, month 116, year 128,
+    time 94 (base values; usePick scales up to day 178 / month 148 /
+    year 162 / time 122 at xl breakpoint). Date wheels bumped 2026-05-16
+    after users reported visible empty space around the centered row.
+  • **Outer ScrollView has `scrollEnabled={false}`.** Only the wheels
+    scroll; the outer surface is a non-scrolling holder. Two scrollable
+    surfaces stacked together (wheels + sheet) felt like the sheet was
+    sliding while the wheel was being flicked. Spacing inside the sheet
+    is trimmed so the whole picker fits the modal's 92%-height bound on
+    standard phones without needing a scroll. `nestedScrollEnabled` is
+    still set because the WheelColumn's programmatic scrollTo on mount
+    bubbles up on Android — the `scrollTo(0,0)` belt-and-suspenders fix
+    above relies on this surface staying a ScrollView.
 
 If anyone proposes restructuring the picker again: confirm scope
 with the user first. Sensitivity fixes are universally welcome;
 visual layout changes need explicit approval.
+
+### Shared birth profile (2026-05-16)
+
+A single shared key `FORM_KEYS.birthProfile = '@dharma_birth_profile'`
+holds the user's own DOB across screens that collect it. Shape:
+`{ dob: ISO, birthTime: 'HH:MM' }`. Helpers `loadBirthProfile()` and
+`saveBirthProfile(date, birthTime)` are in `src/utils/formStorage.js`.
+
+Three screens read+write it (Personality, Daily Rashi, Horoscope) so
+a DOB entered in any one pre-fills the others. Each screen still
+keeps its own form key (`myRashi`, `horoscope`) for screen-specific
+fields like place + name; shared profile is a FALLBACK when the
+screen-specific key is empty, never an override.
+
+Screens that collect someone ELSE'S DOB deliberately do NOT touch
+the shared key: Matchmaking (bride/groom), Family (members),
+Kids/Muhurtam (not birth dates).
+
+### PanchangaCard (Panchang sub-tab — Tithi / Nakshatra / Yoga / etc.)
+
+Compact gold-bordered stat card. Layout: icon + label on a single
+horizontal row (saves vertical space vs the icon-circle variant
+that briefly shipped), then a gold hairline divider, then the value
+block. Uniform gold accent across all six elements — earlier per-
+element accent colours made the grid look like 6 different widgets
+rather than one set.
+
+`PANCHANGA_ICONS` map has BOTH-script keys for all 7 elements
+(Tithi / Nakshatra / Yoga / Karana / Vaaram / Maasam / Samvatsaram).
+Earlier the map only had Telugu keys + a handful of English keys,
+which left Tithi/Nakshatra/Yoga/Karana icon-less when the app was
+in English mode.
+
+Sublabel (paksha / deity / year) uses `silverLight` colour (AAA on
+dark bg) at semibold weight so "శుక్ల పక్షం" / "Krishna Paksha"
+stays legible — the older `textMuted` gray was washed out next to
+the Telugu tithi value.
+
+### Daily morning notification body
+
+`buildMorningBody()` in `notificationService.js` packs the panchangam
+into 3 dot-separated lines so the Neethi Sukta lands above the
+Android collapsed-notification cutoff:
+
+```
+🌙 tithi · ⭐ naksh · 🔮 yoga
+📿 vaaram · 🌅 sunrise · 🌇 sunset
+✅ Abhijit start-end · ❌ Rahu start-end
+━━━━━━━━━━━━━━━━
+💡 నేటి నీతి — source
+{meaning, capped at 240 chars}
+━━━━━━━━━━━━━━━━
+[specials, capped to 2]
+━━━━━━━━━━━━━━━━
+🌟 rashi: prediction
+```
+
+Order matters: panchangam → Neethi → specials → rashi. The earlier
+order (panchangam → specials → SEP → Neethi → SEP → rashi) pushed
+the Neethi sukta off the collapsed notification on busy days.
+
+### PDF + share-card visual standard (2026-05-16)
+
+All HTML-rendered PDFs and the share card follow one design pattern:
+
+- Title page: gradient saffron background, 🚩 + ధర్మ wordmark +
+  సనాతనం tag, gold rule, report name + meta.
+- Each section: card with cream/light-gold background and a gold
+  hairline section-head bar (icon + uppercase title in saffron).
+- Body font floor: **17 px / 1.65 line-height**. Per-section values
+  bump up the ladder: section heads 20-22, h2 24, h1 26-28.
+- Smallest text allowed: **12 px** for footer disclaimers; **13 px**
+  for caption / micro labels. Never below.
+- Icons: emoji or HTML entity (📅 🌙 ⭐ 🔮 ✅ ❌ 🙏 📿 💡 📜 etc.)
+  consistently across builders so the same concept gets the same
+  glyph everywhere.
+- Palette: saffron `#E8751A` for hero / brand, gold `#D4A017` for
+  accents + borders, goldLight `#F5D77A` for value emphasis,
+  tulasi `#4CAF50` for positive, kumkumLight `#E8495A` for warn.
+
+The four files implementing this pattern: `matchmakingReport.js`
+(matchmaking PDF), `HoroscopeFeature.js` `buildHoroscopeHtml`,
+`MuhurtamFinder.js` `buildMuhurtamPdfHtml`, `shareCardBuilder.js`
+(panchangam share card), plus the fallback PDF in
+`SectionShareRow.js handlePdf()` that fires for any section without
+a dedicated builder.
+
+### Nav-label mirror rule
+
+`src/navigation/sections.js` carries the te/en label that the top
+tab bar, bottom scrollable tab bar, and swipe sequence all render.
+These labels MUST match the `FeatureTile label={t(...)}` strings on
+the Home grid (`src/screens/HomeScreen.js`) — keeping them identical
+means the user sees the same short word in three different chrome
+elements instead of three drifting variants. PageHeader titles
+inside each screen can still be more descriptive ("Vedic Horoscope"
+vs nav's "Horoscope") — that's per-screen context, not nav chrome.
+
+Current label set (te / en) — Home + nav share these verbatim:
+Panchangam / పంచాంగం, Festivals / పండుగలు, Muhurtam / ముహూర్తం,
+Zodiac Sign / రాశి, Gold Price / బంగారం ధర, Stock Market / స్టాక్ మార్కెట్,
+Ramayana, Mahabharata, Bhagavad Gita / భగవద్గీత, Moral Quotes / నీతి సూక్తులు,
+Kids Stories / పిల్లల కథలు, Knowledge / ప్రమాణం, Debate / ధర్మ చర్చ,
+Quiz / క్విజ్, Sanskrit / సంస్కృతం, Personality / వ్యక్తిత్వం,
+Love Match / పొందిక, Wisdom / విజ్ఞానం, Horoscope / జాతకం,
+Family Horoscopes / కుటుంబం, Stotras / స్తోత్రాలు, Meditation / ధ్యానం,
+Puja Guide / పూజా గైడ్, Temples / దేవాలయాలు, Donate / దానం,
+Holidays / సెలవులు, Daily Darshan / దైనందిన దర్శనం, Reminder / రిమైండర్.
 
 ### Notification scheduling
 

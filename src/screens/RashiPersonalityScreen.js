@@ -15,7 +15,7 @@ import { useSpeaker } from '../utils/speechService';
 import { BirthDatePicker } from '../components/BirthDatePicker';
 import { getRashiPersonality, RASHI_PERSONALITIES } from '../data/rashiPersonalityData';
 import { RASHIS } from '../utils/dailyRashiService';
-import { loadForm, saveForm, FORM_KEYS } from '../utils/formStorage';
+import { loadForm, saveForm, loadBirthProfile, saveBirthProfile, FORM_KEYS } from '../utils/formStorage';
 import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
 import { trackEvent } from '../utils/analytics';
 
@@ -84,9 +84,16 @@ export function RashiPersonalityScreen() {
   const pillFs = usePick({ default: 14, md: 15, xl: 16 });
   const gridImgSize = usePick({ default: 44, md: 48, xl: 56 });
 
-  // Load saved rashi on mount
+  // Load saved rashi on mount — first try this screen's own key,
+  // then fall back to the shared birth profile so a DOB entered in
+  // Horoscope / Daily Rashi prefills here without re-asking the user.
   useEffect(() => {
-    loadForm(FORM_KEYS.myRashi).then(saved => {
+    (async () => {
+      let saved = await loadForm(FORM_KEYS.myRashi);
+      if (!saved?.dob) {
+        const shared = await loadBirthProfile();
+        if (shared) saved = { dob: shared.date.toISOString(), birthTime: shared.birthTime };
+      }
       if (saved?.dob) {
         try {
           const d = new Date(saved.dob);
@@ -98,7 +105,7 @@ export function RashiPersonalityScreen() {
       } else if (saved?.rashiIndex != null) {
         setRashiIndex(saved.rashiIndex);
       }
-    });
+    })();
   }, []);
 
   // BirthDatePicker invokes onSelect with (date, "HH:MM") when showTime
@@ -110,11 +117,13 @@ export function RashiPersonalityScreen() {
     const idx = detectRashiFromDOB(date);
     if (idx !== null && idx >= 0) {
       setRashiIndex(idx);
+      const finalTime = time || birthTime;
       await saveForm(FORM_KEYS.myRashi, {
         rashiIndex: idx,
         dob: date.toISOString(),
-        birthTime: time || birthTime,
+        birthTime: finalTime,
       });
+      await saveBirthProfile(date, finalTime);
     }
   };
 

@@ -21,7 +21,33 @@ export const FORM_KEYS = {
   teenStudentMode: '@dharma_teen_student_mode',
   seniorMode:      '@dharma_senior_mode',
   fontScale:       '@dharma_font_scale',
+  // Shared "user's own birth" profile — written by any screen that
+  // collects the user's own DOB (Personality, Daily Rashi, Horoscope).
+  // Other screens that collect someone else's DOB (Matchmaking bride/
+  // groom, Family members, Kids) deliberately don't touch this.
+  birthProfile: '@dharma_birth_profile',
 };
+
+// Returns { date: Date, birthTime: 'HH:MM' } or null when nothing saved.
+export async function loadBirthProfile() {
+  const raw = await loadForm(FORM_KEYS.birthProfile);
+  if (!raw?.dob) return null;
+  try {
+    const d = new Date(raw.dob);
+    if (Number.isNaN(d.getTime())) return null;
+    return { date: d, birthTime: raw.birthTime || '06:00' };
+  } catch { return null; }
+}
+
+// Persist the user's own birth. Accepts a Date or ISO string. Birth
+// time is optional — caller passes '' or undefined when their screen
+// doesn't collect time (e.g. Daily Rashi).
+export async function saveBirthProfile(date, birthTime) {
+  if (!date) return;
+  const iso = typeof date === 'string' ? date : date?.toISOString?.();
+  if (!iso) return;
+  await saveForm(FORM_KEYS.birthProfile, { dob: iso, birthTime: birthTime || '06:00' });
+}
 
 export async function loadForm(key) {
   try {

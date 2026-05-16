@@ -549,20 +549,14 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Festivals Tab ── all 2026 festivals ──
-            Header restored for consistency with the other sub-tabs
-            (Chaturthi, Pournami, Amavasya, Pradosham, Holidays, Darshan)
-            — every list now has the same icon + title + subtitle anchor
-            on top, so the layout pattern is uniform across all pills. */}
+        {/* ── Festivals Tab ──
+            • Heading omitted — the sub-tab pill and the year-chip strip
+              above already say "Festivals" and the year.
+            • Share row anchored at the TOP of the card so PDF/share is
+              reachable without scrolling the list to its end. */}
         {activeSubTab === 'festivals' && (
           <View style={s.card}>
-            <ListSectionHeader
-              title={t(TR.festivals.te, TR.festivals.en)}
-              subtitle={`${festivalsYear}`}
-              icon="party-popper"
-              iconColor={DarkColors.gold}
-              inline
-            />
+            <SectionShareRow section="festivals" buildText={() => buildFestivalsShareText(upcomingFestivals, yearData.festivals || [])} />
             {(() => {
               // Pulls from bundled data → AsyncStorage cache → GitHub raw URL,
               // in that order. festivalsService handles all the resolution.
@@ -588,7 +582,6 @@ export function CalendarScreen({ route }) {
                 </ScrollView>
               );
             })()}
-            <SectionShareRow section="festivals" buildText={() => buildFestivalsShareText(upcomingFestivals, yearData.festivals || [])} />
           </View>
         )}
 
@@ -752,13 +745,11 @@ export function CalendarScreen({ route }) {
           </View>
         )}
 
-        {/* ── Darshan Tab ── */}
+        {/* ── Darshan Tab ── inline cardHeader removed 2026-05-16: the
+            PageHeader and TopTabBar already say "Daily Darshan", so a
+            third instance of the title was redundant. */}
         {activeSubTab === 'darshan' && (
           <View style={s.card}>
-            <View style={s.cardHeader}>
-              <MaterialCommunityIcons name="hands-pray" size={16} color={DarkColors.saffron} />
-              <Text style={[s.cardTitle, { color: DarkColors.saffron }]}>{t(TR.dailyDarshan.te, TR.dailyDarshan.en)}</Text>
-            </View>
             <DailyDarshanCard dayOfWeek={selectedDate.getDay()} />
           </View>
         )}

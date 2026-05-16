@@ -300,9 +300,9 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="pot-mix"      label={t('పంచాంగం', 'Panchangam')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
           <FeatureTile icon="party-popper" label={t('పండుగలు', 'Festivals')}  onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
           <FeatureTile icon="calendar-star" label={t('ముహూర్తం', 'Muhurtam')}   onPress={() => navigation.navigate('Muhurtam')} />
-          <FeatureTile icon="star-circle"  label={t('రాశి', 'Rashi')}        onPress={() => navigation.navigate('DailyRashi')} />
-          <FeatureTile icon="gold"         label={t('బంగారం', 'Gold')}        onPress={() => navigation.navigate('Gold')} />
-          <FeatureTile icon="chart-line"   label={t('మార్కెట్', 'Market')}    onPress={() => navigation.navigate('Market')} />
+          <FeatureTile icon="star-circle"  label={t('రాశి', 'Zodiac Sign')}  onPress={() => navigation.navigate('DailyRashi')} />
+          <FeatureTile icon="gold"         label={t('బంగారం ధర', 'Gold Price')} onPress={() => navigation.navigate('Gold')} />
+          <FeatureTile icon="chart-line"   label={t('స్టాక్ మార్కెట్', 'Stock Market')} onPress={() => navigation.navigate('Market')} />
         </FeatureGrid>
 
         {/* "Ithihaasa" — Sanskrit for "thus it happened" — is the proper
@@ -318,10 +318,10 @@ export function HomeScreen({ navigation }) {
         <FeatureGrid>
           <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    onPress={() => navigation.navigate('Ramayana')} />
           <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} onPress={() => navigation.navigate('Mahabharata')} />
-          <FeatureTile icon="book-open-page-variant" label={t('గీత', 'Gita')}            onPress={() => navigation.navigate('Gita')} />
-          <FeatureTile icon="script-text"            label={t('నీతి', 'Neethi')}         onPress={() => navigation.navigate('NeethiSukta')} />
-          <FeatureTile icon="baby-face-outline"      label={t('పిల్లలు', 'Kids')}        onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
-          <FeatureTile icon="shield-star"            label={t('ప్రమాణం', 'Pramana')}     onPress={() => navigation.navigate('Pramana')} />
+          <FeatureTile icon="book-open-page-variant" label={t('భగవద్గీత', 'Bhagavad Gita')}    onPress={() => navigation.navigate('Gita')} />
+          <FeatureTile icon="script-text"            label={t('నీతి సూక్తులు', 'Moral Quotes')}  onPress={() => navigation.navigate('NeethiSukta')} />
+          <FeatureTile icon="baby-face-outline"      label={t('పిల్లల కథలు', 'Kids Stories')} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
+          <FeatureTile icon="shield-star"            label={t('ప్రమాణం', 'Knowledge')}   onPress={() => navigation.navigate('Pramana')} />
         </FeatureGrid>
 
         <SectionDivider icon="rocket-launch" te="యువత" en="Youth" />
@@ -330,11 +330,11 @@ export function HomeScreen({ navigation }) {
             a youth-life-stage decision that benefits from being grouped
             with debate/quiz/sanskrit) */}
         <FeatureGrid>
-          <FeatureTile icon="vote"             label={t('చర్చ', 'Debate')}        onPress={() => navigation.navigate('DharmaPoll')} />
+          <FeatureTile icon="vote"             label={t('ధర్మ చర్చ', 'Debate')}    onPress={() => navigation.navigate('DharmaPoll')} />
           <FeatureTile icon="head-question"    label={t('క్విజ్', 'Quiz')}         onPress={() => navigation.navigate('Quiz')} />
           <FeatureTile icon="alpha-s-circle"   label={t('సంస్కృతం', 'Sanskrit')}   onPress={() => navigation.navigate('SanskritWord')} />
           <FeatureTile icon="account-circle"   label={t('వ్యక్తిత్వం', 'Personality')} onPress={() => navigation.navigate('RashiProfile')} />
-          <FeatureTile icon="heart-multiple"   label={t('పొందిక', 'Match')}        onPress={() => navigation.navigate('Matchmaking')} />
+          <FeatureTile icon="heart-multiple"   label={t('పొందిక', 'Love Match')}   onPress={() => navigation.navigate('Matchmaking')} />
           <FeatureTile icon="zodiac-leo"       label={t('విజ్ఞానం', 'Wisdom')}      onPress={() => navigation.navigate('Astro')} />
         </FeatureGrid>
 
@@ -343,7 +343,7 @@ export function HomeScreen({ navigation }) {
         {/* 4. Life Decisions — Match moved to Youth, Muhurtam moved to Daily */}
         <FeatureGrid>
           <FeatureTile icon="account-star"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
-          <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family')}    onPress={() => navigation.navigate('Family')} />
+          <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family Horoscopes')} onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
 
         <SectionDivider icon="hand-heart" te="భక్తి" en="Devotion" />
@@ -352,7 +352,7 @@ export function HomeScreen({ navigation }) {
         <FeatureGrid>
           <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు', 'Stotras')}    onPress={() => navigation.navigate('Stotra')} />
           <FeatureTile icon="meditation"        label={t('ధ్యానం', 'Meditation')}    onPress={() => navigation.navigate('Meditation')} />
-          <FeatureTile icon="fire"              label={t('పూజ', 'Puja')}            onPress={() => navigation.navigate('PujaGuide')} />
+          <FeatureTile icon="fire"              label={t('పూజా గైడ్', 'Puja Guide')} onPress={() => navigation.navigate('PujaGuide')} />
           <FeatureTile icon="temple-hindu"      label={t('దేవాలయాలు', 'Temples')}    onPress={() => navigation.navigate('TempleNearby')} />
           <FeatureTile icon="hand-heart"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
@@ -366,7 +366,7 @@ export function HomeScreen({ navigation }) {
             pattern Panchang / Festivals / Kids use). */}
         <FeatureGrid>
           <FeatureTile icon="flag-variant"  label={t('సెలవులు', 'Holidays')}    onPress={() => navigation.navigate('Holidays', { tab: 'holidays', _ts: Date.now() })} />
-          <FeatureTile icon="temple-hindu"  label={t('దర్శనం', 'Darshan')}      onPress={() => navigation.navigate('Darshan',  { tab: 'darshan',  _ts: Date.now() })} />
+          <FeatureTile icon="temple-hindu"  label={t('దైనందిన దర్శనం', 'Daily Darshan')} onPress={() => navigation.navigate('Darshan',  { tab: 'darshan',  _ts: Date.now() })} />
           <FeatureTile icon="bell-plus"     label={t('రిమైండర్', 'Reminder')}    onPress={() => navigation.navigate('Reminder')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />

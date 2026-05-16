@@ -6,6 +6,176 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.4.5] — 2026-05-16
+
+Readability + label clarity release. Every home tile, nav bar pill,
+and PDF artefact got a typography + structure audit. No new features —
+purely polish, but the cumulative effect changes how the app feels at
+arm's length.
+
+### Added
+
+- **Shared birth-profile storage** (`FORM_KEYS.birthProfile`, helpers
+  `loadBirthProfile()` / `saveBirthProfile()` in `formStorage.js`).
+  Personality, Daily Rashi, and Horoscope now read/write a single
+  shared key so a DOB entered in any one of them pre-fills the
+  others. Matchmaking (bride/groom), Family (members), and Muhurtam
+  (event date) deliberately skip the shared key.
+- **DharmaPoll share + PDF now include the "hint"** — `buildShareText`
+  pulls `poll.context` (the in-app hint box), `poll.sideA.args`,
+  `poll.sideB.args`, and `poll.sourceRef` so recipients get the
+  reasoning behind the vote, not just the headline split.
+- **Floating close X** on the BirthDatePicker now that the title row
+  is gone — keeps dismissal discoverable from the top of the sheet
+  alongside the backdrop tap and bottom Cancel button.
+
+### Changed — labels & navigation
+
+Home tile labels and nav-bar labels (top + bottom) now mirror each
+other. Earlier the nav used longer descriptive forms while the home
+grid used compact ones, which made the same section read three
+different ways in three different chrome elements. Current set:
+
+| Old nav | New nav (matches home) |
+|---|---|
+| నేటి పంచాంగం / Panchangam | పంచాంగం / Panchangam |
+| శుభ ముహూర్తాలు / Muhurtam | ముహూర్తం / Muhurtam |
+| మీ రాశి / Your Rashi | రాశి / Zodiac Sign |
+| బంగారం వెండి / Gold & Silver | బంగారం ధర / Gold Price |
+| మార్కెట్ / Market | స్టాక్ మార్కెట్ / Stock Market |
+| భగవద్గీత / Bhagavad Gita | భగవద్గీత / Bhagavad Gita (English label restored) |
+| నీతి సూక్తాలు / Neethi Suktalu | నీతి సూక్తులు / Moral Quotes |
+| పిల్లల కథలు / Kid's Stories | పిల్లల కథలు / Kids Stories |
+| ధర్మ ప్రమాణం / Dharma Pramana | ప్రమాణం / Knowledge |
+| ధర్మ చర్చ / Dharma Debate | ధర్మ చర్చ / Debate |
+| క్విజ్ / Daily Quiz | క్విజ్ / Quiz |
+| సంస్కృత పదం / Sanskrit Word | సంస్కృతం / Sanskrit |
+| రాశి వ్యక్తిత్వం / Rashi Personality | వ్యక్తిత్వం / Personality |
+| జాతక పొందిక / Love Match | పొందిక / Love Match |
+| వేద విజ్ఞానం / Vedic Wisdom | విజ్ఞానం / Wisdom |
+| వేద జాతకం / Vedic Horoscope | జాతకం / Horoscope |
+| కుటుంబ జాతకాలు / Family Profiles | కుటుంబం / Family Horoscopes |
+| స్తోత్రాలు & మంత్రాలు / Stotras & Mantras | స్తోత్రాలు / Stotras |
+| పూజా గైడ్ / Puja Guide | పూజా గైడ్ / Puja Guide |
+| సెలవు దినాలు / Holidays | సెలవులు / Holidays |
+| దర్శనం / Darshan | దైనందిన దర్శనం / Daily Darshan |
+
+PageHeader titles inside each screen still use the more descriptive
+forms ("Vedic Horoscope", "Family Horoscopes", "Knowledge").
+
+### Changed — Panchangam Elements section
+
+Cards in the Panchang sub-tab redesigned for legibility:
+
+- **Single-row header** (icon + label) instead of stacked icon-circle
+  + label — saves ~40 px per card.
+- **Uniform gold accent** (left bar, icon, label, divider) across all
+  six elements. The earlier per-element palette (saffron / tulasi /
+  kumkum / silver / violet) made the grid read as six unrelated
+  widgets.
+- **Icons in English mode** — `PANCHANGA_ICONS` map now has both-script
+  keys for all 7 elements. Earlier the map missed English keys for
+  Tithi, Nakshatra, Yoga, Karana, so the cards rendered icon-less
+  when the language was English.
+- **Sublabel readability** — paksha / deity / Telugu year strings
+  bumped from `textMuted` 13/14/15 to `silverLight` 14/15/16 with
+  semibold weight, so "శుక్ల పక్షం" / "Krishna Paksha" stays legible
+  next to the larger tithi value.
+
+### Changed — BirthDatePicker
+
+- **Top title row removed** ("Select Date of Birth" + close X) — the
+  parent screen's section header already names the picker. ~50 px of
+  vertical real estate reclaimed.
+- Replaced with a **floating close X** in the top-right corner so
+  dismissal stays discoverable from the top edge.
+- Inner "Birth Date" / "Birth Time" badge dividers retained — they
+  identify the two halves of the wheel block.
+
+### Changed — Daily morning notification
+
+`buildMorningBody()` in `notificationService.js`:
+
+- Panchangam compressed from 5 lines to **3 dot-separated lines**
+  (`🌙 tithi · ⭐ naksh · 🔮 yoga` / `📿 vaaram · 🌅 sunrise · 🌇 sunset`
+  / `✅ Abhijit … · ❌ Rahu …`).
+- **Neethi Sukta promoted** above special-days and rashi prediction —
+  on busy days the sukta used to land below the Android collapsed-
+  notification cutoff.
+- Neethi meaning cap bumped 138 → **240 chars** so the full Telugu
+  sukta reads when expanded.
+- Special days capped to first 2 entries so the rashi prediction
+  line isn't pushed off-screen on festival days.
+
+### Changed — PDF generation (matchmaking, horoscope, muhurtam)
+
+All three generated PDFs got a two-pass font ladder bump and a
+brand-aligned visual standard:
+
+- **Body font floor 17 px / 1.65 line-height** (was unset → browser
+  default 13-14 on most expo-print renderers).
+- Ladder bumped twice: `10→12, 11→13, 12→14, 13→15, 14→16, 15→17,
+  16→18, 17→19, 18→20, 20→22, 22→24`. Smallest text on any PDF is
+  now **12 px**, used only in footer disclaimers; **13 px** for
+  caption text; body content is **15-17 px**.
+- **Horoscope PDF rewritten** end-to-end. Was a bare-bones purple-
+  themed template with 11-12 pt footnotes and no section dividers;
+  now mirrors the matchmaking pattern — gradient saffron title page,
+  section cards with gold-bordered heads + section icons (🌟 birth
+  positions, 📖 life predictions, 📅 today's forecast), per-card
+  icons for Rashi / Nakshatra / Lagna / Sun Sign, per-prediction
+  icons (👤 💼 ❤️ 💑 🧘).
+- **Share-card builder** (panchangam image-share) restyled with the
+  same brand header + section divider + 2×2 colored card grid +
+  sunrise/sunset bar with vertical divider.
+- **Fallback PDF** (`SectionShareRow.handlePdf()`) — used by any
+  section that doesn't have a dedicated builder — got the same
+  brand-aligned title page + section divider + cream-card content
+  block treatment.
+
+### Changed — AstroScreen (Vedic Wisdom) reference text
+
+`sourceLinkText` (the "Patanjali Yoga Sutra ↗", "Ashtanga Hridayam ↗"
+link under each Sanskrit verse) bumped 11 → 14 pt + 600 weight,
+0.2 letter-spacing. Roman transliteration 14 → 15. Section subtitle
+14 → 15. Card title 17 → 18.
+
+### Changed — Share preview modal
+
+`SectionShareRow` modal sub-fonts bumped to the caption floor:
+`consentText` 11 → 13 (medium weight), `platformLabel` 13 → 15,
+`platformTelugu` 11 → 13, `platformHint` 11 → 13. Consent row
+padding bumped 10 → 12 and got a subtle green border to match the
+modal's card rhythm.
+
+### Changed — Tile + section relabels (full list above)
+
+Gold tile in home grid: `బంగారం ధర` / `Gold Price` (was `బంగారం`).
+Market tile: `స్టాక్ మార్కెట్` / `Stock Market` (was `మార్కెట్`).
+Kids tile: `పిల్లల కథలు` / `Kids Stories` (Telugu corrected from
+`పిల్లలు`). Neethi tile: `నీతి సూక్తులు` / `Moral Quotes` (was
+`Neethisuktaalu`). DharmaPoll Telugu: `ధర్మ చర్చ` (was `చర్చ`).
+Pramana English: `Knowledge`. Family English: `Family Horoscopes`.
+
+### Fixed
+
+- **Third "Daily Darshan" title removed** from CalendarScreen's
+  Darshan sub-tab card body. The PageHeader and TopTabBar already
+  name the section; the inline `cardHeader` with hands-pray icon was
+  redundant.
+- **PramanaScreen page header** English: `Dharma Pramana` →
+  `Knowledge` (matches nav + home tile).
+
+### Operational
+
+- **CLAUDE.md** updated: new "Shared birth profile",
+  "PanchangaCard", "Daily morning notification body", "PDF + share-
+  card visual standard", and "Nav-label mirror rule" sections.
+  BirthDatePicker design-intent block updated to reflect the
+  title-removed layout.
+
+---
+
 ## [2.4.4] — 2026-05-05
 
 Live Market data via Cloud Function · Holidays + Darshan promoted to

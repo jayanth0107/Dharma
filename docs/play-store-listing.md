@@ -1,4 +1,4 @@
-# Google Play Store Listing — Dharma v2.4.3 (versionCode 11)
+# Google Play Store Listing — Dharma v2.4.5 (versionCode 13)
 
 ## App Name (30 chars max)
 Dharma · Ithihaasa & Panchangam
@@ -33,9 +33,9 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 🏹 **Ramayana Daily** — All 7 kandas in 30 episodes. Each with moral, "Did You Know?", character notes, exact Sarga reference.
 ⚔️ **Mahabharata Daily** — All 18 parvas in 30 episodes. BORI Critical Edition. Character studies your textbook never gave you.
 🕉️ **Bhagavad Gita** — 30 selected verses, Sanskrit + Telugu lipi + English meaning, theme-tagged, share-ready.
-📜 **Neethi Suktas** — Chanakya Niti, Vidura Niti, Bhartrihari, Subhashitas, Thirukkural, Panchatantra. Every quote ends with "Apply Today" — one practical action.
-📚 **Pramana Trayam** — Shruti / Smriti / Shishtachara source attribution for every deity, festival, vrata.
-👶 **Kids' retellings** — 50 simple moral retellings + 30 easy slokas for ages 6–12.
+📜 **Moral Quotes (Neethi Suktalu)** — Chanakya Niti, Vidura Niti, Bhartrihari, Subhashitas, Thirukkural, Panchatantra. Every quote ends with "Apply Today" — one practical action.
+📚 **Knowledge (Pramana Trayam)** — Shruti / Smriti / Shishtachara source attribution for every deity, festival, vrata.
+👶 **Kids Stories** — 50 simple moral retellings + 30 easy slokas for ages 6–12.
 
 ━━━━━━━━━━━━━━━━
 
@@ -52,19 +52,21 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 ♌ Vedic Astrology
 
-• **Vedic Horoscope (జాతకం)** — Moon Rashi, Lagna, Nakshatra, Navagraha. Bilingual predictions. Beautiful PDF report.
-• **Muhurtam Finder** — pick any date (±1 year) to see auspicious-time analysis. 90-day scan for marriage, griha pravesh, travel, business, vehicle, education.
-• **8-Kuta Matchmaking** — full Ashtakoot compatibility, North-Indian Kundli charts, downloadable PDF for both families.
-• **Daily Rashi** — Senior mode (career/finance/health/relationships) and Student mode (studies/exams/friendships).
+• **Horoscope (జాతకం)** — Moon Rashi, Lagna, Nakshatra, Navagraha. Bilingual predictions across personality, career, health, relationships, spirituality. **Brand-new PDF report design** — gradient saffron title page, section cards with iconography, readable 17 pt body type.
+• **Muhurtam** — pick any date (±1 year) to see auspicious-time analysis. 90-day scan for wedding, griha pravesh, travel, business, vehicle, education.
+• **Love Match (8-Kuta Ashtakoot)** — full compatibility scoring, North-Indian Kundli charts, redesigned PDF report — every interpretation card now reads at arm's length.
+• **Zodiac Sign** — daily rashi predictions in Senior mode (career / finance / health / relationships) and Student mode (studies / exams / friendships).
+• **Personality** — Vedic personality profile for all 12 rashis: life mission, daily affirmation, fasting day, chakra, shadow work, lucky number / day / colour, gemstone, deity.
+• **Family Horoscopes** — store multiple family-member kundalis. DOB you enter in one screen pre-fills across Personality, Daily Rashi, and Horoscope automatically.
 
 ━━━━━━━━━━━━━━━━
 
 🎯 Built for youth & lifelong learners
 
-🗣️ **Dharma Debate** — daily dharmic dilemma, A/B vote, arguments revealed after voting. *"Was Karna right? Is karma fatalistic? Social media = Maya?"*
-🧠 **Daily Quiz** — Vedic and Puranic questions. Aligned to Class 6–12 syllabus.
+🗣️ **Debate (Dharma Charcha)** — daily dharmic dilemma, A/B vote, arguments revealed after voting. Share preview now carries the context + both arguments + source reference so the conversation continues outside the app.
+🧠 **Quiz** — daily Vedic and Puranic questions. Aligned to Class 6–12 syllabus.
 📝 **Sanskrit Word of the Day** — Devanagari + root etymology + how it lives in modern Telugu.
-⭐ **Vedic Personality Profile** — life mission, daily affirmation, fasting day, chakra, lucky number, gemstone, deity, shadow work — all 12 rashis.
+⭐ **Wisdom (Vedic Wisdom)** — Vedic concept of the day, Upanishad teaching, Patanjali Yoga Sutra, Ayurveda tip — every entry now carries a clear citation link back to the source text.
 
 ━━━━━━━━━━━━━━━━
 
@@ -73,17 +75,17 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 🪔 **Stotras & Mantras** — Vishnu Sahasranama, Lalita Sahasranama, Hanuman Chalisa, Sri Rudram, Ganapati Atharva Shirsha, Aditya Hridayam, Sri Sukta, Bhaja Govindam, Gayatri, Maha Mrityunjaya. Read along, listen to authentic pandit recordings.
 🧘 **Meditation** — animated breathing circle (4-2-6 inhale-hold-exhale), mantra picker (Om, Om Namah Shivaya, Hare Krishna Hare Rama, Om Reverb). Chant continues when you lock the screen.
 🔥 **Puja Guide** — 12 step-by-step guides with itemised samagri lists.
-🛕 **Nearby Temples** — find by deity, distance, ratings.
+🛕 **Temples** — find by deity, distance, ratings.
 🌅 **Daily Darshan** — deity of the day with mantra and significance.
 
 ━━━━━━━━━━━━━━━━
 
 💰 Practical tools
 
-• Live gold & silver prices (3-API cascade, India premium adjusted)
-• NSE / BSE indices, popular ETFs
-• Set price alerts
-• Custom reminder CRUD with notifications
+• **Gold Price** — live 22K / 24K gold and silver, 3-API cascade, India premium adjusted, alert subscriptions.
+• **Stock Market** — NIFTY 50, NIFTY BANK, popular ETFs and stocks, served by our own Cloud Function for reliable data even on patchy networks.
+• **Holidays** — India + Telangana/AP.
+• **Reminders** — custom CRUD with notifications.
 
 ━━━━━━━━━━━━━━━━
 
@@ -101,23 +103,19 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 --- END ---
 
-## What's New (release notes — last 4000 chars max for Play Console)
+## What's New (release notes for Play Console — under 500 chars)
 
-✨ **v2.4.3 — Real-world Android polish**
+✨ v2.4.5 — Readability + clarity polish
 
-• Location auto-detect repaired end-to-end. Fixed reverse-geocoding (now uses Geoapify primary, no longer depends on a disabled Google Geocoding API). Both IP geolocation fallbacks replaced with working providers.
-• Vedic Horoscope birth-place search — guaranteed to return results even with patchy networks: 4-tier provider chain plus a 150-city offline fallback covering every Telangana / AP district + Telugu-diaspora hubs.
-• Birth-date picker overhauled — bigger 5-row scroll wheels, more sensitive flicks, date display sits directly above the date wheel (and time above time).
-• Top + bottom navigation bars — bigger fonts, drag-to-scroll no longer triggers accidental tile opens.
-• Muhurtam moved to the Daily section. Tap the tile and see all 6 event types — last selection no longer persists.
-• Daily notification body refreshes per day (was showing yesterday's panchangam).
-• Today's Summary card — chip layout reworked so timing range never gets cropped on small phones.
-• Vedic Personality — birth date + time pinned to top with one-tap edit.
-• "Read More" in horoscope details now opens reliably (race condition fixed).
-• Many typography + WCAG contrast bumps based on tester feedback.
+• Home grid + top/bottom nav bars now share the same short labels everywhere
+• Panchangam Elements (Tithi, Nakshatra, Yoga…) — redesigned cards with uniform gold accent, in-line icons for both Telugu and English, readable Paksha labels
+• Birth-date picker — top title row removed, ~50 px reclaimed
+• Horoscope, Matchmaking, Muhurtam PDFs — body type bumped to 17 pt with brand-aligned section cards and icons
+• Daily morning notification — Neethi Sukta now appears above Android's collapsed cutoff
+• Dharma Debate share preview now carries the context, arguments and source reference
 
 ## Keywords (comma separated, 200 chars max)
-ramayana telugu, mahabharata telugu, ithihaasa telugu, bhagavad gita telugu, telugu panchangam, తెలుగు పంచాంగం, neethi suktalu, chanakya niti telugu, vidura niti, sanskrit word of the day, dharma debate, hanuman chalisa, vishnu sahasranama, gayatri mantra, daily sloka, sanatana dharma, sanskrit class 10, indian history textbook, tithi today, nakshatram today, rahu kalam, festival calendar telugu, ekadashi 2026, gold price today india, vedic horoscope telugu, telugu jathakam, kundali milan, matchmaking telugu, muhurtham, daily quiz hindu, dharma values, telugu meditation, telugu mantras
+ramayana telugu, mahabharata telugu, ithihaasa telugu, bhagavad gita telugu, telugu panchangam, తెలుగు పంచాంగం, neethi suktalu, moral quotes telugu, chanakya niti telugu, vidura niti, sanskrit word of the day, dharma debate, hanuman chalisa, vishnu sahasranama, gayatri mantra, daily sloka, sanatana dharma, sanskrit class 10, indian history textbook, tithi today, nakshatram today, rahu kalam, festival calendar telugu, ekadashi 2026, gold price today india, zodiac sign telugu, vedic horoscope telugu, telugu jathakam, kundali milan, matchmaking telugu, muhurtham, daily quiz hindu, dharma values, telugu meditation, telugu mantras, stock market india, nse nifty
 
 ## Category
 Education

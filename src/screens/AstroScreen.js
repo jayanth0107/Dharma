@@ -335,8 +335,8 @@ const s = StyleSheet.create({
     borderColor: DarkColors.borderCard,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  cardTitle: { fontSize: 17, fontWeight: '600', letterSpacing: 0.3 },
-  cardSubtitle: { fontSize: 14, color: DarkColors.silver, marginTop: 2, fontWeight: '500' },
+  cardTitle: { fontSize: 18, fontWeight: '600', letterSpacing: 0.3 },
+  cardSubtitle: { fontSize: 15, color: DarkColors.silver, marginTop: 3, fontWeight: '500' },
 
   // Sanskrit + Roman block (used by Concept, Upanishad, Yoga Sutra)
   sanskritText: {
@@ -345,7 +345,7 @@ const s = StyleSheet.create({
     letterSpacing: 0.4, lineHeight: 28,
   },
   romanText: {
-    fontSize: 14, color: DarkColors.silverLight, textAlign: 'center',
+    fontSize: 15, color: DarkColors.silverLight, textAlign: 'center',
     fontWeight: '500', fontStyle: 'italic', paddingBottom: 10,
   },
   meaningText: {
@@ -364,16 +364,19 @@ const s = StyleSheet.create({
     fontWeight: '400', paddingBottom: 8,
   },
 
-  // Source link (small clickable footer)
+  // Source link — was 11 pt before 2026-05-16 (off-token, below the
+  // app's caption floor of 13). Bumped to 14 pt + 600 weight so the
+  // reference text ("Patanjali Yoga Sutra ↗", "Ashtanga Hridayam ↗")
+  // reads as a clear link, not a fineprint.
   sourceLink: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingVertical: 6, paddingTop: 4,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingVertical: 8,
     borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
-    marginTop: 6,
+    marginTop: 8,
   },
   sourceLinkText: {
-    flex: 1, fontSize: 11, color: DarkColors.gold,
-    fontWeight: '600', fontStyle: 'italic',
+    flex: 1, fontSize: 14, color: DarkColors.gold,
+    fontWeight: '600', letterSpacing: 0.2,
   },
 
   // Ayurveda-specific

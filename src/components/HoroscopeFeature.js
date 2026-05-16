@@ -18,7 +18,7 @@ import { BirthDatePicker } from './BirthDatePicker';
 // BirthTimePicker merged into BirthDatePicker (showTime prop)
 import { LocationSearchModal } from './LocationSearchModal';
 import { ClearableInput } from './ClearableInput';
-import { loadForm, saveForm, clearForm, FORM_KEYS } from '../utils/formStorage';
+import { loadForm, saveForm, clearForm, loadBirthProfile, saveBirthProfile, FORM_KEYS } from '../utils/formStorage';
 import { useLanguage } from '../context/LanguageContext';
 
 // ── Horoscope Card (shown in main feed) ──
@@ -129,10 +129,14 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
   const [showSavedList, setShowSavedList] = useState(false);
   const searchTimer = useRef(null);
 
-  // Load saved form + saved profiles on first open
+  // Load saved form + saved profiles on first open. Falls back to the
+  // shared birth profile for date/time when this screen's own form is
+  // empty — so a DOB entered in Personality / Daily Rashi prefills
+  // here. Place + name are screen-specific and never prefilled.
   React.useEffect(() => {
     if (visible && !formLoaded) {
-      loadForm(FORM_KEYS.horoscope).then(saved => {
+      (async () => {
+        const saved = await loadForm(FORM_KEYS.horoscope);
         if (saved) {
           if (saved.name) setName(saved.name);
           if (saved.birthDate) setBirthDate(saved.birthDate);
@@ -141,8 +145,17 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
           if (saved.placeQuery) setPlaceQuery(saved.placeQuery);
           if (saved.birthPlace) setBirthPlace(saved.birthPlace);
         }
+        if (!saved?.birthDate) {
+          const shared = await loadBirthProfile();
+          if (shared) {
+            const d = shared.date;
+            setBirthDateObj(d);
+            setBirthDate(`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`);
+            if (!saved?.birthTime && shared.birthTime) setBirthTime(shared.birthTime);
+          }
+        }
         setFormLoaded(true);
-      });
+      })();
       loadForm(FORM_KEYS.horoscopeSaved).then(list => {
         if (Array.isArray(list)) setSavedProfiles(list);
       });
@@ -502,6 +515,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                     setBirthDate(`${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}`);
                     if (timeStr) setBirthTime(timeStr);
                     setShowDatePicker(false);
+                    saveBirthProfile(d, timeStr || birthTime);
                   }}
                   onClose={() => setShowDatePicker(false)}
                 />
@@ -1363,42 +1377,190 @@ function buildHoroscopeHtml(h) {
     if (typeof v === 'object') return v.te || v.telugu || v.en || v.english || '';
     return String(v);
   };
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const dateStr = h.birthDate?.toLocaleDateString?.('en-IN', { year:'numeric', month:'long', day:'numeric' }) || '';
+  const generated = new Date().toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' });
+  return `<!DOCTYPE html><html lang="te"><head><meta charset="utf-8">
     <style>
-      body{font-family:sans-serif;max-width:700px;margin:0 auto;padding:30px;color:#2C1810;line-height:1.8}
-      h1{color:#4A1A6B;font-size:24px;text-align:center;border-bottom:2px solid #4A1A6B;padding-bottom:8px}
-      h2{color:#4A1A6B;font-size:18px;margin-top:20px}
-      .info{text-align:center;color:#6B5B4B;margin-bottom:20px}
-      .grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
-      .card{flex:1;min-width:140px;background:#F8F5F0;border-radius:10px;padding:12px;border-left:3px solid #4A1A6B;text-align:center}
-      .card-label{font-size:12px;color:#8A7A6A}
-      .card-value{font-size:18px;font-weight:800;color:#4A1A6B;margin:4px 0}
-      .card-sub{font-size:11px;color:#6B5B4B}
-      .pred{margin:12px 0;padding:12px;background:#FAFAF5;border-radius:8px;border-left:3px solid #E8751A}
-      .pred-title{font-weight:700;color:#4A1A6B;margin-bottom:4px}
-      .footer{text-align:center;color:#aaa;font-size:11px;margin-top:30px;border-top:1px solid #eee;padding-top:12px}
-      .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:60px;color:rgba(74,26,107,0.04);font-weight:900;pointer-events:none;z-index:-1;white-space:nowrap}
+      @page { margin: 18mm 14mm; size: A4; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Telugu', sans-serif;
+        max-width: 760px; margin: 0 auto; padding: 24px 18px;
+        color: #2C1810; background: #FFFFFF;
+        font-size: 18px; line-height: 1.65;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      h1 { color: #E8751A; font-size: 26px; text-align: center; font-weight: 700; }
+      h2 { color: #E8751A; font-size: 22px; font-weight: 700; margin: 0;
+           padding-bottom: 8px; border-bottom: 2px solid #D4A017; }
+      .title-page {
+        background: linear-gradient(135deg, #FFF5E6 0%, #FFE8C8 100%);
+        border: 2px solid #D4A017; border-radius: 14px;
+        padding: 32px 22px; text-align: center; margin-bottom: 24px;
+      }
+      .brand-flag { font-size: 36px; margin-bottom: 6px; }
+      .brand-name { color: #E8751A; font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+      .brand-tag { color: #D4A017; font-size: 15px; letter-spacing: 2px; margin-bottom: 18px; }
+      .rule { width: 60px; height: 2px; background: #D4A017; margin: 0 auto 18px; }
+      .report-name { color: #2C1810; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+      .report-sub  { color: #E8751A; font-size: 17px; font-weight: 500; margin-bottom: 14px; }
+      .person { color: #D4A017; font-size: 22px; font-weight: 700; margin-top: 6px; }
+      .meta { color: #6B5B4B; font-size: 16px; margin-top: 10px; line-height: 1.7; }
+      .meta strong { color: #2C1810; font-weight: 600; }
+      .section-card {
+        background: #FAF6F0; border: 1px solid #E8D8C0; border-radius: 12px;
+        padding: 18px 20px; margin-bottom: 20px;
+      }
+      .section-head {
+        display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+        padding-bottom: 8px; border-bottom: 2px solid #D4A017;
+      }
+      .section-icon { font-size: 24px; }
+      .section-title { color: #E8751A; font-size: 22px; font-weight: 700; }
+      .grid { display: flex; flex-wrap: wrap; gap: 12px; }
+      .card {
+        flex: 1; min-width: 160px;
+        background: #FFFFFF; border-radius: 10px; padding: 14px 12px;
+        border: 1px solid #E8D8C0; border-left: 4px solid #D4A017;
+        text-align: center;
+      }
+      .card-icon { font-size: 20px; margin-bottom: 4px; }
+      .card-label { font-size: 15px; color: #8A6A40; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+      .card-value { font-size: 22px; font-weight: 800; color: #E8751A; margin: 6px 0 2px; }
+      .card-sub { font-size: 16px; color: #6B5B4B; }
+      .pred {
+        margin: 0 0 14px; padding: 14px 16px;
+        background: #FFFFFF; border-radius: 10px;
+        border-left: 4px solid #E8751A; border-top: 1px solid #E8D8C0;
+        border-right: 1px solid #E8D8C0; border-bottom: 1px solid #E8D8C0;
+      }
+      .pred:last-child { margin-bottom: 0; }
+      .pred-head {
+        display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+      }
+      .pred-icon { font-size: 20px; }
+      .pred-title { font-weight: 700; color: #E8751A; font-size: 19px; }
+      .pred-body { color: #2C1810; font-size: 17px; line-height: 1.7; }
+      .footer {
+        text-align: center; color: #6B5B4B;
+        margin-top: 24px; padding-top: 16px;
+        border-top: 1px solid #E8D8C0;
+      }
+      .footer-brand { color: #D4A017; font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+      .footer-sub { color: #8A6A40; font-size: 15px; margin-bottom: 10px; }
+      .footer-note { color: #999; font-size: 14px; line-height: 1.55; max-width: 600px; margin: 0 auto; }
+      .watermark {
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%,-50%) rotate(-30deg);
+        font-size: 80px; color: rgba(212,160,23,0.04);
+        font-weight: 900; pointer-events: none; z-index: -1; white-space: nowrap;
+      }
     </style>
     </head><body>
-    <div class="watermark">Generated for ${h.name}</div>
-    <h1>🙏 వేద జాతకం — ${h.name}</h1>
-    <p class="info">${h.birthDate?.toLocaleDateString?.('te-IN') || ''} • ${h.birthTime} • ${h.birthPlace?.name || ''}</p>
-    <div class="grid">
-      <div class="card"><div class="card-label">రాశి</div><div class="card-value">${h.rashi?.telugu || ''}</div><div class="card-sub">${h.rashi?.english || ''}</div></div>
-      <div class="card"><div class="card-label">నక్షత్రం</div><div class="card-value">${h.nakshatra?.telugu || ''}</div><div class="card-sub">పాద ${h.nakshatra?.pada || ''}</div></div>
-      <div class="card"><div class="card-label">లగ్నం</div><div class="card-value">${h.lagna?.telugu || ''}</div><div class="card-sub">${h.lagna?.english || ''}</div></div>
-      <div class="card"><div class="card-label">సూర్య రాశి</div><div class="card-value">${h.sunSign?.telugu || ''}</div><div class="card-sub">${h.sunSign?.english || ''}</div></div>
+    <div class="watermark">ధర్మ</div>
+
+    <!-- ══════════════ TITLE PAGE ══════════════ -->
+    <div class="title-page">
+      <div class="brand-flag">🚩</div>
+      <div class="brand-name">ధర్మ — సనాతనం</div>
+      <div class="brand-tag">DHARMA: TELUGU ASTRO, CALENDAR &amp; GOLD</div>
+      <div class="rule"></div>
+      <div class="report-name">వేద జాతకం</div>
+      <div class="report-sub">Vedic Horoscope Report</div>
+      <div class="person">🙏 ${esc(h.name)}</div>
+      <div class="meta">
+        <div>📅 <strong>${esc(dateStr)}</strong></div>
+        <div>🕐 ${esc(h.birthTime || '')} &nbsp;·&nbsp; 📍 ${esc(h.birthPlace?.name || '')}</div>
+        <div style="margin-top:8px;color:#999;font-size:14px;">Generated on ${esc(generated)}</div>
+      </div>
     </div>
-    <h2>జాతక ఫలాలు</h2>
+
+    <!-- ══════════════ KEY ASTROLOGICAL POSITIONS ══════════════ -->
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-icon">🌟</span>
+        <span class="section-title">జన్మ గ్రహ స్థితి — Birth Chart Positions</span>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="card-icon">🌙</div>
+          <div class="card-label">రాశి · Moon Sign</div>
+          <div class="card-value">${esc(h.rashi?.telugu || '')}</div>
+          <div class="card-sub">${esc(h.rashi?.english || '')}</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⭐</div>
+          <div class="card-label">నక్షత్రం · Nakshatra</div>
+          <div class="card-value">${esc(h.nakshatra?.telugu || '')}</div>
+          <div class="card-sub">పాద ${esc(h.nakshatra?.pada || '')}</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧭</div>
+          <div class="card-label">లగ్నం · Ascendant</div>
+          <div class="card-value">${esc(h.lagna?.telugu || '')}</div>
+          <div class="card-sub">${esc(h.lagna?.english || '')}</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">☀️</div>
+          <div class="card-label">సూర్య రాశి · Sun Sign</div>
+          <div class="card-value">${esc(h.sunSign?.telugu || '')}</div>
+          <div class="card-sub">${esc(h.sunSign?.english || '')}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ JAATAKA PHALA ══════════════ -->
     ${h.predictions ? `
-      <div class="pred"><div class="pred-title">వ్యక్తిత్వం</div>${pickT(h.predictions.personality)}</div>
-      <div class="pred"><div class="pred-title">వృత్తి</div>${pickT(h.predictions.career)}</div>
-      <div class="pred"><div class="pred-title">ఆరోగ్యం</div>${pickT(h.predictions.health)}</div>
-      <div class="pred"><div class="pred-title">సంబంధాలు</div>${pickT(h.predictions.relationships)}</div>
-      <div class="pred"><div class="pred-title">ఆధ్యాత్మికత</div>${pickT(h.predictions.spiritual)}</div>
-    ` : ''}
-    ${h.dailyForecast ? `<h2>📅 నేటి ఫలం</h2><p>${pickT(h.dailyForecast)}</p>` : ''}
-    <div class="footer">Generated by ధర్మ దినచర్య (ధర్మ) App<br>Vedic calculations using Drik Ganita + Lahiri Ayanamsa<br>🙏 సర్వే జనాః సుఖినో భవంతు</div>
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-icon">📖</span>
+        <span class="section-title">జాతక ఫలాలు — Life Predictions</span>
+      </div>
+      <div class="pred">
+        <div class="pred-head"><span class="pred-icon">👤</span><span class="pred-title">వ్యక్తిత్వం — Personality</span></div>
+        <div class="pred-body">${pickT(h.predictions.personality)}</div>
+      </div>
+      <div class="pred">
+        <div class="pred-head"><span class="pred-icon">💼</span><span class="pred-title">వృత్తి — Career</span></div>
+        <div class="pred-body">${pickT(h.predictions.career)}</div>
+      </div>
+      <div class="pred">
+        <div class="pred-head"><span class="pred-icon">❤️</span><span class="pred-title">ఆరోగ్యం — Health</span></div>
+        <div class="pred-body">${pickT(h.predictions.health)}</div>
+      </div>
+      <div class="pred">
+        <div class="pred-head"><span class="pred-icon">💑</span><span class="pred-title">సంబంధాలు — Relationships</span></div>
+        <div class="pred-body">${pickT(h.predictions.relationships)}</div>
+      </div>
+      <div class="pred">
+        <div class="pred-head"><span class="pred-icon">🧘</span><span class="pred-title">ఆధ్యాత్మికత — Spirituality</span></div>
+        <div class="pred-body">${pickT(h.predictions.spiritual)}</div>
+      </div>
+    </div>` : ''}
+
+    <!-- ══════════════ DAILY FORECAST (optional) ══════════════ -->
+    ${h.dailyForecast ? `
+    <div class="section-card">
+      <div class="section-head">
+        <span class="section-icon">📅</span>
+        <span class="section-title">నేటి ఫలం — Today's Forecast</span>
+      </div>
+      <div class="pred-body">${pickT(h.dailyForecast)}</div>
+    </div>` : ''}
+
+    <!-- ══════════════ FOOTER ══════════════ -->
+    <div class="footer">
+      <div class="footer-brand">🙏 ధర్మ — సనాతనం</div>
+      <div class="footer-sub">Dharma: Telugu Astro, Calendar &amp; Gold</div>
+      <div class="footer-note">
+        ⚠ ఈ నివేదిక దృక్ గణిత మరియు లాహిరి అయనాంశ ఆధారంగా ఖగోళశాస్త్రీయంగా రూపొందించబడింది. ఇది సలహా మాత్రమే.<br/>
+        This report uses Drik Ganita + Lahiri Ayanamsa calculations. Advisory only — please consult a qualified astrologer for important decisions.
+      </div>
+      <div style="color:#bbb;font-size:13px;margin-top:10px;">
+        📲 play.google.com/store/apps/details?id=com.dharmadaily.app
+      </div>
+    </div>
     </body></html>`;
 }
 
