@@ -154,9 +154,17 @@ export function SettingsModal({ visible, onClose, isPremium, onTogglePremium, em
                   value={settings.dailyPanchangam} onChange={(v) => updateSetting('dailyPanchangam', v)}
                   iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
+                {/* Daily Neethi Sukta — morning (8 AM). Default ON; toggle
+                    remains so users can turn it off (Play Store policy). */}
                 <SettingRow
                   icon="format-quote-open" label={t(TR.dailyQuote.te, TR.dailyQuote.en)} sublabel={t(TR.dailyQuoteSub.te, TR.dailyQuoteSub.en)}
                   value={settings.dailyQuote} onChange={(v) => updateSetting('dailyQuote', v)}
+                  iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
+                />
+                {/* Daily Bhagavad Gita — evening (7 PM). Default ON. */}
+                <SettingRow
+                  icon="book-open-variant" label={t(TR.dailyGita.te, TR.dailyGita.en)} sublabel={t(TR.dailyGitaSub.te, TR.dailyGitaSub.en)}
+                  value={settings.dailyGita} onChange={(v) => updateSetting('dailyGita', v)}
                   iconSize={settingIconSize} labelSize={settingLabelSize} sublabelSize={settingSublabelSize} rowPad={settingRowPad}
                 />
                 <SettingRow

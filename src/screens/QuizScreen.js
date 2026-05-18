@@ -103,7 +103,7 @@ export function QuizScreen() {
     return (
       <SwipeWrapper screenName="Quiz">
       <View style={s.screen}>
-        <PageHeader title={t('క్విజ్ ఫలితం', 'Quiz Result')} />
+        <PageHeader title={t('జ్ఞాన పోటి ఫలితం', 'Quiz Result')} />
         <TopTabBar />
         <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]}>
           <View style={s.resultCard}>
@@ -188,7 +188,7 @@ export function QuizScreen() {
   return (
     <SwipeWrapper screenName="Quiz">
     <View style={s.screen}>
-      <PageHeader title={t('నేటి క్విజ్', 'Today\'s Quiz')} />
+      <PageHeader title={t('నేటి జ్ఞాన పోటి', 'Today\'s Quiz')} />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]} keyboardShouldPersistTaps="handled">
 

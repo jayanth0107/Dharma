@@ -9,11 +9,18 @@
 //
 //   1. Morning Briefing  (~6 AM, default ON)        — Panchangam digest
 //   2. Ramayana episode  (~7 AM, default OFF)       — daily Ithihaasa
-//   3. Gita sloka        (~9 AM, default OFF)       — daily verse
-//   4. Neethi Sukta      (~12 PM, default ON)       — wisdom nudge
-//   5. Mahabharata       (~6 PM, default OFF)       — evening Ithihaasa
+//   3. Neethi Sukta      (~8 AM, default ON)        — morning wisdom nudge (was noon)
+//   4. Mahabharata       (~6 PM, default OFF)       — evening Ithihaasa
+//   5. Gita sloka        (~7 PM, default ON)        — evening verse (was 9 AM)
 //   6. Festival reminder (1 day before, 6 PM)       — event-driven
 //   7. Ekadashi reminder (1 day before, 6 PM)       — event-driven
+//
+// The two "daily recommended" streams the app pushes by default are
+// Neethi Sukta in the morning (Vidhi/Nishedha framing — what to do +
+// what to avoid per the shastras) and Bhagavad Gita in the evening
+// (verse to reflect on). Both are still individually toggleable in
+// Settings — Play Store policy requires every notification to be
+// disable-able by the user.
 //
 // All notifications are bilingual — content is rendered in the user's
 // chosen language (read from @dharma_lang at schedule time). Switching
@@ -36,15 +43,20 @@ import { getTodayGitaSloka } from '../data/bhagavadGita';
 const NOTIF_SETTINGS_KEY = '@dharma_notif_settings';
 const LANG_KEY = '@dharma_lang';
 
-// Default settings — Neethi Sukta + Panchangam + event reminders ON;
-// Ithihaasa / Gita OFF so users opt-in to texts they want to follow.
+// Default settings — Panchangam + Neethi Sukta (morning) + Bhagavad
+// Gita (evening) + event reminders ON. The two "daily recommended"
+// streams (Neethi + Gita) are ON by default to satisfy the app's
+// goal of giving the user two contemplation prompts a day — what to
+// do/avoid in the morning, a verse to reflect on in the evening.
+// Ithihaasa (Ramayana / Mahabharata) stay OFF so users opt in only
+// to the texts they want to follow.
 const DEFAULT_SETTINGS = {
   enabled: true,
   dailyPanchangam: true,      // Morning briefing — 6 AM
   dailyRamayana: false,       // Daily Ramayana episode — 7 AM
-  dailyGita: false,           // Daily Gita sloka — 9 AM
-  dailyQuote: true,           // Daily Neethi Sukta — 12 PM
+  dailyQuote: true,           // Daily Neethi Sukta — 8 AM (morning)
   dailyMahabharata: false,    // Daily Mahabharata episode — 6 PM
+  dailyGita: true,            // Daily Gita sloka — 7 PM (evening)
   festivalReminder: true,     // 1 day before festivals
   ekadashiReminder: true,     // 1 day before ekadashi
   notifHour: 6,               // Morning briefing time (user-adjustable)
@@ -53,10 +65,12 @@ const DEFAULT_SETTINGS = {
 
 // Fixed notification slots for the wisdom-content streams. Spread
 // across the day so users get one nudge at a time, not a barrage.
+// Neethi moved from noon → 8 AM (morning contemplation).
+// Gita moved from 9 AM → 7 PM (evening contemplation).
 const SLOT_RAMAYANA    = { hour: 7,  minute: 0 };
-const SLOT_GITA        = { hour: 9,  minute: 0 };
-const SLOT_NEETHI      = { hour: 12, minute: 0 };
+const SLOT_NEETHI      = { hour: 8,  minute: 0 };
 const SLOT_MAHABHARATA = { hour: 18, minute: 0 };
+const SLOT_GITA        = { hour: 19, minute: 0 };
 
 // ─────────────────────────────────────────────────────────────────────────
 // Storage helpers

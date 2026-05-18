@@ -30,8 +30,8 @@ export const TR = {
   dailyRashiSub:  { te: 'మీ  రాశి',           en: 'Your Rashi' },
   jaatakam:       { te: 'వేద జాతకం',          en: 'Vedic Horoscope' },
   jaatakamSub:    { te: 'వేద జాతకం',          en: 'Vedic Horoscope' },
-  matchmaking:    { te: 'జాతక పొందిక',        en: 'Love Match' },
-  matchmakingSub: { te: 'ప్రేమ పొందిక',       en: 'Love Match' },
+  matchmaking:    { te: 'ఈడు జోడు',           en: 'Love Match' },
+  matchmakingSub: { te: 'ఈడు జోడు',           en: 'Love Match' },
   muhurtamTile:   { te: 'శుభ ముహూర్తాలు',      en: 'Muhurtam & Timings' },
   muhurtamSub:    { te: 'ముహూర్తాలు & సమయాలు', en: 'Muhurtam & Timings' },
   astro:          { te: 'వేద విజ్ఞానం',       en: 'Vedic Wisdom' },
@@ -181,7 +181,10 @@ export const TR = {
   dailyPanchang: { te: 'దైనిక పంచాంగం', en: 'Daily Panchang' },
   dailyPanchangSub: { te: 'ప్రతిరోజూ సూర్యోదయం సమయంలో పంచాంగ సారాంశం', en: 'Daily panchang summary at sunrise' },
   dailyQuote: { te: 'దైనిక నీతి సూక్తం', en: 'Daily Neethi Sukta' },
-  dailyQuoteSub: { te: 'మధ్యాహ్నం 12 గంటలకు చాణక్య · విదుర · తిరుక్కురళ్ నుండి జ్ఞాన వాక్యం', en: 'Wisdom from Chanakya · Vidura · Thirukkural at noon' },
+  dailyQuoteSub: { te: 'ఉదయం 8 గంటలకు చాణక్య · విదుర · తిరుక్కురళ్ నుండి జ్ఞాన వాక్యం', en: 'Wisdom from Chanakya · Vidura · Thirukkural at 8 AM' },
+  dailyGita: { te: 'దైనిక భగవద్గీత', en: 'Daily Bhagavad Gita' },
+  dailyGitaSub: { te: 'సాయంత్రం 7 గంటలకు భగవద్గీత శ్లోకం + భావం', en: 'Bhagavad Gita sloka + meaning at 7 PM' },
+  recommendedDaily: { te: 'రోజువారీ సిఫార్సు', en: 'Daily Recommended' },
   festivalReminder: { te: 'పండుగ రిమైండర్', en: 'Festival Reminder' },
   festivalReminderSub: { te: 'పండుగకు 1 రోజు ముందు రిమైండర్', en: 'Reminder 1 day before festival' },
   ekadashiReminder: { te: 'ఏకాదశి రిమైండర్', en: 'Ekadashi Reminder' },
@@ -333,6 +336,16 @@ export const TR = {
   claimCodeSuccess: { te: '🎉 Premium సక్రియం అయింది!', en: '🎉 Premium activated!' },
   claimCodeError: { te: 'కోడ్ రిడీమ్ విఫలమైంది', en: 'Code redemption failed' },
   haveClaimCode: { te: 'క్లెయిమ్ కోడ్ ఉందా?', en: 'Have a claim code?' },
+
+  // ── NeethiSukta — Vidhi / Nishedha / Shastra ──
+  // "Always follow the Shastras" framing — the do/avoid pair derived from
+  // each sukta's quote + meaning, with the shastra source as citation.
+  followShastras:    { te: 'శాస్త్రాన్ని అనుసరించండి', en: 'Always follow the Shastras' },
+  followShastrasSub: { te: 'ధర్మంలో ఏది చేయాలి, ఏది మానాలి — శాస్త్రాలే మార్గదర్శి', en: 'What to do, what to avoid — the Shastras are our guide' },
+  shastraSaysHeader: { te: 'శాస్త్రం ఏం చెబుతుంది', en: 'What the Shastras say' },
+  vidhiLabel:        { te: 'విధి — చేయవలసినది', en: 'Vidhi — Do' },
+  nishedhaLabel:     { te: 'నిషేధం — చేయరానిది', en: 'Nishedha — Avoid' },
+  shastraSource:     { te: 'శాస్త్రం', en: 'Source' },
 
   // ── Share message ──
   shareMessage: {

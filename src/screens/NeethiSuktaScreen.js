@@ -15,6 +15,7 @@ import { SectionShareRow } from '../components/SectionShareRow';
 import { useSpeaker } from '../utils/speechService';
 import { getTodayNeethiSukta, NEETHI_SUKTAS } from '../data/neethiSuktaData';
 import { SacredContentDisclaimer } from '../components/SacredContentDisclaimer';
+import { TR } from '../data/translations';
 
 const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
 
@@ -36,14 +37,20 @@ export function NeethiSuktaScreen() {
   const buildShareText = (sukta) => {
     const isEn = lang === 'en';
     const L = isEn
-      ? { hdr: 'Dharma — Neethi Sukta', meaning: 'Meaning', apply: 'Apply Today' }
-      : { hdr: 'ధర్మ — నీతి సూక్తం',     meaning: 'అర్థం',   apply: 'ఈరోజు ఆచరించండి' };
-    return `🙏 *${L.hdr}*\n\n` +
+      ? { hdr: 'Dharma — Neethi Sukta', meaning: 'Meaning', apply: 'Apply Today', vidhi: 'Vidhi (Do)', nishedha: 'Nishedha (Avoid)', shastra: 'Source' }
+      : { hdr: 'ధర్మ — నీతి సూక్తం',     meaning: 'అర్థం',   apply: 'ఈరోజు ఆచరించండి', vidhi: 'విధి (చేయాలి)', nishedha: 'నిషేధం (మానాలి)', shastra: 'శాస్త్రం' };
+    let body = `🙏 *${L.hdr}*\n\n` +
       `📜 ${t(sukta.source.te, sukta.source.en)}\n\n` +
       `"${t(sukta.quote.te, sukta.quote.en)}"\n\n` +
       `💡 *${L.meaning}:* ${t(sukta.meaning.te, sukta.meaning.en)}\n\n` +
-      `✅ *${L.apply}:* ${t(sukta.applyToday.te, sukta.applyToday.en)}\n\n` +
-      `━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+      `✅ *${L.apply}:* ${t(sukta.applyToday.te, sukta.applyToday.en)}\n`;
+    if (sukta.vidhi && sukta.nishedha) {
+      body += `\n🕉️ *${L.vidhi}:* ${t(sukta.vidhi.te, sukta.vidhi.en)}\n` +
+              `⚠️ *${L.nishedha}:* ${t(sukta.nishedha.te, sukta.nishedha.en)}\n`;
+      if (sukta.shastra) body += `📖 *${L.shastra}:* ${t(sukta.shastra.te, sukta.shastra.en)}\n`;
+    }
+    body += `\n━━━━━━━━━━━━━━━━\n📲 *Dharma App*\n${PLAY_LINK}`;
+    return body;
   };
 
   const renderSukta = (sukta, isToday = false) => (
@@ -89,6 +96,47 @@ export function NeethiSuktaScreen() {
         </View>
       </View>
 
+      {/* What the Shastras say — Vidhi (Do) / Nishedha (Avoid) pair.
+          Colour scheme is intentionally dark-theme native: gold for the
+          positive vidhi card, saffron for the cautionary nishedha card.
+          Green/kumkum read as off-theme on the dark surface. */}
+      {sukta.vidhi && sukta.nishedha && (
+        <View style={s.shastraBlock}>
+          <View style={s.shastraHeader}>
+            <MaterialCommunityIcons name="book-open-page-variant" size={16} color={DarkColors.gold} />
+            <Text style={s.shastraHeaderText}>{t(TR.shastraSaysHeader.te, TR.shastraSaysHeader.en)}</Text>
+          </View>
+
+          {/* Vidhi — gold accent (positive / prescribed) */}
+          <View style={s.vidhiCard}>
+            <View style={s.vidhiHeader}>
+              <MaterialCommunityIcons name="check-decagram" size={18} color={DarkColors.gold} />
+              <Text style={s.vidhiLabel}>{t(TR.vidhiLabel.te, TR.vidhiLabel.en)}</Text>
+            </View>
+            <Text style={s.vidhiText}>{t(sukta.vidhi.te, sukta.vidhi.en)}</Text>
+          </View>
+
+          {/* Nishedha — saffron accent (cautionary / prohibited) */}
+          <View style={s.nishedhaCard}>
+            <View style={s.nishedhaHeader}>
+              <MaterialCommunityIcons name="alert-octagon-outline" size={18} color={DarkColors.saffron} />
+              <Text style={s.nishedhaLabel}>{t(TR.nishedhaLabel.te, TR.nishedhaLabel.en)}</Text>
+            </View>
+            <Text style={s.nishedhaText}>{t(sukta.nishedha.te, sukta.nishedha.en)}</Text>
+          </View>
+
+          {/* Shastra source footer */}
+          {sukta.shastra && (
+            <View style={s.shastraSourceRow}>
+              <MaterialCommunityIcons name="script-text-outline" size={14} color={DarkColors.goldLight} />
+              <Text style={s.shastraSourceText}>
+                {t(TR.shastraSource.te, TR.shastraSource.en)}: {t(sukta.shastra.te, sukta.shastra.en)}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
       {/* Share */}
       <SectionShareRow section={`neethi_${sukta.id}`} buildText={() => buildShareText(sukta)} />
     </View>
@@ -105,6 +153,16 @@ export function NeethiSuktaScreen() {
           <MaterialCommunityIcons name="script-text" size={28} color={DarkColors.gold} />
           <Text style={s.headerTitle}>{t('నీతి సూక్తాలు', 'Daily Wisdom Quotes')}</Text>
           <Text style={s.headerSub}>{t('చాణక్య, విదుర, భర్తృహరి, పంచతంత్రం నుండి జీవిత పాఠాలు', 'Life lessons from Chanakya, Vidura, Bhartrihari & Panchatantra')}</Text>
+        </View>
+
+        {/* Follow-the-Shastras banner — sets the frame for the
+            Vidhi/Nishedha cards below. Gold-bordered, dark-theme native. */}
+        <View style={s.followBanner}>
+          <MaterialCommunityIcons name="om" size={20} color={DarkColors.gold} />
+          <View style={{ flex: 1 }}>
+            <Text style={s.followBannerTitle}>{t(TR.followShastras.te, TR.followShastras.en)}</Text>
+            <Text style={s.followBannerSub}>{t(TR.followShastrasSub.te, TR.followShastrasSub.en)}</Text>
+          </View>
         </View>
 
         {/* Today's sukta */}
@@ -177,4 +235,62 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   browseBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+
+  // ── Follow-the-Shastras banner ──
+  // Sits between the page intro and today's card; gold-tinted on dark bg.
+  followBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 12, paddingHorizontal: 14, borderRadius: 14,
+    marginBottom: 14,
+    backgroundColor: DarkColors.goldDim,
+    borderWidth: 1, borderColor: DarkColors.borderGold,
+  },
+  followBannerTitle: { fontSize: 16, fontWeight: '700', color: DarkColors.gold, marginBottom: 2 },
+  followBannerSub:   { fontSize: 13, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 18 },
+
+  // ── Shastra block: Vidhi (Do) + Nishedha (Avoid) + Source ──
+  // Dark-theme native palette: gold = positive/prescribed, saffron =
+  // cautionary/prohibited. Do NOT swap to tulasiGreen/kumkum here —
+  // they read as off-theme on the dark surface.
+  shastraBlock: { marginBottom: 12 },
+  shastraHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginTop: 4, marginBottom: 10,
+  },
+  shastraHeaderText: {
+    fontSize: 14, fontWeight: '700', color: DarkColors.gold,
+    letterSpacing: 0.3, textTransform: 'uppercase',
+  },
+
+  // Vidhi card — gold accent
+  vidhiCard: {
+    backgroundColor: DarkColors.goldDim,
+    borderLeftWidth: 3, borderLeftColor: DarkColors.gold,
+    borderTopRightRadius: 12, borderBottomRightRadius: 12,
+    padding: 12, marginBottom: 8,
+  },
+  vidhiHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  vidhiLabel:  { fontSize: 13, fontWeight: '700', color: DarkColors.gold, letterSpacing: 0.3 },
+  vidhiText:   { fontSize: 16, fontWeight: '500', color: '#FFFFFF', lineHeight: 25 },
+
+  // Nishedha card — saffron accent
+  nishedhaCard: {
+    backgroundColor: DarkColors.saffronDim,
+    borderLeftWidth: 3, borderLeftColor: DarkColors.saffron,
+    borderTopRightRadius: 12, borderBottomRightRadius: 12,
+    padding: 12, marginBottom: 8,
+  },
+  nishedhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  nishedhaLabel:  { fontSize: 13, fontWeight: '700', color: DarkColors.saffron, letterSpacing: 0.3 },
+  nishedhaText:   { fontSize: 16, fontWeight: '500', color: '#FFFFFF', lineHeight: 25 },
+
+  // Shastra source citation
+  shastraSourceRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingTop: 4, paddingHorizontal: 4, marginBottom: 4,
+  },
+  shastraSourceText: {
+    fontSize: 13, fontWeight: '500', color: DarkColors.goldLight,
+    fontStyle: 'italic',
+  },
 });

@@ -39,7 +39,7 @@ function PriceCard({ item, t, sizes }) {
   );
 }
 
-export function MarketScreen() {
+export function MarketScreen({ navigation }) {
   const { t } = useLanguage();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -157,7 +157,7 @@ export function MarketScreen() {
             <Text style={[s.sourceText, { fontSize: sourceTextSize }]}>{data?.source || ''}</Text>
 
             {/* Navigate to Gold prices */}
-            <TouchableOpacity style={[s.goldLink, { padding: goldLinkPad }]} onPress={() => {}}>
+            <TouchableOpacity style={[s.goldLink, { padding: goldLinkPad }]} onPress={() => navigation?.navigate('Gold')}>
               <MaterialCommunityIcons name="gold" size={goldIconSize} color={DarkColors.gold} />
               <Text style={[s.goldLinkText, { fontSize: goldLinkTextSize }]}>{t('బంగారం & వెండి భౌతిక ధరలు చూడండి', 'View physical Gold & Silver prices')}</Text>
             </TouchableOpacity>

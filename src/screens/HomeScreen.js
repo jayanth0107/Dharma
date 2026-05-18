@@ -331,10 +331,10 @@ export function HomeScreen({ navigation }) {
             with debate/quiz/sanskrit) */}
         <FeatureGrid>
           <FeatureTile icon="vote"             label={t('ధర్మ చర్చ', 'Debate')}    onPress={() => navigation.navigate('DharmaPoll')} />
-          <FeatureTile icon="head-question"    label={t('క్విజ్', 'Quiz')}         onPress={() => navigation.navigate('Quiz')} />
+          <FeatureTile icon="head-question"    label={t('జ్ఞాన పోటి', 'Quiz')}     onPress={() => navigation.navigate('Quiz')} />
           <FeatureTile icon="alpha-s-circle"   label={t('సంస్కృతం', 'Sanskrit')}   onPress={() => navigation.navigate('SanskritWord')} />
           <FeatureTile icon="account-circle"   label={t('వ్యక్తిత్వం', 'Personality')} onPress={() => navigation.navigate('RashiProfile')} />
-          <FeatureTile icon="heart-multiple"   label={t('పొందిక', 'Love Match')}   onPress={() => navigation.navigate('Matchmaking')} />
+          <FeatureTile icon="heart-multiple"   label={t('ఈడు జోడు', 'Love Match')}  onPress={() => navigation.navigate('Matchmaking')} />
           <FeatureTile icon="zodiac-leo"       label={t('విజ్ఞానం', 'Wisdom')}      onPress={() => navigation.navigate('Astro')} />
         </FeatureGrid>
 

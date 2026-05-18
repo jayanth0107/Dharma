@@ -38,10 +38,10 @@ export const MAIN_SECTIONS = [
 
   // ── 3. Youth & Learning (15–25, engagement, Match) ──
   { name: 'DharmaPoll',   icon: 'vote',                   te: 'ధర్మ చర్చ',           en: 'Debate' },
-  { name: 'Quiz',         icon: 'head-question',          te: 'క్విజ్',             en: 'Quiz' },
+  { name: 'Quiz',         icon: 'head-question',          te: 'జ్ఞాన పోటి',          en: 'Quiz' },
   { name: 'SanskritWord', icon: 'alpha-s-circle',         te: 'సంస్కృతం',           en: 'Sanskrit' },
   { name: 'RashiProfile', icon: 'account-circle',         te: 'వ్యక్తిత్వం',         en: 'Personality' },
-  { name: 'Matchmaking',  icon: 'heart-multiple',         te: 'పొందిక',             en: 'Love Match' },
+  { name: 'Matchmaking',  icon: 'heart-multiple',         te: 'ఈడు జోడు',           en: 'Love Match' },
   { name: 'Astro',        icon: 'zodiac-leo',             te: 'విజ్ఞానం',           en: 'Wisdom' },
 
   // ── 4. Life Decisions (adults / premium) ──

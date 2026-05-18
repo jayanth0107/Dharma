@@ -1,9 +1,10 @@
 // ధర్మ — Puja Guide Screen (పూజా మార్గదర్శకం)
 // Step-by-step visual guide for common pujas
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
@@ -16,6 +17,17 @@ import { trackEvent } from '../utils/analytics';
 export function PujaGuideScreen() {
   const { t } = useLanguage();
   const [selectedPuja, setSelectedPuja] = useState(null);
+
+  // Reset to the all-pujas list whenever the user leaves this tab.
+  // Without this, bottom-tabs keeps the screen mounted and the previously
+  // opened puja persists — so re-entering the tab shows the detail view
+  // for whatever was last viewed instead of the list. Cleanup-on-blur
+  // (return fn of useFocusEffect) is the standard fix for this pattern.
+  useFocusEffect(
+    useCallback(() => {
+      return () => setSelectedPuja(null);
+    }, []),
+  );
 
   if (selectedPuja) {
     const puja = selectedPuja;
