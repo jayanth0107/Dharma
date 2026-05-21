@@ -27,11 +27,15 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 const ITEM_HEIGHT = 44;
-// 5 visible rows — 2 dim above, selected center, 2 dim below.
-// Keep VISIBLE_ITEMS odd so the highlight band sits on a true center row.
-const VISIBLE_ITEMS = 5;
-const CENTER_OFFSET = Math.floor(VISIBLE_ITEMS / 2);
-const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
+// Visible row counts — odd numbers only, so the highlight band sits on a
+// true center row. Date wheels use 5 (2 dim above + center + 2 dim below)
+// because users browse years widely and need vertical context. Time
+// wheels use 3 (1 dim above + center + 1 dim below) because hour/min/am-pm
+// are picked deliberately, not browsed — fewer rows reclaim ~88px of
+// vertical space, which fits the picker on phones with usable height
+// below ~780px.
+const DATE_VISIBLE_ITEMS = 5;
+const TIME_VISIBLE_ITEMS = 3;
 const CURRENT_YEAR = new Date().getFullYear();
 // Default year range — covers centenarian elders for Family / Matchmaking.
 // Callers can override via yearStart / yearEnd (Muhurtam uses current ± 1).
@@ -50,11 +54,16 @@ const getDaysInMonth = (m, y) => new Date(y, m + 1, 0).getDate();
 // decelerationRate={0.997} numeric for cross-platform parity, no
 // disableIntervalMomentum so long flicks ride momentum, overScrollMode
 // "never" so Android's edge glow doesn't swallow gestures at list ends.
-function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }) {
+function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, visibleItems = DATE_VISIBLE_ITEMS }) {
   const scrollRef = useRef(null);
   const lastSnapped = useRef(selectedIndex);
   const isFirstMount = useRef(true);
   const isUserScrolling = useRef(false);
+
+  // Per-instance so date wheels can be taller than time wheels.
+  // Must stay odd — see DATE_VISIBLE_ITEMS / TIME_VISIBLE_ITEMS notes above.
+  const centerOffset = Math.floor(visibleItems / 2);
+  const pickerHeight = ITEM_HEIGHT * visibleItems;
 
   useEffect(() => {
     if (isFirstMount.current) {
@@ -135,8 +144,11 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
   return (
     <View style={[ws.column, { width: width || 80 }]}>
       {label ? <Text style={ws.columnLabel}>{label}</Text> : null}
-      <View style={[ws.wheelContainer, { height: PICKER_HEIGHT }]}>
-        <View style={ws.selectionHighlight} pointerEvents="none" />
+      <View style={[ws.wheelContainer, { height: pickerHeight }]}>
+        <View
+          style={[ws.selectionHighlight, { top: ITEM_HEIGHT * centerOffset }]}
+          pointerEvents="none"
+        />
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
@@ -155,8 +167,8 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width }
           onMomentumScrollEnd={handleSnapEnd}
           onScrollEndDrag={handleSnapEnd}
           contentContainerStyle={{
-            paddingTop: ITEM_HEIGHT * CENTER_OFFSET,
-            paddingBottom: ITEM_HEIGHT * CENTER_OFFSET,
+            paddingTop: ITEM_HEIGHT * centerOffset,
+            paddingBottom: ITEM_HEIGHT * centerOffset,
           }}
         >
           {data.map((item, i) => (
@@ -311,23 +323,23 @@ export function BirthDatePicker({
     <Modal transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={ws.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
-        <View style={[ws.container, { paddingBottom: bottomInset }]}>
+        <View style={ws.container}>
           <ScrollView
             ref={outerScrollRef}
+            style={ws.scrollFlex}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={ws.scrollContent}
-            // User-driven outer scroll is OFF — the wheels are the only
-            // scroll surface here, and a second one made users feel the
-            // whole sheet was sliding while they tried to flick a wheel.
-            // `nestedScrollEnabled` is kept because programmatic scrollTo
-            // from a WheelColumn on mount still bubbles up on Android; the
-            // scrollTo(0,0) belt-and-suspenders fix above relies on this
-            // surface staying a ScrollView. Spacing below was trimmed to
-            // keep the whole sheet within the modal's 92%-height bound on
-            // standard phones, so nothing needs to scroll.
+            // Outer scroll stays ON. Content above the sticky action bar
+            // can still overflow on small phones (especially with time
+            // wheels visible), and we want the user to be able to reach
+            // the result pill / dividers via scroll if needed. The
+            // Cancel/Select buttons are now OUTSIDE this ScrollView
+            // (sticky at the modal bottom) so they're always reachable
+            // regardless of scroll position. The mount-time bubble fix
+            // (force-scrollTo(0,0) after 50ms) still applies.
             nestedScrollEnabled
-            scrollEnabled={false}
+            scrollEnabled={true}
             overScrollMode="never"
           >
             {/* Top header removed 2026-05-16 — the parent screen's
@@ -410,6 +422,7 @@ export function BirthDatePicker({
                     label={lang === 'te' ? 'గంట' : 'Hour'}
                     renderItem={(h) => pad2(h)}
                     width={timeColWidth}
+                    visibleItems={TIME_VISIBLE_ITEMS}
                   />
                   <Text style={ws.colonText}>:</Text>
                   <WheelColumn
@@ -419,6 +432,7 @@ export function BirthDatePicker({
                     label={lang === 'te' ? 'నిమిషం' : 'Min'}
                     renderItem={(m) => pad2(m)}
                     width={timeColWidth}
+                    visibleItems={TIME_VISIBLE_ITEMS}
                   />
                   <WheelColumn
                     data={PERIODS}
@@ -426,6 +440,7 @@ export function BirthDatePicker({
                     onSelect={(i) => setIsPm(i === 1)}
                     label={lang === 'te' ? 'కాలం' : 'AM/PM'}
                     width={timeColWidth}
+                    visibleItems={TIME_VISIBLE_ITEMS}
                   />
                 </View>
               </>
@@ -445,19 +460,25 @@ export function BirthDatePicker({
               </View>
             </View>
 
-            <View style={ws.actions}>
-              <TouchableOpacity style={ws.cancelBtn} onPress={onClose}>
-                <Text style={ws.cancelText}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[ws.confirmBtn, { paddingVertical: btnPadV }]}
-                onPress={handleConfirm}
-              >
-                <MaterialCommunityIcons name="check" size={20} color="#0A0A0A" />
-                <Text style={ws.confirmText}>{lang === 'te' ? 'ఎంచుకోండి' : 'Select'}</Text>
-              </TouchableOpacity>
-            </View>
           </ScrollView>
+
+          {/* ── Sticky bottom action bar ──
+              Cancel + Select sit OUTSIDE the ScrollView so they're
+              always visible at the modal bottom, no matter how tall the
+              wheel block gets. The hairline top border separates them
+              from the scroll content above. */}
+          <View style={[ws.actions, { paddingBottom: bottomInset }]}>
+            <TouchableOpacity style={ws.cancelBtn} onPress={onClose}>
+              <Text style={ws.cancelText}>{lang === 'te' ? 'రద్దు' : 'Cancel'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[ws.confirmBtn, { paddingVertical: btnPadV }]}
+              onPress={handleConfirm}
+            >
+              <MaterialCommunityIcons name="check" size={20} color="#0A0A0A" />
+              <Text style={ws.confirmText}>{lang === 'te' ? 'ఎంచుకోండి' : 'Select'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -470,11 +491,16 @@ const ws = StyleSheet.create({
     backgroundColor: DarkColors.bgCard,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '92%',
+    // flexDirection: 'column' (default). scrollFlex below uses flexShrink
+    // so the ScrollView gives up height first when content overflows the
+    // 92% cap — the sticky action bar at the bottom never gets clipped.
   },
-  // Extra top padding compensates for the removed title header — keeps
-  // the first "Birth Date" badge from sitting flush against the modal's
-  // rounded top edge.
-  scrollContent: { paddingTop: 14, paddingBottom: 8 },
+  // ScrollView takes content height naturally; shrinks instead of pushing
+  // the sticky actions off-screen when content + actions exceed maxHeight.
+  scrollFlex: { flexShrink: 1 },
+  // paddingTop trimmed 14 → 8 to reclaim vertical space; paddingBottom
+  // can be 0 because the sticky action bar adds its own padding below.
+  scrollContent: { paddingTop: 8, paddingBottom: 4 },
 
   // Floating close X — replaces the full top-header bar. Sits in the
   // top-right corner so dismissal stays discoverable even though the
@@ -491,7 +517,7 @@ const ws = StyleSheet.create({
 
   sectionDivider: {
     flexDirection: 'row', alignItems: 'center',
-    marginHorizontal: 20, marginTop: 10,
+    marginHorizontal: 20, marginTop: 6,
   },
   sectionDividerLine: { flex: 1, height: 1, backgroundColor: DarkColors.borderCard },
   sectionDividerBadge: {
@@ -522,8 +548,9 @@ const ws = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   selectionHighlight: {
+    // `top` is set inline per WheelColumn instance — depends on visibleItems
+    // (date wheels = 5 rows = 88px, time wheels = 3 rows = 44px).
     position: 'absolute',
-    top: ITEM_HEIGHT * CENTER_OFFSET,
     left: 0, right: 0,
     height: ITEM_HEIGHT,
     backgroundColor: DarkColors.goldDim,
@@ -539,7 +566,7 @@ const ws = StyleSheet.create({
   // old top "live preview" pill since users now read it AFTER scrolling
   // instead of glancing back and forth between top chips and bottom wheels.
   resultBlock: {
-    alignItems: 'center', marginTop: 10, paddingHorizontal: 20,
+    alignItems: 'center', marginTop: 6, paddingHorizontal: 20,
   },
   resultLabel: {
     fontSize: 12, fontWeight: '700', color: DarkColors.silverLight,
@@ -558,7 +585,13 @@ const ws = StyleSheet.create({
 
   actions: {
     flexDirection: 'row', gap: 12,
-    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14,
+    paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10,
+    // Hairline top border visually separates the sticky action bar
+    // from the scroll content above. paddingBottom is the floor — the
+    // inline paddingBottom={bottomInset} on this element overrides it
+    // to add safe-area room for Android gesture pill / iOS home bar.
+    borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
+    backgroundColor: DarkColors.bgCard,
   },
   cancelBtn: {
     flex: 1, alignItems: 'center', justifyContent: 'center',

@@ -80,9 +80,10 @@ const SECTION_COMPONENTS = {
   PujaGuide:    withErrorBoundary(PujaGuideScreen, 'PujaGuide'),
   Family:       withErrorBoundary(FamilyScreen, 'Family'),
   Kids:         withErrorBoundary(CalendarScreen, 'Kids'),
-  // Promoted from Festivals sub-tab chips to top-level tiles. Both still
-  // share CalendarScreen — params seed the initial sub-tab.
-  Holidays:     withErrorBoundary(CalendarScreen, 'Holidays'),
+  // Darshan was promoted from a Festivals sub-tab chip to a top-level
+  // tile; still renders via CalendarScreen seeded with the right sub-tab.
+  // (Holidays was previously a peer top-level tile but has been removed —
+  // Festivals section already surfaces holiday content.)
   Darshan:      withErrorBoundary(CalendarScreen, 'Darshan'),
   TempleNearby: withErrorBoundary(TempleNearbyScreen, 'TempleNearby'),
   Donate:       DonateScreen,

@@ -19,14 +19,24 @@ export function TopTabBar() {
   const scrollNodeRef = useRef(null);
   const { width: screenW } = useWindow();
 
-  // Drag-vs-tap discriminator. When the user mouse-drags the bar to
-  // scroll horizontally, RN-Web's TouchableOpacity still fires onPress
-  // on whichever tab the pointer was over at release. We watch raw
-  // pointer events on the DOM node and swallow the synthetic click in
-  // the capture phase if the pointer moved beyond DRAG_THRESHOLD —
-  // intercepting before TouchableOpacity sees it. The earlier
-  // React-state approach lost the race against onPress on web.
+  // Drag-vs-tap discriminator runs in two places:
+  //   • Web — raw DOM pointer events on the ScrollView's underlying
+  //     <div>, click swallowed in the capture phase (see onScrollViewRef
+  //     below). Necessary because RN-Web's TouchableOpacity still fires
+  //     onPress on the pill that was under the cursor at release.
+  //   • Native (iOS / Android) — per-pill onTouchStart / onTouchMove
+  //     stores the initial finger position and a "moved" flag. onPress
+  //     consults the flag and aborts the navigation if the gesture was
+  //     actually a drag-scroll. RN's native gesture system mostly
+  //     handles this for us, but on horizontal ScrollViews with
+  //     TouchableOpacity children the touch can still register as a
+  //     tap if the user drags within the tap's hit slop on some
+  //     Android devices.
   const DRAG_THRESHOLD = 5;
+  // Single shared ref — only one pill is being touched at any moment,
+  // so we don't need per-pill state. onTouchStart resets it; onTouchMove
+  // flips `moved` when the finger has travelled beyond the threshold.
+  const touchTrackRef = useRef({ x: 0, y: 0, moved: false });
 
   // Responsive sizing — bumped 13/14/15/16 → 16/17/18/20 after tester
   // said top-bar labels were not readable at arm's length on a phone.
@@ -150,10 +160,23 @@ export function TopTabBar() {
                   scrollRef.current.scrollTo({ x: targetX, animated: false });
                 }
               }}
+              onTouchStart={(e) => {
+                touchTrackRef.current = {
+                  x: e.nativeEvent.pageX,
+                  y: e.nativeEvent.pageY,
+                  moved: false,
+                };
+              }}
+              onTouchMove={(e) => {
+                const t = touchTrackRef.current;
+                const dx = Math.abs(e.nativeEvent.pageX - t.x);
+                const dy = Math.abs(e.nativeEvent.pageY - t.y);
+                if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) t.moved = true;
+              }}
               onPress={() => {
-                // Drag-vs-tap suppression happens in the DOM capture
-                // phase (see onScrollViewRef) — by the time we get here,
-                // we know the user actually tapped, not dragged.
+                // Native drag-vs-tap guard. Web is covered by the DOM
+                // click-capture handler in onScrollViewRef.
+                if (touchTrackRef.current.moved) return;
                 if (section.params) {
                   navigation.navigate(section.name, { ...section.params, _ts: Date.now() });
                 } else {

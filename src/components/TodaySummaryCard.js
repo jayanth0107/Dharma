@@ -3,30 +3,86 @@
 // CANONICAL EXAMPLE of the new theme rule: every Text composes from a
 // `Type.X` token. To change all body / label / value weights across the
 // app, edit src/theme/typography.js — never inline fontSize/fontWeight.
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform, Vibration } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { DarkColors, Type } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { useApp } from '../context/AppContext';
+import { getSankalpaState, tapSankalpaDeepam } from '../utils/sankalpaService';
+import { trackEvent } from '../utils/analytics';
+import { VaaramDeityStrip } from './VaaramDeityStrip';
 
-export function TodaySummaryCard({ onNavigate, streak }) {
+// `streak` prop is accepted for backward compatibility but ignored —
+// the pill below now owns its own state via sankalpaService.
+export function TodaySummaryCard({ onNavigate }) {
   const { t } = useLanguage();
   const { panchangam, todayFestival, todayEkadashi } = useApp();
 
+  // ── Sankalpa Deepam state ──
+  // Replaces the old passive auto-streak badge with an intentional
+  // once-a-day tap. Idempotent within a day; one grace skip per week
+  // is handled inside sankalpaService.
+  const [sankalpa, setSankalpa] = useState({ streak: 0, litToday: false, totalLifetimeTaps: 0 });
+  // Refetch on focus so a tap from the floating FAB on another screen
+  // is reflected in the pill the next time the user returns to Home.
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      getSankalpaState()
+        .then((s) => { if (mounted) setSankalpa(s); })
+        .catch(() => {});
+      return () => { mounted = false; };
+    }, []),
+  );
+  // Flame anim — silver diya pulses to saffron on tap.
+  const flameAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (sankalpa.litToday) flameAnim.setValue(1);
+  }, [sankalpa.litToday]);
+
+  const handleTapDeepam = useCallback(async () => {
+    if (sankalpa.litToday) return;       // idempotent
+    // Optimistic UI — set lit immediately so the animation starts now.
+    setSankalpa((s) => ({ ...s, litToday: true, streak: s.streak + 1 }));
+    Animated.sequence([
+      Animated.timing(flameAnim, { toValue: 0.6, duration: 200, useNativeDriver: false }),
+      Animated.timing(flameAnim, { toValue: 1.0, duration: 600, useNativeDriver: false }),
+    ]).start();
+    if (Platform.OS === 'android') {
+      try { Vibration.vibrate(40); } catch {}
+    }
+    try {
+      const next = await tapSankalpaDeepam();
+      setSankalpa(next);
+      trackEvent('sankalpa_tap', { streak: next.streak });
+    } catch {}
+  }, [sankalpa.litToday, flameAnim]);
+
   // ── Responsive sizes — every chip / label / icon scales with phone class.
   // sm (≤360 dp) → md (414+) → lg (500+) → xl (768+, tablet).
+  // Chrome tightened (12 → 10, etc.) to absorb the deity-portrait
+  // growth from 48 → 64 px without raising the overall card height —
+  // tile view below must not be pushed down.
   const cardMarginH    = usePick({ default: 16, lg: 24, xl: 32 });
-  const cardPad        = usePick({ default: 12, md: 14, lg: 18, xl: 22 });
+  const cardPad        = usePick({ default: 10, md: 12, lg: 16, xl: 20 });
   const dateFs         = usePick({ default: 18, md: 19, lg: 21, xl: 24 });
   const yearFs         = usePick({ default: 15, md: 16, lg: 17, xl: 19 });
+  // Sankalpa pill on the top-right — silver candle / saffron fire +
+  // streak count (with a ✓ when lit). Tap target lives here, not on
+  // the deity image (the previous "tap-the-deity" idiom occluded the
+  // portrait's bottom-right corner with the badge — moved back here
+  // so the deity art reads cleanly while staying interactive).
   const streakIconSz   = usePick({ default: 14, md: 15, lg: 17, xl: 20 });
   const streakFs       = usePick({ default: 17, md: 18, lg: 19, xl: 22 });
-  const infoIconSz     = usePick({ default: 14, md: 16, lg: 18, xl: 20 });
-  const infoLabelFs    = usePick({ default: 13, md: 14, lg: 15, xl: 17 });
-  const infoValueFs    = usePick({ default: 16, md: 17, lg: 18, xl: 21 });
-  const infoDividerH   = usePick({ default: 32, lg: 36, xl: 42 });
+  // Deity image size — 72 (50 % bigger than the previous 48). We can
+  // afford the extra height now because the "Daily" SectionDivider has
+  // been removed from the Home grid above, reclaiming ~35 px of vertical
+  // space — the tile-pushdown that 72 would have caused before is fully
+  // offset, with ~25 px net reclaimed back to the tile-view.
+  const deitySize      = usePick({ default: 72, md: 74, lg: 80, xl: 88 });
   const timingPadH     = usePick({ default: 10, md: 12, lg: 14, xl: 18 });
   const timingPadV     = usePick({ default: 8,  md: 9,  lg: 11, xl: 13 });
   const timingIconSz   = usePick({ default: 16, md: 17, lg: 19, xl: 22 });
@@ -36,7 +92,7 @@ export function TodaySummaryCard({ onNavigate, streak }) {
   const timingTimeFs   = usePick({ default: 13, md: 14, lg: 16, xl: 18 });
   const festIconSz     = usePick({ default: 14, md: 15, lg: 17, xl: 20 });
   const festFs         = usePick({ default: 16, md: 17, lg: 18, xl: 21 });
-  const rowGap         = usePick({ default: 8, md: 10, lg: 12, xl: 16 });
+  const rowGap         = usePick({ default: 6, md: 8, lg: 10, xl: 14 });
 
   if (!panchangam) return null;
 
@@ -50,47 +106,77 @@ export function TodaySummaryCard({ onNavigate, streak }) {
       onPress={() => onNavigate?.('Panchang')}
       activeOpacity={0.8}
     >
-      {/* Date + Streak */}
+      {/* Deity portrait (left) + date (centre) + Sankalpa pill (right) ──
+          The deity is decorative — it shows today's vaaram ishta devata
+          but is NOT itself the tap target. Sankalpa Deepam lives in the
+          pill on the right; tapping the pill lights the lamp. Keeping
+          tap-to-light separated from the portrait protects the artwork
+          from being covered by an overlay badge.                         */}
       <View style={[s.topRow, { marginBottom: rowGap }]}>
-        <View style={{ flex: 1 }}>
-          <Text style={[s.dateText, { fontSize: dateFs, lineHeight: dateFs + 6 }]}>{t(dateStr, dateStrEn)}</Text>
-          <Text style={[s.yearText, { fontSize: yearFs, lineHeight: yearFs + 6 }]}>
+        <VaaramDeityStrip size={deitySize} />
+
+        <View style={{ flex: 1, marginLeft: 14 }}>
+          {/* numberOfLines={1} + adjustsFontSizeToFit guard the worst
+              case: "Wednesday, December 25" + Telugu year/month string
+              run ~220 dp at full size on a 360 dp phone where the
+              middle column has only ~150 dp after deity (64) + pill
+              (~90). Without these props the text would wrap to 2 lines
+              and push everything below down. minimumFontScale=0.7
+              still keeps the smallest auto-shrunk size ≥ 13 px. */}
+          <Text
+            style={[s.dateText, { fontSize: dateFs, lineHeight: dateFs + 6 }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
+            {t(dateStr, dateStrEn)}
+          </Text>
+          <Text
+            style={[s.yearText, { fontSize: yearFs, lineHeight: yearFs + 6 }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
             {t(panchangam.teluguYear?.te, panchangam.teluguYear?.en)} · {t(panchangam.teluguMonth?.telugu, panchangam.teluguMonth?.english)}
           </Text>
         </View>
-        {streak > 0 && (
-          <View style={s.streakBadge}>
-            <MaterialCommunityIcons name="fire" size={streakIconSz} color={DarkColors.saffron} />
-            <Text style={[s.streakText, { fontSize: streakFs, lineHeight: streakFs }]}>{streak}</Text>
-          </View>
-        )}
-      </View>
 
-      {/* Key Info Row */}
-      <View style={[s.infoRow, { marginBottom: rowGap }]}>
-        <View style={s.infoItem}>
-          <MaterialCommunityIcons name="moon-waning-crescent" size={infoIconSz} color={DarkColors.saffron} />
-          <Text style={[s.infoLabel, { fontSize: infoLabelFs }]}>{t('తిథి', 'Tithi')}</Text>
-          <Text style={[s.infoValue, { fontSize: infoValueFs, lineHeight: infoValueFs + 5 }]}>
-            {t(panchangam.tithi?.telugu, panchangam.tithi?.english || panchangam.tithi?.telugu)}
+        <TouchableOpacity
+          style={[s.sankalpaBadge, sankalpa.litToday && s.sankalpaBadgeLit]}
+          onPress={(e) => { e.stopPropagation?.(); handleTapDeepam(); }}
+          activeOpacity={sankalpa.litToday ? 1 : 0.7}
+          accessibilityLabel={sankalpa.litToday
+            ? t('ఈరోజు దీపం వెలిగింది', 'Lit today')
+            : t('సంకల్ప దీపం వెలిగించండి', 'Light Sankalpa Deepam')
+          }
+        >
+          <Animated.View style={{
+            opacity: sankalpa.litToday ? 1 : flameAnim.interpolate({
+              inputRange: [0, 1], outputRange: [0.55, 1],
+            }),
+          }}>
+            <MaterialCommunityIcons
+              name={sankalpa.litToday ? 'fire' : 'candle'}
+              size={streakIconSz}
+              color={sankalpa.litToday ? DarkColors.saffron : DarkColors.silverLight}
+            />
+          </Animated.View>
+          <Text style={[
+            s.streakText,
+            { fontSize: streakFs, lineHeight: streakFs },
+            sankalpa.litToday && s.streakTextLit,
+          ]}>
+            {sankalpa.streak}
           </Text>
-        </View>
-        <View style={[s.infoDivider, { height: infoDividerH }]} />
-        <View style={s.infoItem}>
-          <MaterialCommunityIcons name="star-four-points" size={infoIconSz} color={DarkColors.gold} />
-          <Text style={[s.infoLabel, { fontSize: infoLabelFs }]}>{t('నక్షత్రం', 'Star')}</Text>
-          <Text style={[s.infoValue, { fontSize: infoValueFs, lineHeight: infoValueFs + 5 }]}>
-            {t(panchangam.nakshatra?.telugu, panchangam.nakshatra?.english || panchangam.nakshatra?.telugu)}
-          </Text>
-        </View>
-        <View style={[s.infoDivider, { height: infoDividerH }]} />
-        <View style={s.infoItem}>
-          <MaterialCommunityIcons name="weather-sunset-up" size={infoIconSz} color="#E8751A" />
-          <Text style={[s.infoLabel, { fontSize: infoLabelFs }]}>{t('సూర్యోదయం', 'Sunrise')}</Text>
-          <Text style={[s.infoValue, { fontSize: infoValueFs, lineHeight: infoValueFs + 5 }]}>
-            {panchangam.sunriseFormatted || panchangam.sunrise}
-          </Text>
-        </View>
+          {sankalpa.litToday && (
+            <MaterialCommunityIcons
+              name="check-circle"
+              size={streakIconSz - 2}
+              color={DarkColors.gold}
+              style={{ marginLeft: 1 }}
+            />
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Timings — icon on the left, label and time stacked on the right.
@@ -155,18 +241,24 @@ const s = StyleSheet.create({
   topRow: { flexDirection: 'row', alignItems: 'center' },
   // Font sizes / line-heights are injected via usePick at render time.
   dateText:    { fontWeight: '500', color: '#FFFFFF' },
-  yearText:    { fontWeight: '500', color: DarkColors.gold, marginTop: 2 },
-  streakBadge: {
+  yearText:    { fontWeight: '500', color: DarkColors.gold, marginTop: 0 },
+  // Sankalpa Deepam pill — top-right of the card. Unlit (default
+  // morning) uses silver-dim + candle icon; lit state turns saffron-dim
+  // + fire icon + small gold ✓ + saffron streak count. Deity portrait
+  // to the left stays purely decorative — keeping the tap target here
+  // protects the artwork from being covered by an overlay.
+  sankalpaBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: DarkColors.saffronDim, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(232,117,26,0.30)',
+    paddingHorizontal: 10, paddingVertical: 3, borderRadius: 14,
+    backgroundColor: DarkColors.silverDim,
+    borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  streakText:  { fontWeight: '600', color: DarkColors.saffron },
-  infoRow:     { flexDirection: 'row', alignItems: 'center' },
-  infoItem:    { flex: 1, alignItems: 'center', gap: 3, paddingHorizontal: 2 },
-  infoDivider: { width: 1, backgroundColor: DarkColors.borderCard },
-  infoLabel:   { fontWeight: '700', color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: 0.4 },
-  infoValue:   { fontWeight: '500', color: '#FFFFFF', textAlign: 'center' },
+  sankalpaBadgeLit: {
+    backgroundColor: DarkColors.saffronDim,
+    borderColor: 'rgba(232,117,26,0.30)',
+  },
+  streakText:    { fontWeight: '700', color: DarkColors.silverLight },
+  streakTextLit: { color: DarkColors.saffron },
   timingsRow:  { flexDirection: 'row', gap: 6, marginBottom: 0 },
   // Chip — vertical stack now: header row (icon + label) above, time
   // range on the second line. The time row spans full chip width so

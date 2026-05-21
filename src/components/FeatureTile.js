@@ -49,14 +49,20 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
   // more visual weight since label is now a single word.
   const iconSize = usePick({ default: 36, md: 40, lg: 44, xl: 50 });
   const tileMinH = usePick({ default: 90, md: 100, lg: 116, xl: 128 });
-  // Telugu glyphs render ~80% of em-square height vs Latin caps that fill
-  // it top-to-bottom — same nominal fontSize reads visually smaller.
-  // Bump 2 px in Telugu so tile labels look the same weight in both
-  // languages (industry-standard "Telugu optical adjustment").
-  // v3 — bumped one rung above v2 (14 → 15 default) after tester said
-  // home tile labels were still too small to read at arm's length.
-  const teBump = lang === 'te' ? 2 : 0;
-  const labelSize = usePick({ default: 15, md: 16, lg: 17, xl: 19 }) + teBump;
+  // Telugu optical sizing audit (v6 — English dialled down to match
+  // the popular-app body-label standard):
+  //  • Base fontSize 17 → 16 default — Material Design 3 `bodyLarge`
+  //    and the de-facto standard across WhatsApp / Spotify / Google
+  //    Maps / YouTube for list-row text. v4's 17 read "high" / a tad
+  //    too prominent on dark.
+  //  • Telugu bump kept at +3 — closes the optical x-height gap
+  //    without making Telugu feel oversized.
+  //  • Weight stays at 500 medium (set on s.label below).
+  // Net effect on a 360 dp phone:
+  //  • English label: 16 / medium (500)  — Material bodyLarge
+  //  • Telugu  label: 19 / medium (500)  — +3 px optical adjustment
+  const teBump = lang === 'te' ? 3 : 0;
+  const labelSize = usePick({ default: 16, md: 17, lg: 18, xl: 20 }) + teBump;
   const subSize   = usePick({ default: 14, md: 15, lg: 16, xl: 17 }) + teBump;
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
@@ -195,6 +201,12 @@ const s = StyleSheet.create({
   },
   label: {
     ...Type.label,
+    // Medium (500) — Material Design label spec, matches popular apps
+    // (WhatsApp / Spotify / Maps / YouTube). Type.label is already
+    // medium so this just re-asserts the default and serves as a
+    // reminder that 700-bold here was wrong (too flashy in repeated
+    // grid context).
+    fontWeight: '500',
     color: DarkColors.silver,
     textAlign: 'center',
     paddingHorizontal: Spacing.xxs,

@@ -1,5 +1,13 @@
-// ధర్మ — Daily Streak & Badge Tracker
-// Tracks consecutive daily app opens, total days, milestones
+// ధర్మ — Daily Streak & Badge Tracker  [DEPRECATED — superseded by sankalpaService.js]
+//
+// Kept in the tree so the one-time migration in sankalpaService can
+// read the legacy `@dharma_streak` key and back-seed the new Sankalpa
+// taps[]. After ~1 release cycle (when active users have all migrated)
+// this file and the legacy key can be deleted.
+//
+// Do NOT call recordDailyOpen() or import anything else from this file
+// in new code — the Sankalpa Deepam pill in TodaySummaryCard is the
+// canonical user-facing surface for streak/practice tracking.
 import { loadForm, saveForm, FORM_KEYS } from './formStorage';
 
 const STREAK_KEY = '@dharma_streak';

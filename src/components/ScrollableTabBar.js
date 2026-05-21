@@ -26,6 +26,10 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
   // moved beyond DRAG_THRESHOLD between pointerdown and pointerup.
   // (React-state approach lost the race against onPress.)
   const DRAG_THRESHOLD = 5;
+  // Native drag-vs-tap guard (mirrors TopTabBar): the existing DOM-event
+  // suppression in onScrollViewRef only covers web. On native, a horizontal
+  // drag inside a pill could still register as a tap and navigate.
+  const touchTrackRef = useRef({ x: 0, y: 0, moved: false });
 
   // Responsive sizing — bumped 12/13/14/15 → 14/15/16/18 after tester
   // said bottom-bar labels were too small to read in motion. Icons +
@@ -130,9 +134,22 @@ export function ScrollableTabBar({ state, descriptors, navigation }) {
                   scrollRef.current.scrollTo({ x: targetX, animated: false });
                 }
               }}
+              onTouchStart={(e) => {
+                touchTrackRef.current = {
+                  x: e.nativeEvent.pageX,
+                  y: e.nativeEvent.pageY,
+                  moved: false,
+                };
+              }}
+              onTouchMove={(e) => {
+                const tr = touchTrackRef.current;
+                const dx = Math.abs(e.nativeEvent.pageX - tr.x);
+                const dy = Math.abs(e.nativeEvent.pageY - tr.y);
+                if (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD) tr.moved = true;
+              }}
               onPress={() => {
-                // Drag suppression handled in DOM capture phase
-                // (see onScrollViewRef).
+                // Native drag-vs-tap. Web covered by DOM click-capture handler.
+                if (touchTrackRef.current.moved) return;
                 if (section.params) {
                   navigation.navigate(section.name, { ...section.params, _ts: Date.now() });
                 } else {

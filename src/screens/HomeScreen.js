@@ -25,7 +25,7 @@ import { SectionShareRow } from '../components/SectionShareRow';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { BirthDatePicker } from '../components/BirthDatePicker';
 import { TodaySummaryCard } from '../components/TodaySummaryCard';
-import { recordDailyOpen } from '../utils/streakService';
+import { SectionImageCard } from '../components/SectionImageCard';
 import { useAuth } from '../context/AuthContext';
 import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappShare';
 
@@ -36,7 +36,10 @@ import { shareOnWhatsApp, buildDailyPanchangamMessage } from '../utils/whatsappS
 // but unambiguously legible now.
 function SectionDivider({ icon, te, en }) {
   const { t, lang } = useLanguage();
-  const labelSize = lang === 'te' ? 17 : 15;
+  // Section-divider label sizing matches FeatureTile's v4 audit:
+  // English 16, Telugu 20 (+4 optical-adjustment bump) for parity at
+  // arm's length. Weight is set on s.dividerText (already bold).
+  const labelSize = lang === 'te' ? 20 : 16;
   const iconSize = labelSize + 4;
   // Why this combo of styles works for alignment:
   //   1. Both glyphs in a flex row with alignItems:'center'
@@ -49,7 +52,22 @@ function SectionDivider({ icon, te, en }) {
   //      descent area is unused for x-height letters).
   return (
     <View style={s.sectionDivider}>
-      <View style={s.dividerLine} />
+      {/* Rangoli decorative line — DOUBLE line for visual weight per
+          user feedback ("section divider header text is only dominant").
+          Two stacked rows of rangoli pattern on each lane give the
+          divider enough presence to balance the centre badge. Overflow
+          hidden clips the strings at the lane edges so any phone width
+          works without manual sizing; alignItems controls flow direction
+          (left lane flows toward the badge from the left, right lane
+          from the right). */}
+      <View style={[s.dividerLane, { alignItems: 'flex-end' }]}>
+        <Text style={s.rangoliText} numberOfLines={1} allowFontScaling={false}>
+          {RANGOLI_PATTERN}
+        </Text>
+        <Text style={s.rangoliText} numberOfLines={1} allowFontScaling={false}>
+          {RANGOLI_PATTERN_ALT}
+        </Text>
+      </View>
       <View style={s.dividerBadge}>
         <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.gold} />
         <Text
@@ -66,10 +84,27 @@ function SectionDivider({ icon, te, en }) {
           {t(te, en)}
         </Text>
       </View>
-      <View style={s.dividerLine} />
+      <View style={[s.dividerLane, { alignItems: 'flex-start' }]}>
+        <Text style={s.rangoliText} numberOfLines={1} allowFontScaling={false}>
+          {RANGOLI_PATTERN}
+        </Text>
+        <Text style={s.rangoliText} numberOfLines={1} allowFontScaling={false}>
+          {RANGOLI_PATTERN_ALT}
+        </Text>
+      </View>
     </View>
   );
 }
+
+// Two complementary rangoli motifs stacked vertically inside each
+// divider lane (top row + bottom row). Different glyph rhythms give the
+// double line a layered "kolam border" feel instead of two identical
+// rows. All glyphs are universally supported across Android / iOS
+// system fonts (· = interpunct, ◆ = filled diamond, ◇ = open diamond,
+// ❀ = filled rose). Patterns are long enough to fill any phone-width
+// divider lane — overflow:hidden on the lane clips the ends.
+const RANGOLI_PATTERN     = '· ◆ · ❀ · ◆ · ❀ '.repeat(8);
+const RANGOLI_PATTERN_ALT = '◇ · ◇ · ◇ · ◇ · '.repeat(8);
 
 export function HomeScreen({ navigation }) {
   const {
@@ -84,12 +119,10 @@ export function HomeScreen({ navigation }) {
   const [showDrawer, setShowDrawer] = useState(false);
   const [showPanchangamShare, setShowPanchangamShare] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [streak, setStreak] = useState(0);
 
-  // Record daily open and load streak
-  useEffect(() => {
-    recordDailyOpen().then(data => setStreak(data.currentStreak));
-  }, []);
+  // Sankalpa Deepam state is owned by TodaySummaryCard — no Home-level
+  // bookkeeping needed. The legacy auto-streak (recordDailyOpen) was
+  // removed; users now commit deliberately via the diya pill in the card.
 
   // ── Responsive header sizing — single-row header that fits any phone ──
   // Tiny phones (<360) get smaller icons + flag + smaller subtitle so the
@@ -291,25 +324,49 @@ export function HomeScreen({ navigation }) {
       {/* ── Feature Grid — compact: one-word labels, no sublabels,
             slim icon-only dividers between categories ── */}
       <ScrollView style={s.gridScroll} contentContainerStyle={s.gridContent} showsVerticalScrollIndicator={false}>
-        <TodaySummaryCard onNavigate={(screen) => navigation.navigate(screen)} streak={streak} />
+        <TodaySummaryCard onNavigate={(screen) => navigation.navigate(screen)} />
 
-        <SectionDivider icon="calendar-clock" te="రోజువారీ" en="Daily" />
+        {/* No "Daily" SectionDivider here — the summary card above IS the
+            daily section header (date + panchangam + sankalpa deepam), so
+            an explicit label would just duplicate it. The first tile grid
+            flows directly out of the card, reclaiming ~35 px of vertical
+            space and bringing more tiles into the first-glance viewport.
+            Other sections (Ithihaasa / Youth / Astrology / Devotion /
+            Utility) keep their dividers — those mark real thematic shifts. */}
 
-        {/* 1. Daily Habit */}
+        {/* 1. Daily Habit — DailyRashi (రాశి ఫలం) sits at position 2,
+            right after Panchangam, because morning use is the dominant
+            pattern: open app → see today's panchangam → check today's
+            rashi predictions. Festivals / Muhurtam / Gold follow. */}
         <FeatureGrid>
           <FeatureTile icon="pot-mix"      label={t('పంచాంగం', 'Panchangam')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
+          <FeatureTile icon="star-circle-outline"  label={t('రాశి భవిష్యత్తు', 'Zodiac Sign')}  onPress={() => navigation.navigate('DailyRashi')} />
           <FeatureTile icon="party-popper" label={t('పండుగలు', 'Festivals')}  onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
-          <FeatureTile icon="calendar-star" label={t('ముహూర్తం', 'Muhurtam')}   onPress={() => navigation.navigate('Muhurtam')} />
-          <FeatureTile icon="star-circle"  label={t('రాశి', 'Zodiac Sign')}  onPress={() => navigation.navigate('DailyRashi')} />
+          <FeatureTile icon="calendar-star-outline" label={t('ముహూర్తం', 'Muhurtam')}   onPress={() => navigation.navigate('Muhurtam')} />
           <FeatureTile icon="gold"         label={t('బంగారం ధర', 'Gold Price')} onPress={() => navigation.navigate('Gold')} />
-          <FeatureTile icon="chart-line"   label={t('స్టాక్ మార్కెట్', 'Stock Market')} onPress={() => navigation.navigate('Market')} />
         </FeatureGrid>
 
-        {/* "Ithihaasa" — Sanskrit for "thus it happened" — is the proper
-            classification for Ramayana and Mahabharata (and the Gita
-            within). They are not casual "stories" but historical
-            scripture in the Sanatana tradition. */}
-        <SectionDivider icon="book-open-page-variant" te="ఇతిహాసం" en="Ithihaasa" />
+        {/* Ithihaasa hero card — Raja Ravi Varma "Krishna with Arjuna"
+            (Mahabharata Gita Upadesha) from Wikimedia Commons, public
+            domain. Anchors the start of the "sacred texts" half of the
+            app with figurative art instead of a slim divider. */}
+        {/* Ithihaasa — three user-curated landscape images:
+              1. Setu Bandhan (Rama / Lakshmana / Hanuman / vanaras building the
+                 bridge to Lanka — Ramayana)
+              2. Vyasa dictating to Ganesha (Mahabharata being composed)
+              3. Krishna teaching Arjuna on the chariot (Bhagavad Gita war scene
+                 — MANDATORY)
+            Card lays out cells proportionally to each image's aspect ratio so
+            every painting fills its cell exactly — no crop, no gaps. */}
+        <SectionImageCard
+          images={[
+            { source: require('../../assets/sections/ithihaasa1.jpg'), aspect: 284 / 177 },
+            { source: require('../../assets/sections/ithihaasa2.jpg'), aspect: 301 / 168 },
+            { source: require('../../assets/sections/ithihaasa3.jpg'), aspect: 259 / 195 },
+          ]}
+          te="ఇతిహాసం"
+          en="Ithihaasa"
+        />
 
         {/* 2. Ithihaasa — Ramayana, Mahabharata, Gita + Kids retellings +
             Pramana + Neethi (sutras/aphorisms from itihasa-adjacent texts
@@ -318,10 +375,10 @@ export function HomeScreen({ navigation }) {
         <FeatureGrid>
           <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    onPress={() => navigation.navigate('Ramayana')} />
           <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} onPress={() => navigation.navigate('Mahabharata')} />
-          <FeatureTile icon="book-open-page-variant" label={t('భగవద్గీత', 'Bhagavad Gita')}    onPress={() => navigation.navigate('Gita')} />
-          <FeatureTile icon="script-text"            label={t('నీతి సూక్తులు', 'Moral Quotes')}  onPress={() => navigation.navigate('NeethiSukta')} />
+          <FeatureTile icon="book-open-page-variant-outline" label={t('భగవద్గీత', 'Bhagavad Gita')}    onPress={() => navigation.navigate('Gita')} />
+          <FeatureTile icon="script-text-outline"            label={t('నీతి సూక్తులు', 'Moral Quotes')}  onPress={() => navigation.navigate('NeethiSukta')} />
           <FeatureTile icon="baby-face-outline"      label={t('పిల్లల కథలు', 'Kids Stories')} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
-          <FeatureTile icon="shield-star"            label={t('ప్రమాణం', 'Knowledge')}   onPress={() => navigation.navigate('Pramana')} />
+          <FeatureTile icon="shield-star-outline"            label={t('ప్రమాణం', 'Knowledge')}   onPress={() => navigation.navigate('Pramana')} />
         </FeatureGrid>
 
         <SectionDivider icon="rocket-launch" te="యువత" en="Youth" />
@@ -330,44 +387,81 @@ export function HomeScreen({ navigation }) {
             a youth-life-stage decision that benefits from being grouped
             with debate/quiz/sanskrit) */}
         <FeatureGrid>
-          <FeatureTile icon="vote"             label={t('ధర్మ చర్చ', 'Debate')}    onPress={() => navigation.navigate('DharmaPoll')} />
-          <FeatureTile icon="head-question"    label={t('జ్ఞాన పోటి', 'Quiz')}     onPress={() => navigation.navigate('Quiz')} />
-          <FeatureTile icon="alpha-s-circle"   label={t('సంస్కృతం', 'Sanskrit')}   onPress={() => navigation.navigate('SanskritWord')} />
-          <FeatureTile icon="account-circle"   label={t('వ్యక్తిత్వం', 'Personality')} onPress={() => navigation.navigate('RashiProfile')} />
-          <FeatureTile icon="heart-multiple"   label={t('ఈడు జోడు', 'Love Match')}  onPress={() => navigation.navigate('Matchmaking')} />
+          <FeatureTile icon="vote-outline"             label={t('ధర్మ చర్చ', 'Debate')}    onPress={() => navigation.navigate('DharmaPoll')} />
+          <FeatureTile icon="head-question-outline"    label={t('జ్ఞాన పోటి', 'Quiz')}     onPress={() => navigation.navigate('Quiz')} />
+          <FeatureTile icon="alpha-s-circle-outline"   label={t('సంస్కృతం', 'Sanskrit')}   onPress={() => navigation.navigate('SanskritWord')} />
+          <FeatureTile icon="account-circle-outline"   label={t('మీ స్వభావం', 'Personality')} onPress={() => navigation.navigate('RashiProfile')} />
+          <FeatureTile icon="heart-multiple-outline"   label={t('ప్రేమ జ్యోతిష్యం', 'Love Match')}  onPress={() => navigation.navigate('Matchmaking')} />
           <FeatureTile icon="zodiac-leo"       label={t('విజ్ఞానం', 'Wisdom')}      onPress={() => navigation.navigate('Astro')} />
         </FeatureGrid>
 
-        <SectionDivider icon="account-star" te="జ్యోతిష్యం" en="Astrology" />
+        {/* Jyothishyam (Astrology) — three user-curated images:
+              1. astro1 — chakra-yogi with seven chakras + cosmos backdrop
+              2. astro2 — Navagraha (nine planets) mandala with deities
+              3. astro3 — rishi teaching disciples (Vedic jyotishya tradition)
+            Proportional-flex layout: each image fills its cell exactly. */}
+        <SectionImageCard
+          images={[
+            { source: require('../../assets/sections/astro1.jpg'), aspect: 186 / 270 },
+            // Centre image gets flex 1.3 — per user, the Navagraha mandala
+            // should read slightly larger than the flanking images.
+            { source: require('../../assets/sections/astro2.jpg'), aspect: 168 / 300, flex: 1.3 },
+            { source: require('../../assets/sections/astro3.jpg'), aspect: 268 / 188 },
+          ]}
+          te="జ్యోతిష్యం"
+          en="Astrology"
+        />
 
-        {/* 4. Life Decisions — Match moved to Youth, Muhurtam moved to Daily */}
+        {/* 4. Life Decisions — Match moved to Youth, Muhurtam moved to
+            Daily, Market moved to Utility tail (it's a lookup, not a
+            dharmic-life decision). */}
         <FeatureGrid>
-          <FeatureTile icon="account-star"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
-          <FeatureTile icon="account-group"  label={t('కుటుంబం', 'Family Horoscopes')} onPress={() => navigation.navigate('Family')} />
+          <FeatureTile icon="account-star-outline"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
+          <FeatureTile icon="account-group-outline"  label={t('కుటుంబం', 'Family Horoscopes')} onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
 
-        <SectionDivider icon="hand-heart" te="భక్తి" en="Devotion" />
+        {/* Devotion hero card — Tirumala (Sri Venkateswara) gopurams,
+            Wikimedia Commons, public domain. The gold-plated Ananda
+            Nilayam is the most universally recognised Telugu temple
+            image; anchors the "practice" half of the app. */}
+        {/* Devotion — three user-curated landscape images:
+              1. Brihadeeswara Temple (Thanjavur — Shiva)
+              2. Konark Sun Temple (Surya)
+              3. Meditation / dhyana scene with Krishna apparition
+            Same proportional-flex layout: every image fills its cell exactly. */}
+        <SectionImageCard
+          images={[
+            { source: require('../../assets/sections/bhakti1.jpg'), aspect: 284 / 177 },
+            // bhakti2 = pooja1.jpg (portrait 199×253) — Shiva-Parvati puja scene
+            { source: require('../../assets/sections/bhakti2.jpg'), aspect: 199 / 253 },
+            { source: require('../../assets/sections/bhakti3.jpg'), aspect: 268 / 188 },
+          ]}
+          te="భక్తి"
+          en="Devotion"
+        />
 
         {/* 5. Devotion & Service */}
         <FeatureGrid>
           <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు', 'Stotras')}    onPress={() => navigation.navigate('Stotra')} />
           <FeatureTile icon="meditation"        label={t('ధ్యానం', 'Meditation')}    onPress={() => navigation.navigate('Meditation')} />
           <FeatureTile icon="fire"              label={t('పూజా గైడ్', 'Puja Guide')} onPress={() => navigation.navigate('PujaGuide')} />
-          <FeatureTile icon="temple-hindu"      label={t('దేవాలయాలు', 'Temples')}    onPress={() => navigation.navigate('TempleNearby')} />
-          <FeatureTile icon="hand-heart"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
+          <FeatureTile icon="temple-hindu-outline"      label={t('దేవాలయాలు', 'Temples')}    onPress={() => navigation.navigate('TempleNearby')} />
+          <FeatureTile icon="hand-heart-outline"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
 
         <SectionDivider icon="tools" te="ఉపయుక్త" en="Utility" />
 
-        {/* Utility tail. Holidays + Darshan promoted from Festivals
-            sub-tab chips to first-class tiles so they're reachable in
-            one tap. Both still render via CalendarScreen, seeded with
-            the right initial sub-tab via the route params (the same
-            pattern Panchang / Festivals / Kids use). */}
+        {/* Utility tail. Stock Market lives here as a lookup tile (was
+            previously in Astrology — moved because it's an information
+            shortcut, not a dharmic-life decision). Holidays was removed
+            entirely — the Festivals section already surfaces holiday
+            content via its sub-tabs, so a dedicated tile was redundant.
+            Darshan stays as a quick-access shortcut to the daily deity
+            view inside CalendarScreen. */}
         <FeatureGrid>
-          <FeatureTile icon="flag-variant"  label={t('సెలవులు', 'Holidays')}    onPress={() => navigation.navigate('Holidays', { tab: 'holidays', _ts: Date.now() })} />
-          <FeatureTile icon="temple-hindu"  label={t('దైనందిన దర్శనం', 'Daily Darshan')} onPress={() => navigation.navigate('Darshan',  { tab: 'darshan',  _ts: Date.now() })} />
-          <FeatureTile icon="bell-plus"     label={t('రిమైండర్', 'Reminder')}    onPress={() => navigation.navigate('Reminder')} />
+          <FeatureTile icon="chart-line"            label={t('స్టాక్ మార్కెట్', 'Stock Market')} onPress={() => navigation.navigate('Market')} />
+          <FeatureTile icon="temple-hindu-outline"  label={t('దైనందిన దర్శనం', 'Daily Darshan')} onPress={() => navigation.navigate('Darshan',  { tab: 'darshan',  _ts: Date.now() })} />
+          <FeatureTile icon="bell-plus-outline"     label={t('రిమైండర్', 'Reminder')}    onPress={() => navigation.navigate('Reminder')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />
       </ScrollView>
@@ -546,11 +640,32 @@ const s = StyleSheet.create({
   // break without stealing screen real estate from the grid.
   sectionDivider: {
     flexDirection: 'row', alignItems: 'center',
-    marginTop: 8, marginBottom: 4,     // tightened further from 14/8
+    marginTop: 8, marginBottom: 4,
     paddingHorizontal: 4,
   },
-  dividerLine: {
-    flex: 1, height: 1.5, backgroundColor: DarkColors.borderGold,
+  // Decorative lane on each side of the centre badge. Now TALLER to
+  // accommodate two stacked rangoli rows (per user: divider should be
+  // more prominent so it can hold its own against the centre badge).
+  // flexDirection: 'column' is the default, so the two <Text> rows
+  // stack naturally on top of each other. Overflow:hidden clips the
+  // patterns at the lane edges.
+  dividerLane: {
+    flex: 1,
+    height: 32,
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  // Rangoli repeating-glyph text. Opacity bumped 0.55 → 0.70 so the
+  // pattern reads more clearly with the heavier double-line treatment.
+  // Each row is ~14 dp tall; two rows fit in the 32 dp lane with a
+  // small gap created by the line-height vs font-size delta.
+  rangoliText: {
+    fontSize: 13,
+    lineHeight: 16,
+    color: DarkColors.gold,
+    opacity: 0.7,
+    letterSpacing: 2,
+    includeFontPadding: false,
   },
   dividerBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
