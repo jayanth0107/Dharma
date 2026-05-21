@@ -9,7 +9,6 @@ export const TR = {
   sanatana: { te: 'సనాతనం', en: 'Sanatana' },
   loading: { te: 'ధర్మ', en: 'Dharma' },
   signoff: { te: 'సర్వే జనాః సుఖినో భవంతు', en: 'May all beings be happy' },
-  version: { te: 'ధర్మ v2.0.0', en: 'Dharma v2.0.0' },
 
   // ── Navigation — Bottom Tabs ──
   navHome: { te: 'హోమ్', en: 'Home' },

@@ -5,10 +5,19 @@ import { TopTabBar } from '../components/TopTabBar';
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useApp } from '../context/AppContext';
 import { useLanguage, T } from '../context/LanguageContext';
+
+// Live version pulled from app.json via expo-constants — never lies,
+// auto-updates with every release. (Previous hardcoded "v2.4.2" string
+// drifted ~5 releases behind the actual build before being noticed.)
+const APP_VERSION =
+  Constants.expoConfig?.version ||
+  Constants.manifest?.version ||
+  '2.4.0';
 
 import { PageHeader } from '../components/PageHeader';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
@@ -56,7 +65,7 @@ export function MoreScreen({ navigation }) {
       {/* Version footer */}
       <View style={[s.footer, { paddingVertical: footerPaddingV }]}>
         <Text style={[s.footerText, { fontSize: footerFontSize }]}>{t(T.signoff.te, T.signoff.en)}</Text>
-        <Text style={[s.versionText, { fontSize: versionFontSize, marginTop: versionMarginTop }]}>ధర్మ v2.4.2</Text>
+        <Text style={[s.versionText, { fontSize: versionFontSize, marginTop: versionMarginTop }]}>ధర్మ v{APP_VERSION}</Text>
       </View>
 
       {showShareApp && (
