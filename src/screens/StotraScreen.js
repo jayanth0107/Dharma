@@ -138,10 +138,10 @@ export function StotraScreen({ navigation }) {
                         <View style={[s.cardBadge, stotra.isComplete && s.cardBadgeFull]}>
                           <MaterialCommunityIcons
                             name={stotra.isComplete ? 'check-circle' : 'dots-horizontal-circle-outline'}
-                            size={10}
-                            color={stotra.isComplete ? DarkColors.tulasiGreen : DarkColors.saffron}
+                            size={12}
+                            color={stotra.isComplete ? DarkColors.gold : DarkColors.saffron}
                           />
-                          <Text style={[s.cardBadgeText, stotra.isComplete && { color: DarkColors.tulasiGreen }]}>
+                          <Text style={[s.cardBadgeText, stotra.isComplete && { color: DarkColors.gold }]}>
                             {stotra.isComplete
                               ? t(`పూర్తి · ${verseCount} శ్లోకాలు`, `Full · ${verseCount} verses`)
                               : t(`ఎంపిక · ${verseCount} శ్లోకాలు`, `Excerpt · ${verseCount} verses`)}
@@ -170,7 +170,7 @@ export function StotraScreen({ navigation }) {
                 <TouchableOpacity
                   key={mantra.id}
                   style={s.card}
-                  onPress={() => navigation.navigate('MantraAudio', { preselectId: mantra.id })}
+                  onPress={() => navigation.navigate('MantraAudio', { preselectId: mantra.id, _ts: Date.now() })}
                   activeOpacity={0.7}
                 >
                   <View style={[s.iconWrap, { backgroundColor: mantra.color + '22' }]}>
@@ -395,8 +395,8 @@ const s = StyleSheet.create({
   subTabTextActive: { color: '#0A0A0A' },
 
   tabHint: {
-    fontSize: 13, color: DarkColors.silver, fontWeight: '600',
-    marginBottom: 14, fontStyle: 'italic', lineHeight: 19,
+    fontSize: 14, color: DarkColors.silverLight, fontWeight: '500',
+    marginBottom: 14, fontStyle: 'italic', lineHeight: 21,
   },
 
   // List card
@@ -409,16 +409,23 @@ const s = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     alignItems: 'center', justifyContent: 'center',
   },
-  cardName: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
-  cardMeta: { fontSize: 12, color: DarkColors.silver, marginTop: 3, fontWeight: '500' },
-  cardBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 6, flexWrap: 'wrap' },
+  // Card typography bumped for readability — old 12 dp subtitle was hard
+  // to read against the dark surface. Weight kept at medium (500) /
+  // semibold (600) per the popular-app standard (Material 3 / WhatsApp /
+  // Spotify); avoid bold (700) for repeated list rows.
+  cardName: { fontSize: 17, fontWeight: '600', color: '#FFFFFF' },
+  cardMeta: { fontSize: 14, color: DarkColors.silverLight, marginTop: 4, fontWeight: '500', lineHeight: 19 },
+  cardBadgeRow: { flexDirection: 'row', gap: 6, marginTop: 8, flexWrap: 'wrap' },
   cardBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingVertical: 2, paddingHorizontal: 6, borderRadius: 6,
-    backgroundColor: 'rgba(232,117,26,0.10)',
+    paddingVertical: 3, paddingHorizontal: 8, borderRadius: 7,
+    backgroundColor: 'rgba(232,117,26,0.12)',
   },
-  cardBadgeFull: { backgroundColor: 'rgba(76,175,80,0.10)' },
-  cardBadgeText: { fontSize: 10, fontWeight: '700', color: DarkColors.saffron, letterSpacing: 0.3 },
+  // Completed-state badge background switched from tulasi-green
+  // rgba(76,175,80,0.10) to gold-dim per the dark-theme palette rule —
+  // green reads as off-theme on the dark surface.
+  cardBadgeFull: { backgroundColor: 'rgba(212,160,23,0.14)' },
+  cardBadgeText: { fontSize: 12, fontWeight: '600', color: DarkColors.saffron, letterSpacing: 0.2 },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' },
@@ -435,8 +442,8 @@ const s = StyleSheet.create({
     width: 38, height: 38, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
-  modalTitle: { fontSize: 17, fontWeight: '700' },
-  modalSource: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2 },
+  modalTitle: { fontSize: 19, fontWeight: '600' },
+  modalSource: { fontSize: 13, color: DarkColors.silver, marginTop: 3, fontWeight: '500' },
   modalCloseBtn: { padding: 6 },
   modalScrollContent: { padding: 18, paddingBottom: 12 },
 
@@ -447,7 +454,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.08)', borderRadius: 10,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  benefitText: { flex: 1, fontSize: 13, fontWeight: '600', color: DarkColors.gold, lineHeight: 19 },
+  benefitText: { flex: 1, fontSize: 15, fontWeight: '600', color: DarkColors.gold, lineHeight: 22 },
 
   // YouTube primary CTA
   youtubeBtn: {
@@ -455,8 +462,8 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgElevated, borderRadius: 14, marginBottom: 10,
     borderWidth: 2, borderColor: 'rgba(255,0,0,0.25)',
   },
-  youtubeBtnTitle: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
-  youtubeBtnSub: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2, fontStyle: 'italic' },
+  youtubeBtnTitle: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
+  youtubeBtnSub: { fontSize: 13, color: DarkColors.silver, marginTop: 3, fontStyle: 'italic' },
 
   // Speaker (TTS for meaning)
   speakerBtn: {
@@ -466,7 +473,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   speakerBtnActive: { backgroundColor: DarkColors.saffron, borderColor: DarkColors.saffron },
-  speakerBtnText: { fontSize: 13, fontWeight: '700', color: DarkColors.gold },
+  speakerBtnText: { fontSize: 14, fontWeight: '600', color: DarkColors.gold },
 
   // Excerpt notice
   excerptNotice: {
@@ -475,7 +482,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(232,117,26,0.06)', borderRadius: 10,
     borderWidth: 1, borderColor: 'rgba(232,117,26,0.2)',
   },
-  excerptText: { flex: 1, fontSize: 12, fontWeight: '600', color: DarkColors.saffron, lineHeight: 18 },
+  excerptText: { flex: 1, fontSize: 14, fontWeight: '600', color: DarkColors.saffron, lineHeight: 20 },
 
   // Verses
   versesContainer: {
@@ -495,17 +502,20 @@ const s = StyleSheet.create({
   verseNumPillDoha: {
     backgroundColor: DarkColors.saffron,
   },
-  verseNum: { fontSize: 10, fontWeight: '600', color: DarkColors.gold, letterSpacing: 0.5 },
-  verseTe: { fontSize: 17, fontWeight: '700', color: DarkColors.gold, lineHeight: 28 },
-  verseEn: { fontSize: 13, color: DarkColors.textMuted, marginTop: 4, fontStyle: 'italic', lineHeight: 19 },
+  verseNum: { fontSize: 12, fontWeight: '600', color: DarkColors.gold, letterSpacing: 0.4 },
+  // Sanskrit verses in Telugu lipi — kept at the higher end (19 dp, semibold)
+  // for legibility of conjunct glyphs. Dropped bold 700 → semibold 600
+  // per popular-app weight standard.
+  verseTe: { fontSize: 19, fontWeight: '600', color: DarkColors.gold, lineHeight: 30 },
+  verseEn: { fontSize: 14, color: DarkColors.silverLight, marginTop: 5, fontStyle: 'italic', lineHeight: 21 },
 
   // Meaning block
   meaningBox: {
     backgroundColor: 'rgba(212,160,23,0.04)', borderRadius: 12, padding: 14,
     borderWidth: 1, borderColor: 'rgba(212,160,23,0.15)', marginBottom: 14,
   },
-  meaningLabel: { fontSize: 12, fontWeight: '600', color: DarkColors.gold, marginBottom: 6, letterSpacing: 0.4 },
-  meaningText: { fontSize: 14, color: DarkColors.silver, lineHeight: 22, fontWeight: '500' },
+  meaningLabel: { fontSize: 13, fontWeight: '600', color: DarkColors.gold, marginBottom: 8, letterSpacing: 0.3 },
+  meaningText: { fontSize: 15, color: DarkColors.silverLight, lineHeight: 24, fontWeight: '500' },
 
   // Sources block
   sourcesBlock: {
@@ -513,17 +523,17 @@ const s = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
   },
   sourcesTitle: {
-    fontSize: 11, fontWeight: '600', color: DarkColors.silver,
-    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8,
+    fontSize: 13, fontWeight: '600', color: DarkColors.silver,
+    textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10,
   },
-  sourceLineRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 8 },
-  sourceLineLabel: { fontWeight: '700', color: DarkColors.silver },
-  sourceLineText: { flex: 1, fontSize: 12, color: DarkColors.textSecondary, lineHeight: 18 },
+  sourceLineRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 10 },
+  sourceLineLabel: { fontWeight: '600', color: DarkColors.silver },
+  sourceLineText: { flex: 1, fontSize: 14, color: DarkColors.silverLight, lineHeight: 21, fontWeight: '500' },
   sourceLinkRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
-  sourceLinkText: { flex: 1, fontSize: 12, color: DarkColors.gold, fontWeight: '600' },
+  sourceLinkText: { flex: 1, fontSize: 14, color: DarkColors.gold, fontWeight: '600' },
 
   // Footer close
   closeBtn: {
@@ -531,5 +541,5 @@ const s = StyleSheet.create({
     alignItems: 'center', marginHorizontal: 18, marginTop: 6,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  closeBtnText: { fontSize: 14, fontWeight: '700', color: DarkColors.silver },
+  closeBtnText: { fontSize: 15, fontWeight: '600', color: DarkColors.silver },
 });

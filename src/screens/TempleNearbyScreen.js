@@ -265,7 +265,7 @@ export function TempleNearbyScreen() {
           <MaterialCommunityIcons
             name={gpsStatus === 'gps' ? 'crosshairs-gps' : gpsStatus === 'detecting' ? 'loading' : 'map-marker-alert'}
             size={16}
-            color={gpsStatus === 'gps' ? DarkColors.tulasiGreen : gpsStatus === 'failed' ? DarkColors.kumkum : DarkColors.gold}
+            color={gpsStatus === 'gps' ? DarkColors.gold : gpsStatus === 'failed' ? DarkColors.saffron : DarkColors.silver}
           />
           <Text style={s.locationText}>
             {gpsStatus === 'detecting' ? t('లొకేషన్ గుర్తిస్తోంది...', 'Detecting location...')
@@ -309,13 +309,16 @@ export function TempleNearbyScreen() {
           )}
         </View>
 
-        {/* Deity quick filters */}
+        {/* Deity quick filters — each launches a Google Maps search for
+            the deity-specific query (verified via searchMapsFor below).
+            Colors all on the brand gold/saffron palette per the dark-
+            theme rule; blue/kumkum/tulasi-green here were off-theme. */}
         <View style={s.deityRow}>
           {[
-            { icon: 'om', label: t('శివ', 'Shiva'), q: 'Shiva temple near me', color: '#4A90D9' },
-            { icon: 'temple-hindu', label: t('విష్ణు', 'Vishnu'), q: 'Vishnu temple near me', color: DarkColors.saffron },
-            { icon: 'elephant', label: t('గణేష్', 'Ganesh'), q: 'Ganesh temple near me', color: DarkColors.kumkum },
-            { icon: 'shield-star', label: t('హనుమాన్', 'Hanuman'), q: 'Hanuman temple near me', color: DarkColors.tulasiGreen },
+            { icon: 'om',           label: t('శివ', 'Shiva'),     q: 'Shiva temple near me',    color: '#C55A11' /* saffronDark */ },
+            { icon: 'temple-hindu', label: t('విష్ణు', 'Vishnu'),  q: 'Vishnu temple near me',  color: DarkColors.saffron },
+            { icon: 'elephant',     label: t('గణేష్', 'Ganesh'),  q: 'Ganesh temple near me',   color: '#F5D77A' /* goldLight */ },
+            { icon: 'shield-star',  label: t('హనుమాన్', 'Hanuman'), q: 'Hanuman temple near me', color: DarkColors.gold },
           ].map((d) => (
             <TouchableOpacity
               key={d.q}
@@ -325,7 +328,7 @@ export function TempleNearbyScreen() {
               hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
               accessibilityLabel={`Search ${d.label} temples`}
             >
-              <MaterialCommunityIcons name={d.icon} size={18} color={d.color} />
+              <MaterialCommunityIcons name={d.icon} size={22} color={d.color} />
               <Text style={s.deityBtnText} numberOfLines={1}>{d.label}</Text>
             </TouchableOpacity>
           ))}
@@ -388,7 +391,7 @@ export function TempleNearbyScreen() {
                     </View>
                   )}
                   {temple.open !== undefined && (
-                    <Text style={{ fontSize: 12, fontWeight: '700', color: temple.open ? DarkColors.tulasiGreen : DarkColors.kumkum }}>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: temple.open ? DarkColors.gold : DarkColors.saffron }}>
                       {temple.open ? '● Open' : '● Closed'}
                     </Text>
                   )}
@@ -435,10 +438,10 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.bgCard, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
     marginBottom: 10, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  locationText: { flex: 1, fontSize: 13, fontWeight: '600', color: DarkColors.textSecondary },
+  locationText: { flex: 1, fontSize: 14, fontWeight: '500', color: DarkColors.silverLight },
   locationBadge: {
-    fontSize: 10, fontWeight: '600', color: DarkColors.gold,
-    backgroundColor: DarkColors.bgElevated, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
+    fontSize: 12, fontWeight: '600', color: DarkColors.gold,
+    backgroundColor: DarkColors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
     overflow: 'hidden',
   },
   // Search box
@@ -456,14 +459,18 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.saffron, borderRadius: 14, paddingVertical: 14, marginBottom: 12,
   },
   mapsBtnText: { fontSize: 15, fontWeight: '600', color: '#fff' },
-  // Deity buttons
+  // Deity quick-filter buttons — font bumped 11/700 → 14/600 and
+  // icon size bumped 18 → 22 above. Per user: "short labels are
+  // difficult to read." Weight dropped from bold to semibold per the
+  // popular-app label standard (Material `labelLarge` / 500 medium
+  // would be even softer, but 600 keeps each button feeling tappable).
   deityRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   deityBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5,
-    backgroundColor: DarkColors.bgCard, borderRadius: 10, paddingVertical: 10,
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    backgroundColor: DarkColors.bgCard, borderRadius: 10, paddingVertical: 12,
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  deityBtnText: { fontSize: 11, fontWeight: '700', color: DarkColors.textSecondary },
+  deityBtnText: { fontSize: 14, fontWeight: '600', color: DarkColors.silverLight },
   // Range pills
   rangeRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   rangePill: {

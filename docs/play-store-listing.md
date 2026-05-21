@@ -1,4 +1,4 @@
-# Google Play Store Listing — Dharma v2.4.5 (versionCode 13)
+# Google Play Store Listing — Dharma v2.4.8 (versionCode 16)
 
 ## App Name (30 chars max)
 Dharma · Ithihaasa & Panchangam
@@ -105,14 +105,17 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 ## What's New (release notes for Play Console — under 500 chars)
 
-✨ v2.4.5 — Readability + clarity polish
+✨ v2.4.8 — Sankalpa Deepam, image-card sections, Telugu polish
 
-• Home grid + top/bottom nav bars now share the same short labels everywhere
-• Panchangam Elements (Tithi, Nakshatra, Yoga…) — redesigned cards with uniform gold accent, in-line icons for both Telugu and English, readable Paksha labels
-• Birth-date picker — top title row removed, ~50 px reclaimed
-• Horoscope, Matchmaking, Muhurtam PDFs — body type bumped to 17 pt with brand-aligned section cards and icons
-• Daily morning notification — Neethi Sukta now appears above Android's collapsed cutoff
-• Dharma Debate share preview now carries the context, arguments and source reference
+• Tap the diya on the Home card daily — Sankalpa Deepam, your lamp of resolve
+• Vaaram deity portrait — today's ishta-devata (Sun→Surya … Sat→Shani)
+• Image-card section headers for Ithihaasa / Bhakti / Astrology; double-row rangoli dividers elsewhere
+• Evening Bhagavad Gita notification at 7 PM; Neethi Sukta moved to 8 AM
+• NeethiSukta now shows Vidhi (Do) + Nishedha (Avoid) per shastra
+• Softer Telugu labels: రాశి భవిష్యత్తు, మీ స్వభావం, ప్రేమ జ్యోతిష్యం, మీ జాతకం, దేవాలయాలు దగ్గరలో
+• Readability bumps + theme-color audit across Stotras, Mantras, Temples
+• BirthDatePicker scroll fix; sticky Cancel/Select on small phones
+• Mantra navigation fixed — correct mantra opens every time
 
 ## Keywords (comma separated, 200 chars max)
 ramayana telugu, mahabharata telugu, ithihaasa telugu, bhagavad gita telugu, telugu panchangam, తెలుగు పంచాంగం, neethi suktalu, moral quotes telugu, chanakya niti telugu, vidura niti, sanskrit word of the day, dharma debate, hanuman chalisa, vishnu sahasranama, gayatri mantra, daily sloka, sanatana dharma, sanskrit class 10, indian history textbook, tithi today, nakshatram today, rahu kalam, festival calendar telugu, ekadashi 2026, gold price today india, zodiac sign telugu, vedic horoscope telugu, telugu jathakam, kundali milan, matchmaking telugu, muhurtham, daily quiz hindu, dharma values, telugu meditation, telugu mantras, stock market india, nse nifty

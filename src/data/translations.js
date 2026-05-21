@@ -53,7 +53,6 @@ export const TR = {
   timings: { te: 'ముహూర్తాలు', en: 'Timings' },
   darshan: { te: 'దైనిక దర్శనం', en: 'Daily Darshan' },
   goldPrice: { te: 'బంగారం ధర', en: 'Gold Price' },
-  horoscope: { te: 'రాశి ఫలం', en: 'Horoscope' },
   muhurtam: { te: 'ముహూర్తం', en: 'Muhurtam' },
   shareApp: { te: 'షేర్ యాప్', en: 'Share App' },
   settings: { te: 'సెట్టింగ్స్', en: 'Settings' },

@@ -229,7 +229,10 @@ export const STOTRAS = [
     name: { te: 'భజ గోవిందం', en: 'Bhaja Govindam' },
     deity: { te: 'శ్రీ మహావిష్ణువు / గోవిందుడు', en: 'Lord Vishnu / Govinda' },
     icon: 'music-note',
-    color: '#4CAF50',
+    // Was #4CAF50 (tulasi green) — off-theme on the dark surface per
+    // the brand palette rule. Switched to gold-light (still distinct
+    // from other stotras without breaking theme cohesion).
+    color: '#F5D77A',
     duration: { te: '6 నిమిషాలు', en: '6 minutes' },
     benefit: { te: 'వైరాగ్యం, మోక్ష జ్ఞానం, మాయ నుండి విముక్తి',
                en: 'Detachment, knowledge of liberation, freedom from illusion' },
@@ -405,7 +408,9 @@ export const STOTRAS = [
     name: { te: 'శ్రీ రుద్రం (నమకం)', en: 'Sri Rudram (Namakam)' },
     deity: { te: 'శ్రీ శివుడు', en: 'Lord Shiva' },
     icon: 'om',
-    color: '#9B6FCF',
+    // Was #9B6FCF (purple) — off-theme. Saffron-dark fits Shiva's
+    // ferocious-aspect imagery without breaking the dark-theme palette.
+    color: '#C55A11',
     duration: { te: '20+ నిమిషాలు (పూర్తి)', en: '20+ minutes (full)' },
     benefit: { te: 'శివ కటాక్షం, రోగ నివారణ, పాప విమోచనం, మోక్షం',
                en: 'Shiva\'s grace, disease removal, sin liberation, moksha' },
@@ -467,7 +472,9 @@ export const STOTRAS = [
     name: { te: 'విష్ణు సహస్రనామం', en: 'Vishnu Sahasranama' },
     deity: { te: 'శ్రీ మహావిష్ణువు', en: 'Lord Vishnu' },
     icon: 'account-star',
-    color: '#4A90D9',
+    // Was #4A90D9 (blue) — off-theme. Gold-shimmer for Vishnu's
+    // divine-radiance association keeps the brand palette intact.
+    color: '#FFD700',
     duration: { te: '30+ నిమిషాలు (పూర్తి)', en: '30+ minutes (full)' },
     benefit: { te: 'సర్వ పాపహరం, మోక్షప్రదం, ఆరోగ్యం, ఐశ్వర్యం',
                en: 'Removes all sins, grants liberation, health, prosperity' },
@@ -511,7 +518,10 @@ export const STOTRAS = [
     name: { te: 'శ్రీ లలితా సహస్రనామం', en: 'Sri Lalita Sahasranama' },
     deity: { te: 'శ్రీ లలితా త్రిపురసుందరి', en: 'Sri Lalita Tripurasundari' },
     icon: 'star-circle',
-    color: '#E8495A',
+    // Was #E8495A (kumkum red) — off-theme on the dark surface. Saffron
+    // (Devi's traditional shakti / kumkum-as-bindi association) keeps
+    // the symbolic warmth while staying in the brand palette.
+    color: '#E8751A',
     duration: { te: '35+ నిమిషాలు (పూర్తి)', en: '35+ minutes (full)' },
     benefit: { te: 'సౌభాగ్యం, శక్తి, మోక్షం, ధర్మ-కామ-అర్థ-మోక్షాలు',
                en: 'Prosperity, power, liberation, all four purusharthas' },

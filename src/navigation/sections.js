@@ -49,14 +49,14 @@ export const MAIN_SECTIONS = [
   // ── 4. Life Decisions (adults — premium astrology) ──
   // Stock Market moved out to Utility tail — see below — because it's
   // a lookup tile, not a life decision rooted in astrology.
-  { name: 'Horoscope',    icon: 'account-star-outline',           te: 'జాతకం',              en: 'Horoscope' },
-  { name: 'Family',       icon: 'account-group-outline',          te: 'కుటుంబం',            en: 'Family Horoscopes' },
+  { name: 'Horoscope',    icon: 'account-star-outline',           te: 'మీ జాతకం',           en: 'Horoscope' },
+  { name: 'Family',       icon: 'account-group-outline',          te: 'కుటుంబ జాతకాలు',     en: 'Family Horoscopes' },
 
   // ── 5. Devotion & Service (elders, deeper practice) ──
   { name: 'Stotra',       icon: 'music-note-eighth',      te: 'స్తోత్రాలు',          en: 'Stotras' },
   { name: 'Meditation',   icon: 'meditation',             te: 'ధ్యానం',             en: 'Meditation' },
   { name: 'PujaGuide',    icon: 'fire',                   te: 'పూజా గైడ్',          en: 'Puja Guide' },
-  { name: 'TempleNearby', icon: 'temple-hindu-outline',           te: 'దేవాలయాలు',          en: 'Temples' },
+  { name: 'TempleNearby', icon: 'temple-hindu-outline',           te: 'దేవాలయాలు దగ్గరలో',   en: 'Temples Nearby' },
   { name: 'Donate',       icon: 'hand-heart-outline',             te: 'దానం',              en: 'Donate' },
 
   // ── Utility tail ──

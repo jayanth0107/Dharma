@@ -416,8 +416,8 @@ export function HomeScreen({ navigation }) {
             Daily, Market moved to Utility tail (it's a lookup, not a
             dharmic-life decision). */}
         <FeatureGrid>
-          <FeatureTile icon="account-star-outline"   label={t('జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
-          <FeatureTile icon="account-group-outline"  label={t('కుటుంబం', 'Family Horoscopes')} onPress={() => navigation.navigate('Family')} />
+          <FeatureTile icon="account-star-outline"   label={t('మీ జాతకం', 'Horoscope')}  onPress={() => navigation.navigate('Horoscope')} />
+          <FeatureTile icon="account-group-outline"  label={t('కుటుంబ జాతకాలు', 'Family Horoscopes')} onPress={() => navigation.navigate('Family')} />
         </FeatureGrid>
 
         {/* Devotion hero card — Tirumala (Sri Venkateswara) gopurams,
@@ -445,7 +445,7 @@ export function HomeScreen({ navigation }) {
           <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు', 'Stotras')}    onPress={() => navigation.navigate('Stotra')} />
           <FeatureTile icon="meditation"        label={t('ధ్యానం', 'Meditation')}    onPress={() => navigation.navigate('Meditation')} />
           <FeatureTile icon="fire"              label={t('పూజా గైడ్', 'Puja Guide')} onPress={() => navigation.navigate('PujaGuide')} />
-          <FeatureTile icon="temple-hindu-outline"      label={t('దేవాలయాలు', 'Temples')}    onPress={() => navigation.navigate('TempleNearby')} />
+          <FeatureTile icon="temple-hindu-outline"      label={t('దేవాలయాలు దగ్గరలో', 'Temples Nearby')}    onPress={() => navigation.navigate('TempleNearby')} />
           <FeatureTile icon="hand-heart-outline"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
 

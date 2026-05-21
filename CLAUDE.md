@@ -5,7 +5,7 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu **sacred-stories + panchangam + Vedic astrology** mobile app. Daily Ramayana / Mahabharata episode, Bhagavad Gita sloka, Neethi Sukta wisdom, Sanskrit word, Dharma debate / quiz, Stotras + Mantras with pandit recordings, animated meditation; full Drik-Ganita panchangam (Tithi, Nakshatra, Yoga, Karana, Muhurtams), festivals + Ekadashi + Pournami / Amavasya / Pradosham observances, Vedic horoscope (జాతకం), 8-Kuta matchmaking, Muhurtam finder, daily rashi predictions, Vedic personality profile, live gold/silver prices, Indian market indices, nearby-temple finder.
 
 **App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.4.5 (versionCode 13)
+**Version:** 2.4.8 (versionCode 16)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 **EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
@@ -569,16 +569,25 @@ elements instead of three drifting variants. PageHeader titles
 inside each screen can still be more descriptive ("Vedic Horoscope"
 vs nav's "Horoscope") — that's per-screen context, not nav chrome.
 
-Current label set (te / en) — Home + nav share these verbatim:
+Current label set (te / en) — Home + nav share these verbatim
+(updated 2026-05-22 to reflect v2.4.8 label sweep — multi-round
+refinements from informal to more dharmic phrasing):
 Panchangam / పంచాంగం, Festivals / పండుగలు, Muhurtam / ముహూర్తం,
-Zodiac Sign / రాశి, Gold Price / బంగారం ధర, Stock Market / స్టాక్ మార్కెట్,
+Zodiac Sign / రాశి భవిష్యత్తు (was రాశి, then రాశి ఫలం),
+Gold Price / బంగారం ధర, Stock Market / స్టాక్ మార్కెట్,
 Ramayana, Mahabharata, Bhagavad Gita / భగవద్గీత, Moral Quotes / నీతి సూక్తులు,
 Kids Stories / పిల్లల కథలు, Knowledge / ప్రమాణం, Debate / ధర్మ చర్చ,
-Quiz / క్విజ్, Sanskrit / సంస్కృతం, Personality / వ్యక్తిత్వం,
-Love Match / పొందిక, Wisdom / విజ్ఞానం, Horoscope / జాతకం,
-Family Horoscopes / కుటుంబం, Stotras / స్తోత్రాలు, Meditation / ధ్యానం,
+Quiz / జ్ఞాన పోటి (was క్విజ్), Sanskrit / సంస్కృతం,
+Personality / మీ స్వభావం (was వ్యక్తిత్వం),
+Love Match / ప్రేమ జ్యోతిష్యం (was పొందిక, then ఈడు జోడు),
+Wisdom / విజ్ఞానం, Horoscope / మీ జాతకం (was జాతకం),
+Family Horoscopes / కుటుంబ జాతకాలు (was కుటుంబం),
+Stotras / స్తోత్రాలు, Meditation / ధ్యానం,
 Puja Guide / పూజా గైడ్, Temples / దేవాలయాలు, Donate / దానం,
-Holidays / సెలవులు, Daily Darshan / దైనందిన దర్శనం, Reminder / రిమైండర్.
+Daily Darshan / దైనందిన దర్శనం, Reminder / రిమైండర్.
+
+(Holidays / సెలవులు removed in v2.4.7 — Festivals section's sub-tab
+already surfaces holiday content, the standalone tile was redundant.)
 
 ### Notification scheduling
 
@@ -600,6 +609,157 @@ should return ZERO matches. An inline `usePick()` call inside JSX
 that lives after an early `return` (e.g. `if (loading) return null`)
 makes the hook count vary between renders and crashes the screen
 on first mount. Caught once in `GoldPriceCard.js` (May 2026).
+
+### React Navigation gotchas (bottom-tabs specific)
+
+Three patterns bit us during the v2.4.7 session — collected here so
+they don't repeat:
+
+1. **Tab.Screen state retention.** `createBottomTabNavigator` keeps
+   every registered screen mounted in memory by default. Therefore
+   `useState(() => derivedFromRouteParams)` only runs ONCE per app
+   session. Subsequent navigations to the same tab with different
+   params DO update `route.params` but DON'T re-derive state.
+   - **Fix:** `useEffect([route.params.preselectId, route.params._ts])`
+     that re-resolves state on param change.
+   - **Caller-side:** pass `_ts: Date.now()` so repeated taps of the
+     same item create a unique route.params reference and trigger
+     the effect.
+   - Bit me on Hanuman Chalisa not opening in MantraAudio after a
+     different mantra had been viewed first.
+
+2. **`navigation.goBack()` jumps to firstRoute, not previous tab.**
+   `backBehavior` defaults to `'firstRoute'`, so goBack from any
+   Tab.Screen lands on Home (the first registered tab), regardless
+   of where the user came from.
+   - **Fix:** use explicit `navigation.navigate('TargetTab')` instead
+     of `navigation.goBack()` for "back to where you came from" UX.
+   - Bit me on the MantraAudio back button — testers landed on Home
+     instead of Stotras.
+
+3. **Screen-internal state survives across re-entries.** Same root
+   cause as #1: Tab.Screens stay mounted. If a screen has internal
+   state (e.g. `selectedPuja`, `selectedMantra`), that state is
+   STILL set when the user re-enters the tab via a top/bottom bar
+   tap.
+   - **Fix:** `useFocusEffect(() => () => setInternalState(null), [])`
+     to reset state on blur. (See `PujaGuideScreen.js`.)
+   - Bit me on PujaGuide showing the previously-opened puja instead
+     of the all-pujas list.
+
+### Web vs native API differences
+
+- **`Image.resolveAssetSource`** exists on native React Native but
+  is NOT available on react-native-web. Code that needs intrinsic
+  image dimensions for layout (e.g., proportional aspect-ratio cells
+  in `SectionImageCard`) must pass dimensions explicitly from the
+  caller, not read them at render time. Caught when SectionImageCard
+  crashed the Metro web preview with `TypeError: Image.default.resolveAssetSource is not a function`.
+
+- **`useNavigationState`** requires being a descendant of a navigator
+  screen (NOT just inside `<NavigationContainer>`). Sibling-of-
+  `<Tab.Navigator>` placement crashes with "Couldn't get the
+  navigation state." For overlays alongside the navigator (e.g., the
+  earlier SankalpaDeepamFAB experiment), pass route info as a prop
+  from the `tabBar` callback rather than reading it via the hook.
+
+### Version display pipeline (single source of truth)
+
+Every UI surface that displays the app version MUST read it from
+`Constants.expoConfig.version` (`expo-constants`), not from a hardcoded
+string. `app.json` `expo.version` is the single source of truth — bump
+it once and:
+- `SettingsModal.js` ✓ already reads via Constants
+- `MoreScreen.js` ✓ updated 2026-05-22 (was hardcoded "v2.4.2" and
+  had drifted ~5 releases)
+
+`TR.version` translation key was deleted (unused, also stale).
+`package.json` `version` is kept in sync for npm tooling but doesn't
+surface in the UI.
+
+### Home grid section structure (v2.4.7+)
+
+The 5 thematic blocks on Home are now rendered with **mixed section
+header treatments** instead of uniform slim dividers:
+
+| Block | Header treatment | Files |
+|---|---|---|
+| Daily | None (TodaySummaryCard IS the daily header) | — |
+| Ithihaasa | **Image card** (3 user-curated paintings) | `SectionImageCard.js` |
+| Youth | Slim divider with double-row rangoli pattern | `HomeScreen.js SectionDivider` |
+| Astrology | **Image card** (3 jyotishya scenes) | `SectionImageCard.js` |
+| Devotion | **Image card** (3 temple/meditation images) | `SectionImageCard.js` |
+| Utility | Slim divider with double-row rangoli pattern | `HomeScreen.js SectionDivider` |
+
+`SectionImageCard` uses **per-cell `flex` prop** to bias proportions
+(e.g., Astrology Navagraha mandala gets `flex: 1.3` so it reads as
+the centre anchor). Card height is fixed at 88 dp (uniform across
+all 3 image cards); cover mode crops any aspect mismatch evenly.
+
+Slim dividers carry a **double-row rangoli pattern** (`· ◆ · ❀` +
+`◇ · ◇ · ◇`) at low opacity on each side of the badge — replaces
+the v2.4.5 plain gold rule and the v2.4.7 single-row kolam attempt.
+Lane height bumped to 32 dp to accommodate the two rows.
+
+### Sankalpa Deepam (v2.4.7)
+
+User-driven daily-practice anchor. Replaces the older passive
+`@dharma_streak` (auto-counter based on app opens).
+
+- `src/utils/sankalpaService.js` — IST date math (avoid UTC), weekly
+  grace skip (1 free skip per Mon-Sun week), one-time migration from
+  the legacy streak so users don't lose their count.
+- Pill rendered on `TodaySummaryCard` top-right. Tap = light today's
+  lamp. Icon swaps silver `candle` → saffron `fire` + ✓ when lit.
+- The old `streakService.js` is kept in the tree (marked deprecated)
+  ONLY so the migration can read its legacy storage key. Will be
+  deleted after one release cycle when active users have migrated.
+
+### Vaaram-deity portrait on the summary card
+
+Squircle (rounded-square, NOT circle) deity portrait sits left of
+the date. Image swaps per day-of-week:
+| Day | Deity | Image source |
+|---|---|---|
+| Sun | Surya | `assets/deities/surya.jpg` (pre-existing) |
+| Mon | Shiva | `assets/deities/shiva.jpg` (pre-existing) |
+| Tue | Hanuman | `assets/deities/hanuman.jpg` (pre-existing) |
+| Wed | Ganesha | `assets/deities/ganesha.jpg` (pre-existing) |
+| Thu | Vishnu / Venkateswara | `assets/deities/venkateswara.jpg` (pre-existing) |
+| Fri | Lakshmi | `assets/deities/lakshmi.jpg` — Raja Ravi Varma "Goddess Lakshmi" (1896), Wikimedia Commons, PD |
+| Sat | Shani | `assets/deities/shani.jpg` — Raja Ravi Varma "Shani Deva", Wikimedia Commons, PD |
+
+Rounded square is intentional — pure-circle crop chops crowns / hands
+/ vahanas on the existing portraits. The squircle (cornerRadius = 22%
+of side) preserves much more of each painting.
+
+### Typography weight standard (popular-app aligned)
+
+After three round-trips on the FeatureTile labels, settled on:
+
+- **Tile labels & list-row text:** weight 500 (medium) per Material
+  Design 3 `labelLarge`, WhatsApp chat names, Spotify track titles.
+  Bold (700) was "too flashy" per user feedback.
+- **Section dividers / category headers:** weight 600 OK.
+- **Hero titles, player titles, badges:** weight 700 OK.
+- **Indic optical-sizing fix:** Telugu glyphs get **+3 px font-size
+  bump** (not weight bump) to close the x-height gap vs Latin caps.
+  `teBump = lang === 'te' ? 3 : 0` in FeatureTile.
+
+### Off-theme color list (do NOT introduce on dark surfaces)
+
+Per `feedback_dark_theme_colors.md`, these colors read as off-theme
+on the `#0A0A0A` dark surface — even at WCAG-passing contrast:
+
+| Hex | Meaning | Replace with |
+|---|---|---|
+| `#4CAF50` tulasi green | success / positive | gold `#D4A017` |
+| `#E8495A` kumkum red | warning / kumkum | saffron `#E8751A` |
+| `#4A90D9` blue | (none in palette) | gold or saffron family |
+| `#9B6FCF` purple | (none in palette) | saffron-dark `#C55A11` |
+
+Caught + fixed across `stotraData.js` (4 entries) and the
+StotraScreen complete-badge styling in v2.4.8.
 
 ### Auth for Firestore probes
 

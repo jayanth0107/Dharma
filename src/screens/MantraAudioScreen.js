@@ -2,7 +2,7 @@
 // NO TTS for mantras — incorrect pronunciation of Sanskrit mantras is harmful.
 // Instead: shows lyrics for reading along + links to authentic Vedic pandit recordings.
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
@@ -40,19 +40,44 @@ function MantraCard({ mantra, onPress, t }) {
 }
 
 // ── Main Screen ──
-export function MantraAudioScreen({ route }) {
+export function MantraAudioScreen({ route, navigation }) {
   const { t, lang } = useLanguage();
   // preselectId is passed when navigating from the combined Stotra/Mantra
   // sub-tab so the player opens directly on the chosen mantra.
+  // `_ts` is a navigation cache-buster — passing Date.now() from the
+  // caller forces the route params object reference to differ even when
+  // the user re-taps the SAME mantra, which makes the useEffect below
+  // fire reliably.
   const preselectId = route?.params?.preselectId;
+  const navTs = route?.params?._ts;
   const [selectedMantra, setSelectedMantra] = useState(
     () => (preselectId ? MANTRAS.find(m => m.id === preselectId) : null)
   );
 
+  // Bottom-tab screens stay mounted in React Navigation. Without this
+  // effect, the useState above only ran ONCE per app session, so
+  // tapping different mantras from the Stotra screen always opened
+  // whichever mantra was tapped first. Re-resolve whenever preselectId
+  // (or the cache-buster _ts) changes — bug caught when Hanuman Chalisa
+  // wasn't opening after first mantra was viewed.
+  useEffect(() => {
+    if (!preselectId) return;
+    const next = MANTRAS.find(m => m.id === preselectId);
+    if (next) setSelectedMantra(next);
+  }, [preselectId, navTs]);
+
   const contentPad = usePick({ default: 16, lg: 20, xl: 28 });
   const lyricFontSize = usePick({ default: 20, lg: 22, xl: 24 });
 
-  const handleBack = useCallback(() => setSelectedMantra(null), []);
+  // Back from a mantra player goes EXPLICITLY to Stotra — not via
+  // navigation.goBack(), which in bottom-tabs defaults to backBehavior:
+  // 'firstRoute' and lands on Home instead of the previous tab. Since
+  // grep confirms StotraScreen is the only caller of MantraAudio, an
+  // unconditional navigate('Stotra') is safe and correct.
+  const handleBack = useCallback(() => {
+    setSelectedMantra(null);
+    navigation?.navigate?.('Stotra');
+  }, [navigation]);
 
   const getShareText = useCallback(() => {
     if (!selectedMantra) return '';
@@ -262,18 +287,22 @@ const s = StyleSheet.create({
   },
   cardIconWrap: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   cardBody: { flex: 1, marginLeft: 12, marginRight: 8 },
-  cardName: { fontSize: 16, fontWeight: '600', color: '#FFFFFF' },
-  cardDeity: { fontSize: 13, fontWeight: '600', color: DarkColors.textSecondary, marginTop: 2 },
-  cardDuration: { fontSize: 12, fontWeight: '500', color: DarkColors.textMuted, marginTop: 2 },
+  // Card typography bumped for legibility — old 13 dp deity subtitle
+  // was hard to read against the dark surface. Weights kept at
+  // semibold (600) / medium (500) per popular-app standard; bold (700)
+  // reserved for hero titles only.
+  cardName: { fontSize: 17, fontWeight: '600', color: '#FFFFFF' },
+  cardDeity: { fontSize: 14, fontWeight: '500', color: DarkColors.silverLight, marginTop: 3 },
+  cardDuration: { fontSize: 13, fontWeight: '500', color: DarkColors.silver, marginTop: 3 },
 
   // Player
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 14, paddingVertical: 4 },
-  backText: { fontSize: 14, fontWeight: '700', color: DarkColors.gold },
+  backText: { fontSize: 15, fontWeight: '600', color: DarkColors.gold },
 
   playerHeader: { alignItems: 'center', marginBottom: 16 },
   playerIconWrap: { width: 72, height: 72, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   playerTitle: { fontSize: 22, fontWeight: '700', textAlign: 'center', marginBottom: 4 },
-  playerDeity: { fontSize: 15, fontWeight: '600', color: DarkColors.textSecondary, textAlign: 'center' },
+  playerDeity: { fontSize: 16, fontWeight: '500', color: DarkColors.silverLight, textAlign: 'center' },
 
   benefitBox: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -289,11 +318,11 @@ const s = StyleSheet.create({
     borderWidth: 2, borderColor: 'rgba(255,0,0,0.2)',
   },
   youtubeBtnTitle: { fontSize: 15, fontWeight: '600', color: '#FFFFFF' },
-  youtubeBtnSub: { fontSize: 12, fontWeight: '500', color: DarkColors.textMuted, marginTop: 2 },
+  youtubeBtnSub: { fontSize: 13, fontWeight: '500', color: DarkColors.silver, marginTop: 3 },
 
   // Lyrics
   lyricsHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  lyricsHeaderText: { fontSize: 16, fontWeight: '600', color: DarkColors.gold },
+  lyricsHeaderText: { fontSize: 17, fontWeight: '600', color: DarkColors.gold },
 
   lyricsContainer: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16, marginBottom: 16,
@@ -303,19 +332,24 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
     paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: DarkColors.borderCard,
   },
-  lyricNum: { fontSize: 14, fontWeight: '600', width: 20, textAlign: 'center', marginTop: 4 },
+  lyricNum: { fontSize: 15, fontWeight: '600', width: 22, textAlign: 'center', marginTop: 4 },
   lyricTexts: { flex: 1 },
-  lyricTe: { fontSize: 20, fontWeight: '700', color: DarkColors.gold, lineHeight: 30 },
-  lyricEn: { fontSize: 14, fontWeight: '500', color: DarkColors.textMuted, marginTop: 4, fontStyle: 'italic' },
+  // Mantra lyric in Telugu lipi — kept large for chanting legibility.
+  // Dropped bold 700 → semibold 600 (per popular-app weight standard;
+  // bold across long mantra blocks reads as "shouting").
+  lyricTe: { fontSize: 21, fontWeight: '600', color: DarkColors.gold, lineHeight: 32 },
+  lyricEn: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, marginTop: 5, fontStyle: 'italic', lineHeight: 22 },
 
   // How to chant
   howToBox: {
     backgroundColor: 'rgba(212,160,23,0.04)', borderRadius: 14, padding: 16, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderGold,
   },
-  howToTitle: { fontSize: 15, fontWeight: '600', color: DarkColors.gold, marginBottom: 10 },
+  // "ఎలా పఠించాలి" / "How to Recite" section title — bumped for
+  // readability per user feedback.
+  howToTitle: { fontSize: 17, fontWeight: '600', color: DarkColors.gold, marginBottom: 12 },
   howToRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 8 },
-  howToText: { flex: 1, fontSize: 14, fontWeight: '500', color: DarkColors.silver, lineHeight: 22 },
+  howToText: { flex: 1, fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, lineHeight: 24 },
 
   // Source attribution
   sourceRow: {
@@ -323,5 +357,5 @@ const s = StyleSheet.create({
     paddingVertical: 12, marginBottom: 8,
     borderTopWidth: 1, borderTopColor: DarkColors.borderCard,
   },
-  sourceText: { fontSize: 12, fontWeight: '600', color: DarkColors.textMuted, fontStyle: 'italic' },
+  sourceText: { fontSize: 13, fontWeight: '500', color: DarkColors.silver, fontStyle: 'italic' },
 });
