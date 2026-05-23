@@ -105,16 +105,15 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 ## What's New (release notes for Play Console — under 500 chars)
 
-✨ v2.4.9 — Astrology + Wisdom hubs, branded chrome, faster picker
+✨ v2.4.10 — Typography audit + UPI prefill fix + Quiz share
 
-• New Astrology hub: Daily Rashi, Personality, Horoscope, Family Horoscopes, Love Match, Muhurtam — all in one tap
-• New Wisdom hub: Debate, Quiz, Sanskrit Word, Knowledge, Vedic Wisdom
-• Branded "ధర్మ" header on every main screen; back + home buttons on sub-screens
-• Tile labels word-wrap (no more ellipsis on Panchangam, Mahabharata, Family Horoscopes)
-• Telugu voice install hint on first launch; better Telugu TTS detection
-• Birth-date picker scroll feels smoother
-• Kids Story images now show full deity illustration (no crop)
-• "Neethi Suktulu" Telugu spelling fix everywhere
+• Form labels and hints upgraded across Horoscope, Matchmaking, Family — readable size + AAA contrast
+• PhonePe / Paytm wallets now open prefilled to ₹ amount (was opening to home screen)
+• Quiz share preview now lists each question + your answer + correct answer
+• Telugu "Sanatana" subtitle auto-scales with the brand title, never clips
+• సెట్టింగ్స్ + other Telugu page titles no longer cut off on small phones
+• Italic styles removed from Telugu surfaces (no italic Telugu font; rendered as broken slant)
+• 30+ small-font / low-contrast fixes across screens
 
 ## Keywords (comma separated, 200 chars max)
 ramayana telugu, mahabharata telugu, ithihaasa telugu, bhagavad gita telugu, telugu panchangam, తెలుగు పంచాంగం, neethi suktalu, moral quotes telugu, chanakya niti telugu, vidura niti, sanskrit word of the day, dharma debate, hanuman chalisa, vishnu sahasranama, gayatri mantra, daily sloka, sanatana dharma, sanskrit class 10, indian history textbook, tithi today, nakshatram today, rahu kalam, festival calendar telugu, ekadashi 2026, gold price today india, zodiac sign telugu, vedic horoscope telugu, telugu jathakam, kundali milan, matchmaking telugu, muhurtham, daily quiz hindu, dharma values, telugu meditation, telugu mantras, stock market india, nse nifty
