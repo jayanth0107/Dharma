@@ -33,10 +33,13 @@ function StoryTile({ story, onPress, wide }) {
       onPress={onPress}
       activeOpacity={0.85}
     >
-      {/* Deity image */}
+      {/* Deity image — `contain` so the whole illustration shows
+          (heads/feet/vahanas not chopped off). The wrap is letterboxed
+          with a subtle gold-tint background so the gaps read as
+          intentional matting rather than "missing image". */}
       <View style={[st.tileImageWrap, { height: imgH }]}>
         {imgOk ? (
-          <Image source={typeof story.image === 'string' ? { uri: story.image } : story.image} style={st.tileImage} resizeMode="cover" onError={() => setImgOk(false)} />
+          <Image source={typeof story.image === 'string' ? { uri: story.image } : story.image} style={st.tileImage} resizeMode="contain" onError={() => setImgOk(false)} />
         ) : (
           <View style={[st.tileFallback, { backgroundColor: DarkColors.gold + '15' }]}>
             <MaterialCommunityIcons name={story.icon} size={fallbackIcon} color={DarkColors.gold} />
@@ -158,7 +161,7 @@ export function KidsSection({ dayOfWeek }) {
               </TouchableOpacity>
               <ScrollView showsVerticalScrollIndicator={false}>
                 {!modalImgFailed ? (
-                  <Image source={typeof activeStory.image === 'string' ? { uri: activeStory.image } : activeStory.image} style={[st.modalImage, { height: modalImgH }]} resizeMode="cover" onError={() => setModalImgFailed(true)} />
+                  <Image source={typeof activeStory.image === 'string' ? { uri: activeStory.image } : activeStory.image} style={[st.modalImage, { height: modalImgH }]} resizeMode="contain" onError={() => setModalImgFailed(true)} />
                 ) : (
                   <View style={[st.modalImageFallback, { backgroundColor: activeStory.color + '15', height: modalImgH }]}>
                     <MaterialCommunityIcons name={activeStory.icon} size={modalFallbackIcon} color={activeStory.color} />
@@ -214,6 +217,10 @@ const st = StyleSheet.create({
   },
   tileImageWrap: {
     width: '100%', height: 110, position: 'relative',
+    // Subtle gold-tinted matte behind the contained image — the
+    // letterbox bars read as intentional framing instead of "image
+    // failed to load". Same hue as goldDim used elsewhere.
+    backgroundColor: 'rgba(212,160,23,0.08)',
   },
   tileImage: { width: '100%', height: '100%' },
   tileFallback: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' },

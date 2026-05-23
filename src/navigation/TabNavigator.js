@@ -45,6 +45,8 @@ import { DharmaPollScreen } from '../screens/DharmaPollScreen';
 import { RashiPersonalityScreen } from '../screens/RashiPersonalityScreen';
 import { MahabharataScreen } from '../screens/MahabharataScreen';
 import { MantraAudioScreen } from '../screens/MantraAudioScreen';
+import { JyotishyamHubScreen } from '../screens/JyotishyamHubScreen';
+import { WisdomHubScreen } from '../screens/WisdomHubScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -58,27 +60,22 @@ const SECTION_COMPONENTS = {
   Home:         withErrorBoundary(HomeScreen, 'Home'),
   Panchang:     withErrorBoundary(CalendarScreen, 'Panchang'),
   Festivals:    withErrorBoundary(CalendarScreen, 'Festivals'),
-  DailyRashi:   withErrorBoundary(DailyRashiScreen, 'DailyRashi'),
-  Horoscope:    withErrorBoundary(HoroscopeScreen, 'Horoscope'),
-  Matchmaking:  withErrorBoundary(MatchmakingScreen, 'Matchmaking'),
-  Muhurtam:     withErrorBoundary(MuhurtamScreen, 'Muhurtam'),
-  Astro:        withErrorBoundary(AstroScreen, 'Astro'),
+  // Jyotishyam is the astrology hub — holds DailyRashi, RashiProfile,
+  // Horoscope, Family, Matchmaking, Muhurtam (each remains a real
+  // screen, registered as a utility route below).
+  Jyotishyam:   withErrorBoundary(JyotishyamHubScreen, 'Jyotishyam'),
+  // WisdomHub holds Debate, Quiz, Sanskrit, Vedic Wisdom (Astro).
+  WisdomHub:    withErrorBoundary(WisdomHubScreen, 'WisdomHub'),
   Gold:         withErrorBoundary(GoldScreen, 'Gold'),
   Ramayana:     withErrorBoundary(RamayanaScreen, 'Ramayana'),
   NeethiSukta:  withErrorBoundary(NeethiSuktaScreen, 'NeethiSukta'),
   Mahabharata:  withErrorBoundary(MahabharataScreen, 'Mahabharata'),
-  DharmaPoll:   withErrorBoundary(DharmaPollScreen, 'DharmaPoll'),
-  RashiProfile: withErrorBoundary(RashiPersonalityScreen, 'RashiProfile'),
-  SanskritWord: withErrorBoundary(SanskritWordScreen, 'SanskritWord'),
   Gita:         withErrorBoundary(GitaScreen, 'Gita'),
   Market:       withErrorBoundary(MarketScreen, 'Market'),
   Reminder:     ReminderScreen,
-  Quiz:         withErrorBoundary(QuizScreen, 'Quiz'),
-  Pramana:      withErrorBoundary(PramanaScreen, 'Pramana'),
   Stotra:       withErrorBoundary(StotraScreen, 'Stotra'),
   Meditation:   withErrorBoundary(MeditationScreen, 'Meditation'),
   PujaGuide:    withErrorBoundary(PujaGuideScreen, 'PujaGuide'),
-  Family:       withErrorBoundary(FamilyScreen, 'Family'),
   Kids:         withErrorBoundary(CalendarScreen, 'Kids'),
   // Darshan was promoted from a Festivals sub-tab chip to a top-level
   // tile; still renders via CalendarScreen seeded with the right sub-tab.
@@ -104,6 +101,22 @@ const UTILITY_SCREENS = [
   // MantraAudio is the player view for individual mantras. The Stotra
   // screen's "Mantras" sub-tab navigates here with preselectId.
   { name: 'MantraAudio',   component: withErrorBoundary(MantraAudioScreen, 'MantraAudio') },
+  // v2.4.9 — astrology leaf screens. Each used to be a MAIN_SECTION
+  // (visible in top/bottom bar + swipe). Now reached only via the
+  // Jyotishyam hub tile on Home. Still registered so deep-links + the
+  // hub's navigate(name) calls continue to resolve.
+  { name: 'DailyRashi',    component: withErrorBoundary(DailyRashiScreen, 'DailyRashi') },
+  { name: 'RashiProfile',  component: withErrorBoundary(RashiPersonalityScreen, 'RashiProfile') },
+  { name: 'Horoscope',     component: withErrorBoundary(HoroscopeScreen, 'Horoscope') },
+  { name: 'Family',        component: withErrorBoundary(FamilyScreen, 'Family') },
+  { name: 'Matchmaking',   component: withErrorBoundary(MatchmakingScreen, 'Matchmaking') },
+  { name: 'Muhurtam',      component: withErrorBoundary(MuhurtamScreen, 'Muhurtam') },
+  // Wisdom hub leaves — reached via the WisdomHub tile on Home.
+  { name: 'DharmaPoll',    component: withErrorBoundary(DharmaPollScreen, 'DharmaPoll') },
+  { name: 'Quiz',          component: withErrorBoundary(QuizScreen, 'Quiz') },
+  { name: 'SanskritWord',  component: withErrorBoundary(SanskritWordScreen, 'SanskritWord') },
+  { name: 'Pramana',       component: withErrorBoundary(PramanaScreen, 'Pramana') },
+  { name: 'Astro',         component: withErrorBoundary(AstroScreen, 'Astro') },
 ];
 
 const HIDDEN_OPTIONS = {

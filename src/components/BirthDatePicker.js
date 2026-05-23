@@ -60,6 +60,21 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
   const isFirstMount = useRef(true);
   const isUserScrolling = useRef(false);
 
+  // visualIndex drives the dim/selected text styling DURING the flick.
+  // Keeping it as local state means only THIS column re-renders as the
+  // user scrolls — parent (and sibling wheels) stay stable until the
+  // wheel snaps. Previously onSelect fired on every row crossing, which
+  // cascaded setDay/setMonth/setYear → parent re-render → 3-wheel
+  // remap of all data items, 60×/sec during a flick. That was the
+  // single biggest cause of the wheel feeling non-smooth on Android.
+  const [visualIndex, setVisualIndex] = useState(selectedIndex);
+
+  // Mirror prop → local visual state when the parent forcibly changes
+  // selectedIndex (e.g. month flip 31→28 clamps day).
+  useEffect(() => {
+    if (!isUserScrolling.current) setVisualIndex(selectedIndex);
+  }, [selectedIndex]);
+
   // Per-instance so date wheels can be taller than time wheels.
   // Must stay odd — see DATE_VISIBLE_ITEMS / TIME_VISIBLE_ITEMS notes above.
   const centerOffset = Math.floor(visibleItems / 2);
@@ -110,13 +125,13 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
     }
   }, [data.length, selectedIndex]);
 
+  // Scroll handler updates ONLY the local visual index. No onSelect
+  // call here — parent stays untouched until snap-end. This is the
+  // hot path that runs at 60fps during a flick; keep it allocation-free.
   const handleScroll = useCallback((e) => {
     const idx = indexFromY(e.nativeEvent.contentOffset.y);
-    if (idx !== lastSnapped.current) {
-      lastSnapped.current = idx;
-      onSelect(idx);
-    }
-  }, [indexFromY, onSelect]);
+    setVisualIndex((prev) => (prev === idx ? prev : idx));
+  }, [indexFromY]);
 
   const handleScrollBeginDrag = useCallback(() => {
     isUserScrolling.current = true;
@@ -124,6 +139,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
 
   const handleSnapEnd = useCallback((e) => {
     const idx = indexFromY(e.nativeEvent.contentOffset.y);
+    setVisualIndex(idx);
     if (idx !== lastSnapped.current) {
       lastSnapped.current = idx;
       onSelect(idx);
@@ -135,6 +151,7 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ y: i * ITEM_HEIGHT, animated: true });
     }
+    setVisualIndex(i);
     if (i !== lastSnapped.current) {
       lastSnapped.current = i;
       onSelect(i);
@@ -155,8 +172,11 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
           snapToInterval={ITEM_HEIGHT}
           snapToAlignment="start"
           // Numeric deceleration — 'normal'/'fast' map to different values
-          // on iOS vs Android. 0.997 gives long-flick parity across both.
-          decelerationRate={0.997}
+          // on iOS vs Android, so we pin a number. 0.985 is the standard
+          // picker-wheel rate (sharper than 0.997 which felt floaty —
+          // a flick "carried" too long before snapping, which read as
+          // sluggish even though it was technically smooth).
+          decelerationRate={0.985}
           bounces={Platform.OS === 'ios'}
           nestedScrollEnabled
           overScrollMode="never"
@@ -180,8 +200,8 @@ function WheelColumn({ data, selectedIndex, onSelect, label, renderItem, width, 
             >
               <Text style={[
                 ws.itemText,
-                i === selectedIndex && ws.itemTextSelected,
-                i !== selectedIndex && ws.itemTextDim,
+                i === visualIndex && ws.itemTextSelected,
+                i !== visualIndex && ws.itemTextDim,
               ]}>
                 {renderItem ? renderItem(item) : String(item)}
               </Text>

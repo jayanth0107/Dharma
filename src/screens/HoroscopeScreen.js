@@ -9,9 +9,13 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { HoroscopeModal } from '../components/HoroscopeFeature';
 
-export function HoroscopeScreen({ navigation }) {
+export function HoroscopeScreen({ navigation, route }) {
   const { premiumActive } = useApp();
   const { t } = useLanguage();
+  // If we landed here from the Jyotishyam hub, the modal's close X
+  // should send the user back to that hub — not jump to Home.
+  const backTo = route?.params?.backTo;
+  const closeTarget = backTo || 'Home';
 
   return (
     <SwipeWrapper screenName="Horoscope">
@@ -21,7 +25,7 @@ export function HoroscopeScreen({ navigation }) {
       <HoroscopeModal
         visible={true}
         embedded={true}
-        onClose={() => navigation.navigate('Home')}
+        onClose={() => navigation.navigate(closeTarget)}
         isPremium={premiumActive}
         onOpenPremium={() => navigation.navigate('Premium')}
       />

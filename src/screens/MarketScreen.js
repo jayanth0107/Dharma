@@ -9,7 +9,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { fetchMarketData } from '../utils/marketService';
 
 function PriceCard({ item, t, sizes }) {
@@ -93,7 +93,7 @@ export function MarketScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Market">
     <View style={s.screen}>
-      <PageHeader title={t('మార్కెట్', 'Market')} />
+      <BrandedHeader showBack />
       <TopTabBar />
       <ScrollView
         style={s.scroll} contentContainerStyle={[s.content, { padding: contentPad }]}

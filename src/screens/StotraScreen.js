@@ -21,7 +21,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { useLanguage } from '../context/LanguageContext';
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { SectionShareRow } from '../components/SectionShareRow';
@@ -70,7 +70,7 @@ export function StotraScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="Stotra">
       <View style={s.screen}>
-        <PageHeader title={t('స్తోత్రాలు & మంత్రాలు', 'Stotras & Mantras')} />
+        <BrandedHeader showBack />
         <TopTabBar />
 
         {/* Sub-tab bar */}

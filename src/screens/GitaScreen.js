@@ -10,7 +10,7 @@ import { trackEvent } from '../utils/analytics';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { SectionShareRow } from '../components/SectionShareRow';
@@ -34,7 +34,6 @@ export function GitaScreen() {
     }
   }, [today?.id]);
 
-  const titleFs       = usePick({ default: 20, md: 22, xl: 26 });
   const sanskritFs    = usePick({ default: 18, md: 20, xl: 22 });
   const sanskritLh    = usePick({ default: 30, md: 33, xl: 36 });
   const meaningFs     = usePick({ default: 16, md: 17, xl: 19 });
@@ -136,15 +135,14 @@ export function GitaScreen() {
   return (
     <SwipeWrapper screenName="Gita">
       <View style={s.screen}>
-        <PageHeader title={t('భగవద్గీత', 'Bhagavad Gita')} />
+        <BrandedHeader showBack />
         <TopTabBar />
         <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-          {/* Header */}
+          {/* In-page title was "భగవద్గీత — నేటి శ్లోకం" — removed since
+              BrandedHeader + the highlighted top-tab already announce
+              the section. Subtitle stays as the cadence promise, font
+              bumped so it reads on its own. */}
           <View style={s.header}>
-            <MaterialCommunityIcons name="book-open-page-variant" size={28} color={DarkColors.gold} />
-            <Text style={[s.headerTitle, { fontSize: titleFs }]}>
-              {t('భగవద్గీత — నేటి శ్లోకం', "Bhagavad Gita — Today's Sloka")}
-            </Text>
             <Text style={s.headerSub}>
               {t('ప్రతి రోజు ఒక శ్లోకం — 30 రోజుల్లో గీత', 'One sloka every day — Gita in 30 days')}
             </Text>
@@ -195,8 +193,9 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontWeight: '700', color: DarkColors.gold, textAlign: 'center', letterSpacing: 0.5 },
-  headerSub: { fontSize: 15, lineHeight: 22, color: DarkColors.silverLight, textAlign: 'center', fontWeight: '500' },
+  // headerTitle removed in v2.4.9 — duplicate of BrandedHeader +
+  // TopTabBar. Subtitle bumped 15→18 / 500→600 / lh 22→26.
+  headerSub: { fontSize: 18, lineHeight: 26, color: DarkColors.silverLight, textAlign: 'center', fontWeight: '600', paddingHorizontal: 8 },
 
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,

@@ -19,7 +19,7 @@ const APP_VERSION =
   Constants.manifest?.version ||
   '2.4.0';
 
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 import { SectionShareRow } from '../components/SectionShareRow';
 
@@ -42,7 +42,7 @@ export function MoreScreen({ navigation }) {
   return (
     <SwipeWrapper screenName="More">
     <View style={s.screen}>
-      <PageHeader title={t('మరిన్ని', 'More')} />
+      <BrandedHeader showBack />
       <TopTabBar />
 
       <View style={[s.gridContainer, { paddingHorizontal: gridPaddingH, paddingTop: gridPaddingV, paddingBottom: gridPaddingV }]}>

@@ -24,7 +24,11 @@ function getTileWidthPercent(columns) {
   return `${((100 - gapFraction) / columns).toFixed(2)}%`;
 }
 
-export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, analyticsId, _gridIndex, _gridTotal }) {
+// labelLines defaults to 2: long bilingual strings (కుటుంబ జాతకాలు,
+// దైనందిన దర్శనం, స్టాక్ మార్కెట్) word-wrap onto a second line on
+// Home and on hub screens, rather than ellipsizing. Callers that
+// genuinely need single-line behaviour can pass labelLines={1}.
+export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, analyticsId, labelLines = 2, _gridIndex, _gridTotal }) {
   // Wrap onPress so every home/feature tile fires a uniform tile_tap
   // event. `icon` is a stable English-only string and works as the key
   // when an explicit analyticsId isn't passed. The label varies by
@@ -49,21 +53,20 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
   // more visual weight since label is now a single word.
   const iconSize = usePick({ default: 36, md: 40, lg: 44, xl: 50 });
   const tileMinH = usePick({ default: 90, md: 100, lg: 116, xl: 128 });
-  // Telugu optical sizing audit (v6 — English dialled down to match
-  // the popular-app body-label standard):
-  //  • Base fontSize 17 → 16 default — Material Design 3 `bodyLarge`
-  //    and the de-facto standard across WhatsApp / Spotify / Google
-  //    Maps / YouTube for list-row text. v4's 17 read "high" / a tad
-  //    too prominent on dark.
-  //  • Telugu bump kept at +3 — closes the optical x-height gap
-  //    without making Telugu feel oversized.
-  //  • Weight stays at 500 medium (set on s.label below).
-  // Net effect on a 360 dp phone:
-  //  • English label: 16 / medium (500)  — Material bodyLarge
-  //  • Telugu  label: 19 / medium (500)  — +3 px optical adjustment
+  // Telugu optical sizing audit (v9 — English dialled down one more
+  // step. User reported "Panchangam" / "Mahabharata" wrapping to a
+  // second line on phones because Latin glyphs are wider than the
+  // 14 px label could fit inside the ~150 dp tile content area).
+  //  • Base 13 default — one step below Material `bodyMedium`.
+  //  • Telugu bump kept at +3 — Telugu glyphs are narrower per
+  //    character but taller, so they don't have the same wrap issue
+  //    and stay on one line at the bumped size.
+  // Net effect:
+  //  • English: 13 / 14 / 15 / 17 (default / md / lg / xl)
+  //  • Telugu:  16 / 17 / 18 / 20
   const teBump = lang === 'te' ? 3 : 0;
-  const labelSize = usePick({ default: 16, md: 17, lg: 18, xl: 20 }) + teBump;
-  const subSize   = usePick({ default: 14, md: 15, lg: 16, xl: 17 }) + teBump;
+  const labelSize = usePick({ default: 13, md: 14, lg: 15, xl: 17 }) + teBump;
+  const subSize   = usePick({ default: 11, md: 12, lg: 13, xl: 14 }) + teBump;
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
   const widthStyle = gridCtx?.tileWidth
@@ -106,11 +109,33 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
       {/* Icon — single uniform color */}
       <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.gold} />
 
-      {/* Label */}
-      <Text style={[s.label, { fontSize: labelSize }]} numberOfLines={2}>{label}</Text>
+      {/* Label — default single line + autoshrink (Home grid). Callers
+          that need wrap (e.g. hub screens with longer Telugu names like
+          కుటుంబ జాతకాలు) can pass labelLines={2}. With 2 lines we drop
+          adjustsFontSizeToFit because the wrap itself handles the
+          overflow — autoshrink + multiline together fights itself. */}
+      <Text
+        style={[s.label, { fontSize: labelSize }]}
+        numberOfLines={labelLines}
+        adjustsFontSizeToFit={labelLines === 1}
+        minimumFontScale={0.7}
+        allowFontScaling={false}
+      >
+        {label}
+      </Text>
 
-      {/* Sublabel */}
-      {sublabel && <Text style={[s.sublabel, { fontSize: subSize }]} numberOfLines={2}>{sublabel}</Text>}
+      {/* Sublabel — same treatment */}
+      {sublabel && (
+        <Text
+          style={[s.sublabel, { fontSize: subSize }]}
+          numberOfLines={labelLines}
+          adjustsFontSizeToFit={labelLines === 1}
+          minimumFontScale={0.7}
+          allowFontScaling={false}
+        >
+          {sublabel}
+        </Text>
+      )}
 
     </TouchableOpacity>
   );

@@ -43,8 +43,8 @@ const SOURCES = {
                en: 'Based on the Gita Press Gorakhpur edition.' },
   },
   neethi: {
-    line:    { te: 'నీతి సూక్తాలు — చాణక్య నీతి, విదుర నీతి, సుభాషితావళి, తిరుక్కురళ్',
-               en: 'Neethi Suktalu — Chanakya Niti, Vidura Niti, Subhashitavali, Thirukkural' },
+    line:    { te: 'నీతి సూక్తులు — చాణక్య నీతి, విదుర నీతి, సుభాషితావళి, తిరుక్కురళ్',
+               en: 'Neethi Suktulu — Chanakya Niti, Vidura Niti, Subhashitavali, Thirukkural' },
     compact: { te: 'చాణక్య నీతి, విదుర నీతి, సుభాషితావళి, తిరుక్కురళ్ ఆధారంగా.',
                en: 'Based on Chanakya Niti, Vidura Niti, Subhashitavali, Thirukkural.' },
   },

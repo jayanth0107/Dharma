@@ -9,19 +9,21 @@ import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { MuhurtamFinderModal } from '../components/MuhurtamFinder';
 
-export function MuhurtamScreen({ navigation }) {
+export function MuhurtamScreen({ navigation, route }) {
   const { location, premiumActive } = useApp();
   const { t } = useLanguage();
+  const backTo = route?.params?.backTo;
+  const closeTarget = backTo || 'Home';
 
   return (
     <SwipeWrapper screenName="Muhurtam">
     <View style={s.screen}>
-      <PageHeader title={t('శుభ ముహూర్తాలు & సమయాలు', 'Muhurtam & Timings')} />
+      <PageHeader title={t('ముహూర్తం', 'Muhurtam')} />
       <TopTabBar />
       <MuhurtamFinderModal
         visible={true}
         embedded={true}
-        onClose={() => navigation.navigate('Home')}
+        onClose={() => navigation.navigate(closeTarget)}
         location={location}
         isPremium={premiumActive}
         onOpenPremium={() => navigation.navigate('Premium')}

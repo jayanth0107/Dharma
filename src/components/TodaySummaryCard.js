@@ -187,16 +187,27 @@ export function TodaySummaryCard({ onNavigate }) {
           ENTIRE chip width — no left-side icon column to fight with —
           so the full "10:30 AM–11:30 AM" fits as a clean one-liner
           even on the narrowest 360-dp phones. */}
+      {/* Timing chips. Every text node has adjustsFontSizeToFit so when
+          the time range "10:30 AM – 11:30 AM" doesn't fit at the chosen
+          fontSize on a narrow phone, it shrinks gracefully instead of
+          ellipsizing or wrapping. minimumFontScale=0.75 floors the
+          shrink so the value stays readable (≥ 10 dp). */}
       <View style={s.timingsRow}>
         {panchangam.abhijitMuhurtam && (
           <View style={[s.timingChip, s.timingChipGood, { paddingHorizontal: timingPadH, paddingVertical: timingPadV }]}>
             <View style={s.timingHeaderRow}>
               <MaterialCommunityIcons name="check-circle" size={timingIconSz} color={DarkColors.goldLight} />
-              <Text style={[s.timingLabel, { fontSize: timingLabelFs, color: DarkColors.goldLight }]} numberOfLines={1}>
+              <Text
+                style={[s.timingLabel, { fontSize: timingLabelFs, color: DarkColors.goldLight }]}
+                numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}
+              >
                 {t('శుభ కాలం', 'Good Time')}
               </Text>
             </View>
-            <Text style={[s.timingTime, { fontSize: timingTimeFs, color: DarkColors.goldLight }]} numberOfLines={1}>
+            <Text
+              style={[s.timingTime, { fontSize: timingTimeFs, color: DarkColors.goldLight }]}
+              numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}
+            >
               {panchangam.abhijitMuhurtam.startFormatted} – {panchangam.abhijitMuhurtam.endFormatted}
             </Text>
           </View>
@@ -205,11 +216,17 @@ export function TodaySummaryCard({ onNavigate }) {
           <View style={[s.timingChip, s.timingChipBad, { paddingHorizontal: timingPadH, paddingVertical: timingPadV }]}>
             <View style={s.timingHeaderRow}>
               <MaterialCommunityIcons name="close-circle" size={timingIconSz} color={DarkColors.silverLight} />
-              <Text style={[s.timingLabel, { fontSize: timingLabelFs, color: DarkColors.silverLight }]} numberOfLines={1}>
+              <Text
+                style={[s.timingLabel, { fontSize: timingLabelFs, color: DarkColors.silverLight }]}
+                numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}
+              >
                 {t('రాహు కాలం', 'Rahu Kalam')}
               </Text>
             </View>
-            <Text style={[s.timingTime, { fontSize: timingTimeFs, color: DarkColors.silverLight }]} numberOfLines={1}>
+            <Text
+              style={[s.timingTime, { fontSize: timingTimeFs, color: DarkColors.silverLight }]}
+              numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}
+            >
               {panchangam.rahuKalam.startFormatted} – {panchangam.rahuKalam.endFormatted}
             </Text>
           </View>

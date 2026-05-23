@@ -11,7 +11,7 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
 
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { GoldSilverPriceCard } from '../components/GoldPriceCard';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { AdBannerWidget } from '../components/AdBanner';
@@ -102,7 +102,7 @@ export function GoldScreen() {
   return (
     <SwipeWrapper screenName="Gold">
     <View style={s.screen}>
-      <PageHeader title={t('బంగారం వెండి ధరలు', 'Gold & Silver Prices')} />
+      <BrandedHeader showBack />
       <TopTabBar />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
       <ScrollView

@@ -22,6 +22,7 @@ import { trackScreenView } from './src/utils/analytics';
 import { checkRatePrompt } from './src/utils/ratePrompt';
 import { OnboardingScreen } from './src/components/OnboardingScreen';
 import { TabNavigator } from './src/navigation/TabNavigator';
+import { LocationPickerModal } from './src/components/LocationPickerModal';
 import { DarkColors, WEB_MAX_WIDTH, IS_WEB, FontFamilies } from './src/theme';
 
 // ── Global default font ─────────────────────────────────────────────────
@@ -294,6 +295,11 @@ export default function App() {
         >
             <TabNavigator />
           </NavigationContainer>
+          {/* Global location picker — mounted at the root so the
+              LocationPill in PageHeader can open it from any screen
+              (not just Home). Reads showLocationPicker from
+              AppContext; renders nothing until opened. */}
+          <LocationPickerModal />
         </AppProvider>
         </AuthProvider>
         </LanguageProvider>

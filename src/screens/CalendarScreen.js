@@ -13,7 +13,7 @@ import { useApp } from '../context/AppContext';
 import { useLanguage, T, TR } from '../context/LanguageContext';
 import { usePick } from '../theme/responsive';
 
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { ListSectionHeader } from '../components/ListSectionHeader';
 import { SubTabBar } from '../components/SubTabBar';
 import { BirthDatePicker } from '../components/BirthDatePicker';
@@ -234,7 +234,7 @@ export function CalendarScreen({ route }) {
   return (
     <SwipeWrapper screenName="Calendar">
     <View style={s.screen}>
-      <PageHeader title={screenTitle} />
+      <BrandedHeader showBack />
       <TopTabBar />
       {showSubTabs && (
         <SubTabBar tabs={getSubTabs(t)} activeTab={activeSubTab} onTabChange={setActiveSubTab} />

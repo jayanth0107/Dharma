@@ -11,6 +11,52 @@ let teluguVoice = null;
 let englishVoice = null;
 let voicesLoaded = false;
 
+// ── Mobile voice management ──
+// expo-speech.speak({ language: 'te-IN' }) does NOT guarantee Telugu
+// audio — if the device doesn't have a Telugu TTS voice installed,
+// Android silently picks the default voice (usually English). Result:
+// user picks Telugu in the app, hears English audio. Fix is to query
+// the available voices once, cache the Telugu voice identifier, and
+// pass it explicitly to ExpoSpeech.speak(). When no Telugu voice is
+// installed, we fall back to English text + raise the fallback note.
+let mobileTeluguVoiceId = null;
+let mobileVoicesLoaded = false;
+let mobileVoiceLoadPromise = null;
+
+function loadMobileVoices() {
+  if (Platform.OS === 'web') return Promise.resolve();
+  if (mobileVoicesLoaded) return Promise.resolve();
+  if (mobileVoiceLoadPromise) return mobileVoiceLoadPromise;
+  mobileVoiceLoadPromise = (async () => {
+    try {
+      const voices = await ExpoSpeech.getAvailableVoicesAsync();
+      // Pick the highest-quality Telugu voice when multiple are present.
+      const teVoices = (voices || []).filter((v) => {
+        const lng = (v.language || '').toLowerCase().replace('_', '-');
+        return lng.startsWith('te');
+      });
+      if (teVoices.length > 0) {
+        const enhanced = teVoices.find((v) => (v.quality || '').toLowerCase() === 'enhanced');
+        mobileTeluguVoiceId = (enhanced || teVoices[0]).identifier || null;
+      }
+    } catch {}
+    mobileVoicesLoaded = true;
+  })();
+  return mobileVoiceLoadPromise;
+}
+
+// Kick off voice detection eagerly on first import so the cache is
+// ready by the time a user taps Listen.
+if (Platform.OS !== 'web') {
+  loadMobileVoices();
+}
+
+/** True when Telugu TTS is usable (web: voice loaded; mobile: voice id detected). */
+export function hasTeluguVoiceMobile() {
+  if (Platform.OS === 'web') return false;
+  return mobileVoicesLoaded && mobileTeluguVoiceId != null;
+}
+
 function loadWebVoices() {
   if (typeof window === 'undefined' || !window.speechSynthesis) return;
   const voices = window.speechSynthesis.getVoices();
@@ -125,20 +171,35 @@ function doSpeak(textTe, textEn, lang, onDone) {
       webSpeak(text, englishVoice, 'en-IN', 0.8, onDone);
     }
   } else {
-    // Mobile — OS handles Telugu/English voices natively
-    const text = lang === 'te' ? (textTe || textEn) : (textEn || textTe);
-    if (!text) { onDone?.(); return; }
-    const langCode = lang === 'te' ? 'te-IN' : 'en-IN';
-    const rate = lang === 'te' ? 0.85 : 0.8;
-    try {
-      ExpoSpeech.speak(text, {
-        language: langCode,
-        rate,
-        onDone,
-        onError: onDone,
-        onStopped: onDone,
-      });
-    } catch { onDone?.(); }
+    // Mobile — query installed voices, pass voice id explicitly when
+    // a Telugu voice is available. Otherwise fall back to English text
+    // + English voice so the user actually gets audio they understand
+    // instead of an "English voice reading Telugu glyphs" hybrid.
+    const teluguReady = mobileVoicesLoaded && mobileTeluguVoiceId != null;
+    if (lang === 'te' && teluguReady) {
+      const text = textTe || textEn;
+      if (!text) { onDone?.(); return; }
+      try {
+        ExpoSpeech.speak(text, {
+          language: 'te-IN',
+          voice: mobileTeluguVoiceId,
+          rate: 0.85,
+          onDone, onError: onDone, onStopped: onDone,
+        });
+      } catch { onDone?.(); }
+    } else {
+      // English path — also the fallback path when Telugu was
+      // requested but no Telugu voice is installed on the device.
+      const text = textEn || textTe;
+      if (!text) { onDone?.(); return; }
+      try {
+        ExpoSpeech.speak(text, {
+          language: 'en-IN',
+          rate: 0.8,
+          onDone, onError: onDone, onStopped: onDone,
+        });
+      } catch { onDone?.(); }
+    }
   }
 }
 
@@ -168,8 +229,17 @@ export function useSpeaker() {
       doStop();
       if (mountedRef.current) setIsSpeaking(false);
     } else {
-      // Check if we're falling back to English on web
-      const willFallback = Platform.OS === 'web' && lang === 'te' && !hasTeluguVoice();
+      // Detect fallback on BOTH platforms:
+      //  • web — Telugu voice not loaded by speechSynthesis
+      //  • mobile — Telugu voice not installed on device (cached
+      //    flag from loadMobileVoices). When the cache isn't ready
+      //    yet (first tap), assume Telugu IS available (optimistic)
+      //    and the next tap will set the banner correctly once the
+      //    voice list resolves.
+      const willFallback = lang === 'te' && (
+        (Platform.OS === 'web' && !hasTeluguVoice()) ||
+        (Platform.OS !== 'web' && mobileVoicesLoaded && mobileTeluguVoiceId == null)
+      );
       doSpeak(textTe, textEn, lang, () => {
         if (mountedRef.current) setIsSpeaking(false);
       });

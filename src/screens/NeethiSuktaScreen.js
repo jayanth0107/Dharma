@@ -8,7 +8,7 @@ import { trackEvent } from '../utils/analytics';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { SectionShareRow } from '../components/SectionShareRow';
@@ -145,13 +145,14 @@ export function NeethiSuktaScreen() {
   return (
     <SwipeWrapper screenName="NeethiSukta">
     <View style={s.screen}>
-      <PageHeader title={t('నీతి సూక్తాలు', 'Neethi Suktalu')} />
+      <BrandedHeader showBack />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        {/* Header — title removed (it's already in the PageHeader at the
+            top and in the top tab bar; a third copy in-page was noise).
+            Subtitle stays as the source-attribution sentence with a
+            bumped font for readability. */}
         <View style={s.header}>
-          <MaterialCommunityIcons name="script-text" size={28} color={DarkColors.gold} />
-          <Text style={s.headerTitle}>{t('నీతి సూక్తాలు', 'Daily Wisdom Quotes')}</Text>
           <Text style={s.headerSub}>{t('చాణక్య, విదుర, భర్తృహరి, పంచతంత్రం నుండి జీవిత పాఠాలు', 'Life lessons from Chanakya, Vidura, Bhartrihari & Panchatantra')}</Text>
         </View>
 
@@ -189,8 +190,11 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, textAlign: 'center' },
-  headerSub: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 23, paddingHorizontal: 8 },
+  // Source-attribution line — title above was removed (duplicate of
+  // PageHeader / TopTabBar); subtitle font bumped 15→18 so the
+  // "Chanakya / Vidura / Bhartrihari / Panchatantra" sentence reads
+  // clearly without being floated next to a competing big title.
+  headerSub: { fontSize: 18, fontWeight: '600', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 26, paddingHorizontal: 8 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard,

@@ -14,6 +14,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { LANG_STORAGE_KEY } from '../context/LanguageContext';
@@ -81,6 +82,26 @@ export function OnboardingScreen({ onDone }) {
             <Text style={[s.changeHint, { fontSize: hintSize }]}>
               సెట్టింగ్స్‌లో ఎప్పుడైనా మార్చవచ్చు / Change anytime in Settings
             </Text>
+
+            {/* Telugu-TTS install hint — Android often ships without a
+                Telugu TTS voice, so kids-story / sloka audio falls back
+                to English. Surface the install path once during
+                onboarding so users can grab the voice pack before they
+                hit the first Listen button. Hidden on web (browser
+                speech is OS-managed). */}
+            {Platform.OS !== 'web' && (
+              <View style={[s.ttsHint, { marginTop: 16 }]}>
+                <MaterialCommunityIcons name="volume-high" size={18} color={DarkColors.gold} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[s.ttsHintTitle, { fontSize: hintSize + 1 }]}>
+                    తెలుగు ఆడియో కోసం / For Telugu audio
+                  </Text>
+                  <Text style={[s.ttsHintBody, { fontSize: hintSize }]}>
+                    Settings → System → Languages → Text-to-speech → Install Telugu voice.
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -133,5 +154,19 @@ const s = StyleSheet.create({
   changeHint: {
     color: DarkColors.textMuted, fontWeight: '500', textAlign: 'center',
     marginTop: 22, lineHeight: 20,
+  },
+  ttsHint: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    paddingHorizontal: 14, paddingVertical: 12,
+    backgroundColor: 'rgba(212,160,23,0.08)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.25)',
+  },
+  ttsHintTitle: {
+    color: DarkColors.gold, fontWeight: '700', marginBottom: 2,
+  },
+  ttsHintBody: {
+    color: DarkColors.silver, fontWeight: '500', lineHeight: 20,
   },
 });

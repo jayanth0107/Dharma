@@ -1,15 +1,22 @@
 // ధర్మ — Shared Page Header
-// Shows on ALL screens: ← Back | 🏠 Home | Title ... ENG/తెలు toggle
-// Consistent dark theme header across the entire app
+// Two rows of chrome shown on every screen that isn't Home:
+//   Row 1 — ← Back  🏠 Home   ───── Title ─────
+//   Row 2 — 📍 Location pill                      Eng·తెలుగు toggle
+// Location pill mirrors Home's chrome so users always know which
+// location the panchangam/horoscope/muhurtam data is computed against.
+// The pill triggers showLocationPicker on AppContext; the actual
+// LocationPickerModal is mounted at App.js root so opens regardless
+// of the active screen.
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { DarkColors, Type, Spacing } from '../theme';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { DarkColors, Type } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
+import { LocationPill } from './LocationPill';
 
 // onBackPress (optional): when supplied, the back arrow runs this
 // instead of navigation.goBack(). Useful when a screen has internal
@@ -18,33 +25,45 @@ import { useLanguage } from '../context/LanguageContext';
 export function PageHeader({ title, onMenuPress, onBackPress }) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const route = useRoute();
   const { lang, toggleLang } = useLanguage();
+
+  // Hub-aware back nav. When a screen is reached FROM a hub tile (e.g.
+  // Jyotishyam → DailyRashi), the hub passes { backTo: 'Jyotishyam' }
+  // as a route param. The default navigation.goBack() on bottom-tabs
+  // sends the user to firstRoute=Home (per the feedback memory in
+  // CLAUDE.md), not to the hub — explicit navigate(backTo) fixes that.
+  const backTo = route?.params?.backTo;
 
   const menuIconSize = usePick({ default: 24, lg: 26, xl: 28 });
   const navIconSize = usePick({ default: 22, lg: 24, xl: 26 });
   const padH = usePick({ default: 12, lg: 16, xl: 20 });
-  const langFontSize = usePick({ default: 14, lg: 15, xl: 17 });
-  const langPadH = usePick({ default: 12, lg: 14, xl: 18 });
-  const langPadV = usePick({ default: 7, lg: 8, xl: 10 });
-  const titlePadH = usePick({ default: 110, lg: 120, xl: 140 });
+  const langFontSize = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
+  const langPadH = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
+  const langPadV = usePick({ default: 5, sm: 5, md: 6, lg: 7, xl: 8 });
+  // titlePadH was 110/120/140 back when the lang toggle lived on row 1
+  // and needed right-side clearance. The toggle moved to row 2, so the
+  // title only needs to clear the two left-side icon buttons (back +
+  // home ≈ 76 dp). Bumping the title content width from ~116 dp to
+  // ~176 dp on small phones means long titles ("Vedic Horoscope",
+  // "Family Horoscopes", "శుభ ముహూర్తాలు") no longer hit the autoshrink
+  // floor and ellipsize.
+  const titlePadH = usePick({ default: 80, sm: 80, md: 88, lg: 100, xl: 120 });
 
   return (
     <View style={[s.container, { paddingTop: Math.max(insets.top, 10) + 4, paddingHorizontal: padH }]}>
+      {/* Row 1 — Back / Home / Title */}
       <View style={s.row}>
-        {/* Centered title — absolutely positioned so icons don't shift it.
-            pointerEvents now lives in the style (was a prop) — RN 0.81+
-            and react-native-web both deprecate the prop form. */}
         <View style={[s.titleAbs, { paddingHorizontal: titlePadH, pointerEvents: 'none' }]}>
           <Text
             style={s.title}
             numberOfLines={1}
             adjustsFontSizeToFit
-            minimumFontScale={0.65}
+            minimumFontScale={0.55}
             allowFontScaling={false}
           >{title}</Text>
         </View>
 
-        {/* Back / Hamburger */}
         {onMenuPress ? (
           <TouchableOpacity style={s.iconBtn} onPress={onMenuPress}>
             <MaterialCommunityIcons name="menu" size={menuIconSize} color={DarkColors.silver} />
@@ -54,6 +73,7 @@ export function PageHeader({ title, onMenuPress, onBackPress }) {
             style={s.iconBtn}
             onPress={() => {
               if (onBackPress) { onBackPress(); return; }
+              if (backTo) { navigation.navigate(backTo); return; }
               if (navigation.canGoBack()) navigation.goBack();
               else navigation.navigate('Home');
             }}
@@ -62,22 +82,30 @@ export function PageHeader({ title, onMenuPress, onBackPress }) {
           </TouchableOpacity>
         )}
 
-        {/* Home */}
         <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')}>
           <MaterialCommunityIcons name="home" size={navIconSize} color={DarkColors.silver} />
         </TouchableOpacity>
 
         <View style={{ flex: 1 }} />
+      </View>
 
-        {/* Language toggle — right-aligned */}
-        <TouchableOpacity style={[s.langToggle, { paddingHorizontal: langPadH, paddingVertical: langPadV }]} onPress={toggleLang} activeOpacity={0.7}>
+      {/* Row 2 — Location pill (left) + Language toggle (right). Mirrors
+          the chrome HomeScreen renders below its branded header so the
+          two screens have the same "context" row. */}
+      <View style={s.row2}>
+        <LocationPill />
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity
+          style={[s.langToggle, { paddingHorizontal: langPadH, paddingVertical: langPadV }]}
+          onPress={toggleLang}
+          activeOpacity={0.7}
+        >
           <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>Eng</Text>
           <View style={[s.langDot, lang === 'en' ? s.langDotEn : s.langDotTe]} />
           <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తెలుగు</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Divider */}
       <View style={s.divider} />
     </View>
   );
@@ -93,6 +121,12 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 8,
     position: 'relative',
+  },
+  row2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 8,
+    gap: 8,
   },
   iconBtn: {
     padding: 6,
@@ -117,7 +151,6 @@ const s = StyleSheet.create({
     height: 1,
     backgroundColor: DarkColors.borderGold,
   },
-  // Language toggle
   langToggle: {
     flexDirection: 'row',
     alignItems: 'center',

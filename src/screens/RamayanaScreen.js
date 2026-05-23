@@ -8,7 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
-import { PageHeader } from '../components/PageHeader';
+import { BrandedHeader } from '../components/BrandedHeader';
 import { SwipeWrapper } from '../components/SwipeWrapper';
 import { TopTabBar } from '../components/TopTabBar';
 import { SectionShareRow } from '../components/SectionShareRow';
@@ -105,13 +105,13 @@ export function RamayanaScreen() {
   return (
     <SwipeWrapper screenName="Ramayana">
     <View style={s.screen}>
-      <PageHeader title={t('రామాయణం', 'Ramayana')} />
+      <BrandedHeader showBack />
       <TopTabBar />
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        {/* In-page title removed in v2.4.9 — BrandedHeader + the
+            highlighted top-tab already announce "Ramayana". Subtitle
+            stays as the cadence promise, font bumped. */}
         <View style={s.header}>
-          <MaterialCommunityIcons name="bow-arrow" size={28} color={DarkColors.saffron} />
-          <Text style={s.headerTitle}>{t('రామాయణం — నేటి ఎపిసోడ్', 'Ramayana — Today\'s Episode')}</Text>
           <Text style={s.headerSub}>{t('ప్రతి రోజు ఒక ఘట్టం — 30 రోజుల్లో రామాయణం', 'One episode every day — Ramayana in 30 days')}</Text>
         </View>
 
@@ -148,8 +148,9 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16 },
   header: { alignItems: 'center', marginBottom: 16, gap: 6 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: DarkColors.saffron, textAlign: 'center' },
-  headerSub: { fontSize: 15, fontWeight: '500', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 22 },
+  // headerTitle removed in v2.4.9 — duplicate of BrandedHeader +
+  // TopTabBar. Subtitle bumped 15→18 / 500→600 / lh 22→26.
+  headerSub: { fontSize: 18, fontWeight: '600', color: DarkColors.silverLight, textAlign: 'center', lineHeight: 26, paddingHorizontal: 8 },
   card: {
     backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 18, marginBottom: 14,
     borderWidth: 1, borderColor: DarkColors.borderCard,
