@@ -83,7 +83,7 @@ export function WebViewScreen({ route, navigation }) {
             style={s.actionBtn}
             onPress={() => {
               const url = pageId === 'rate'
-                ? 'https://play.google.com/store/apps/details?id=com.dharmadaily.app'
+                ? 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom'
                 : 'mailto:jayanthkumar0107@zohomail.in?subject=Dharma App Feedback';
               if (Platform.OS === 'web') window.open(url, '_blank');
               else Linking.openURL(url);

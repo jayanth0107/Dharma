@@ -72,7 +72,7 @@ export function MoreScreen({ navigation }) {
         <SectionShareRow
           section="share_app" hideButton autoOpen
           onClose={() => setShowShareApp(false)}
-          buildText={() => `🙏 ధర్మ — తెలుగు పంచాంగం యాప్\n\nరోజువారీ తిథి, నక్షత్రం, ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!\n\n📥 Download:\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n\n🙏 సర్వే జనాః సుఖినో భవంతు`}
+          buildText={() => `🙏 ధర్మ — తెలుగు పంచాంగం యాప్\n\nరోజువారీ తిథి, నక్షత్రం, ముహూర్తాలు, పండుగలు, బంగారం ధరలు — అన్నీ ఒకే యాప్‌లో!\n\n📥 Download:\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.wisdom\n\n🙏 సర్వే జనాః సుఖినో భవంతు`}
         />
       )}
     </View>

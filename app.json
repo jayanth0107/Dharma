@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dharmadaily.app",
+      "bundleIdentifier": "com.dharmadaily.wisdom",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "పంచాంగం గణనల కోసం మీ స్థానం అవసరం — సూర్యోదయం/సూర్యాస్తమయం సమయాలు",
         "CFBundleLocalizations": [
@@ -30,7 +30,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F0F1A"
       },
-      "package": "com.dharmadaily.app",
+      "package": "com.dharmadaily.wisdom",
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE",

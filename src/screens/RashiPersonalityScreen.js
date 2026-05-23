@@ -19,7 +19,7 @@ import { loadForm, saveForm, loadBirthProfile, saveBirthProfile, FORM_KEYS } fro
 import { getNakshatraRashiFromDate } from '../utils/matchmakingCalculator';
 import { trackEvent } from '../utils/analytics';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 // Compact profile cell used in the Vedic Profile grid (lucky number,
 // day, color, gemstone, deity, fasting day, chakra). Two cells per row

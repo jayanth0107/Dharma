@@ -14,7 +14,7 @@ import { SectionShareRow } from '../components/SectionShareRow';
 import { useSpeaker } from '../utils/speechService';
 import { getTodaySanskritWord, SANSKRIT_WORDS } from '../data/sanskritWordData';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 export function SanskritWordScreen() {
   const { t, lang } = useLanguage();

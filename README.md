@@ -9,7 +9,7 @@ A comprehensive **React Native (Expo)** app delivering daily **sacred stories** 
 > **Note**: For developers using Claude Code or similar AI assistants — `.claudeignore` lists generated artefacts, secrets, and large binaries to skip during indexing. `CLAUDE.md` carries persistent project context including operational tooling, location-search provider chain, and design-intent notes for the BirthDatePicker.
 
 - **GitHub:** https://github.com/jayanth0107/Dharma
-- **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
+- **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom
 
 ---
 
@@ -452,8 +452,8 @@ Clear AsyncStorage (native) or `localStorage` (web) to wipe reminders, premium, 
 | Field | Value |
 |-------|-------|
 | App name | Dharma: Wisdom & Astrology |
-| Bundle ID (iOS) | `com.dharmadaily.app` |
-| Package (Android) | `com.dharmadaily.app` |
+| Bundle ID (iOS) | `com.dharmadaily.wisdom` |
+| Package (Android) | `com.dharmadaily.wisdom` |
 | Version | 2.4.5 |
 | versionCode (Android) | 13 |
 | Expo SDK | 54 |

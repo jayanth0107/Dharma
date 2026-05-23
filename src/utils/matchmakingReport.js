@@ -450,7 +450,7 @@ ${result.groomProfile && result.brideProfile ? `
     <br/>This report is based on astronomical calculations and Vedic astrology. It is advisory only — final decisions should be made with personal discretion.
   </p>
   <p style="color:#333;font-size:14px;margin-top:12px;">
-    &#128247; Download the app: play.google.com/store/apps/details?id=com.dharmadaily.app
+    &#128247; Download the app: play.google.com/store/apps/details?id=com.dharmadaily.wisdom
   </p>
 </div>
 

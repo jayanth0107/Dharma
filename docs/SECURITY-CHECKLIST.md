@@ -21,8 +21,8 @@ This ensures:
 ### 3. API Key Restrictions (Google Cloud Console)
 Go to: https://console.cloud.google.com/apis/credentials
 - [ ] Restrict Firebase API key to:
-  - Android: `com.dharmadaily.app` (SHA-1 from EAS)
-  - iOS: Bundle ID `com.dharmadaily.app`
+  - Android: `com.dharmadaily.wisdom` (SHA-1 from EAS)
+  - iOS: Bundle ID `com.dharmadaily.wisdom`
   - Web: `dharmadaily-1fa89.firebaseapp.com` + your production domain
 - [ ] Restrict Google Places API key to:
   - Android apps only (for production)

@@ -156,7 +156,7 @@ export function AstroScreen() {
               `${concept.oneLine.te}\n${concept.oneLine.en}\n\n` +
               `${concept.description.te}\n\n${concept.description.en}\n\n` +
               `📖 Source: ${concept.source}\n\n` +
-              `📥 Dharma App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+              `📥 Dharma App: https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom`}
           />
         </SectionCard>
 
@@ -184,7 +184,7 @@ export function AstroScreen() {
             buildText={() => `📖 ధర్మ — ${upanishad.upanishad.te} ${upanishad.verse}\n\n` +
               `${upanishad.sanskrit}\n${upanishad.roman}\n\n` +
               `${upanishad.meaning.te}\n\n${upanishad.meaning.en}\n\n` +
-              `📥 Dharma App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+              `📥 Dharma App: https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom`}
           />
         </SectionCard>
 
@@ -255,7 +255,7 @@ export function AstroScreen() {
               (mantra.roman ? `${mantra.roman}\n` : '') +
               `\n🎯 ${mantra.meaning.te} / ${mantra.meaning.en}\n` +
               `🔢 Chant ${mantra.count} times\n\n` +
-              `📥 Dharma App: https://play.google.com/store/apps/details?id=com.dharmadaily.app`}
+              `📥 Dharma App: https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom`}
           />
         </SectionCard>
 

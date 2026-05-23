@@ -950,7 +950,7 @@ export function MatchmakingScreen({ navigation }) {
             text += `\n━━━━━━━━━━━━━━━━━━\n`;
             text += `⚠️ *${L.disclaimer}:* ${L.disclaimerText}\n\n`;
             text += `📲 *${L.footer}*\n`;
-            text += `https://play.google.com/store/apps/details?id=com.dharmadaily.app\n`;
+            text += `https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom\n`;
             text += `🙏 ${L.blessing}`;
             return text;
           }}

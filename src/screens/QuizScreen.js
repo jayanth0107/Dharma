@@ -168,7 +168,7 @@ export function QuizScreen() {
             text += `🏆 స్కోర్: ${correctCount}/${questions.length} (${percentage}%)\n`;
             text += `${t(grade.te, grade.en)}\n\n`;
             text += `📲 *Dharma App* — Telugu Panchangam & Astrology\n`;
-            text += `https://play.google.com/store/apps/details?id=com.dharmadaily.app`;
+            text += `https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom`;
             return text;
           }} />
 

@@ -30,7 +30,7 @@ function detectRashiFromDOB(date) {
 
 // Persist my rashi via shared form storage
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 function buildRashiShareText(pred, date) {
   const dateStr = date.toLocaleDateString('te-IN', { weekday: 'long', month: 'long', day: 'numeric' });

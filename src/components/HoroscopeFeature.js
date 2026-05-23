@@ -1029,7 +1029,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       text += `🛡️ ${L.remedy}:\n${pickL(h.vedic.remedy)}\n\n`;
                     }
 
-                    text += `━━━━━━━━━━━━━━━━\n📲 *${L.footer}*\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.app\n🙏 ${L.blessing}`;
+                    text += `━━━━━━━━━━━━━━━━\n📲 *${L.footer}*\nhttps://play.google.com/store/apps/details?id=com.dharmadaily.wisdom\n🙏 ${L.blessing}`;
                     return text;
                   }}
                 />
@@ -1558,7 +1558,7 @@ function buildHoroscopeHtml(h) {
         This report uses Drik Ganita + Lahiri Ayanamsa calculations. Advisory only — please consult a qualified astrologer for important decisions.
       </div>
       <div style="color:#bbb;font-size:13px;margin-top:10px;">
-        📲 play.google.com/store/apps/details?id=com.dharmadaily.app
+        📲 play.google.com/store/apps/details?id=com.dharmadaily.wisdom
       </div>
     </div>
     </body></html>`;

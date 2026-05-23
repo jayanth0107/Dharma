@@ -101,7 +101,7 @@ export function buildPanchangamShareCard(panchangam, date, locationName) {
     <div style="text-align: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(212,160,23,0.2);">
       <div style="font-size: 14px; color: #D4A017; font-weight: 700;">🙏 సర్వే జనాః సుఖినో భవంతు</div>
       <div style="font-size: 12px; color: #8A8A8A; margin-top: 6px;">Dharma App — Telugu Panchangam</div>
-      <div style="font-size: 11px; color: #6A6A6A; margin-top: 2px;">play.google.com/store/apps/details?id=com.dharmadaily.app</div>
+      <div style="font-size: 11px; color: #6A6A6A; margin-top: 2px;">play.google.com/store/apps/details?id=com.dharmadaily.wisdom</div>
     </div>
   </div>
 </body>

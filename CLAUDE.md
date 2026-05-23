@@ -7,7 +7,7 @@
 **App name:** Dharma: Wisdom & Astrology
 **Version:** 2.4.9 (versionCode 17)
 **GitHub:** https://github.com/jayanth0107/Dharma
-**Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
+**Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom
 **EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
 **Firebase project:** `dharmadaily-1fa89` (asia-south1 Mumbai)
 

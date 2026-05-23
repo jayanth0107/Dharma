@@ -16,7 +16,7 @@ import { useSpeaker } from '../utils/speechService';
 import { getTodayMahabharataEpisode, MAHABHARATA_EPISODES } from '../data/mahabharataData';
 import { SacredContentDisclaimer } from '../components/SacredContentDisclaimer';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 export function MahabharataScreen() {
   const { t, lang } = useLanguage();

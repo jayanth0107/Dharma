@@ -16,7 +16,7 @@ import { getTodayDharmaPoll, DHARMA_POLLS } from '../data/dharmaPollData';
 import { loadForm, saveForm } from '../utils/formStorage';
 import { trackEvent } from '../utils/analytics';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 const VOTE_KEY_PREFIX = '@dharma_poll_vote_';
 
 function getSimulatedResults(id) {

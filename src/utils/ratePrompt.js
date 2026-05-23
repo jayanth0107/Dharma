@@ -10,7 +10,7 @@ const MIN_DAYS = 3;
 const COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Replace with your actual Play Store URL after publishing
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 async function getStorage() {
   try {

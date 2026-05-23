@@ -20,7 +20,7 @@ import { SacredContentDisclaimer } from '../components/SacredContentDisclaimer';
 import { AdBannerWidget } from '../components/AdBanner';
 import { devanagariToTelugu } from '../utils/transliterate';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 export function GitaScreen() {
   const { t, lang } = useLanguage();

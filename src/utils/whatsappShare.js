@@ -39,6 +39,6 @@ export function buildDailyPanchangamMessage(panchangam, date, locationName) {
 
 ━━━━━━━━━━━━━━━━
 📲 *Dharma App* — Telugu Panchangam
-https://play.google.com/store/apps/details?id=com.dharmadaily.app
+https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom
 🙏 సర్వే జనాః సుఖినో భవంతు`;
 }

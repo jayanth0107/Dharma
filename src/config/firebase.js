@@ -10,7 +10,7 @@
 //
 // FOR ANDROID APP:
 // 7. In Firebase Console → Project Settings → "Your apps" → Add app → Android
-// 8. Package name: com.dharmadaily.app
+// 8. Package name: com.dharmadaily.wisdom
 // 9. Download google-services.json → place in project root
 //
 // OPTIONAL SERVICES (enable as needed):

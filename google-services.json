@@ -16,6 +16,31 @@
       "api_key": [
         {
           "current_key": "AIzaSyABqzkzK7lBdtrW3nyMH4KupZJw62udxaY"
+        },
+        {
+          "current_key": "AIzaSyAdN_oaljZxUWHl-bSyqFva7Kt66sszs8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:945414157606:android:09b6a032a9838753fdbde7",
+        "android_client_info": {
+          "package_name": "com.dharmadaily.wisdom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABqzkzK7lBdtrW3nyMH4KupZJw62udxaY"
+        },
+        {
+          "current_key": "AIzaSyAdN_oaljZxUWHl-bSyqFva7Kt66sszs8g"
         }
       ],
       "services": {

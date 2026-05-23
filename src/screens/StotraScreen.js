@@ -30,7 +30,7 @@ import { STOTRAS } from '../data/stotraData';
 import { MANTRAS } from '../data/mantraData';
 import { trackEvent } from '../utils/analytics';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 function openYouTube(query) {
   const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;

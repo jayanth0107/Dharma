@@ -16,7 +16,7 @@ import { useSpeaker } from '../utils/speechService';
 import { getTodayRamayanaEpisode, RAMAYANA_EPISODES } from '../data/ramayanaData';
 import { SacredContentDisclaimer } from '../components/SacredContentDisclaimer';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 export function RamayanaScreen() {
   const { t, lang } = useLanguage();

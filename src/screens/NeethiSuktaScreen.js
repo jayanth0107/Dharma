@@ -17,7 +17,7 @@ import { getTodayNeethiSukta, NEETHI_SUKTAS } from '../data/neethiSuktaData';
 import { SacredContentDisclaimer } from '../components/SacredContentDisclaimer';
 import { TR } from '../data/translations';
 
-const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.app';
+const PLAY_LINK = 'https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom';
 
 export function NeethiSuktaScreen() {
   const { t, lang } = useLanguage();
