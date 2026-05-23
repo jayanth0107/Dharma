@@ -1,11 +1,11 @@
-# CLAUDE.md — Dharma: Telugu Astro, Calendar & Gold
+# CLAUDE.md — Dharma: Wisdom & Astrology
 
 ## What is this project?
 
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu **sacred-stories + panchangam + Vedic astrology** mobile app. Daily Ramayana / Mahabharata episode, Bhagavad Gita sloka, Neethi Sukta wisdom, Sanskrit word, Dharma debate / quiz, Stotras + Mantras with pandit recordings, animated meditation; full Drik-Ganita panchangam (Tithi, Nakshatra, Yoga, Karana, Muhurtams), festivals + Ekadashi + Pournami / Amavasya / Pradosham observances, Vedic horoscope (జాతకం), 8-Kuta matchmaking, Muhurtam finder, daily rashi predictions, Vedic personality profile, live gold/silver prices, Indian market indices, nearby-temple finder.
 
-**App name:** Dharma: Telugu Astro, Calendar & Gold
-**Version:** 2.4.8 (versionCode 16)
+**App name:** Dharma: Wisdom & Astrology
+**Version:** 2.4.9 (versionCode 17)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.app
 **EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
@@ -164,7 +164,7 @@ src/
 
 ## Branding
 
-- **App name:** Dharma: Telugu Astro, Calendar & Gold
+- **App name:** Dharma: Wisdom & Astrology
 - **Telugu name:** ధర్మ — సనాతనం
 - **Icon:** Custom saffron Bhagwa Dhwaj with ॐ symbol
 - **Home header:** ☰ Drawer + 🚩 Flag + "ధర్మ | సనాతనం" + 🔔 + ⚙ + 👤 avatar

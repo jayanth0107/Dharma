@@ -1552,7 +1552,7 @@ function buildHoroscopeHtml(h) {
     <!-- ══════════════ FOOTER ══════════════ -->
     <div class="footer">
       <div class="footer-brand">🙏 ధర్మ — సనాతనం</div>
-      <div class="footer-sub">Dharma: Telugu Astro, Calendar &amp; Gold</div>
+      <div class="footer-sub">Dharma: Wisdom &amp; Astrology</div>
       <div class="footer-note">
         ⚠ ఈ నివేదిక దృక్ గణిత మరియు లాహిరి అయనాంశ ఆధారంగా ఖగోళశాస్త్రీయంగా రూపొందించబడింది. ఇది సలహా మాత్రమే.<br/>
         This report uses Drik Ganita + Lahiri Ayanamsa calculations. Advisory only — please consult a qualified astrologer for important decisions.

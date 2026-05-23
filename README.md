@@ -1,4 +1,4 @@
-# Dharma: Telugu Astro, Calendar & Gold
+# Dharma: Wisdom & Astrology
 
 **ధర్మ — సనాతనం**
 
@@ -451,7 +451,7 @@ Clear AsyncStorage (native) or `localStorage` (web) to wipe reminders, premium, 
 
 | Field | Value |
 |-------|-------|
-| App name | Dharma: Telugu Astro, Calendar & Gold |
+| App name | Dharma: Wisdom & Astrology |
 | Bundle ID (iOS) | `com.dharmadaily.app` |
 | Package (Android) | `com.dharmadaily.app` |
 | Version | 2.4.5 |

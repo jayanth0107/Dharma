@@ -1,4 +1,4 @@
-// ధర్మ — Dharma: Telugu Astro, Calendar & Gold
+// ధర్మ — Dharma: Wisdom & Astrology
 // Main entry point — minimal shell with ErrorBoundary + AppProvider + TabNavigator
 
 import React, { Component, useState, useEffect } from 'react';

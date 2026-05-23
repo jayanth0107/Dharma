@@ -444,7 +444,7 @@ ${result.groomProfile && result.brideProfile ? `
 <!-- ══════════════ FOOTER ══════════════ -->
 <div style="text-align:center;padding:24px 16px;border-top:1px solid #2A2A2A;margin-top:20px;">
   <p style="color:#D4A017;font-size:17px;font-weight:600;margin-bottom:4px;">&#128249; ధర్మ — సనాతనం</p>
-  <p style="color:#9A9A9A;font-size:16px;margin-bottom:12px;">Dharma: Telugu Astro, Calendar &amp; Gold</p>
+  <p style="color:#9A9A9A;font-size:16px;margin-bottom:12px;">Dharma: Wisdom &amp; Astrology</p>
   <p style="color:#555;font-size:15px;line-height:1.5;max-width:600px;margin:0 auto;">
     &#9888; Disclaimer: ఈ నివేదిక ఖగోళ గణనలు మరియు వేద జ్యోతిషం ఆధారంగా రూపొందించబడింది. ఇది సలహా మాత్రమే — తుది నిర్ణయాలు వ్యక్తిగత విచక్షణతో తీసుకోవాలి.
     <br/>This report is based on astronomical calculations and Vedic astrology. It is advisory only — final decisions should be made with personal discretion.

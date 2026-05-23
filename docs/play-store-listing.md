@@ -1,7 +1,7 @@
 # Google Play Store Listing — Dharma v2.4.8 (versionCode 16)
 
 ## App Name (30 chars max)
-Dharma · Ithihaasa & Panchangam
+Dharma: Wisdom & Astrology
 
 ## Short Description (80 chars max)
 Daily Ramayana, Mahabharata, Gita, Panchangam — Telugu & English. 100% free.
@@ -11,7 +11,7 @@ Daily Ramayana, Mahabharata, Gita, Panchangam — Telugu & English. 100% free.
 
 🙏 ధర్మ — Rediscover the wisdom your grandparents knew.
 
-One Ithihaasa episode every morning. The full panchangam your grandfather kept on his wall. Bhagavad Gita verses, Vidura niti, Stotras with pandit recordings, daily quizzes for your kids. Bilingual Telugu / English. **No ads. No paywalls. No tracking. Free for everyone.**
+One sacred story every morning — Ramayana, Mahabharata, Bhagavad Gita. The full Telugu panchangam (Hindu calendar) your grandfather kept on his wall. Daily horoscope, Vedic astrology, moral quotes, mantras with pandit audio, kids stories, daily quizzes. Bilingual Telugu / English. **No ads. No paywalls. No tracking. Free for everyone.**
 
 If you ever wished your phone served Sanatana wisdom instead of stealing your time — this is the app.
 
@@ -28,13 +28,13 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 ━━━━━━━━━━━━━━━━
 
-📖 Daily Ithihaasa — 30-day rotations
+📖 Daily Sacred Stories — 30-day rotations (Ithihaasa)
 
 🏹 **Ramayana Daily** — All 7 kandas in 30 episodes. Each with moral, "Did You Know?", character notes, exact Sarga reference.
 ⚔️ **Mahabharata Daily** — All 18 parvas in 30 episodes. BORI Critical Edition. Character studies your textbook never gave you.
 🕉️ **Bhagavad Gita** — 30 selected verses, Sanskrit + Telugu lipi + English meaning, theme-tagged, share-ready.
-📜 **Moral Quotes (Neethi Suktalu)** — Chanakya Niti, Vidura Niti, Bhartrihari, Subhashitas, Thirukkural, Panchatantra. Every quote ends with "Apply Today" — one practical action.
-📚 **Knowledge (Pramana Trayam)** — Shruti / Smriti / Shishtachara source attribution for every deity, festival, vrata.
+📜 **Moral Quotes** — Chanakya Niti, Vidura Niti, Bhartrihari, Subhashitas, Thirukkural, Panchatantra. Every quote ends with "Apply Today" — one practical action.
+📚 **Knowledge** — Shruti / Smriti / Shishtachara source attribution for every deity, festival, vrata.
 👶 **Kids Stories** — 50 simple moral retellings + 30 easy slokas for ages 6–12.
 
 ━━━━━━━━━━━━━━━━
@@ -91,7 +91,7 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 🎓 What makes ధర్మ different
 
-✓ **Source-first** — every Ithihaasa episode carries a verse number. Anyone can verify.
+✓ **Source-first** — every sacred story (Ithihaasa) carries a verse number. Anyone can verify.
 ✓ **Bilingual without compromise** — Telugu glyphs render with proper line-heights, not as an afterthought.
 ✓ **Astronomically computed**, not table-lookup. Works for 1923 or 2099.
 ✓ **No tracking SDKs**, no ads, no in-app purchases at launch.
@@ -105,17 +105,16 @@ If you ever wished your phone served Sanatana wisdom instead of stealing your ti
 
 ## What's New (release notes for Play Console — under 500 chars)
 
-✨ v2.4.8 — Sankalpa Deepam, image-card sections, Telugu polish
+✨ v2.4.9 — Astrology + Wisdom hubs, branded chrome, faster picker
 
-• Tap the diya on the Home card daily — Sankalpa Deepam, your lamp of resolve
-• Vaaram deity portrait — today's ishta-devata (Sun→Surya … Sat→Shani)
-• Image-card section headers for Ithihaasa / Bhakti / Astrology; double-row rangoli dividers elsewhere
-• Evening Bhagavad Gita notification at 7 PM; Neethi Sukta moved to 8 AM
-• NeethiSukta now shows Vidhi (Do) + Nishedha (Avoid) per shastra
-• Softer Telugu labels: రాశి భవిష్యత్తు, మీ స్వభావం, ప్రేమ జ్యోతిష్యం, మీ జాతకం, దేవాలయాలు దగ్గరలో
-• Readability bumps + theme-color audit across Stotras, Mantras, Temples
-• BirthDatePicker scroll fix; sticky Cancel/Select on small phones
-• Mantra navigation fixed — correct mantra opens every time
+• New Astrology hub: Daily Rashi, Personality, Horoscope, Family Horoscopes, Love Match, Muhurtam — all in one tap
+• New Wisdom hub: Debate, Quiz, Sanskrit Word, Knowledge, Vedic Wisdom
+• Branded "ధర్మ" header on every main screen; back + home buttons on sub-screens
+• Tile labels word-wrap (no more ellipsis on Panchangam, Mahabharata, Family Horoscopes)
+• Telugu voice install hint on first launch; better Telugu TTS detection
+• Birth-date picker scroll feels smoother
+• Kids Story images now show full deity illustration (no crop)
+• "Neethi Suktulu" Telugu spelling fix everywhere
 
 ## Keywords (comma separated, 200 chars max)
 ramayana telugu, mahabharata telugu, ithihaasa telugu, bhagavad gita telugu, telugu panchangam, తెలుగు పంచాంగం, neethi suktalu, moral quotes telugu, chanakya niti telugu, vidura niti, sanskrit word of the day, dharma debate, hanuman chalisa, vishnu sahasranama, gayatri mantra, daily sloka, sanatana dharma, sanskrit class 10, indian history textbook, tithi today, nakshatram today, rahu kalam, festival calendar telugu, ekadashi 2026, gold price today india, zodiac sign telugu, vedic horoscope telugu, telugu jathakam, kundali milan, matchmaking telugu, muhurtham, daily quiz hindu, dharma values, telugu meditation, telugu mantras, stock market india, nse nifty

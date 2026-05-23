@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Dharma: Telugu Astro, Calendar & Gold",
+    "name": "Dharma: Wisdom & Astrology",
     "slug": "DharmaDaily",
     "version": "2.4.9",
     "orientation": "portrait",
@@ -43,7 +43,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "name": "Dharma: Telugu Astro, Calendar & Gold",
+      "name": "Dharma: Wisdom & Astrology",
       "shortName": "Dharma",
       "lang": "te",
       "description": "Free Telugu Panchangam, Ramayana, Mahabharata, Bhagavad Gita, Rashi predictions, Mantra audio, Dharma quiz, Neethi Suktalu, Sanskrit words, gold prices, festivals & more.",
