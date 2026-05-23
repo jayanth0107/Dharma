@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Delete Your Account — Dharma: Wisdom &amp; Astrology</title>
+<meta name="description" content="How to request deletion of your account and associated data from Dharma: Wisdom & Astrology mobile app." />
+<style>
+  :root { --gold: #B8860B; --saffron: #C55A11; --bg: #FFFCF6; --ink: #1A1A1A; --muted: #555; --line: #E6DDC5; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: var(--bg); margin: 0; padding: 24px 16px 60px; line-height: 1.65; font-size: 17px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  header { border-bottom: 2px solid var(--gold); padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { color: var(--saffron); font-size: 28px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0; }
+  h2 { color: var(--gold); font-size: 22px; margin: 28px 0 8px; border-left: 4px solid var(--gold); padding-left: 10px; }
+  p { margin: 0 0 10px; }
+  ol, ul { margin: 0 0 14px; padding-left: 24px; }
+  li { margin-bottom: 8px; }
+  .step { background: #FFF7E6; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  .step strong { color: var(--saffron); }
+  a { color: var(--saffron); }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 18px; font-size: 15px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; vertical-align: top; text-align: left; }
+  th { background: #FFF7E6; color: var(--saffron); }
+  footer { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 16px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Delete Your Account &amp; Data</h1>
+  <p class="sub"><strong>App:</strong> Dharma: Wisdom &amp; Astrology · <strong>Developer:</strong> Sanatana Technologies</p>
+</header>
+
+<p>
+  This page describes how to request deletion of your account and all data associated with it from the Dharma: Wisdom &amp; Astrology mobile app (package <code>com.dharmadaily.wisdom</code>), in accordance with India's Digital Personal Data Protection Act 2023, GDPR Article 17, and Google Play's data-deletion policy.
+</p>
+
+<h2>How to request deletion</h2>
+
+<div class="step">
+  <p><strong>Step 1 — Email us.</strong></p>
+  <p>Send an email from the email address (or phone number) associated with your account to:</p>
+  <p style="margin: 10px 0; padding: 10px 12px; background: #FFFCF0; border-radius: 6px;">
+    <a href="mailto:jayanthkumar0107@zohomail.in?subject=Account%20Deletion%20Request%20-%20Dharma%20App"><strong>jayanthkumar0107@zohomail.in</strong></a>
+  </p>
+  <p>Subject line: <strong>Account Deletion Request — Dharma App</strong></p>
+</div>
+
+<div class="step">
+  <p><strong>Step 2 — Include the following in the email body:</strong></p>
+  <ul>
+    <li>Your registered <strong>phone number</strong> (the one you used for Phone OTP login), OR your <strong>device Installation ID</strong> (find it inside the app: Settings → About → Diagnostics)</li>
+    <li>A clear statement that you wish to delete your account</li>
+    <li>Whether you want <strong>full deletion</strong> (account + all data) or <strong>partial deletion</strong> (some data types only — specify which)</li>
+  </ul>
+</div>
+
+<div class="step">
+  <p><strong>Step 3 — We will respond within 7 business days.</strong></p>
+  <p>After verifying your identity (via OTP to the registered phone number), we delete your data and send you a confirmation email with the list of records purged.</p>
+</div>
+
+<div class="step">
+  <p><strong>Alternative — Delete locally without emailing us.</strong></p>
+  <p>The fastest way to remove all locally stored data is to uninstall the app, or open <strong>Android Settings → Apps → Dharma → Storage → Clear data</strong>. This removes all on-device records: bookmarks, language preferences, location, birth profile, premium status, sankalpa streak. Cloud-stored records (if any) require the email request above.</p>
+</div>
+
+<h2>What is deleted vs. what is retained</h2>
+
+<table>
+  <thead>
+    <tr><th>Data type</th><th>What happens</th><th>Retention after deletion request</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>On-device data</strong> (bookmarks, preferences, birth profile, sankalpa streak, premium status)</td>
+      <td><strong>Deleted immediately</strong> when you uninstall or clear app data</td>
+      <td>0 days</td>
+    </tr>
+    <tr>
+      <td><strong>Phone Auth record</strong> (your phone number in Firebase Authentication)</td>
+      <td><strong>Deleted within 7 days</strong> of verified request</td>
+      <td>0 days after action</td>
+    </tr>
+    <tr>
+      <td><strong>Analytics events</strong> tied to your device Installation ID</td>
+      <td><strong>Deleted within 7 days</strong> of verified request</td>
+      <td>0 days after action</td>
+    </tr>
+    <tr>
+      <td><strong>Crash logs</strong></td>
+      <td>Deleted within 7 days; otherwise auto-purged after 90 days</td>
+      <td>0 days after action</td>
+    </tr>
+    <tr>
+      <td><strong>Anonymous payment / donation records</strong> (amount, plan, timestamp, anonymous device ID)</td>
+      <td><strong>Retained for 7 years</strong> for accounting and Indian Income Tax Act compliance, but anonymised — no personally identifying information attached</td>
+      <td>7 years (anonymised)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>What we cannot delete</h2>
+<ul>
+  <li><strong>Aggregated, anonymised statistics</strong> that cannot be linked back to any individual user (e.g. total daily active users). These contain no personal data.</li>
+  <li><strong>Records required by law</strong> — anonymous donation records (₹ amount + plan + timestamp) must be retained for 7 years for tax accounting purposes per Indian Income Tax Act. These contain no personal identifier.</li>
+  <li><strong>Data on backup systems</strong> until those backups expire (maximum 30 days after deletion).</li>
+</ul>
+
+<h2>Need help?</h2>
+<p>
+  If you have any questions about the deletion process, contact us at <a href="mailto:jayanthkumar0107@zohomail.in">jayanthkumar0107@zohomail.in</a>. We respond within 7 business days.
+</p>
+
+<p>
+  See also: <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms &amp; Conditions</a>
+</p>
+
+<footer>
+  © 2026 Sanatana Technologies. Dharma — సనాతనం.<br/>
+  Effective: 23 May 2026 · Version 1.0
+</footer>
+
+</div>
+</body>
+</html>
