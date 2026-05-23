@@ -41,14 +41,13 @@ export function PageHeader({ title, onMenuPress, onBackPress }) {
   const langFontSize = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
   const langPadH = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
   const langPadV = usePick({ default: 5, sm: 5, md: 6, lg: 7, xl: 8 });
-  // titlePadH was 110/120/140 back when the lang toggle lived on row 1
-  // and needed right-side clearance. The toggle moved to row 2, so the
-  // title only needs to clear the two left-side icon buttons (back +
-  // home ≈ 76 dp). Bumping the title content width from ~116 dp to
-  // ~176 dp on small phones means long titles ("Vedic Horoscope",
-  // "Family Horoscopes", "శుభ ముహూర్తాలు") no longer hit the autoshrink
-  // floor and ellipsize.
-  const titlePadH = usePick({ default: 80, sm: 80, md: 88, lg: 100, xl: 120 });
+  // titlePadH locked in at lower values after Telugu titles (సెట్టింగ్స్,
+  // మంత్రాలు, నీతి సూక్తులు) were observed clipping on real devices.
+  // Telugu glyphs take ~1.4x the width of equivalent Latin at the same
+  // font size, so we need more horizontal headroom. Default 70 (down
+  // from 80) gives ~196 dp content area on a 360 dp phone — enough
+  // for the longest Telugu page title at the autoshrink floor.
+  const titlePadH = usePick({ default: 70, sm: 70, md: 78, lg: 90, xl: 110 });
 
   return (
     <View style={[s.container, { paddingTop: Math.max(insets.top, 10) + 4, paddingHorizontal: padH }]}>
@@ -59,7 +58,7 @@ export function PageHeader({ title, onMenuPress, onBackPress }) {
             style={s.title}
             numberOfLines={1}
             adjustsFontSizeToFit
-            minimumFontScale={0.55}
+            minimumFontScale={0.45}
             allowFontScaling={false}
           >{title}</Text>
         </View>

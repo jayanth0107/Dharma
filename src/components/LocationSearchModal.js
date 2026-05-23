@@ -528,7 +528,7 @@ const ls = StyleSheet.create({
     fontSize: 11,
     color: DarkColors.textMuted,
     marginTop: 2,
-    fontStyle: 'italic',
+    
   },
   emptyState: {
     alignItems: 'center',

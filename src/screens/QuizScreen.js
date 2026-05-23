@@ -29,7 +29,7 @@ const CATEGORY_COLORS = {
 };
 
 export function QuizScreen() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const today = new Date();
   const [currentSet, setCurrentSet] = useState(0); // 0-4
   const questions = useMemo(() => getDailyQuiz(today, currentSet), [today.toDateString(), currentSet]);
@@ -163,11 +163,34 @@ export function QuizScreen() {
           <Text style={s.setIndicator}>{t(`సెట్ ${currentSet + 1} / ${MAX_SETS_PER_DAY}`, `Set ${currentSet + 1} of ${MAX_SETS_PER_DAY}`)}</Text>
 
           <SectionShareRow section="quiz" buildText={() => {
-            let text = `🧠 *ధర్మ క్విజ్ — నేటి ఫలితం*\n`;
+            const isEn = lang === 'en';
+            const L = isEn
+              ? { hdr: 'Dharma Quiz — Today\'s Result', score: 'Score', yourAns: 'Your answer', correctAns: 'Correct', notAns: 'Skipped', app: 'Dharma App — Telugu Panchangam & Astrology' }
+              : { hdr: 'ధర్మ క్విజ్ — నేటి ఫలితం',          score: 'స్కోర్', yourAns: 'మీ సమాధానం', correctAns: 'సరైనది',  notAns: 'వదిలేశారు', app: 'Dharma App — Telugu Panchangam & Astrology' };
+            let text = `🧠 *${L.hdr}*\n`;
             text += `━━━━━━━━━━━━━━━━━━\n`;
-            text += `🏆 స్కోర్: ${correctCount}/${questions.length} (${percentage}%)\n`;
-            text += `${t(grade.te, grade.en)}\n\n`;
-            text += `📲 *Dharma App* — Telugu Panchangam & Astrology\n`;
+            text += `🏆 ${L.score}: ${correctCount}/${questions.length} (${percentage}%)\n`;
+            text += `${t(grade.te, grade.en)}\n`;
+            // Per-question breakdown — was missing earlier, share preview
+            // only showed the score line. Now lists each Q with the user's
+            // answer + correct answer marked with ✓ / ✗.
+            questions.forEach((q, idx) => {
+              const userAns = answers[idx];
+              const isCorrect = userAns === q.answer;
+              const mark = userAns == null ? '⏭️' : (isCorrect ? '✅' : '❌');
+              const qText = t(q.q?.te, q.q?.en);
+              const userOption = userAns != null
+                ? t(q.options[userAns].te, q.options[userAns].en)
+                : L.notAns;
+              const correctOption = t(q.options[q.answer].te, q.options[q.answer].en);
+              text += `\n${mark} ${idx + 1}. ${qText}\n`;
+              text += `   ${L.yourAns}: ${userOption}\n`;
+              if (!isCorrect) {
+                text += `   ${L.correctAns}: ${correctOption}\n`;
+              }
+            });
+            text += `\n━━━━━━━━━━━━━━━━━━\n`;
+            text += `📲 *${L.app}*\n`;
             text += `https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom`;
             return text;
           }} />

@@ -53,20 +53,18 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
   // more visual weight since label is now a single word.
   const iconSize = usePick({ default: 36, md: 40, lg: 44, xl: 50 });
   const tileMinH = usePick({ default: 90, md: 100, lg: 116, xl: 128 });
-  // Telugu optical sizing audit (v9 — English dialled down one more
-  // step. User reported "Panchangam" / "Mahabharata" wrapping to a
-  // second line on phones because Latin glyphs are wider than the
-  // 14 px label could fit inside the ~150 dp tile content area).
-  //  • Base 13 default — one step below Material `bodyMedium`.
-  //  • Telugu bump kept at +3 — Telugu glyphs are narrower per
-  //    character but taller, so they don't have the same wrap issue
-  //    and stay on one line at the bumped size.
+  // Telugu optical sizing audit (v10 — LOCKED IN, no further changes).
+  // After several rounds of shrinking that made labels unreadable on
+  // device, set to Material Body Medium (14) + 1 step = 15 px for
+  // English, +3 optical bump = 18 px for Telugu. Matches the readable
+  // weight of the top tab bar so visual hierarchy is consistent.
+  // labelLines=2 (default) lets longer strings wrap rather than shrink.
   // Net effect:
-  //  • English: 13 / 14 / 15 / 17 (default / md / lg / xl)
-  //  • Telugu:  16 / 17 / 18 / 20
+  //  • English: 15 / 16 / 17 / 19 (default / md / lg / xl)
+  //  • Telugu:  18 / 19 / 20 / 22
   const teBump = lang === 'te' ? 3 : 0;
-  const labelSize = usePick({ default: 13, md: 14, lg: 15, xl: 17 }) + teBump;
-  const subSize   = usePick({ default: 11, md: 12, lg: 13, xl: 14 }) + teBump;
+  const labelSize = usePick({ default: 15, md: 16, lg: 17, xl: 19 }) + teBump;
+  const subSize   = usePick({ default: 12, md: 13, lg: 14, xl: 15 }) + teBump;
 
   // Prefer the exact pixel width measured by FeatureGrid; fall back to %.
   const widthStyle = gridCtx?.tileWidth

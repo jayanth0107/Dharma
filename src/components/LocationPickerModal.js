@@ -281,7 +281,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: DarkColors.borderCard,
   },
   searchInput: { flex: 1, color: DarkColors.textPrimary, paddingVertical: 4, minHeight: 36 },
-  noResults: { textAlign: 'center', color: DarkColors.textMuted, paddingVertical: 16, fontStyle: 'italic' },
+  noResults: { textAlign: 'center', color: DarkColors.textMuted, paddingVertical: 16 },
   divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
   dividerLine: { flex: 1, height: 1, backgroundColor: DarkColors.borderCard },
   dividerText: { color: DarkColors.textMuted, fontWeight: '600', marginHorizontal: 10 },

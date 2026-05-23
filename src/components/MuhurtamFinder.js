@@ -983,7 +983,7 @@ const s = StyleSheet.create({
   },
   dateHelper: {
     fontSize: 12, fontWeight: '500', color: DarkColors.textMuted,
-    marginTop: 8, textAlign: 'center', fontStyle: 'italic',
+    marginTop: 8, textAlign: 'center',
   },
 
   eventCard: {

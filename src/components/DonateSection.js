@@ -39,17 +39,41 @@ function buildUpiDeepLink(amount) {
   return `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&tn=${encodeURIComponent(APP_NAME + ' Donation')}&am=${amount}&cu=INR`;
 }
 
-// Build UPI intent URLs for specific apps
-function getAppIntentUrls(amount) {
-  const note = encodeURIComponent(`${APP_NAME} Donation`);
+// Per-app UPI deep link. Each app has a DIFFERENT path component —
+// generic templates like `${scheme}://upi/pay?...` only work for
+// Google Pay (tez). PhonePe, Paytm and BHIM use `://pay` directly
+// (NO `/upi/` segment), and would open to their home screen instead
+// of the prefilled payment screen if we used the wrong path.
+//   • Google Pay (tez/gpay): tez://upi/pay?...     ← needs /upi/pay
+//   • PhonePe:               phonepe://pay?...     ← just /pay
+//   • Paytm:                 paytmmp://pay?...     ← just /pay
+//   • BHIM / universal:      upi://pay?...         ← just /pay
+function buildAppUpiUrl(scheme, amount) {
   const pa = encodeURIComponent(UPI_ID);
   const pn = encodeURIComponent(MERCHANT_NAME);
-  const params = `pa=${pa}&pn=${pn}&am=${amount}&cu=INR&tn=${note}`;
+  const tn = encodeURIComponent(`${APP_NAME} Donation`);
+  const params = `pa=${pa}&pn=${pn}&am=${amount}&cu=INR&tn=${tn}`;
+  switch (scheme) {
+    case 'tez':
+    case 'gpay':
+      return `tez://upi/pay?${params}`;
+    case 'phonepe':
+      return `phonepe://pay?${params}`;
+    case 'paytmmp':
+      return `paytmmp://pay?${params}`;
+    case 'upi':
+    default:
+      return `upi://pay?${params}`;
+  }
+}
+
+// Build UPI intent URLs for specific apps (legacy callers)
+function getAppIntentUrls(amount) {
   return [
-    { url: `gpay://upi/pay?${params}`, name: 'Google Pay' },
-    { url: `phonepe://pay?${params}`, name: 'PhonePe' },
-    { url: `paytmmp://pay?${params}`, name: 'Paytm' },
-    { url: `upi://pay?${params}`, name: 'BHIM UPI' },
+    { url: buildAppUpiUrl('tez', amount),     name: 'Google Pay' },
+    { url: buildAppUpiUrl('phonepe', amount), name: 'PhonePe' },
+    { url: buildAppUpiUrl('paytmmp', amount), name: 'Paytm' },
+    { url: buildAppUpiUrl('upi', amount),     name: 'BHIM UPI' },
   ];
 }
 
@@ -508,7 +532,12 @@ export function DonateModal({ visible, onClose, initialAmount, embedded = false 
                           alert(`${t(TR.upiCopied.te, TR.upiCopied.en)}\n\n${UPI_ID}\n\n${app.name} • ₹${amt}`);
                           return;
                         }
-                        const url = `${app.scheme}://upi/pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amt}&cu=INR&tn=${encodeURIComponent(APP_NAME + ' Donation')}`;
+                        // Per-app URL — generic `${scheme}://upi/pay` only
+                        // works for Google Pay. PhonePe / Paytm / BHIM need
+                        // `${scheme}://pay` (no /upi/), otherwise they open
+                        // to their home screen instead of the prefilled
+                        // payment screen with the ₹ amount populated.
+                        const url = buildAppUpiUrl(app.scheme, amt);
                         try {
                           const canOpen = await Linking.canOpenURL(url);
                           if (canOpen) { await Linking.openURL(url); return; }
@@ -654,7 +683,7 @@ const styles = StyleSheet.create({
   },
   cardContent: { flex: 1 },
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#fff', letterSpacing: 0.3 },
-  cardSubtitle: { fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: '500', marginTop: 2 },
+  cardSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: '500', marginTop: 2, lineHeight: 18 },
   quickRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14, gap: 8 },
   quickBtn: {
     flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 12,
@@ -670,7 +699,7 @@ const styles = StyleSheet.create({
   modalHeader: { paddingTop: 10, paddingBottom: 12, paddingHorizontal: 16 },
   modalHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   modalHeaderTitle: { fontSize: 20, fontWeight: '600', color: '#fff' },
-  modalQuote: { fontSize: 15, fontWeight: '700', color: DarkColors.goldShimmer, textAlign: 'center', marginTop: 6, fontStyle: 'italic' },
+  modalQuote: { fontSize: 15, fontWeight: '700', color: DarkColors.goldShimmer, textAlign: 'center', marginTop: 6 },
   modalQuoteEn: { fontSize: 12, color: 'rgba(255,255,255,0.8)', textAlign: 'center', marginTop: 2 },
   modalBody: { padding: 20 },
   modalMessage: { fontSize: 14, color: DarkColors.textPrimary, lineHeight: 22, marginBottom: 8 },
@@ -696,7 +725,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: 'rgba(255,255,255,0.92)',
     fontWeight: '700',
-    fontStyle: 'italic',
+    
     // fontSize + lineHeight set inline (responsive via quoteEnSize)
   },
   headerIconBtn: { padding: 6 },
@@ -762,14 +791,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, gap: 4,
   },
   copyText: { fontSize: 12, fontWeight: '700', color: DarkColors.gold },
-  upiNote: { fontSize: 11, color: DarkColors.textMuted, marginTop: 8 },
+  upiNote: { fontSize: 13, color: DarkColors.silverLight, fontWeight: '500', marginTop: 8, lineHeight: 18 },
 
   // Thank you
   thankYouBox: {
     flexDirection: 'row', alignItems: 'flex-start', backgroundColor: DarkColors.saffronDim,
     borderRadius: 12, padding: 14, marginTop: 20, gap: 10, borderWidth: 1, borderColor: DarkColors.borderCard,
   },
-  thankYouText: { flex: 1, fontSize: 13, color: DarkColors.textSecondary, lineHeight: 20, fontStyle: 'italic' },
+  thankYouText: { flex: 1, fontSize: 14, color: DarkColors.textSecondary, fontWeight: '500', lineHeight: 21 },
 
   // Close
   // De-emphasized close — subtle text link, not a dominant button.

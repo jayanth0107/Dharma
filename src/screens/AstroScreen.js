@@ -346,7 +346,7 @@ const s = StyleSheet.create({
   },
   romanText: {
     fontSize: 15, color: DarkColors.silverLight, textAlign: 'center',
-    fontWeight: '500', fontStyle: 'italic', paddingBottom: 10,
+    fontWeight: '500', paddingBottom: 10,
   },
   meaningText: {
     fontSize: 16, color: DarkColors.silverLight, lineHeight: 26,
@@ -356,7 +356,7 @@ const s = StyleSheet.create({
   // Concept-specific
   conceptOneLine: {
     fontSize: 16, fontWeight: '600', color: DarkColors.gold,
-    textAlign: 'center', fontStyle: 'italic',
+    textAlign: 'center',
     paddingVertical: 8,
   },
   conceptDesc: {
@@ -396,17 +396,17 @@ const s = StyleSheet.create({
   },
   mantraRoman: {
     fontSize: 14, color: DarkColors.silver, textAlign: 'center',
-    fontWeight: '600', fontStyle: 'italic', letterSpacing: 0.4,
+    fontWeight: '600', letterSpacing: 0.4,
     paddingBottom: 10,
   },
   mantraCount: {
     fontSize: 13, color: DarkColors.textSecondary, textAlign: 'center',
-    fontWeight: '600', fontStyle: 'italic',
+    fontWeight: '600',
   },
 
   // Yoga
   yogaName: { fontSize: 22, fontWeight: '700', color: DarkColors.gold, textAlign: 'center', paddingVertical: 6 },
-  yogaDesc: { fontSize: 13, color: DarkColors.textSecondary, textAlign: 'center', marginTop: 4, fontStyle: 'italic' },
+  yogaDesc: { fontSize: 13, color: DarkColors.textSecondary, textAlign: 'center', marginTop: 4 },
 
   // Vastu
   vastuRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },

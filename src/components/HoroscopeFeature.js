@@ -469,7 +469,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                     value={name}
                     onChangeText={setName}
                     placeholder={t('మీ పూర్తి పేరు', 'Your full name')}
-                    placeholderTextColor={DarkColors.textMuted}
+                    placeholderTextColor={DarkColors.silverLight}
                     maxLength={50}
                   />
                 </View>
@@ -483,7 +483,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       <Text style={s.fieldLabel}>{t('జన్మ తేదీ', 'Date of Birth')}</Text>
                     </View>
                     <TouchableOpacity style={s.input} onPress={() => setShowDatePicker(true)}>
-                      <Text style={birthDate ? { fontSize: 15, color: DarkColors.silver, fontWeight: '700' } : { fontSize: 15, color: DarkColors.textMuted }}>
+                      <Text style={birthDate ? { fontSize: 16, color: DarkColors.silver, fontWeight: '700' } : { fontSize: 16, color: DarkColors.silverLight, fontWeight: '500' }}>
                         {birthDate || t('తేదీ ఎంచుకోండి', 'Select Date')}
                       </Text>
                     </TouchableOpacity>
@@ -546,11 +546,11 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                       </View>
                     ) : (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <MaterialCommunityIcons name="magnify" size={18} color={DarkColors.textMuted} />
-                        <Text style={{ fontSize: 15, color: DarkColors.textMuted, flex: 1 }}>
+                        <MaterialCommunityIcons name="magnify" size={18} color={DarkColors.silverLight} />
+                        <Text style={{ fontSize: 16, fontWeight: '500', color: DarkColors.silverLight, flex: 1 }}>
                           {t('నగరం / గ్రామం / పట్టణం వెతకండి', 'Search city / village / town')}
                         </Text>
-                        <MaterialCommunityIcons name="chevron-right" size={18} color={DarkColors.textMuted} />
+                        <MaterialCommunityIcons name="chevron-right" size={18} color={DarkColors.silverLight} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -591,7 +591,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
             {step === 'payment' && (
               <View style={[s.form, { padding: formPad }]}>
                 <Text style={[s.formTitle, { fontSize: titleSize }]}>{t('జాతకం రూపొందించడానికి ప్లాన్ ఎంచుకోండి', 'Choose a plan to generate your horoscope')}</Text>
-                <Text style={{ fontSize: 13, color: '#999999', textAlign: 'center', marginBottom: 16 }}>
+                <Text style={{ fontSize: 13, color: DarkColors.silverLight, textAlign: 'center', marginBottom: 16 }}>
                   {t('Premium ఫీచర్ — వేద జ్యోతిష్య ఆధారిత ఖచ్చితమైన జాతకం', 'Premium feature — accurate Vedic astrology chart')}
                 </Text>
 
@@ -651,13 +651,13 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
                     {/* QR Code */}
                     <View style={{ alignItems: 'center', marginTop: 14, padding: 12, backgroundColor: '#222222', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
-                      <Text style={{ fontSize: 13, fontWeight: '500', color: '#999999', marginBottom: 8 }}>{t('QR కోడ్ స్కాన్ చేయండి', 'Scan QR code')}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '500', color: DarkColors.silverLight, marginBottom: 8 }}>{t('QR కోడ్ స్కాన్ చేయండి', 'Scan QR code')}</Text>
                       {!qrFailed ? (
                         <Image source={{ uri: getHoroscopeQrUrl(selectedPlan.price) }} style={{ width: 160, height: 160 }} resizeMode="contain" onError={() => setQrFailed(true)} />
                       ) : (
                         <View style={{ alignItems: 'center', justifyContent: 'center', width: 160, height: 160 }}>
                           <MaterialCommunityIcons name="qrcode" size={48} color="#999999" />
-                          <Text style={{ fontSize: 13, color: '#999999', marginTop: 8 }}>{t('QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.', 'QR could not load. Use the UPI ID instead.')}</Text>
+                          <Text style={{ fontSize: 13, color: DarkColors.silverLight, marginTop: 8 }}>{t('QR లోడ్ కాలేదు. UPI ID ఉపయోగించండి.', 'QR could not load. Use the UPI ID instead.')}</Text>
                         </View>
                       )}
                       <Text style={{ fontSize: 13, fontWeight: '700', color: '#9B6FCF', marginTop: 8 }}>₹{selectedPlan.price}</Text>
@@ -665,7 +665,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
 
                     {/* UPI ID */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, gap: 8 }}>
-                      <Text style={{ fontSize: 13, color: '#999999' }}>UPI ID:</Text>
+                      <Text style={{ fontSize: 13, color: DarkColors.silverLight }}>UPI ID:</Text>
                       <Text style={{ fontSize: 14, fontWeight: '700', color: '#FFFFFF' }}>{UPI_ID_H}</Text>
                     </View>
 
@@ -692,7 +692,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                         <View style={{ alignItems: 'center', paddingVertical: 12, gap: 4, marginBottom: 10, backgroundColor: 'rgba(46,125,50,0.06)', borderRadius: 12, padding: 14 }}>
                           <MaterialCommunityIcons name="check-circle-outline" size={28} color={DarkColors.tulasiGreen} />
                           <Text style={{ fontSize: 16, fontWeight: '700', color: DarkColors.tulasiGreen }}>{t('పేమెంట్ పూర్తయిందా?', 'Payment complete?')}</Text>
-                          <Text style={{ fontSize: 13, color: '#999999', textAlign: 'center' }}>{t(`₹${selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి`, `Tap below after sending ₹${selectedPlan?.price}`)}</Text>
+                          <Text style={{ fontSize: 13, color: DarkColors.silverLight, textAlign: 'center' }}>{t(`₹${selectedPlan?.price} పంపిన తర్వాత క్రింద నొక్కండి`, `Tap below after sending ₹${selectedPlan?.price}`)}</Text>
                         </View>
                         <TouchableOpacity style={s.activatePayBtn} onPress={handleConfirmHoroPayment}>
                           <LinearGradient colors={[DarkColors.tulasiGreen, '#1B5E20']} style={s.activatePayGradient}>
@@ -701,7 +701,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                           </LinearGradient>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setHoroPayStep('idle')} style={{ marginTop: 8, alignItems: 'center' }}>
-                          <Text style={{ fontSize: 13, color: '#999999' }}>{t('← వెనక్కి / పేమెంట్ చేయలేదు', '← Back / Did not pay')}</Text>
+                          <Text style={{ fontSize: 13, color: DarkColors.silverLight }}>{t('← వెనక్కి / పేమెంట్ చేయలేదు', '← Back / Did not pay')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -709,7 +709,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 )}
 
                 <TouchableOpacity onPress={() => setStep('form')} style={{ marginTop: 12, alignItems: 'center' }}>
-                  <Text style={{ fontSize: 14, color: '#999999' }}>{t('← వెనక్కి', '← Back')}</Text>
+                  <Text style={{ fontSize: 14, color: DarkColors.silverLight }}>{t('← వెనక్కి', '← Back')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -772,7 +772,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                         <Text style={s.readMoreText}>{t('మరింత', 'More')}</Text>
                       </TouchableOpacity>
                     </View>
-                    <Text style={{ fontSize: 12, color: '#999999', marginBottom: 10 }}>Source: {horoscope.source}</Text>
+                    <Text style={{ fontSize: 12, color: DarkColors.silverLight, marginBottom: 10 }}>Source: {horoscope.source}</Text>
                     <View style={s.navagrahaGrid}>
                       {Object.values(horoscope.navagraha).map((planet, i) => (
                         <View key={i} style={s.navagrahaItem}>
@@ -1035,7 +1035,7 @@ export function HoroscopeModal({ visible, onClose, isPremium, onOpenPremium, emb
                 />
 
                 {/* Usage counter */}
-                <Text style={{ fontSize: 10, color: '#999999', textAlign: 'center', marginTop: 8 }}>
+                <Text style={{ fontSize: 10, color: DarkColors.silverLight, textAlign: 'center', marginTop: 8 }}>
                   Source: {horoscope.source || 'astronomy-engine'}
                 </Text>
               </View>
@@ -1596,7 +1596,7 @@ const s = StyleSheet.create({
     fontSize: 14, color: '#C0C0C0', textAlign: 'center', marginTop: 12, lineHeight: 22,
   },
   lockedDescEn: {
-    fontSize: 12, color: '#999999', textAlign: 'center', marginTop: 6, lineHeight: 18,
+    fontSize: 12, color: DarkColors.silverLight, textAlign: 'center', marginTop: 6, lineHeight: 18,
   },
   lockedBtn: {
     marginTop: 24, borderRadius: 14, overflow: 'hidden', width: '100%',
@@ -1609,7 +1609,7 @@ const s = StyleSheet.create({
     fontSize: 16, fontWeight: '600', color: DarkColors.goldShimmer,
   },
   lockedCancel: {
-    fontSize: 13, color: '#999999', fontWeight: '600',
+    fontSize: 13, color: DarkColors.silverLight, fontWeight: '600',
   },
 
   // Form
@@ -1625,7 +1625,12 @@ const s = StyleSheet.create({
   field: { marginBottom: 16 },
   dateTimeRow: { flexDirection: 'row', marginBottom: 0 },
   fieldHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 6 },
-  fieldLabel: { fontSize: 14, fontWeight: '700', color: '#FFFFFF', flex: 1 },
+  // fieldLabel bumped 14→16. Matches the home tile label baseline
+  // (Material Body Large), so form labels read at the same weight as
+  // the rest of the app's UI chrome instead of feeling smaller. The
+  // bump also gives Telugu glyphs (పేరు, జన్మ తేదీ, సమయం, జన్మ స్థలం)
+  // enough optical x-height to be comfortably readable.
+  fieldLabel: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', flex: 1 },
   gpsBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(212,160,23,0.1)', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 12,
@@ -1636,7 +1641,12 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.08)',
     fontSize: 16, fontWeight: '600', color: '#FFFFFF',
   },
-  fieldHint: { fontSize: 11, color: '#999999', fontStyle: 'italic', marginTop: 4, marginLeft: 4 },
+  // Hint text below input was 11px / italic / #999999 — three issues:
+  // (1) too small to read at arm's length, (2) italic Telugu glyphs
+  // render poorly with Noto Sans Telugu, (3) low contrast on dark bg.
+  // Bumped 11→13, color → silverLight (#C0C0C0, AAA contrast on
+  // #0A0A0A), removed italic. Adds breathing room with lineHeight.
+  fieldHint: { fontSize: 13, fontWeight: '500', color: '#C0C0C0', marginTop: 6, marginLeft: 4, lineHeight: 18 },
   // Time picker — structured layout
   timePickerWrap: {
     backgroundColor: '#1E1E1E', borderRadius: 14, padding: 16,
@@ -1650,7 +1660,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', gap: 10,
   },
   timeColumn: { alignItems: 'center', gap: 6 },
-  timeColumnLabel: { fontSize: 11, fontWeight: '700', color: '#999999', textTransform: 'uppercase', letterSpacing: 1 },
+  timeColumnLabel: { fontSize: 11, fontWeight: '700', color: DarkColors.silverLight, textTransform: 'uppercase', letterSpacing: 1 },
   timeSpinnerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   timeSpinBtn: {
     width: 38, height: 38, borderRadius: 19,
@@ -1658,7 +1668,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(212,160,23,0.3)',
   },
   timeSpinValue: { fontSize: 24, fontWeight: '700', color: '#FFFFFF', minWidth: 36, textAlign: 'center' },
-  timeColonBig: { fontSize: 28, fontWeight: '700', color: '#999999', marginTop: 22 },
+  timeColonBig: { fontSize: 28, fontWeight: '700', color: DarkColors.silverLight, marginTop: 22 },
   ampmGroup: { flexDirection: 'column', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: DarkColors.gold },
   ampmBtn: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: 'transparent' },
   ampmBtnActive: { backgroundColor: 'rgba(212,160,23,0.25)' },
@@ -1700,7 +1710,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
   },
   placeItemName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
-  placeItemDesc: { fontSize: 12, color: '#999999', marginTop: 2 },
+  placeItemDesc: { fontSize: 12, color: DarkColors.silverLight, marginTop: 2 },
   generateBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 8 },
   generateGradient: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -1708,7 +1718,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(212,160,23,0.12)', borderWidth: 1, borderColor: DarkColors.borderGold,
   },
   generateText: { fontSize: 17, fontWeight: '600', color: DarkColors.gold },
-  disclaimer: { fontSize: 11, color: '#999999', fontStyle: 'italic', textAlign: 'center', marginTop: 16, lineHeight: 18 },
+  disclaimer: { fontSize: 13, color: DarkColors.silverLight, fontWeight: '500', textAlign: 'center', marginTop: 16, lineHeight: 20 },
 
   // Payment step
   planCard: {
@@ -1722,7 +1732,7 @@ const s = StyleSheet.create({
   bestTagText: { fontSize: 8, fontWeight: '600', color: DarkColors.goldShimmer },
   planEmoji: { fontSize: 24 },
   planName: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
-  planDesc: { fontSize: 11, color: '#999999', marginTop: 2 },
+  planDesc: { fontSize: 13, color: DarkColors.silverLight, fontWeight: '500', marginTop: 2, lineHeight: 18 },
   planPrice: { fontSize: 20, fontWeight: '700', color: '#9B6FCF' },
   upiAppBtn: {
     width: '48%', flexDirection: 'row', alignItems: 'center',
@@ -1738,7 +1748,7 @@ const s = StyleSheet.create({
   // Loading
   loadingBox: { alignItems: 'center', padding: 60 },
   loadingText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', marginTop: 16 },
-  loadingSubtext: { fontSize: 12, color: '#999999', marginTop: 4 },
+  loadingSubtext: { fontSize: 12, color: DarkColors.silverLight, marginTop: 4 },
 
   // Result
   result: {},

@@ -445,7 +445,7 @@ export function MatchmakingScreen({ navigation }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
                     <Text style={[s.inputText, { fontSize: inputFontSize, fontWeight: '500', flex: 1 }]}>{groomPlace.name}</Text>
-                    <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>({groomPlace.latitude?.toFixed(1)}°, {groomPlace.longitude?.toFixed(1)}°)</Text>
+                    <Text style={{ fontSize: 12, color: DarkColors.silverLight }}>({groomPlace.latitude?.toFixed(1)}°, {groomPlace.longitude?.toFixed(1)}°)</Text>
                     <TouchableOpacity onPress={() => { setGroomPlace(null); setGroomPlaceQuery(''); }}>
                       <MaterialCommunityIcons name="close-circle" size={16} color={DarkColors.textMuted} />
                     </TouchableOpacity>
@@ -487,7 +487,7 @@ export function MatchmakingScreen({ navigation }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <MaterialCommunityIcons name="check-circle" size={14} color={DarkColors.tulasiGreen} />
                     <Text style={[s.inputText, { fontSize: inputFontSize, fontWeight: '500', flex: 1 }]}>{bridePlace.name}</Text>
-                    <Text style={{ fontSize: 11, color: DarkColors.textMuted }}>({bridePlace.latitude?.toFixed(1)}°, {bridePlace.longitude?.toFixed(1)}°)</Text>
+                    <Text style={{ fontSize: 12, color: DarkColors.silverLight }}>({bridePlace.latitude?.toFixed(1)}°, {bridePlace.longitude?.toFixed(1)}°)</Text>
                     <TouchableOpacity onPress={() => { setBridePlace(null); setBridePlaceQuery(''); }}>
                       <MaterialCommunityIcons name="close-circle" size={16} color={DarkColors.textMuted} />
                     </TouchableOpacity>
@@ -1070,7 +1070,7 @@ const s = StyleSheet.create({
   kutaInfo: { marginBottom: 8 },
   kutaName: { fontSize: 15, fontWeight: '600', color: DarkColors.textPrimary },
   kutaNameEn: { fontSize: 12, color: DarkColors.textMuted, marginTop: 1 },
-  kutaDesc: { fontSize: 11, color: DarkColors.textMuted, marginTop: 2, fontStyle: 'italic' },
+  kutaDesc: { fontSize: 13, color: DarkColors.silverLight, fontWeight: '500', marginTop: 2, lineHeight: 18 },
   kutaScoreBox: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 6 },
   kutaScore: { fontSize: 22, fontWeight: '700' },
   kutaMax: { fontSize: 13, color: DarkColors.textMuted, marginLeft: 2 },

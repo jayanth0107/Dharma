@@ -276,9 +276,13 @@ const s = StyleSheet.create({
   formCard: { backgroundColor: DarkColors.bgCard, borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: DarkColors.borderCard },
   formTitle: { fontSize: 16, fontWeight: '600', color: DarkColors.gold, marginBottom: 12 },
   input: { backgroundColor: DarkColors.bgElevated, borderRadius: 12, padding: 14, fontSize: 15, color: '#FFFFFF', marginBottom: 10, borderWidth: 1, borderColor: DarkColors.borderCard },
-  inputText: { fontSize: 15, color: '#FFFFFF', fontWeight: '700' },
-  inputPlaceholder: { fontSize: 15, color: DarkColors.textMuted },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: DarkColors.textMuted, marginBottom: 6, marginTop: 4 },
+  inputText: { fontSize: 16, color: '#FFFFFF', fontWeight: '700' },
+  // Placeholder color upgraded from textMuted to silverLight per audit
+  // (textMuted at ~5:1 contrast was hard to read on dark bg).
+  inputPlaceholder: { fontSize: 16, color: DarkColors.silverLight, fontWeight: '500' },
+  // Form label was 13px/textMuted — labels are primary chrome, can't
+  // be muted. Bumped to 16px/700/#FFFFFF to match Horoscope fieldLabel.
+  fieldLabel: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', marginBottom: 6, marginTop: 4 },
   relRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 },
   relPill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 16, backgroundColor: DarkColors.bgElevated, borderWidth: 1, borderColor: DarkColors.borderCard },
   relPillActive: { backgroundColor: DarkColors.gold, borderColor: DarkColors.gold },

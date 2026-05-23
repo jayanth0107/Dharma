@@ -53,7 +53,15 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
   const headerSlotSize     = usePick({ default: 36, sm: 36, md: 40, lg: 44, xl: 48 });
   const headerSlotGap      = usePick({ default: 2,  sm: 2,  md: 4,  lg: 6,  xl: 8 });
   const headerTitleFont    = usePick({ default: 26, sm: 26, md: 30, lg: 32, xl: 36 });
-  const headerSubtitleFont = usePick({ default: 12, sm: 12, md: 14, lg: 16, xl: 18 });
+  // సనాతనం subtitle size is DERIVED from the title size at a fixed
+  // ratio (0.6x). This guarantees three properties simultaneously:
+  //   1. Subtitle is ALWAYS smaller than the title (mathematically — no
+  //      chance of the two sizing tables drifting apart over time).
+  //   2. Subtitle scales together with the title across phone classes —
+  //      we never have to maintain two parallel size tables.
+  //   3. Subtitle remains optically readable at every breakpoint:
+  //      title=26→sub=16, title=30→sub=18, title=32→sub=19, title=36→sub=22.
+  const headerSubtitleFont = Math.round(headerTitleFont * 0.6);
 
   // Container + spacing — were hardcoded 16/12/8. Now scale with phone
   // class so the header doesn't feel tight on small phones and doesn't

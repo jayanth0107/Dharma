@@ -351,6 +351,6 @@ const gs = StyleSheet.create({
   footerText: { ...Type.caption, color: DarkColors.textSecondary, textAlign: 'center' },
   disclaimer: {
     ...Type.micro, color: DarkColors.textMuted, textAlign: 'center', marginTop: 6,
-    fontStyle: 'italic', paddingHorizontal: 10,
+    paddingHorizontal: 10,
   },
 });

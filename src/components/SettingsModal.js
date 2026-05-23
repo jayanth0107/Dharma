@@ -844,8 +844,8 @@ const s = StyleSheet.create({
   infoValue: { fontSize: 14, color: DarkColors.textPrimary, fontWeight: '700' },
 
   noteText: {
-    fontSize: 12, color: DarkColors.textMuted, fontStyle: 'italic',
-    textAlign: 'center', marginTop: 16, marginBottom: 8, lineHeight: 18,
+    fontSize: 13, fontWeight: '500', color: DarkColors.silverLight,
+    textAlign: 'center', marginTop: 16, marginBottom: 8, lineHeight: 19,
   },
 
   adminLogin: {

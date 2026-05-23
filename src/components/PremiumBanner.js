@@ -61,8 +61,12 @@ function getQrCodeUrl(amount) {
 function buildAppUpiUrl(scheme, amount) {
   const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Dharma Premium')}`;
   switch (scheme) {
+    case 'tez':
     case 'gpay':
-      return `gpay://upi/pay?${params}`;
+      // Google Pay India's URL scheme is `tez://` (legacy "Tez" brand
+      // name). `gpay://` works on some devices but not all; `tez://`
+      // is the reliable one.
+      return `tez://upi/pay?${params}`;
     case 'phonepe':
       return `phonepe://pay?${params}`;
     case 'paytmmp':
@@ -652,7 +656,7 @@ const b = StyleSheet.create({
   iconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center' },
   textWrap: { flex: 1, marginLeft: 12 },
   title: { fontSize: 15, fontWeight: '600', color: DarkColors.gold },
-  subtitle: { fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2, lineHeight: 16 },
+  subtitle: { fontSize: 13, fontWeight: '500', color: 'rgba(255,255,255,0.85)', marginTop: 2, lineHeight: 18 },
   badge: { backgroundColor: DarkColors.gold, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
   badgeText: { fontSize: 10, fontWeight: '600', color: '#0A0A0A' },
 });
@@ -685,9 +689,9 @@ const s = StyleSheet.create({
   perkRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: DarkColors.borderCard },
   perkIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(212,160,23,0.15)', alignItems: 'center', justifyContent: 'center' },
   perkText: { flex: 1, marginLeft: 12 },
-  perkTelugu: { fontSize: 14, fontWeight: '600', color: DarkColors.textPrimary },
-  perkEnglish: { fontSize: 11, color: DarkColors.textMuted, marginTop: 1 },
-  perkDetail: { fontSize: 12, color: DarkColors.textMuted, marginTop: 4, lineHeight: 18, fontStyle: 'italic' },
+  perkTelugu: { fontSize: 15, fontWeight: '600', color: DarkColors.textPrimary },
+  perkEnglish: { fontSize: 13, color: DarkColors.silverLight, fontWeight: '500', marginTop: 1 },
+  perkDetail: { fontSize: 13, color: DarkColors.silverLight, fontWeight: '500', marginTop: 4, lineHeight: 18 },
 
   trialSection: { paddingHorizontal: 20, paddingTop: 24 },
   trialBtn: { borderRadius: 16, overflow: 'hidden' },

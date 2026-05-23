@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   detailDateText: { fontSize: 15, fontWeight: '600', color: DarkColors.saffronLight },
   detailDivider: { height: 1, backgroundColor: DarkColors.borderCard, marginVertical: 16 },
   detailDesc: { fontSize: 15, color: DarkColors.textSecondary, lineHeight: 24 },
-  detailCountdown: { fontSize: 13, color: DarkColors.gold, fontWeight: '600', marginTop: 12, fontStyle: 'italic' },
+  detailCountdown: { fontSize: 13, color: DarkColors.gold, fontWeight: '600', marginTop: 12 },
   detailClose: {
     backgroundColor: 'transparent', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 20,
     borderWidth: 1.5, borderColor: DarkColors.gold,

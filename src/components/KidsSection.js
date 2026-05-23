@@ -255,7 +255,7 @@ const st = StyleSheet.create({
   slokaInfo: { flex: 1 },
   slokaDeity: { fontSize: 12, fontWeight: '700', color: DarkColors.textMuted, letterSpacing: 0.5, marginBottom: 2 },
   slokaText: { fontSize: 15, fontWeight: '700', color: DarkColors.textPrimary },
-  slokaMeaning: { fontSize: 12, color: DarkColors.textSecondary, marginTop: 3, fontStyle: 'italic', lineHeight: 17 },
+  slokaMeaning: { fontSize: 13, color: DarkColors.textSecondary, fontWeight: '500', marginTop: 3, lineHeight: 19 },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: DarkColors.overlay, justifyContent: 'flex-end' },

@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
   reminderNote: {
     color: DarkColors.textSecondary,
     marginTop: 4,
-    fontStyle: 'italic',
+    
   },
   deleteBtn: {},
 });

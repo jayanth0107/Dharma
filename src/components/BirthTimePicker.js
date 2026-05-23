@@ -355,7 +355,7 @@ const ts = StyleSheet.create({
     textAlign: 'center',
     marginHorizontal: 20,
     marginBottom: 8,
-    fontStyle: 'italic',
+    
   },
   actions: {
     flexDirection: 'row',

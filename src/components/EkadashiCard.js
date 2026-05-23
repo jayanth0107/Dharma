@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: DarkColors.textSecondary,
     textAlign: 'center',
-    fontStyle: 'italic',
+    
     lineHeight: 20,
   },
 
