@@ -1,5 +1,15 @@
 // ధర్మ — Login Screen (Phone OTP)
-// Firebase Phone Auth with reCAPTCHA (web) / fallback (native)
+//
+// Phone Auth flow uses different SDKs per platform:
+//   • Web      → firebase/auth (JS SDK) with RecaptchaVerifier
+//   • Android/iOS → @react-native-firebase/auth (native module) which
+//                   uses Play Integrity API on Android / Silent APNs
+//                   on iOS. No reCAPTCHA verifier is needed on mobile.
+//
+// Why split? The firebase/auth (JS SDK) signInWithPhoneNumber requires
+// a RecaptchaVerifier argument, which only works in a real DOM (web).
+// On React Native, passing any value (including null) for that arg
+// throws auth/argument-error — that was the bug in v2.4.x on mobile.
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -16,7 +26,22 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ClearableInput } from '../components/ClearableInput';
 import { auth } from '../config/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+
+// Web-only imports (JS SDK). On native these resolve to no-ops because
+// the code paths that use them are platform-gated.
+import { RecaptchaVerifier, signInWithPhoneNumber as signInWeb } from 'firebase/auth';
+
+// Lazy-require @react-native-firebase/auth on mobile. require() (CommonJS)
+// pattern is used instead of import to avoid loading the native module
+// on web builds where the package doesn't have a web implementation.
+let rnFirebaseAuth = null;
+if (Platform.OS !== 'web') {
+  try {
+    rnFirebaseAuth = require('@react-native-firebase/auth').default;
+  } catch (e) {
+    if (__DEV__) console.warn('@react-native-firebase/auth not available:', e?.message);
+  }
+}
 
 export function LoginScreen({ navigation }) {
   const { isLoggedIn, profile, updateName, signOut } = useAuth();
@@ -104,13 +129,28 @@ export function LoginScreen({ navigation }) {
 
     setLoading(true); setError('');
     try {
-      const verifier = setupRecaptcha();
-      if (!verifier && Platform.OS === 'web') {
-        setError(t('reCAPTCHA విఫలమైంది. పేజీని రిఫ్రెష్ చేయండి.', 'reCAPTCHA failed. Refresh and try again.'));
-        setLoading(false);
-        return;
+      let confirmation;
+      if (Platform.OS === 'web') {
+        // Web — JS SDK with RecaptchaVerifier
+        const verifier = setupRecaptcha();
+        if (!verifier) {
+          setError(t('reCAPTCHA విఫలమైంది. పేజీని రిఫ్రెష్ చేయండి.', 'reCAPTCHA failed. Refresh and try again.'));
+          setLoading(false);
+          return;
+        }
+        confirmation = await signInWeb(auth, cleanPhone, verifier);
+      } else {
+        // Mobile — @react-native-firebase/auth with Play Integrity /
+        // Silent APNs. No verifier needed; the platform handles app
+        // verification automatically against the SHA-1 fingerprints
+        // registered in Firebase Console.
+        if (!rnFirebaseAuth) {
+          setError(t('లాగిన్ సేవ అందుబాటులో లేదు', 'Login service unavailable. Please reinstall the app.'));
+          setLoading(false);
+          return;
+        }
+        confirmation = await rnFirebaseAuth().signInWithPhoneNumber(cleanPhone);
       }
-      const confirmation = await signInWithPhoneNumber(auth, cleanPhone, verifier);
       confirmRef.current = confirmation;
       otpAttemptsRef.current++;
       lastOtpTimeRef.current = now;
@@ -120,6 +160,10 @@ export function LoginScreen({ navigation }) {
         ? t('చాలా ఎక్కువ ప్రయత్నాలు. తర్వాత ప్రయత్నించండి.', 'Too many requests. Try again later.')
         : e.code === 'auth/invalid-phone-number'
         ? t('చెల్లుబాటు కాని ఫోన్ నంబర్', 'Invalid phone number')
+        : e.code === 'auth/quota-exceeded'
+        ? t('SMS కోటా అయిపోయింది. తర్వాత ప్రయత్నించండి.', 'SMS quota exceeded. Try again later.')
+        : e.code === 'auth/missing-client-identifier'
+        ? t('యాప్ ధృవీకరణ విఫలమైంది. యాప్‌ను రీఇన్‌స్టాల్ చేయండి.', 'App verification failed. Please reinstall the app.')
         : (e.message || 'OTP sending failed');
       setError(msg);
       if (__DEV__) console.warn('OTP error:', e.code, e.message);

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dharma: Wisdom & Astrology",
     "slug": "DharmaDaily",
-    "version": "2.4.10",
+    "version": "2.4.11",
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
@@ -37,7 +37,7 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 18,
+      "versionCode": 19,
       "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize"
     },
@@ -73,7 +73,9 @@
           "color": "#E8751A"
         }
       ],
-      "expo-font"
-    ],
+      "expo-font",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
+    ]
   }
 }
