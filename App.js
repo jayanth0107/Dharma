@@ -18,11 +18,13 @@ import { useFonts } from 'expo-font';
 import { AppProvider } from './src/context/AppContext';
 import { LanguageProvider } from './src/context/LanguageContext';
 import { AuthProvider } from './src/context/AuthContext';
+import { DrawerProvider, useDrawer } from './src/context/DrawerContext';
 import { trackScreenView } from './src/utils/analytics';
 import { checkRatePrompt } from './src/utils/ratePrompt';
 import { OnboardingScreen } from './src/components/OnboardingScreen';
 import { TabNavigator } from './src/navigation/TabNavigator';
 import { LocationPickerModal } from './src/components/LocationPickerModal';
+import { DrawerMenu } from './src/components/DrawerMenu';
 import { DarkColors, WEB_MAX_WIDTH, IS_WEB, FontFamilies } from './src/theme';
 
 // ── Global default font ─────────────────────────────────────────────────
@@ -108,6 +110,25 @@ if (IS_WEB && typeof document !== 'undefined' && !document.getElementById('dharm
 // the React tree (cold start may fire before any screen has mounted).
 const navigationRef = createNavigationContainerRef();
 const _handledNotifIds = new Set();
+
+// --- Global drawer host ---
+// Mounted once inside NavigationContainer so it can navigate(). All
+// screens open the drawer via useDrawer().openDrawer() — no prop
+// drilling. The "Change Location" menu item still routes to the
+// Location screen; language toggling lives inline inside the drawer.
+function GlobalDrawer() {
+  const { isOpen, closeDrawer } = useDrawer();
+  const navRef = navigationRef;
+  const handleAction = (id) => {
+    if (!navRef.isReady()) return;
+    if (id === 'login')         { navRef.navigate('Login');        return; }
+    if (id === 'premium')       { navRef.navigate('Premium');      return; }
+    if (id === 'notifications') { navRef.navigate('Notifications'); return; }
+    if (id === 'location')      { navRef.navigate('Location');     return; }
+    if (id === 'settings')      { navRef.navigate('Settings');     return; }
+  };
+  return <DrawerMenu visible={isOpen} onClose={closeDrawer} onAction={handleAction} />;
+}
 
 // --- Error Boundary (catches component crashes) ---
 class ErrorBoundary extends Component {
@@ -248,6 +269,7 @@ export default function App() {
         <LanguageProvider>
         <AuthProvider>
         <AppProvider>
+        <DrawerProvider>
           <NavigationContainer
           ref={navigationRef}
           linking={{
@@ -294,12 +316,16 @@ export default function App() {
           }}
         >
             <TabNavigator />
+            {/* Side drawer — mounted inside NavigationContainer so it
+                can navigate. Open from any screen via useDrawer(). */}
+            <GlobalDrawer />
           </NavigationContainer>
           {/* Global location picker — mounted at the root so the
               LocationPill in PageHeader can open it from any screen
               (not just Home). Reads showLocationPicker from
               AppContext; renders nothing until opened. */}
           <LocationPickerModal />
+        </DrawerProvider>
         </AppProvider>
         </AuthProvider>
         </LanguageProvider>
@@ -348,3 +374,4 @@ const styles = StyleSheet.create({
   },
   errorBtnText: { color: '#FFF', fontFamily: FontFamilies.semibold, fontWeight: '600', fontSize: 16 },
 });
+

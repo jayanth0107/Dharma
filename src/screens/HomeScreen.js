@@ -15,7 +15,6 @@ import { useApp } from '../context/AppContext';
 import { useLanguage, TR } from '../context/LanguageContext';
 import { FeatureTile, FeatureGrid } from '../components/FeatureTile';
 import { FlagWithPole } from '../components/FlagWithPole';
-import { DrawerMenu } from '../components/DrawerMenu';
 import { SectionShareRow } from '../components/SectionShareRow';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { BirthDatePicker } from '../components/BirthDatePicker';
@@ -39,26 +38,17 @@ export function HomeScreen({ navigation }) {
   const { lang, t } = useLanguage();
   const { profile } = useAuth();
 
-  const [showDrawer, setShowDrawer] = useState(false);
   const [showPanchangamShare, setShowPanchangamShare] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Sankalpa Deepam state is owned by TodaySummaryCard — no Home-level
-  // bookkeeping needed. The legacy auto-streak (recordDailyOpen) was
-  // removed; users now commit deliberately via the diya pill in the card.
+  // Drawer state lives in DrawerContext now; <GlobalDrawer> is mounted
+  // at App.js root so any screen can open it via useDrawer(). The
+  // hamburger in BrandedHeader auto-routes there when no onDrawerOpen
+  // prop is supplied.
 
   const openUrl = (url) => {
     if (Platform.OS === 'web') window.open(url, '_blank');
     else Linking.openURL(url);
-  };
-
-  // Drawer is now "personal + frequent" only. Growth/legal items moved to More.
-  const handleDrawerAction = (id) => {
-    if (id === 'login')         { navigation.navigate('Login');        return; }
-    if (id === 'premium')       { navigation.navigate('Premium');      return; }
-    if (id === 'notifications') { navigation.navigate('Notifications'); return; }
-    if (id === 'location')      { navigation.navigate('Location');     return; }
-    if (id === 'settings')      { navigation.navigate('Settings');     return; }
   };
 
   if (!panchangam) {
@@ -78,8 +68,10 @@ export function HomeScreen({ navigation }) {
     <View style={s.screen}>
       <StatusBar style="light" />
 
-      {/* ── Branded Header (shared with all top-level MAIN_SECTIONS) ── */}
-      <BrandedHeader onDrawerOpen={() => setShowDrawer(true)} />
+      {/* ── Branded Header (shared with all top-level MAIN_SECTIONS).
+            Hamburger routes to the global drawer via useDrawer() —
+            no local state needed. */}
+      <BrandedHeader />
 
       <TopTabBar />
       <OfflineBanner />
@@ -137,11 +129,11 @@ export function HomeScreen({ navigation }) {
             a 2+2+1 layout on 2-col phones, 3+2 on 3-col, etc. The hubs
             each open a sub-screen with the actual leaf features. */}
         <FeatureGrid>
-          <FeatureTile icon="pot-mix"            label={t('పంచాంగం', 'Panchangam')}   onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
-          <FeatureTile icon="orbit-variant"      label={t('జ్యోతిష్యం', 'Astrology')} onPress={() => navigation.navigate('Jyotishyam')} />
+          <FeatureTile icon="pot-mix"            label={t('పంచాంగం', 'Panchangam')}   lottieSource={require('../../assets/animations/panchangam-moon.json')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
+          <FeatureTile icon="orbit-variant"      label={t('జ్యోతిష్యం', 'Astrology')} animation="spin" lottieSource={require('../../assets/animations/astrology-planet.json')} onPress={() => navigation.navigate('Jyotishyam')} />
           <FeatureTile icon="head-question-outline" label={t('విజ్ఞానం', 'Wisdom')}   onPress={() => navigation.navigate('WisdomHub')} />
           <FeatureTile icon="party-popper"       label={t('పండుగలు', 'Festivals')}     onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
-          <FeatureTile icon="gold"               label={t('బంగారం ధర', 'Gold Price')}  onPress={() => navigation.navigate('Gold')} />
+          <FeatureTile icon="gold"               label={t('బంగారం ధర', 'Gold Price')}  lottieSource={require('../../assets/animations/gold-bars.json')} onPress={() => navigation.navigate('Gold')} />
         </FeatureGrid>
 
         {/* Ithihaasa hero card — Raja Ravi Varma "Krishna with Arjuna"
@@ -172,8 +164,8 @@ export function HomeScreen({ navigation }) {
             than "Youth" where it lived earlier) */}
         <FeatureGrid>
           <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    onPress={() => navigation.navigate('Ramayana')} />
-          <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} onPress={() => navigation.navigate('Mahabharata')} />
-          <FeatureTile icon="book-open-page-variant-outline" label={t('భగవద్గీత', 'Bhagavad Gita')}    onPress={() => navigation.navigate('Gita')} />
+          <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} lottieSource={require('../../assets/animations/gita-book.json')} onPress={() => navigation.navigate('Mahabharata')} />
+          <FeatureTile icon="book-open-page-variant-outline" label={t('భగవద్గీత', 'Bhagavad Gita')}    animation="page-turn" lottieSource={require('../../assets/animations/mahabharata-krishna-arjuna.json')} onPress={() => navigation.navigate('Gita')} />
           <FeatureTile icon="script-text-outline"            label={t('నీతి సూక్తులు', 'Moral Quotes')}  onPress={() => navigation.navigate('NeethiSukta')} />
           <FeatureTile icon="baby-face-outline"      label={t('పిల్లల కథలు', 'Kids Stories')} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
         </FeatureGrid>
@@ -209,34 +201,29 @@ export function HomeScreen({ navigation }) {
 
         {/* 5. Devotion & Service */}
         <FeatureGrid>
-          <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు / మంత్రాలు', 'Stotras / Mantras')} onPress={() => navigation.navigate('Stotra')} />
-          <FeatureTile icon="meditation"        label={t('ధ్యానం', 'Meditation')}    onPress={() => navigation.navigate('Meditation')} />
-          <FeatureTile icon="fire"              label={t('పూజా గైడ్', 'Puja Guide')} onPress={() => navigation.navigate('PujaGuide')} />
-          <FeatureTile icon="temple-hindu-outline"      label={t('దేవాలయాలు దగ్గరలో', 'Temples Nearby')}    onPress={() => navigation.navigate('TempleNearby')} />
+          <FeatureTile icon="music-note-eighth" label={t('స్తోత్రాలు / మంత్రాలు', 'Stotras / Mantras')} lottieSource={require('../../assets/animations/stotra-japamala.json')} onPress={() => navigation.navigate('Stotra')} />
+          <FeatureTile icon="meditation"        label={t('ధ్యానం', 'Meditation')}    lottieSource={require('../../assets/animations/meditation-breath.json')} onPress={() => navigation.navigate('Meditation')} />
+          <FeatureTile icon="fire"              label={t('పూజా గైడ్', 'Puja Guide')} lottieSource={require('../../assets/animations/puja-diya.json')} onPress={() => navigation.navigate('PujaGuide')} />
+          <FeatureTile icon="temple-hindu-outline"      label={t('దేవాలయాలు దగ్గరలో', 'Temples Nearby')}    animation="spin" lottieSource={require('../../assets/animations/temple-flag.json')} onPress={() => navigation.navigate('TempleNearby')} />
           <FeatureTile icon="hand-heart-outline"        label={t('దానం', 'Donate')}         onPress={() => navigation.navigate('Donate')} />
         </FeatureGrid>
 
         <SectionDivider icon="tools" te="ఉపయుక్త" en="Utility" />
 
-        {/* Utility tail. Stock Market lives here as a lookup tile (was
-            previously in Astrology — moved because it's an information
-            shortcut, not a dharmic-life decision). Holidays was removed
-            entirely — the Festivals section already surfaces holiday
-            content via its sub-tabs, so a dedicated tile was redundant.
+        {/* Utility tail. Stock Market tile was removed (v2.5.0) — user
+            feedback that surfacing live stock prices in a dharmic app
+            nudged toward gambling rather than long-horizon investing.
             Darshan stays as a quick-access shortcut to the daily deity
             view inside CalendarScreen. */}
         <FeatureGrid>
-          <FeatureTile icon="chart-line"            label={t('స్టాక్ మార్కెట్', 'Stock Market')} onPress={() => navigation.navigate('Market')} />
           <FeatureTile icon="temple-hindu-outline"  label={t('దైనందిన దర్శనం', 'Daily Darshan')} onPress={() => navigation.navigate('Darshan',  { tab: 'darshan',  _ts: Date.now() })} />
           <FeatureTile icon="bell-plus-outline"     label={t('రిమైండర్', 'Reminder')}    onPress={() => navigation.navigate('Reminder')} />
         </FeatureGrid>
         <View style={{ height: 16 }} />
       </ScrollView>
 
-      {/* ── Overlays — only drawer + share. LocationPickerModal moved
-          to App.js root so PageHeader's LocationPill can open it from
-          any screen. */}
-      <DrawerMenu visible={showDrawer} onClose={() => setShowDrawer(false)} onAction={handleDrawerAction} />
+      {/* DrawerMenu + LocationPickerModal are mounted at App.js root —
+          no per-screen overlay needed here. */}
     </View>
     </SwipeWrapper>
   );

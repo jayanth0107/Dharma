@@ -14,6 +14,7 @@ import { useLanguage, T, TR } from '../context/LanguageContext';
 import { usePick } from '../theme/responsive';
 
 import { BrandedHeader } from '../components/BrandedHeader';
+import { LocationPill } from '../components/LocationPill';
 import { ListSectionHeader } from '../components/ListSectionHeader';
 import { SubTabBar } from '../components/SubTabBar';
 import { BirthDatePicker } from '../components/BirthDatePicker';
@@ -149,11 +150,16 @@ export function CalendarScreen({ route }) {
     return () => { cancelled = true; };
   }, [festivalsYear]);
 
-  // Lunar observances for the selected year — computed locally via
-  // astronomy-engine (works for any year, no fetch). lunarObservances
-  // memoises by (year, lat, lon) so this is cheap to recompute on
-  // every render.
+  // Lunar observances for the selected year — only the Festivals
+  // route consumes these (sub-tabs for chaturthi/pournami/amavasya/
+  // pradosham/ekadashi). Computing them eagerly cost ~1 second on
+  // the Panchang tap because each call scans 365 days through
+  // astronomy-engine. Gate the compute on routeName so Panchang /
+  // GoodTimes / Kids / Holidays / Darshan mounts stay snappy.
   const observancesForYear = useMemo(() => {
+    if (route?.name !== 'Festivals') {
+      return { pournami: [], amavasya: [], chaturthi: [], pradosham: [], ekadashi: [] };
+    }
     const lat = location?.latitude ?? 17.3850;
     const lon = location?.longitude ?? 78.4867;
     return {
@@ -163,7 +169,7 @@ export function CalendarScreen({ route }) {
       pradosham: computePradoshamDates(festivalsYear, lat, lon),
       ekadashi:  computeEkadashiDates (festivalsYear, lat, lon),
     };
-  }, [festivalsYear, location?.latitude, location?.longitude]);
+  }, [route?.name, festivalsYear, location?.latitude, location?.longitude]);
 
   // Load senior mode preference
   React.useEffect(() => {
@@ -303,6 +309,14 @@ export function CalendarScreen({ route }) {
               </View>
               <MaterialCommunityIcons name="chevron-down" size={20} color={DarkColors.gold} />
             </TouchableOpacity>
+
+            {/* Location chip — moved out of the global page chrome in
+                v2.5.0; surfaced here so users still see which city the
+                panchangam (sunrise / Rahukalam / muhurtams) is computed
+                for. Tap to change. */}
+            <View style={s.panchangLocationRow}>
+              <LocationPill />
+            </View>
 
             {/* Yesterday / Today / Tomorrow nav removed — the scroll-wheel
                 date picker behind the date display covers all date
@@ -830,6 +844,13 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(232,117,26,0.12)',
     borderRadius: 16,
     borderWidth: 1, borderColor: 'rgba(232,117,26,0.32)',
+  },
+  panchangLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    marginBottom: 4,
   },
   todayResetText: {
     fontSize: 15, fontWeight: '600', color: DarkColors.saffronLight,

@@ -69,24 +69,30 @@ export function JyotishyamHubScreen() {
             icon="account-star-outline"
             label={t('మీ జాతకం', 'Horoscope')}
             labelLines={2}
+            animation="spin"
+            lottieSource={require('../../assets/animations/horoscope-wheel.json')}
             onPress={() => go('Horoscope')}
           />
           <FeatureTile
             icon="account-group-outline"
             label={t('కుటుంబ జాతకాలు', 'Family Horoscopes')}
             labelLines={2}
+            lottieSource={require('../../assets/animations/family-orbit.json')}
             onPress={() => go('Family')}
           />
           <FeatureTile
             icon="heart-multiple-outline"
             label={t('ప్రేమ జ్యోతిష్యం', 'Love Match')}
             labelLines={2}
+            animation="page-turn"
+            lottieSource={require('../../assets/animations/matchmaking-rings.json')}
             onPress={() => go('Matchmaking')}
           />
           <FeatureTile
             icon="calendar-star-outline"
             label={t('ముహూర్తం', 'Muhurtam')}
             labelLines={2}
+            lottieSource={require('../../assets/animations/muhurtam-clock.json')}
             onPress={() => go('Muhurtam')}
           />
         </FeatureGrid>

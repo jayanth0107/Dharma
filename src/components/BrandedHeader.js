@@ -1,12 +1,18 @@
 // ధర్మ — Shared BrandedHeader
-// Two-row branded chrome used on top-level MAIN_SECTIONS (Home,
+// Single-row branded chrome used on top-level MAIN_SECTIONS (Home,
 // Astrology, Festivals, Gold, …). PageHeader (with ← Back + screen
 // title) is reserved for hub-leaf screens (DailyRashi, Horoscope, etc.)
 // and utility screens (Settings, Login, etc.) where the back arrow
 // is the primary affordance.
 //
-// Row 1 — ☰ Drawer + 🚩 Flag + "ధర్మ సనాతనం" + 🔔 + ⚙ + 👤
-// Row 2 — 📍 Location pill + Eng·తెలుగు toggle
+// Row 1 — ☰ Drawer + 🚩 Flag + "ధర్మ సనాతనం" + ⚙ + 👤
+//
+// Location + language toggle moved into the side drawer in v2.5.0 —
+// they're one-time settings, not chrome that belongs on every screen.
+// Tap ☰ → drawer carries an inline language switch + a "Change
+// Location" menu item. The notifications bell was also removed from
+// chrome — drawer already exposes Notifications, and the bell was
+// pushing the "Dharma" wordmark into clip on the English layout.
 //
 // All right-side action callbacks are optional. If a host screen
 // doesn't supply onNotifications / onSettings / onProfile / onDrawerOpen
@@ -19,22 +25,34 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useLanguage, TR } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
+import { TR } from '../context/LanguageContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useDrawer } from '../context/DrawerContext';
 import { DarkColors } from '../theme';
 import { usePick } from '../theme/responsive';
 import { FlagWithPole } from './FlagWithPole';
-import { LocationPill } from './LocationPill';
+
+// Lazy-require lottie so a missing web peer dep doesn't crash chrome.
+let LottieView = null;
+try {
+  LottieView = require('lottie-react-native').default;
+} catch (e) {
+  if (__DEV__) console.warn('BrandedHeader: lottie unavailable, falling back to flag:', e?.message);
+}
+const DHARMA_WHEEL_SOURCE = require('../../assets/animations/dharma-wheel.json');
 
 // showBack — set true on sub-section main screens (e.g. JyotishyamHubScreen)
 // so the header carries ← Back + 🏠 Home instead of the ☰ drawer button.
 // Home itself leaves showBack=false and supplies onDrawerOpen.
-export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications, onSettings, onProfile }) {
+export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute();
-  const { lang, toggleLang, t } = useLanguage();
-  const { isLoggedIn } = useAuth();
+  const { lang, t } = useLanguage();
+  const { openDrawer } = useDrawer();
+  // Drawer host is global (App.js); fall back to it if the caller
+  // didn't supply its own handler. Keeps existing callers compatible.
+  const handleDrawerOpen = onDrawerOpen || openDrawer;
 
   // Same back-nav logic PageHeader uses, so hub-leaf navigations honour
   // a backTo route param if one was passed in.
@@ -50,9 +68,24 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
   const headerIconSize     = usePick({ default: 24, sm: 24, md: 26, lg: 28, xl: 30 });
   const headerMenuIconSize = usePick({ default: 26, sm: 26, md: 28, lg: 30, xl: 32 });
   const headerFlagSize     = usePick({ default: 30, sm: 30, md: 32, lg: 34, xl: 38 });
+  // Logo (cosmos wheel) renders much bigger than the old flag — the
+  // elliptical orbital content was reading as tiny at any compact
+  // size because the 1.7:1 horizontal squash leaves significant
+  // vertical padding inside a square Lottie box. With the avatar
+  // removed there's room to push this higher, so the orbits + sun
+  // are clearly readable as a brand mark.
+  const headerLogoSize     = usePick({ default: 64, sm: 64, md: 70, lg: 76, xl: 84 });
   const headerSlotSize     = usePick({ default: 36, sm: 36, md: 40, lg: 44, xl: 48 });
   const headerSlotGap      = usePick({ default: 2,  sm: 2,  md: 4,  lg: 6,  xl: 8 });
-  const headerTitleFont    = usePick({ default: 26, sm: 26, md: 30, lg: 32, xl: 36 });
+  // Title font: separate ladders for the two header variants because
+  // adjustsFontSizeToFit doesn't fire on react-native-web — the title
+  // clips instead of shrinking. showBack carries 3 nav icons + the
+  // bigger cosmos wheel logo on the left, leaving very little room
+  // for the wordmark, so the showBack ladder is significantly smaller
+  // to ensure "Dharma" / "ధర్మ" never clips on any phone class.
+  const headerTitleFontBase = usePick({ default: 26, sm: 26, md: 30, lg: 32, xl: 36 });
+  const headerTitleFontBack = usePick({ default: 22, sm: 22, md: 26, lg: 30, xl: 34 });
+  const headerTitleFont = showBack ? headerTitleFontBack : headerTitleFontBase;
   // సనాతనం subtitle size is DERIVED from the title size at a fixed
   // ratio (0.6x). This guarantees three properties simultaneously:
   //   1. Subtitle is ALWAYS smaller than the title (mathematically — no
@@ -67,27 +100,31 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
   // class so the header doesn't feel tight on small phones and doesn't
   // float lonely on tablets.
   const headerPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 20, xl: 24 });
-  const headerPadBottom = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
-  const rowGap          = usePick({ default: 6,  sm: 6,  md: 8,  lg: 10, xl: 12 });
+  // Wheel slot's negative margins scale across breakpoints: small
+  // phones get aggressive pull (logo→title gap is the constraint),
+  // tablets get gentler pull (they have ample title space already).
+  // marginLeft eats the home-icon→logo whitespace; marginRight pulls
+  // the title flush against the visible orbit edge (the Lottie has
+  // ~8% transparent padding inside its viewport that we collapse).
+  const wheelMarginLeft  = usePick({ default: -28, sm: -28, md: -22, lg: -16, xl: -10 });
+  const wheelMarginRight = usePick({ default: -36, sm: -36, md: -28, lg: -20, xl: -12 });
+  // Divider sits below the row. Small positive margin keeps a clean
+  // hairline of space between title row and the gold divider — too
+  // negative (-10) was pulling the divider INTO the title content,
+  // touching the wordmark.
+  const dividerMarginTop = usePick({ default: 0, sm: 0, md: 2, lg: 4, xl: 6 });
+  // Tightened in v2.5.0 — the bigger cosmos logo + Lottie's internal
+  // transparent padding around the orbital content was creating dead
+  // vertical space between the row, the gold divider line, and the
+  // top tab bar below. Zero paddingBottom puts the divider directly
+  // against the next element.
+  const headerPadBottom = usePick({ default: 0,  sm: 0,  md: 0,  lg: 2,  xl: 4 });
+  const rowGap          = usePick({ default: 2,  sm: 2,  md: 4,  lg: 6,  xl: 8 });
 
-  // Avatar slot (right-most) — its size + inner icon size now scale too.
-  const avatarSize     = usePick({ default: 30, sm: 30, md: 34, lg: 38, xl: 42 });
-  const avatarIconSize = usePick({ default: 18, sm: 18, md: 20, lg: 22, xl: 24 });
-
-  const pillPadH    = usePick({ default: 12, sm: 12, md: 14, lg: 16, xl: 18 });
-  const pillPadV    = usePick({ default: 6,  sm: 6,  md: 7,  lg: 8,  xl: 9 });
-  const langDotSize = usePick({ default: 14, sm: 14, md: 16, lg: 18, xl: 20 });
-  const langFontSize = usePick({ default: 14, sm: 14, md: 15, lg: 16, xl: 17 });
-  const langToggleRadius = usePick({ default: 14, sm: 14, md: 16, lg: 18, xl: 20 });
-  const langToggleGap    = usePick({ default: 5,  sm: 5,  md: 6,  lg: 7,  xl: 8 });
-
-  // Default action handlers — main sections that don't override these
-  // get sensible defaults: bell → Notifications, gear → Settings,
-  // avatar → Login. Drawer is host-specific (each main section owns
-  // its drawer state, or skips it), so onDrawerOpen has no default.
-  const handleNotifications = onNotifications || (() => navigation.navigate('Notifications'));
-  const handleSettings      = onSettings      || (() => navigation.navigate('Settings'));
-  const handleProfile       = onProfile       || (() => navigation.navigate('Login'));
+  // Default action handler — main sections that don't override get
+  // a sensible default: gear → Settings. The bell and avatar were
+  // retired in v2.5.0 (drawer carries Notifications, Login, Profile).
+  const handleSettings = onSettings || (() => navigation.navigate('Settings'));
 
   return (
     <LinearGradient
@@ -95,7 +132,7 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
       style={[
         s.header,
         {
-          paddingTop: Math.max(insets.top, 10) + 6,
+          paddingTop: Math.max(insets.top, 4) + 2,
           paddingHorizontal: headerPadH,
           paddingBottom: headerPadBottom,
         },
@@ -104,10 +141,10 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
       {/* Row 1 — single line, sized so every phone class fits */}
       <View style={[s.row1, { gap: headerSlotGap }]}>
         {showBack ? (
-          // Sub-section variant: ← Back + 🏠 Home replace the drawer.
-          // Two slots here vs the one ☰ slot on Home keeps the row
-          // balanced because the title block is flex:1 and takes the
-          // remaining width.
+          // Sub-section variant — Back ← 🏠 on extreme LEFT.
+          // The drawer hamburger moves to the right group (next to
+          // settings) so the title block has 2 fewer icons crowding
+          // it on the left, preventing "Dharma" clip.
           <>
             <TouchableOpacity
               style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
@@ -125,23 +162,38 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
             </TouchableOpacity>
           </>
         ) : (
-          onDrawerOpen && (
-            <TouchableOpacity
-              style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
-              onPress={onDrawerOpen}
-              accessibilityLabel="Menu"
-            >
-              <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
-            </TouchableOpacity>
-          )
+          <TouchableOpacity
+            style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={handleDrawerOpen}
+            accessibilityLabel="Menu"
+          >
+            <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
+          </TouchableOpacity>
         )}
-        <View style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}>
-          <FlagWithPole size={headerFlagSize} />
+        {/* Dharma Cosmos Wheel logo slot — rendered at headerLogoSize
+            (significantly larger than headerFlagSize) because the
+            elliptical orbits + central sun read as tiny at flag size.
+            Slot minWidth tracks the logo size so no extra whitespace
+            sits between the wheel and the "ధర్మ" wordmark. Falls back
+            to FlagWithPole if Lottie can't load. */}
+        <View style={[s.slot, { height: headerLogoSize, minWidth: headerLogoSize, marginLeft: wheelMarginLeft, marginRight: wheelMarginRight }]}>
+          {LottieView ? (
+            <LottieView
+              source={DHARMA_WHEEL_SOURCE}
+              autoPlay
+              loop
+              style={{ width: headerLogoSize, height: headerLogoSize }}
+            />
+          ) : (
+            <FlagWithPole size={headerLogoSize} />
+          )}
         </View>
         <View style={s.titleBlock}>
           <Text
-            style={[s.title, { fontSize: headerTitleFont, flexShrink: 0 }]}
+            style={[s.title, { fontSize: headerTitleFont, flexShrink: 1 }]}
             numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
             allowFontScaling={false}
           >
             {t(TR.appName.te, TR.appName.en)}
@@ -162,13 +214,19 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
             </Text>
           )}
         </View>
-        <TouchableOpacity
-          style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
-          onPress={handleNotifications}
-          accessibilityLabel="Notifications"
-        >
-          <MaterialCommunityIcons name="bell-outline" size={headerIconSize} color={DarkColors.silver} />
-        </TouchableOpacity>
+        {/* On showBack screens, the drawer hamburger lives on the
+            RIGHT (between title block and settings) so the row reads
+            as a balanced 2-icon left / 2-icon right layout — gives
+            the "Dharma" wordmark in the middle more breathing room. */}
+        {showBack && (
+          <TouchableOpacity
+            style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={handleDrawerOpen}
+            accessibilityLabel="Menu"
+          >
+            <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
           onPress={handleSettings}
@@ -176,45 +234,9 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onNotifications,
         >
           <MaterialCommunityIcons name="cog-outline" size={headerIconSize} color={DarkColors.silver} />
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
-          onPress={handleProfile}
-          accessibilityLabel={isLoggedIn ? 'Profile' : 'Login'}
-        >
-          <View
-            style={[
-              s.userAvatar,
-              { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 },
-              isLoggedIn && s.userAvatarLoggedIn,
-            ]}
-          >
-            <MaterialCommunityIcons
-              name={isLoggedIn ? 'account-check' : 'account-circle-outline'}
-              size={avatarIconSize}
-              color={isLoggedIn ? DarkColors.tulasiGreen : DarkColors.textMuted}
-            />
-          </View>
-        </TouchableOpacity>
       </View>
 
-      <View style={[s.divider, { marginTop: rowGap }]} />
-
-      {/* Row 2 — Location pill + Lang toggle */}
-      <View style={[s.row2, { marginTop: rowGap, gap: rowGap }]}>
-        <LocationPill />
-        <View style={{ flex: 1 }} />
-        <TouchableOpacity
-          style={[s.langToggle, { paddingHorizontal: pillPadH, paddingVertical: pillPadV, borderRadius: langToggleRadius, gap: langToggleGap }]}
-          onPress={toggleLang}
-          activeOpacity={0.7}
-        >
-          <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>Eng</Text>
-          <View style={[s.langSwitch, { width: langDotSize * 2.2, height: langDotSize + 4, borderRadius: (langDotSize + 4) / 2 }, lang === 'en' && s.langSwitchEn]}>
-            <View style={[s.langDot, { width: langDotSize, height: langDotSize, borderRadius: langDotSize / 2 }]} />
-          </View>
-          <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తెలుగు</Text>
-        </TouchableOpacity>
-      </View>
+      <View style={[s.divider, { marginTop: dividerMarginTop }]} />
     </LinearGradient>
   );
 }
@@ -235,8 +257,8 @@ const s = StyleSheet.create({
   },
   titleBlock: {
     flex: 1,
-    paddingLeft: 2,
-    paddingRight: 4,
+    paddingLeft: 0,
+    paddingRight: 0,
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'flex-start',
@@ -270,35 +292,5 @@ const s = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: DarkColors.borderGold,
-  },
-  // marginTop + gap set inline (rowGap).
-  row2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  // borderRadius + gap set inline (usePick).
-  langToggle: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: DarkColors.bgCard,
-    borderWidth: 1, borderColor: DarkColors.borderCard,
-  },
-  langLabel: {
-    fontWeight: '700',
-    color: DarkColors.textMuted,
-  },
-  langLabelActive: {
-    color: DarkColors.saffron, fontWeight: '600',
-  },
-  // width / height / borderRadius set inline (langDotSize).
-  langSwitch: {
-    backgroundColor: DarkColors.saffron,
-    justifyContent: 'center', paddingHorizontal: 2,
-    alignItems: 'flex-end',
-  },
-  langSwitchEn: {
-    alignItems: 'flex-start',
-  },
-  langDot: {
-    backgroundColor: '#fff',
   },
 });

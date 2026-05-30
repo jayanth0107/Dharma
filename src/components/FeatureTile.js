@@ -1,13 +1,88 @@
 // ధర్మ — Feature Tile Grid Component
 // Large, clear icons and labels — fills screen, no scroll needed
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, Type, Spacing, Radius, useColumns } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { trackEvent } from '../utils/analytics';
+
+// Lazy-require lottie-react-native so a missing module on web bundles
+// (or an older fork without web support) doesn't crash the whole tree.
+// We render a regular MCI icon fallback if Lottie can't load.
+let LottieView = null;
+try {
+  LottieView = require('lottie-react-native').default;
+} catch (e) {
+  if (__DEV__) console.warn('lottie-react-native not available — falling back to icon:', e?.message);
+}
+
+// Shared loop helper — kicks off an infinite back-and-forth animation
+// on an Animated.Value between 0 and 1 with the given half-cycle duration.
+function startLoop(value, duration) {
+  return Animated.loop(
+    Animated.sequence([
+      Animated.timing(value, { toValue: 1, duration, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(value, { toValue: 0, duration, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ])
+  );
+}
+
+// Single falling particle — translates from above the tile down past
+// the bottom, fading in then out. Each particle uses its own
+// Animated.Value with a staggered phase so the group reads as "rain"
+// rather than a stack of dots moving in lockstep. The looped sequence
+// uses native driver (translateY + opacity are both supported).
+function RainParticle({ index, total, color, leftPct, durationMs }) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const delay = (index / total) * durationMs;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.timing(anim, { toValue: 1, duration: durationMs, easing: Easing.linear, useNativeDriver: true }),
+        Animated.timing(anim, { toValue: 0, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [anim, index, total, durationMs]);
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: `${leftPct}%`,
+        width: 3,
+        height: 3,
+        borderRadius: 2,
+        backgroundColor: color,
+        opacity: anim.interpolate({ inputRange: [0, 0.15, 0.85, 1], outputRange: [0, 0.85, 0.55, 0] }),
+        transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-6, 100] }) }],
+      }}
+    />
+  );
+}
+
+// 5 particles spread across the tile width via pseudo-random offsets.
+// Particle colour depends on which tile they belong to: gold for the
+// astrology (spin) tile, saffron for the gita (page-turn) tile.
+function RainOverlay({ variant }) {
+  const color = variant === 'spin' ? DarkColors.gold : DarkColors.saffronLight || '#FFAA40';
+  const positions = [12, 32, 50, 68, 86];
+  const durationMs = variant === 'spin' ? 1800 : 2200;
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      {positions.map((leftPct, i) => (
+        <RainParticle key={i} index={i} total={positions.length} color={color} leftPct={leftPct} durationMs={durationMs} />
+      ))}
+    </View>
+  );
+}
 
 const GRID_PADDING = 12;
 const TILE_GAP = 12;
@@ -28,7 +103,35 @@ function getTileWidthPercent(columns) {
 // దైనందిన దర్శనం, స్టాక్ మార్కెట్) word-wrap onto a second line on
 // Home and on hub screens, rather than ellipsizing. Callers that
 // genuinely need single-line behaviour can pass labelLines={1}.
-export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, analyticsId, labelLines = 2, _gridIndex, _gridTotal }) {
+// animation (optional): 'spin' | 'page-turn'. Drives the surrounding
+// chrome (focus ring colour, rain particles on/off). The icon motion
+// itself is delegated to Lottie when `lottieSource` is supplied —
+// MCI glyphs were too limited for the rich planet / page-turn effects
+// the user asked for. Lottie renders vector animations on its own
+// thread, so motion is smooth and battery-efficient.
+//
+//   • spin       → gold breathing focus ring. No rain.
+//   • page-turn  → saffron focus ring. Saffron particle rain.
+//
+// lottieSource (optional): Lottie JSON via require(). When provided,
+// the LottieView replaces the MCI glyph entirely — the icon prop is
+// then only used for the analytics key.
+export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disabled, tileHeight, analyticsId, labelLines = 2, animation, lottieSource, _gridIndex, _gridTotal }) {
+  // Single Animated.Value for the breathing focus ring; loops 0↔1 on
+  // 2.2 s cycle. Cleaned up on unmount.
+  const ringAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!animation) return undefined;
+    const ringLoop = startLoop(ringAnim, 1100);
+    ringLoop.start();
+    return () => ringLoop.stop();
+  }, [animation, ringAnim]);
+
+  const ringColor = animation === 'page-turn' ? DarkColors.saffron : DarkColors.gold;
+  const ringStyle = !animation ? null : {
+    opacity: ringAnim.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.9] }),
+    borderColor: ringColor,
+  };
   // Wrap onPress so every home/feature tile fires a uniform tile_tap
   // event. `icon` is a stable English-only string and works as the key
   // when an explicit analyticsId isn't passed. The label varies by
@@ -100,12 +203,43 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
         borderStyle,
         disabled && s.tileDisabled,
       ]}
-      onPress={onPress}
+      onPress={handlePress}
       activeOpacity={0.7}
       disabled={disabled}
     >
-      {/* Icon — single uniform color */}
-      <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.gold} />
+      {/* Focus ring — pulses opacity 0.25 ↔ 0.9. Rendered behind the
+          content via absolute-fill so it doesn't push layout. */}
+      {animation && (
+        <Animated.View pointerEvents="none" style={[s.focusRing, ringStyle]} />
+      )}
+
+      {/* Rain overlay — only on the page-turn tile (Bhagavad Gita).
+          Astrology gets the focus ring + icon spin alone; rain would
+          compete with the spinning planet visually. */}
+      {animation === 'page-turn' && <RainOverlay variant={animation} />}
+
+      {/* Icon — Lottie animation when a source is provided (richer
+          motion than glyph rotations could express), MCI glyph fallback
+          otherwise. The MCI fallback also fires if the Lottie module
+          failed to load at startup (graceful degradation). The text
+          labels below stay stable regardless.
+          The Lottie is wrapped in a View with explicit dimensions and
+          overflow:hidden — without this, the dotlottie-react web
+          element adds its own padding/margins that pushed tile height
+          ~6 dp taller than MCI-icon tiles in the same row. */}
+      {lottieSource && LottieView ? (
+        <View style={{ width: iconSize * 1.35, height: iconSize * 1.35, overflow: 'hidden' }}>
+          <LottieView
+            source={lottieSource}
+            autoPlay
+            loop
+            style={{ width: iconSize * 1.35, height: iconSize * 1.35 }}
+            renderMode={Platform.OS === 'android' ? 'SOFTWARE' : 'AUTOMATIC'}
+          />
+        </View>
+      ) : (
+        <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.gold} />
+      )}
 
       {/* Label — default single line + autoshrink (Home grid). Callers
           that need wrap (e.g. hub screens with longer Telugu names like
@@ -218,6 +352,18 @@ const s = StyleSheet.create({
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
+    // overflow: 'hidden' so falling rain particles clip at the tile
+    // boundary instead of spilling into adjacent tiles.
+    overflow: 'hidden',
+  },
+  // Focus ring — absolute-fill border that breathes via animated
+  // opacity. Inset 4 dp from each edge so it sits inside the grid
+  // divider borders without conflicting visually.
+  focusRing: {
+    position: 'absolute',
+    top: 4, left: 4, right: 4, bottom: 4,
+    borderWidth: 1.5,
+    borderRadius: 8,
   },
   tileDisabled: {
     opacity: 0.4,

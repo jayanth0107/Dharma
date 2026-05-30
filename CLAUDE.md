@@ -5,7 +5,7 @@
 **Dharma** (ధర్మ — సనాతనం) is a React Native (Expo) Telugu **sacred-stories + panchangam + Vedic astrology** mobile app. Daily Ramayana / Mahabharata episode, Bhagavad Gita sloka, Neethi Sukta wisdom, Sanskrit word, Dharma debate / quiz, Stotras + Mantras with pandit recordings, animated meditation; full Drik-Ganita panchangam (Tithi, Nakshatra, Yoga, Karana, Muhurtams), festivals + Ekadashi + Pournami / Amavasya / Pradosham observances, Vedic horoscope (జాతకం), 8-Kuta matchmaking, Muhurtam finder, daily rashi predictions, Vedic personality profile, live gold/silver prices, Indian market indices, nearby-temple finder.
 
 **App name:** Dharma: Wisdom & Astrology
-**Version:** 2.4.9 (versionCode 17)
+**Version:** 2.4.11 (versionCode 19)
 **GitHub:** https://github.com/jayanth0107/Dharma
 **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom
 **EAS project ID:** `8a9795f4-dc5e-4b2b-bfaf-1f320b70dc0d`
@@ -18,29 +18,32 @@
 - **@react-navigation/bottom-tabs** + **@react-navigation/native**
 - **react-native-screens** + **react-native-safe-area-context**
 - **astronomy-engine 2.1.19** for astronomical calculations
-- **Firebase 12.11.0** (Firestore for payment sync, Phone Auth, Analytics)
+- **Firebase 12.11.0** (Firestore for payment sync, web Phone Auth, Analytics)
+- **@react-native-firebase/app + auth 24.0.0** (mobile-only Phone OTP via Play Integrity / Silent APNs — see "Phone Auth" below)
 - **expo-linear-gradient**, **@expo/vector-icons**
 - **@react-native-async-storage/async-storage**
 - **expo-audio** (`useAudioPlayer`, `setAudioModeAsync` — replaces deprecated `expo-av`)
-- **expo-location** (coarse only), **expo-print**, **expo-sharing**, **expo-notifications**, **expo-font**, **expo-speech**
+- **expo-location** (coarse only), **expo-print**, **expo-sharing**, **expo-notifications**, **expo-font**, **expo-speech**, **expo-insights** (EAS Insights / Updates telemetry)
 - Targets iOS, Android, Web
 
-## Architecture (v2.1 — Swipeable + Responsive + Accessible)
+## Architecture (v2.5 — Global Drawer + Lottie-anchored Brand)
 
-- **App.js** is a minimal shell: `ErrorBoundary → SafeAreaProvider → LanguageProvider → AuthProvider → AppProvider → NavigationContainer → TabNavigator`
-- **Navigation** uses `@react-navigation/bottom-tabs` with **17 main sections** registered in `MAIN_SECTIONS` (the source of truth used by both top + bottom bars and swipe). Utility screens (Settings, Login, etc.) are push-only and not surfaced in nav.
+- **App.js** is a minimal shell: `ErrorBoundary → SafeAreaProvider → LanguageProvider → AuthProvider → AppProvider → DrawerProvider → NavigationContainer → TabNavigator + GlobalDrawer + LocationPickerModal`
+- **Navigation** uses `@react-navigation/bottom-tabs` with **19 main sections** registered in `MAIN_SECTIONS` (the source of truth used by both top + bottom bars and swipe). Utility / leaf screens (Settings, Login, hub leaves like Horoscope/Quiz/etc.) are push-only and not surfaced in nav. Stock Market (Market) was removed in v2.5.0 — see "Stock Market removed".
 - **Custom scrollable bottom tab bar** (`ScrollableTabBar`) replaces the default 5-icon bar. Auto-centers active pill via measured `onLayout` positions.
-- **Top tab bar** (`TopTabBar`) renders the same `MAIN_SECTIONS` so top + bottom always agree; same auto-center logic.
+- **Top tab bar** (`TopTabBar`) renders the same `MAIN_SECTIONS` so top + bottom always agree; active tab carries a "diya" silhouette (small saffron flame + curved gold-saffron bowl) below the label instead of the v1 underline.
 - **SwipeWrapper** uses `PanResponder` on the main section screens — left/right swipes navigate prev/next section in `MAIN_SECTIONS` order.
-- **Three React Contexts**:
+- **Four React Contexts**:
   - `AppContext` — date, location, panchangam, premium, gold prices, festivals, ekadashi, holidays, reminders
-  - `AuthContext` — Firebase phone-OTP auth, user profile
+  - `AuthContext` — Phone-OTP auth via platform-conditional SDK (web: `firebase/auth` + RecaptchaVerifier; mobile: `@react-native-firebase/auth` + Play Integrity / Silent APNs), user profile
   - `LanguageContext` — bilingual toggle (te/en), exposes `t(te, en)` and `tKey(TR.key)`; all user strings live in `src/data/translations.js`
+  - `DrawerContext` — `useDrawer()` exposes `openDrawer / closeDrawer / isOpen` so any screen opens the side drawer without prop-drilling. `<GlobalDrawer />` mounted at App.js root inside `NavigationContainer` so it can `navigate()`. The hamburger in `BrandedHeader` / `PageHeader` calls `openDrawer()` directly.
 - **Dark theme** — pure dark `#0A0A0A` with saffron/gold/silver accents (`src/theme/colors.js` → `DarkColors`). Active states use **gold `#D4A017`** (8.4:1 AAA on dark bg). See "Accessibility" section below.
 - **Responsive layout system** — `src/theme/responsive.js` exports `useWindow`, `useColumns`, `useIsAtLeast`, `usePick({sm,md,lg,xl,xxl})`. Every horizontally laid-out element (header, tab bars, location pill, lang toggle, tile grid) consumes `usePick` to scale per phone class.
-- **Grid dashboard** — Home/Astro/More screens use `FeatureTile` + `FeatureGrid` (which itself uses `useColumns` → 2/3/4/5 columns by width).
-- **PageHeader** — shared ← Back + 🏠 Home + center-aligned title + EN/తెలు toggle (on every non-Home screen).
-- **DrawerMenu** — side drawer from hamburger on Home (settings, donate, share, privacy, login).
+- **Grid dashboard** — Home + hub screens (`JyotishyamHubScreen`, `WisdomHubScreen`) + `MoreScreen` use `FeatureTile` + `FeatureGrid` (which itself uses `useColumns` → 2/3/4/5 columns by width).
+- **PageHeader** — single row of chrome `← Back · ☰ Menu · 🏠 Home · Title` shown on every non-Home screen. Title takes flex:1 of the remaining width inside a wrapper View with explicit height = icon button height (so the title's glyphs sit on the same horizontal centreline as the icons; CSS line-height tricks are unreliable on react-native-web). Location pill + EN/తె toggle moved into the drawer in v2.5.0 — they're one-time settings, not chrome on every screen.
+- **BrandedHeader** — shown on top-level `MAIN_SECTIONS` screens. Single row: `☰ Menu · [Dharma Cosmos Wheel logo] · ధర్మ సనాతనం wordmark · ⚙ Settings`. `showBack` variant (used by `JyotishyamHubScreen` / `WisdomHubScreen`) swaps the left ☰ for `← Back · 🏠 Home` and moves the ☰ to the right side beside settings (so the row is balanced 2-left / 2-right and the title has more room). The brand mark is a Lottie animation — see "Brand logo" below. Avatar icon was removed in v2.5.0 (Login lives in the drawer).
+- **DrawerMenu** — side drawer from hamburger. Inline EN/తె language switch row at the top, then `Login / Profile` (new), `Notifications`, `Change Location`, `Settings`. Profile section banner at the top reflects login state (guest vs phone-verified).
 - **ModalOrView** wrapper — components render either as embedded full-page screens OR legacy popup modals via `embedded={true}` prop.
 - **CalendarPicker** is wrapped in `<Modal transparent>` so it always overlays at the root and never gets trapped inside a parent ScrollView.
 - **Deprecated components** live in `src/components/_deprecated/`.
@@ -55,19 +58,24 @@ src/
     AuthContext.js                  # Firebase phone-OTP auth
     LanguageContext.js              # te/en toggle + t(), tKey()
   navigation/
-    TabNavigator.js                 # 17 main sections (MAIN_SECTIONS) + utility screens
-  screens/                          # 22 screens
+    TabNavigator.js                 # 20 main sections (MAIN_SECTIONS) + utility/leaf screens
+    sections.js                     # MAIN_SECTIONS registry (single source of truth)
+  screens/                          # 36 screens
     HomeScreen.js                   # Dashboard grid + branded header + drawer
     CalendarScreen.js               # Sub-tabs: Panchang/Timings/Festivals/Ekadashi/Holidays/Darshan/Gold/Kids
-    AstroScreen.js                  # Astrology features grid
+    JyotishyamHubScreen.js          # Astrology hub: DailyRashi, RashiProfile, Horoscope, Family, Matchmaking, Muhurtam tiles
+    WisdomHubScreen.js              # Wisdom hub: DharmaPoll, Quiz, Sanskrit, Pramana, Astro tiles
+    AstroScreen.js                  # Vedic Wisdom grid (lives under Wisdom hub)
     GoldScreen.js                   # Gold & silver prices
     MoreScreen.js                   # Menu grid: settings, donate, analytics, premium, share
     GitaScreen.js                   # Bhagavad Gita daily sloka + library (premium)
     HoroscopeScreen.js              # Vedic birth chart (జాతకం, premium)
     MuhurtamScreen.js               # Muhurtam finder (premium)
     MatchmakingScreen.js            # 8-kuta Ashtakoot compatibility (premium)
+    FamilyScreen.js                 # Multi-member kundali storage (premium)
     DailyRashiScreen.js             # Today's rashi predictions per sign
-    MarketScreen.js                 # Indian NSE/BSE indices + ETFs (mobile only)
+    RashiPersonalityScreen.js       # Vedic personality profile from DOB
+    MarketScreen.js                 # Indian NSE/BSE indices + ETFs (Cloud Function backed)
     TempleNearbyScreen.js           # Nearby temple finder
     ServicesScreen.js               # Puja booking / astrologer referrals (placeholder)
     PremiumScreen.js                # Premium plans + UPI payment
@@ -76,10 +84,30 @@ src/
     ReminderScreen.js               # Reminder CRUD
     NotificationScreen.js           # Notification settings
     LocationScreen.js               # Location picker (GPS + search)
-    LoginScreen.js                  # Phone OTP login + profile
+    LoginScreen.js                  # Phone OTP login + profile (platform-conditional SDK)
     WebViewScreen.js                # Privacy/Terms/About/Rate/Feedback pages
+    RamayanaScreen.js               # Daily Ramayana episode
+    MahabharataScreen.js            # Daily Mahabharata episode
+    NeethiSuktaScreen.js            # Daily Neethi Sukta
+    SanskritWordScreen.js           # Sanskrit word of the day
+    DharmaPollScreen.js             # Daily dharmic A/B debate
+    QuizScreen.js                   # Daily Vedic + Puranic quiz
+    PramanaScreen.js                # Shruti / Smriti / Shishtachara source attribution
+    StotraScreen.js                 # Stotras + Mantras index
+    MantraAudioScreen.js            # Mantra player (push-only; opened via Stotra → preselectId)
+    MeditationScreen.js             # Animated breathing circle + mantra picker
+    PujaGuideScreen.js              # 12 step-by-step puja guides with samagri lists
   components/
-    PageHeader.js                   # ← Back + 🏠 Home + Title (centered) + lang toggle
+    PageHeader.js                   # Two-row: ← Back + 🏠 Home + Title + location/lang
+    BrandedHeader.js                # Hamburger/back slot + 🚩 + "ధర్మ | సనాతనం" + actions (rolled out across all MAIN_SECTIONS)
+    LocationPill.js                 # Reusable location chip (mounted at App.js root)
+    FlagWithPole.js                 # Saffron flag SVG used in BrandedHeader / onboarding
+    SectionDivider.js               # Labelled + icon-only decorative dividers (rangoli pattern)
+    SectionImageCard.js             # Per-section header with 3 curated images (Ithihaasa / Astrology / Devotion)
+    TodaySummaryCard.js             # Home top card: date + vaaram deity + Sankalpa Deepam pill
+    VaaramDeityStrip.js             # Day-of-week deity portrait strip
+    SacredContentDisclaimer.js      # Source-attribution disclaimer footer
+    StickyActionBar.js              # Pinned action bar (PDF / share) on long screens
     ScrollableTabBar.js             # Custom bottom tab bar (replaces default 5-icon bar)
     TopTabBar.js                    # Horizontal top tab bar (mirrors bottom bar)
     SwipeWrapper.js                 # PanResponder swipe nav between MAIN_SECTIONS
@@ -90,7 +118,7 @@ src/
     ModalOrView.js                  # Embedded (full page) or modal (popup) wrapper
     LocationPickerModal.js          # GPS + search location picker
     CalendarPicker.js               # Date picker overlay
-    OnboardingScreen.js             # First-launch walkthrough
+    OnboardingScreen.js             # First-launch walkthrough + Telugu-TTS install hint
     OfflineBanner.js                # "You are offline" banner
     ScreenErrorBoundary.js          # Per-screen crash recovery
     ReferralBanner.js               # Share/earn referral promo
@@ -104,7 +132,6 @@ src/
     FilterPills.js                  # Observance filter pills
     AdBanner.js / AdBanner.web.js   # AdMob (native) / no-op (web)
     SectionShareRow.js              # WhatsApp + native share
-    GitaCard.js                     # Gita daily sloka + library
     MuhurtamFinder.js               # Auspicious day finder (embedded/modal)
     HoroscopeFeature.js             # Vedic birth chart engine (embedded/modal)
     PremiumBanner.js                # Premium upsell + payment (embedded/modal)
@@ -202,14 +229,14 @@ Already responsive: home tile grid, branded header (icons, flag, title font, sub
 
 ### MAIN_SECTIONS — source of truth for top bar, bottom bar, swipe order, AND home grid
 
-`src/navigation/sections.js` is the single registry. Sections are grouped into 5 thematic blocks; the home grid renders the same order with `<SectionDivider>` between blocks. Reorder there → top bar, bottom bar, swipe, home grid all update together.
+`src/navigation/sections.js` is the single registry. Sections are grouped into 4 thematic blocks (v2.4.9 hub restructure folded the old Youth + Life Decisions blocks into the Jyotishyam + Wisdom hubs); the home grid renders the same order with `<SectionDivider>` / `<SectionImageCard>` between blocks. Reorder there → top bar, bottom bar, swipe, home grid all update together.
 
-**1. Daily Habit (everyone)**
+**1. Daily + hubs (everyone)**
 - Panchang (CalendarScreen, `tab: panchang`)
+- Jyotishyam (`JyotishyamHubScreen` — astrology hub: DailyRashi, RashiProfile, Horoscope, Family, Matchmaking, Muhurtam)
+- WisdomHub (`WisdomHubScreen` — DharmaPoll, Quiz, Sanskrit, Pramana, Astro/Vedic Wisdom)
 - Festivals (CalendarScreen, `tab: festivals`)
-- DailyRashi
 - Gold
-- Market (NSE/BSE, mobile only — web shows "Available in mobile app")
 
 **2. Ithihaasa (Sanskrit "thus it happened" — sacred history)**
 - Ramayana (30-episode rotation)
@@ -217,22 +244,8 @@ Already responsive: home tile grid, branded header (icons, flag, title font, sub
 - Gita (Bhagavad Gita — 30-sloka rotation)
 - NeethiSukta (Chanakya / Vidura / Bhartrihari / Subhashitas / Thirukkural / Panchatantra wisdom quotes)
 - Kids (CalendarScreen, `tab: kids`)
-- Pramana (Shruti / Smriti / Shishtachara source attribution)
 
-**3. Youth & Learning (15–25, engagement + bite-size knowledge)**
-- DharmaPoll (daily dharmic A/B debate)
-- Quiz (daily Vedic & Puranic quiz)
-- SanskritWord (Sanskrit word of the day — Devanagari + etymology + modern Telugu)
-- RashiProfile (Vedic personality profile for all 12 rashis)
-- Matchmaking (8-Kuta Ashtakoot + PDF report)
-- Astro (Vedic Wisdom hub)
-
-**4. Life Decisions (adults / premium-gated)**
-- Horoscope (Vedic జాతకం — Moon Rashi, Lagna, Nakshatra, Navagraha, share + PDF)
-- Muhurtam (date selector ±1 year + 90-day event scan: wedding / griha pravesh / travel / business / vehicle / education)
-- Family (multi-member kundali storage)
-
-**5. Devotion & Service (elders, deeper practice)**
+**3. Devotion & Service**
 - Stotra (Stotras + Mantras with pandit YouTube recordings)
 - Meditation (animated breathing circle + mantra picker — chant continues on screen-lock, stops on tab-switch)
 - PujaGuide (12 step-by-step guides with samagri lists)
@@ -240,13 +253,15 @@ Already responsive: home tile grid, branded header (icons, flag, title font, sub
 - Donate (UPI donation with bilingual amount picker)
 
 **Utility tail**
-- Holidays (CalendarScreen, `tab: holidays`) — promoted from Festivals sub-tab chip to first-class tile in 2.4.4
-- Darshan (CalendarScreen, `tab: darshan`) — same, daily deity card
+- Market (NSE/BSE — Cloud Function backed; lookup utility, not a dharmic-life decision)
+- Darshan (CalendarScreen, `tab: darshan`) — daily deity card
 - Reminder
 - More
 
+(Holidays tile was removed in v2.4.7 — Festivals section's sub-tabs already surface holiday content.)
+
 ### UTILITY_SCREENS — push-only, not in nav bars
-Settings, InfoPage (WebView for Privacy/Terms/About/Rate/Feedback), Login, Location, Notifications, Premium (plans + payment), Services (placeholder — registered but not surfaced).
+Settings, InfoPage (WebView for Privacy/Terms/About/Rate/Feedback), Login, Location, Notifications, Premium (plans + payment), Services (placeholder — registered but not surfaced), MantraAudio (Stotra → preselectId player), and the Jyotishyam + Wisdom hub leaves: DailyRashi, RashiProfile, Horoscope, Family, Matchmaking, Muhurtam, DharmaPoll, Quiz, SanskritWord, Pramana, Astro. The leaves are reached via their hub tiles on Home; still registered as Tab.Screens so deep links + `navigation.navigate(name)` continue to resolve.
 
 ### CalendarScreen routes & sub-tabs
 - `Panchang` — no sub-tabs; scroll-wheel date picker (any date), date dominates layout
@@ -760,6 +775,95 @@ on the `#0A0A0A` dark surface — even at WCAG-passing contrast:
 
 Caught + fixed across `stotraData.js` (4 entries) and the
 StotraScreen complete-badge styling in v2.4.8.
+
+### Phone Auth (platform-conditional SDK — v2.4.11)
+
+`firebase/auth`'s `signInWithPhoneNumber` REQUIRES a `RecaptchaVerifier`
+as the 3rd argument. `RecaptchaVerifier` only works in a real DOM
+(web). On React Native, passing any value (including `null`) for that
+arg throws `auth/argument-error` — that was the v2.4.x mobile login
+bug.
+
+Fix (split by `Platform.OS`):
+- **Web** → `firebase/auth` JS SDK with `RecaptchaVerifier` (invisible).
+- **Mobile** → `@react-native-firebase/auth` native module
+  (`rnAuth().signInWithPhoneNumber(phone)` — no verifier arg).
+  Verifies via Play Integrity API on Android / Silent APNs on iOS.
+
+Both SDKs expose `.confirm(otp)` with the same shape, so
+`handleVerifyOtp` is single-codepath. `AuthContext` aliases
+`onAuthStateChanged` + `signOut` to the matching SDK per platform.
+
+Files: `src/screens/LoginScreen.js` (lazy `require` of
+`@react-native-firebase/auth` only on native — web bundle never loads
+it), `src/context/AuthContext.js` (same pattern for the observer +
+signOut), `app.json` (registers `@react-native-firebase/app` +
+`@react-native-firebase/auth` as Expo config plugins — required so
+the prebuild step links the native modules).
+
+Tester setup: SHA-1 of the **Play App Signing** cert must be
+registered in Firebase Console → Project Settings → Your apps →
+Android → Add fingerprint. Without that, the on-device Play Integrity
+check fails and the user never gets the SMS. After every Play Console
+upload, copy the App Signing SHA-1 from Test and release → App
+integrity → App signing.
+
+**Known gap (deferred to v2.5.0):** Firestore writes still use the JS
+SDK on both platforms. On mobile, the JS-SDK Firestore client doesn't
+carry the RN-Firebase auth session, so `users/{uid}` writes can fail
+the `request.auth != null` security rule. Login works end-to-end;
+name sync to cloud is best-effort. v2.5.0 will install
+`@react-native-firebase/firestore` to close this.
+
+### Brand logo + Lottie animations (v2.5.0)
+
+The brand mark is no longer the static Bhagwa Dhwaj flag — it's now a **Dharma Cosmos Galaxy** Lottie rendered in every `BrandedHeader` (assets/animations/dharma-wheel.json). 14-particle elliptical dust ring + 10 static rotating planets + 3 emanating particles (originating from black hole) + 3 absorbing particles (consumed by black hole) + central dark singularity with rim. Slow 10 s cycle. Lottie filename kept (`dharma-wheel.json`) for path compatibility even though it's now a galaxy, not a wheel.
+
+**Lottie wiring** — installed `lottie-react-native@7.x` + `@lottiefiles/dotlottie-react` (the web peer dep — REQUIRED, see `feedback_lottie_web_peer_dep.md` if you re-install on a fresh clone). `FeatureTile` accepts an optional `lottieSource={require('...')}` prop; when set, the LottieView replaces the MCI glyph icon. Always wrapped in a `View` with explicit dimensions + `overflow: hidden` because the dotlottie-react web container adds internal padding that bumped tile height by ~6 dp otherwise. Render box is `iconSize * 1.35` (slightly bigger than the MCI icon so animations are visible).
+
+**Lotties currently shipping** (all in `assets/animations/`):
+
+| File | Tile | Theme |
+|---|---|---|
+| `dharma-wheel.json` | Brand logo (all BrandedHeaders) | Galaxy w/ black hole, rotating planets, emanating + absorbing matter, dust halo |
+| `astrology-planet.json` | Astrology (Home → Jyotishyam hub) | Saturn-style planet with static elliptical ring + small orbiting planet + 3 dust particles tracing the ring (linear easing, uniform speed) |
+| `gita-book.json` | **Mahabharata** tile (no highlight) | Book with page flipping via stacked-icon swap + scale animation |
+| `mahabharata-krishna-arjuna.json` | **Bhagavad Gita** tile (page-turn highlight) | Krishna (haloed, crowned, with peacock feathers) teaching Arjuna (bow + listening posture) in a horse-chariot (saffron Bhagwa Dhwaj flag, 2 rotating spoked wheels, horse silhouette in front) |
+| `panchangam-moon.json` | Panchangam | Lunar phases — gold moon with dark shadow sweeping across, 4 twinkling nakshatras |
+| `gold-bars.json` | Gold Price | 4 gold biscuits stacked inside a wooden treasure chest with lid open, sparkle |
+| `temple-flag.json` | Temples Nearby | Saffron Bhagwa Dhwaj waving on a gold pole over a stepped-gopuram silhouette |
+| `neethi-scroll.json` | (unused — was Moral Quotes, user reverted to MCI glyph) | Palm-leaf scroll with self-inscribing wisdom lines |
+| `quiz-dots.json` | Quiz (Wisdom hub) | 3 dots cycling left → middle → right (multiple-choice progression) |
+| `sanskrit-waves.json` | Sanskrit (Wisdom hub) | Mantra sound waves rippling outward from central source |
+| `wisdom-lotus.json` | Vedic Wisdom (Wisdom hub) | 6-petal lotus blooming and closing |
+| `horoscope-wheel.json` | Horoscope (Jyotishyam hub) | 12-dot zodiac wheel rotating around centre |
+| `muhurtam-clock.json` | Muhurtam (Jyotishyam hub) | Clock face with hour + minute hands, 4 cardinal ticks |
+| `muhurtam-sun-moon.json` | (unused — was Muhurtam pre-clock) | Sun-moon swap |
+| `matchmaking-rings.json` | Love Match (Jyotishyam hub) | Two interlocked rings drifting apart and together (page-turn highlight, saffron rain) |
+| `family-orbit.json` | Family Horoscopes (Jyotishyam hub) | 3 orbs in triangle around a goldLight centre, rotating |
+| `meditation-breath.json` | Meditation | Seated lotus-posture figure (head + torso + crossed knees + feet, gold halo crown above) |
+| `puja-diya.json` | Puja Guide | Earthen diya bowl (semi-circle base) with flickering flame + pulsing halo |
+| `stotra-japamala.json` | Stotras / Mantras | Japamala (necklace) with 9 saffron beads in U-shape + 1 active goldLight bead sweeping along the arc |
+
+**Animation prop on FeatureTile** controls the *chrome* around the Lottie (not the Lottie itself):
+- `animation="spin"` → gold breathing focus-ring border around tile
+- `animation="page-turn"` → saffron focus-ring + saffron "rain" particle overlay
+- omitted → no ring, no rain (the Lottie still plays)
+
+The Lottie is the icon; the `animation` prop is the highlight. Most premium tiles use `animation="spin"` for a discoverable border halo; tiles user explicitly asked to leave un-highlighted (Quiz, Sanskrit, Family, Muhurtam, Puja Guide, Meditation, Stotras, Mahabharata, Panchangam, Gold) omit the prop.
+
+### Stock Market removed (v2.5.0)
+
+The Stock Market (Market) section was removed in v2.5.0 per user feedback that surfacing live stock prices in a dharmic-content app nudged users toward gambling rather than long-horizon investing. Removed:
+- `MAIN_SECTIONS` entry in `src/navigation/sections.js` (comment in place explaining the removal)
+- `SECTION_COMPONENTS` entry + `MarketScreen` import in `src/navigation/TabNavigator.js`
+- Tile in `src/screens/HomeScreen.js` utility-tail row
+- `src/screens/MarketScreen.js` — deleted
+- `src/utils/marketService.js` — deleted
+
+Backend (`nseQuote` Cloud Function in `functions/index.js`) is **left deployed but orphaned**. When confident no other surface needs it: `firebase functions:delete nseQuote --region asia-south1`.
+
+Two stale entries left untouched (dormant references in unused / deprecated paths): `TR.market` / `TR.marketSub` in `translations.js`, and the Market entry in the comment-style array in `components/_deprecated/GlobalTopTabs.js`.
 
 ### Auth for Firestore probes
 

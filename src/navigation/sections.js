@@ -5,7 +5,7 @@
 //   1. Daily + hubs (Panchangam / Astrology hub / Wisdom hub / Festivals / Gold)
 //   2. Ithihaasa (Ramayana / Mahabharata / Gita / Moral Quotes / Kids)
 //   3. Devotion (Stotras / Meditation / Puja Guide / Temples / Donate)
-//   4. Utility tail (Market / Darshan / Reminder / More)
+//   4. Utility tail (Darshan / Reminder / More)
 //
 // LABELS rule (2026-05-16): the `te` / `en` values below MUST mirror
 // the `FeatureTile label={t(...)}` strings used on the Home grid. Top
@@ -48,9 +48,12 @@ export const MAIN_SECTIONS = [
   // tile; still renders via CalendarScreen seeded with the right sub-tab.
   // Holidays was removed entirely — Festivals section already surfaces
   // holiday content via its sub-tabs.
-  // Stock Market sits here because it's a lookup utility, not a
-  // dharmic-life decision.
-  { name: 'Market',       icon: 'chart-line',                     te: 'స్టాక్ మార్కెట్',     en: 'Stock Market' },
+  // Stock Market tile removed (v2.5.0) — user feedback that surfacing
+  // stock prices in a dharmic-content app nudged users toward gambling
+  // rather than long-horizon investing. The MarketScreen + nseQuote
+  // Cloud Function still exist server-side; this just unlists the entry
+  // point from the home grid + nav. Backend can be deleted later when
+  // we're sure no other client surface needs it.
   { name: 'Darshan',      icon: 'temple-hindu-outline',           te: 'దైనందిన దర్శనం',      en: 'Daily Darshan', params: { tab: 'darshan' } },
   { name: 'Reminder',     icon: 'bell-plus-outline',              te: 'రిమైండర్',           en: 'Reminder' },
   { name: 'More',         icon: 'dots-horizontal',        te: 'మరిన్ని',            en: 'More' },

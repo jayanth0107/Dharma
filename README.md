@@ -2,18 +2,33 @@
 
 **ధర్మ — సనాతనం**
 
-A comprehensive **React Native (Expo)** app delivering daily **sacred stories** (Ramayana, Mahabharata, Gita), **Neethi Sukta wisdom**, **mantras & stotras**, **meditation**, **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, daily Rashi predictions, Sanskrit word of the day, Dharma debate / quiz, Indian market data, live gold/silver prices, and nearby temple finder — built for Telugu-speaking Hindu communities worldwide.
+A comprehensive **React Native (Expo)** app delivering daily **sacred stories** (Ramayana, Mahabharata, Gita), **Neethi Sukta wisdom**, **mantras & stotras**, **meditation**, **Telugu Panchangam**, Vedic astrology (జాతకం birth chart, muhurtam finder, matchmaking), festival calendar, Ekadashi tracking, daily Rashi predictions, Sanskrit word of the day, Dharma debate / quiz, live gold/silver prices, and nearby temple finder — built for Telugu-speaking Hindu communities worldwide.
 
-> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.8 (versionCode 16) &nbsp;|&nbsp; **Expo SDK:** 54
+> **Platforms:** Android · iOS · Web &nbsp;|&nbsp; **Language:** Bilingual (Telugu + English) &nbsp;|&nbsp; **Version:** 2.4.11 (versionCode 19) &nbsp;|&nbsp; **Expo SDK:** 54
 >
-> **Note**: For developers using Claude Code or similar AI assistants — `.claudeignore` lists generated artefacts, secrets, and large binaries to skip during indexing. `CLAUDE.md` carries persistent project context including operational tooling, location-search provider chain, and design-intent notes for the BirthDatePicker.
+> **Note**: For developers using Claude Code or similar AI assistants — `.claudeignore` lists generated artefacts, secrets, and large binaries to skip during indexing. `CLAUDE.md` carries persistent project context including operational tooling, location-search provider chain, design-intent notes for the BirthDatePicker, and the Lottie animation inventory.
 
 - **GitHub:** https://github.com/jayanth0107/Dharma
 - **Play Store:** https://play.google.com/store/apps/details?id=com.dharmadaily.wisdom
 
 ---
 
-## What's new in v2.4.8
+## What's new since v2.4.8
+
+### v2.5.0 (in flight) — Lottie-anchored brand, global drawer, no more Stock Market
+
+- **Dharma Cosmos Galaxy brand mark** — every `BrandedHeader` now shows a custom Lottie galaxy (central black-hole + 10 rotating planets + 14-particle elliptical dust ring + emanating/absorbing particles) in place of the static Bhagwa Dhwaj flag. The Lottie cycles every 10 s.
+- **19 hand-crafted Lottie tile animations** — Astrology (Saturn-style planet with orbiting dust), Bhagavad Gita (Krishna teaching Arjuna in a horse chariot — Krishna haloed, crowned, with peacock feathers; Arjuna seated with bow; saffron Bhagwa Dhwaj flag mounted on chariot; spoked wheels rotating; horse silhouette), Mahabharata (book page-turn, no highlight), Panchangam (moon phases + nakshatras), Gold Price (treasure-chest stack of gold biscuits), Temples Nearby (gopuram + waving flag), Stotras (japamala necklace with sweeping active bead), Meditation (seated lotus figure), Puja Guide (flickering diya), Quiz (3-dot multiple-choice sequence), Sanskrit (mantra sound waves), Vedic Wisdom (blooming lotus), Horoscope (zodiac wheel), Family (3-orb orbit), Love Match (interlocked rings), Muhurtam (clock face). Each runs ~3-10 s loops, all in saffron/gold/goldLight palette on transparent background.
+- **Global drawer** — new `DrawerContext` exposes `useDrawer()` so any screen opens the side drawer without prop-drilling. Drawer is mounted once at `App.js` root and accessible from every screen via the ☰ icon. Drawer now carries an inline `EN ⇄ తె` language switch plus a new `Login / Profile` menu line.
+- **Header chrome simplified** — Location pill + EN/తె language toggle removed from every page header (they were duplicated across ~30 screens). Both moved to the side drawer. Notification bell removed from `BrandedHeader` (drawer's Notifications row covers that). Avatar icon removed from header (drawer's Login row covers it).
+- **PageHeader: 3-icon flex layout** — was absolute-centred title with clipping issues; now `← Back · ☰ Menu · 🏠 Home · Title` in a flex row with the title taking the remaining width inside a wrapper View matching the icon-button height exactly (so glyphs vertically align with icons).
+- **showBack BrandedHeader rebalanced** — Jyotishyam / Wisdom hub headers now read `← Back · 🏠 Home · [Cosmos Wheel] · ధర్మ · ☰ Menu · ⚙ Settings` (2 icons each extreme + brand mark + title in centre).
+- **Top-tab "diya" highlighter** — active tab in the TopTabBar now carries a small saffron flame icon + curved gold bowl (proper దీపం silhouette) below the label, replacing the old 3 px gold underline.
+- **Stock Market removed** — per user feedback that live stock prices pushed the app toward gambling rather than long-horizon investing. Market tile, MarketScreen, and marketService deleted; `nseQuote` Cloud Function left deployed but orphaned (delete manually if no other client needs it).
+- **Panchangam tab perf fix** — `observancesForYear` (5 × 365-day astronomy-engine scans) was running on every CalendarScreen mount; now gated behind `route.name === 'Festivals'` since only that route consumes it. ~1 s of perceived lag on the Panchang tile removed.
+- **`react-native-firebase/auth` for mobile** — Phone-OTP login on Android/iOS now uses the native module (Play Integrity / Silent APNs); web continues with the JS SDK + RecaptchaVerifier. Fixed `auth/argument-error` from v2.4.x mobile login.
+
+### v2.4.8 — Sankalpa Deepam, vaaram deity, section image cards
 
 - **Sankalpa Deepam** — tap the diya on the Home summary card once a day to "light your lamp of resolve." Replaces the passive auto-streak; one grace-skip per week.
 - **Vaaram-deity portrait** — Home summary card now shows today's vaaram ishta-devata (Sun → Surya, Mon → Shiva, Tue → Hanuman, Wed → Ganesha, Thu → Vishnu, Fri → Lakshmi, Sat → Shani). Lakshmi + Shani sourced from Wikimedia Commons public-domain Raja Ravi Varma paintings.
@@ -22,12 +37,9 @@ A comprehensive **React Native (Expo)** app delivering daily **sacred stories** 
 - **NeethiSukta vidhi/nishedha framing** — each daily wisdom now carries explicit Do (Vidhi) and Avoid (Nishedha) cards with shastra citation.
 - **Evening Bhagavad Gita notification** at 7 PM (default ON). Morning Neethi Sukta moved to 8 AM.
 - **Telugu nav-label sweep** — softer / more dharmic phrasing: రాశి → రాశి భవిష్యత్తు, వ్యక్తిత్వం → మీ స్వభావం, పొందిక/ఈడు జోడు → ప్రేమ జ్యోతిష్యం, క్విజ్ → జ్ఞాన పోటి, జాతకం → మీ జాతకం, కుటుంబం → కుటుంబ జాతకాలు, దేవాలయాలు → దేవాలయాలు దగ్గరలో.
-- **Home grid restructure** — DailyRashi promoted to position 2 (after Panchangam) for the natural morning glance. Holidays tile removed (Festivals already surfaces it). Stock Market moved to Utility (lookup, not a dharmic-life decision).
 - **Typography audit** — Material 3 / WhatsApp / Spotify standard. Tile labels at 500 medium (was bold 700); Telugu gets a +3 px optical bump rather than a weight bump.
-- **Icons** — 16 filled icons → outline variants (Material 3 default).
 - **BirthDatePicker fix** — outer scroll re-enabled (was clipping Cancel/Select on phones with usable height < 800 px after v2.4.5's row-count change). Sticky bottom action bar so confirm/cancel are always reachable.
 - **Mantra navigation fix** — tapping a mantra now opens the correct mantra (was opening the first one tapped per session). Back button returns to Stotras properly.
-- **Theme-color audit** — green/red/blue/purple removed from Stotras + Temples sections per the dark-theme rule (gold/saffron only).
 
 ---
 
@@ -59,7 +71,6 @@ A comprehensive **React Native (Expo)** app delivering daily **sacred stories** 
 - **Ekadashi & observances** — Ekadashi · Sankashti Chaturthi · Pournami · Amavasya · Pradosham — computed dynamically for any year via lunar-observance engine
 - **Daily Rashi** — per-sign predictions in **Senior** (career/finance/health/relationships) and **Student** (studies/exams/friendships) modes; bilingual; "Today's Lucky" weekday-bound colour/direction/deity
 - **Live gold & silver prices** — 3-API cascade with India premium, alert subscriptions, 2h cache
-- **Stock Market** — NSE indices, popular stocks, ETFs via dedicated `nseQuote` Cloud Function (Akamai-resilient, last-known-good cached in Firestore)
 
 ### Ithihaasa (sacred history)
 

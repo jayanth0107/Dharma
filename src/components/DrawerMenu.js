@@ -25,6 +25,7 @@ import { TR } from '../data/translations';
 const MENU_ITEMS = [
   { id: 'premium',       icon: 'crown',                 label: 'ప్రీమియం',           labelEn: 'Premium', accent: DarkColors.gold, disabled: true, badgeTe: 'త్వరలో', badgeEn: 'Coming Soon' },
   { id: 'divider1' },
+  { id: 'login',         icon: 'account-circle-outline', label: 'ప్రవేశం / ప్రొఫైల్', labelEn: 'Login / Profile' },
   { id: 'notifications', icon: 'bell-outline',          label: 'నోటిఫికేషన్స్',     labelEn: 'Notifications' },
   { id: 'location',      icon: 'map-marker-outline',    label: 'ప్రదేశం మార్చు',     labelEn: 'Change Location' },
   { id: 'settings',      icon: 'cog-outline',           label: 'సెట్టింగ్స్',         labelEn: 'Settings' },
@@ -33,7 +34,7 @@ const MENU_ITEMS = [
 export function DrawerMenu({ visible, onClose, onAction }) {
   const insets = useSafeAreaInsets();
   const { isLoggedIn, profile } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang, toggleLang } = useLanguage();
   const drawerWidth = usePick({ default: 270, md: 300, xl: 360 });
   const profilePaddingH = usePick({ default: 16, md: 20, xl: 28 });
   const avatarSize = usePick({ default: 50, md: 60, xl: 72 });
@@ -104,6 +105,31 @@ export function DrawerMenu({ visible, onClose, onAction }) {
           </TouchableOpacity>
 
           <View style={s.profileDivider} />
+
+          {/* Inline language switch — moved out of every page chrome
+              in v2.5.0. One-tap toggle without leaving the drawer. */}
+          <View style={[s.langRow, { paddingHorizontal: menuItemPaddingH, paddingVertical: 12 }]}>
+            <MaterialCommunityIcons
+              name="translate"
+              size={menuIconSize}
+              color={DarkColors.silver}
+              style={{ width: menuIconWidth, marginRight: 16 }}
+            />
+            <Text style={[s.langRowLabel, { fontSize: menuLabelSize }]}>{t('భాష', 'Language')}</Text>
+            <TouchableOpacity
+              style={s.langToggle}
+              onPress={toggleLang}
+              activeOpacity={0.7}
+              accessibilityLabel={t('భాషను మార్చు', 'Toggle language')}
+            >
+              <Text style={[s.langLabel, lang === 'en' && s.langLabelActive]}>Eng</Text>
+              <View style={[s.langSwitch, lang === 'en' && s.langSwitchEn]}>
+                <View style={s.langDot} />
+              </View>
+              <Text style={[s.langLabel, lang === 'te' && s.langLabelActive]}>తెలుగు</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={[s.menuDivider, { marginHorizontal: menuItemPaddingH, marginVertical: 0 }]} />
 
           {/* Menu items */}
           <ScrollView style={s.menuScroll} showsVerticalScrollIndicator={false}>
@@ -275,5 +301,53 @@ const s = StyleSheet.create({
     backgroundColor: DarkColors.borderCard,
     marginVertical: 6,
     marginHorizontal: 20,
+  },
+  langRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  langRowLabel: {
+    flex: 1,
+    fontWeight: '600',
+    color: DarkColors.textPrimary,
+    letterSpacing: 0.2,
+  },
+  langToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: DarkColors.bgCard,
+    borderWidth: 1,
+    borderColor: DarkColors.borderCard,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  langLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: DarkColors.textMuted,
+  },
+  langLabelActive: {
+    color: DarkColors.saffron,
+    fontWeight: '600',
+  },
+  langSwitch: {
+    width: 30,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: DarkColors.saffron,
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+    alignItems: 'flex-end',
+  },
+  langSwitchEn: {
+    alignItems: 'flex-start',
+  },
+  langDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#fff',
   },
 });

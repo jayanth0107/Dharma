@@ -62,12 +62,14 @@ export function WisdomHubScreen() {
             icon="school-outline"
             label={t('జ్ఞాన పోటి', 'Quiz')}
             labelLines={2}
+            lottieSource={require('../../assets/animations/quiz-dots.json')}
             onPress={() => go('Quiz')}
           />
           <FeatureTile
             icon="alpha-s-circle-outline"
             label={t('సంస్కృతం', 'Sanskrit')}
             labelLines={2}
+            lottieSource={require('../../assets/animations/sanskrit-waves.json')}
             onPress={() => go('SanskritWord')}
           />
           <FeatureTile
@@ -80,6 +82,8 @@ export function WisdomHubScreen() {
             icon="book-open-variant"
             label={t('వేద విజ్ఞానం', 'Vedic Wisdom')}
             labelLines={2}
+            animation="spin"
+            lottieSource={require('../../assets/animations/wisdom-lotus.json')}
             onPress={() => go('Astro')}
           />
         </FeatureGrid>

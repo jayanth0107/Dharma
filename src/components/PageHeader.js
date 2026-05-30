@@ -1,12 +1,12 @@
 // ధర్మ — Shared Page Header
-// Two rows of chrome shown on every screen that isn't Home:
-//   Row 1 — ← Back  🏠 Home   ───── Title ─────
-//   Row 2 — 📍 Location pill                      Eng·తెలుగు toggle
-// Location pill mirrors Home's chrome so users always know which
-// location the panchangam/horoscope/muhurtam data is computed against.
-// The pill triggers showLocationPicker on AppContext; the actual
-// LocationPickerModal is mounted at App.js root so opens regardless
-// of the active screen.
+// Single row of chrome shown on every screen that isn't Home:
+//   ← Back   ☰ Drawer   🏠 Home    ───── Title ─────
+// Hamburger sits BETWEEN back and home so the three nav affordances
+// read left-to-right as "previous → menu → root". Location + language
+// toggle moved into the side drawer in v2.5.0; the hamburger here
+// opens the same global drawer used on Home, so users can change
+// location / language from any screen. The drawer is mounted at
+// App.js root via DrawerProvider + GlobalDrawer.
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -15,18 +15,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { DarkColors, Type } from '../theme';
 import { usePick } from '../theme/responsive';
-import { useLanguage } from '../context/LanguageContext';
-import { LocationPill } from './LocationPill';
+import { useDrawer } from '../context/DrawerContext';
 
 // onBackPress (optional): when supplied, the back arrow runs this
 // instead of navigation.goBack(). Useful when a screen has internal
 // state (e.g. a running meditation timer) that needs to be cleaned up
 // before — or instead of — popping the navigation stack.
+// onMenuPress (optional): override the default global-drawer open.
+// Most callers can omit it — the hamburger then opens the same
+// drawer mounted at App.js root.
 export function PageHeader({ title, onMenuPress, onBackPress }) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute();
-  const { lang, toggleLang } = useLanguage();
+  const { openDrawer } = useDrawer();
 
   // Hub-aware back nav. When a screen is reached FROM a hub tile (e.g.
   // Jyotishyam → DailyRashi), the hub passes { backTo: 'Jyotishyam' }
@@ -35,74 +37,62 @@ export function PageHeader({ title, onMenuPress, onBackPress }) {
   // CLAUDE.md), not to the hub — explicit navigate(backTo) fixes that.
   const backTo = route?.params?.backTo;
 
-  const menuIconSize = usePick({ default: 24, lg: 26, xl: 28 });
-  const navIconSize = usePick({ default: 22, lg: 24, xl: 26 });
-  const padH = usePick({ default: 12, lg: 16, xl: 20 });
-  const langFontSize = usePick({ default: 13, sm: 13, md: 14, lg: 15, xl: 16 });
-  const langPadH = usePick({ default: 10, sm: 10, md: 12, lg: 14, xl: 16 });
-  const langPadV = usePick({ default: 5, sm: 5, md: 6, lg: 7, xl: 8 });
-  // titlePadH locked in at lower values after Telugu titles (సెట్టింగ్స్,
-  // మంత్రాలు, నీతి సూక్తులు) were observed clipping on real devices.
-  // Telugu glyphs take ~1.4x the width of equivalent Latin at the same
-  // font size, so we need more horizontal headroom. Default 70 (down
-  // from 80) gives ~196 dp content area on a 360 dp phone — enough
-  // for the longest Telugu page title at the autoshrink floor.
-  const titlePadH = usePick({ default: 70, sm: 70, md: 78, lg: 90, xl: 110 });
+  // Flex layout: icons on the left (Back · ☰ · Home) take their natural
+  // width, then the title takes flex:1 of the remaining space. Icon
+  // sizes mirror BrandedHeader so the visual weight of chrome stays
+  // consistent across all screens — was undersized (22 dp) earlier
+  // and felt smaller than the cosmic-wheel-anchored header on Home.
+  const menuIconSize = usePick({ default: 26, sm: 26, md: 28, lg: 30, xl: 32 });
+  const navIconSize  = usePick({ default: 24, sm: 24, md: 26, lg: 28, xl: 30 });
+  const padH         = usePick({ default: 12, sm: 12, md: 16, lg: 20, xl: 24 });
+  const titleSize    = usePick({ default: 22, sm: 22, md: 24, lg: 26, xl: 28 });
+  // Match the title's line-box to the icon-button's box exactly so
+  // alignItems:'center' on the row places the text glyphs at the same
+  // Y as the icons. Icon button height = icon size + 2 * 8 padding.
+  // With lineHeight = that height, the text's visible glyphs sit at
+  // the line-box centre, matching the icons.
+  const iconBoxHeight = Math.max(navIconSize, menuIconSize) + 16;
+
+  const handleMenu = onMenuPress || openDrawer;
 
   return (
     <View style={[s.container, { paddingTop: Math.max(insets.top, 10) + 4, paddingHorizontal: padH }]}>
-      {/* Row 1 — Back / Home / Title */}
       <View style={s.row}>
-        <View style={[s.titleAbs, { paddingHorizontal: titlePadH, pointerEvents: 'none' }]}>
-          <Text
-            style={s.title}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.45}
-            allowFontScaling={false}
-          >{title}</Text>
-        </View>
+        <TouchableOpacity
+          style={s.iconBtn}
+          onPress={() => {
+            if (onBackPress) { onBackPress(); return; }
+            if (backTo) { navigation.navigate(backTo); return; }
+            if (navigation.canGoBack()) navigation.goBack();
+            else navigation.navigate('Home');
+          }}
+          accessibilityLabel="Back"
+        >
+          <Ionicons name="arrow-back" size={navIconSize} color={DarkColors.silver} />
+        </TouchableOpacity>
 
-        {onMenuPress ? (
-          <TouchableOpacity style={s.iconBtn} onPress={onMenuPress}>
-            <MaterialCommunityIcons name="menu" size={menuIconSize} color={DarkColors.silver} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={s.iconBtn}
-            onPress={() => {
-              if (onBackPress) { onBackPress(); return; }
-              if (backTo) { navigation.navigate(backTo); return; }
-              if (navigation.canGoBack()) navigation.goBack();
-              else navigation.navigate('Home');
-            }}
-          >
-            <Ionicons name="arrow-back" size={navIconSize} color={DarkColors.silver} />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity style={s.iconBtn} onPress={handleMenu} accessibilityLabel="Menu">
+          <MaterialCommunityIcons name="menu" size={menuIconSize} color={DarkColors.silver} />
+        </TouchableOpacity>
 
-        <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')}>
+        <TouchableOpacity style={s.iconBtn} onPress={() => navigation.navigate('Home')} accessibilityLabel="Home">
           <MaterialCommunityIcons name="home" size={navIconSize} color={DarkColors.silver} />
         </TouchableOpacity>
 
-        <View style={{ flex: 1 }} />
-      </View>
-
-      {/* Row 2 — Location pill (left) + Language toggle (right). Mirrors
-          the chrome HomeScreen renders below its branded header so the
-          two screens have the same "context" row. */}
-      <View style={s.row2}>
-        <LocationPill />
-        <View style={{ flex: 1 }} />
-        <TouchableOpacity
-          style={[s.langToggle, { paddingHorizontal: langPadH, paddingVertical: langPadV }]}
-          onPress={toggleLang}
-          activeOpacity={0.7}
-        >
-          <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'en' && s.langLabelActive]}>Eng</Text>
-          <View style={[s.langDot, lang === 'en' ? s.langDotEn : s.langDotTe]} />
-          <Text style={[s.langLabel, { fontSize: langFontSize }, lang === 'te' && s.langLabelActive]}>తెలుగు</Text>
-        </TouchableOpacity>
+        {/* Wrapper View with explicit height = icon button height.
+            justifyContent:'center' positions the Text vertically at
+            the middle of this container, regardless of font metrics
+            or line-height quirks. This is the bulletproof way to
+            align text with icons on react-native-web. */}
+        <View style={[s.titleWrap, { height: iconBoxHeight }]}>
+          <Text
+            style={[s.title, { fontSize: titleSize }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.55}
+            allowFontScaling={false}
+          >{title}</Text>
+        </View>
       </View>
 
       <View style={s.divider} />
@@ -119,60 +109,33 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingBottom: 8,
-    position: 'relative',
-  },
-  row2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingBottom: 8,
-    gap: 8,
   },
   iconBtn: {
-    padding: 6,
+    padding: 8,
     marginRight: 4,
   },
-  titleAbs: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
+  // Wrapper takes flex:1 of remaining row width with explicit height
+  // matching the icon button. justifyContent:'center' vertically
+  // centres the Text inside, regardless of font metrics or line-height.
+  titleWrap: {
+    flex: 1,
+    flexShrink: 1,
     justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: 10,
+    paddingRight: 12,
   },
   title: {
-    ...Type.h3,
+    // Type.h3 spread removed — its lineHeight: 33 was making the text
+    // bounding box taller than icons. The titleWrap parent now
+    // handles vertical centring with explicit height.
     fontWeight: '700',
     color: DarkColors.gold,
-    textAlign: 'center',
+    textAlign: 'left',
+    includeFontPadding: false,
   },
   divider: {
     height: 1,
     backgroundColor: DarkColors.borderGold,
   },
-  langToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: DarkColors.bgCard,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: DarkColors.borderCard,
-  },
-  langLabel: {
-    fontWeight: '700',
-    color: DarkColors.textMuted,
-  },
-  langLabelActive: {
-    color: DarkColors.saffron,
-    fontWeight: '600',
-  },
-  langDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: DarkColors.saffron,
-  },
-  langDotTe: {},
-  langDotEn: {},
 });

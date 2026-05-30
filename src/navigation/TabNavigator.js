@@ -14,7 +14,6 @@ const withErrorBoundary = (Screen, name) => (props) => (
 import { HomeScreen } from '../screens/HomeScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { GoldScreen } from '../screens/GoldScreen';
-import { MarketScreen } from '../screens/MarketScreen';
 import { AstroScreen } from '../screens/AstroScreen';
 import { HoroscopeScreen } from '../screens/HoroscopeScreen';
 import { DailyRashiScreen } from '../screens/DailyRashiScreen';
@@ -71,7 +70,6 @@ const SECTION_COMPONENTS = {
   NeethiSukta:  withErrorBoundary(NeethiSuktaScreen, 'NeethiSukta'),
   Mahabharata:  withErrorBoundary(MahabharataScreen, 'Mahabharata'),
   Gita:         withErrorBoundary(GitaScreen, 'Gita'),
-  Market:       withErrorBoundary(MarketScreen, 'Market'),
   Reminder:     ReminderScreen,
   Stotra:       withErrorBoundary(StotraScreen, 'Stotra'),
   Meditation:   withErrorBoundary(MeditationScreen, 'Meditation'),

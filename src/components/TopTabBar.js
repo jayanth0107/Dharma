@@ -1,11 +1,14 @@
 // ధర్మ — Top Horizontal Tab Bar
-// Shows the same 10 main sections as the bottom ScrollableTabBar.
+// Shows the same 20 main sections as the bottom ScrollableTabBar.
 // Rendered at the top of every main-section screen (below PageHeader).
-// Active tab gets a saffron underline; tapping navigates; auto-scrolls
-// to keep the active tab visible.
+// Active tab gets a "diya glow" — saffron text-shadow + a soft
+// saffron-to-transparent gradient crescent below the label, like a
+// lamp wick lighting the text from underneath. No underline.
 
 import React, { useRef, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { DarkColors } from '../theme';
 import { usePick, useWindow } from '../theme/responsive';
@@ -188,6 +191,26 @@ export function TopTabBar() {
               <Text style={[s.label, { fontSize: tabFontSize }, isActive && s.labelActive]}>
                 {t(section.te, section.en)}
               </Text>
+              {/* Diya silhouette — small saffron flame (MCI "fire")
+                  sitting on a saffron-gold bowl with a rounded base.
+                  Replaces the v1 underline-as-crescent so the active
+                  marker reads as a literal దీపం, not just a glow line. */}
+              {isActive && (
+                <View style={s.diyaShape} pointerEvents="none">
+                  <MaterialCommunityIcons
+                    name="fire"
+                    size={10}
+                    color={DarkColors.saffronLight || '#FFAA40'}
+                    style={s.diyaFlame}
+                  />
+                  <LinearGradient
+                    colors={[DarkColors.saffron, DarkColors.gold]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={s.diyaBowl}
+                  />
+                </View>
+              )}
             </TouchableOpacity>
           );
         })}
@@ -213,14 +236,15 @@ const s = StyleSheet.create({
   },
   tab: {
     paddingHorizontal: 16,
+    // Extra bottom space so the diya (flame + bowl, ~18 dp tall) has
+    // room to sit beneath the label without bleeding into the bar's
+    // bottom border.
     paddingVertical: 10,
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
+    paddingBottom: 22,
     flexShrink: 0,
+    position: 'relative',
   },
-  tabActive: {
-    borderBottomColor: DarkColors.gold,
-  },
+  tabActive: {},
   label: {
     fontWeight: '600',
     color: DarkColors.silverLight,
@@ -229,5 +253,36 @@ const s = StyleSheet.create({
   labelActive: {
     color: DarkColors.gold,
     fontWeight: '700',
+    // Close-in saffron halo on the glyphs themselves — reinforces
+    // the gradient pad beneath. textShadowRadius is interpreted as a
+    // blur radius on iOS/Web; Android clamps it but still renders a
+    // visible glow.
+    textShadowColor: 'rgba(232,117,26,0.85)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 10,
+  },
+  // Diya marker — sits absolutely centered beneath the active label.
+  // Two stacked elements: flame on top, bowl underneath. Bowl uses
+  // asymmetric borderRadius (flat top, deep curve at the bottom) so
+  // it reads as an earthen lamp profile, not a generic pill.
+  diyaShape: {
+    position: 'absolute',
+    bottom: 1,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  diyaFlame: {
+    // Pull the flame down so its base sits on the bowl rim. Without
+    // this, MCI icon padding leaves a visible gap.
+    marginBottom: -2,
+  },
+  diyaBowl: {
+    width: 26,
+    height: 7,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    borderBottomLeftRadius: 13,
+    borderBottomRightRadius: 13,
   },
 });
