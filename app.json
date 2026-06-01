@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dharma: Wisdom & Astrology",
     "slug": "DharmaDaily",
-    "version": "2.4.11",
+    "version": "2.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon-512.png",
     "userInterfaceStyle": "light",
@@ -37,7 +37,7 @@
         "ACCESS_COARSE_LOCATION",
         "com.google.android.gms.permission.AD_ID"
       ],
-      "versionCode": 19,
+      "versionCode": 20,
       "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize"
     },

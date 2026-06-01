@@ -6,6 +6,102 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.5.0] — 2026-06-01
+
+Major UX refresh. Visual identity now anchored on animation: every
+home tile and the brand mark itself are Lottie animations chosen
+for the dark dharmic theme. Navigation chrome was simplified — the
+location pill and language toggle moved off every screen header
+into a global side drawer. The stock-market section was removed
+based on user feedback. Phone OTP works end-to-end on both web
+and Android.
+
+### Added
+
+- **Dharma Cosmos brand logo** (`assets/animations/dharma-wheel.json`)
+  replaces the static Bhagwa Dhwaj flag in every `BrandedHeader`.
+  Galaxy with a central black hole, 10 rotating planets, an
+  elliptical dust ring, 3 emanating + 3 absorbing particles.
+  10 s cycle, low-energy on dark surfaces.
+- **19 tile Lotties** across the home grid:
+  Astrology (Saturn ring), Bhagavad Gita (Krishna teaching Arjuna
+  in horse-chariot), Mahabharata (book page-flip), Panchangam
+  (lunar phases + nakshatras), Gold Price (treasure chest with
+  biscuits), Temples (gopuram + Bhagwa Dhwaj), Stotras (japamala),
+  Meditation (seated lotus figure), Puja Guide (diya), Quiz
+  (3-dot progression), Sanskrit (sound waves), Vedic Wisdom
+  (lotus), Horoscope (zodiac wheel), Family (3-orb orbit),
+  Love Match (interlocked rings), Muhurtam (clock face).
+- **Global side drawer** (`src/context/DrawerContext.js` +
+  `<GlobalDrawer />` mounted at App root). `useDrawer()` exposes
+  `openDrawer / closeDrawer / isOpen` so any screen opens the
+  drawer without prop-drilling. Inline EN/తె language switch
+  + Login / Profile entry added.
+- **Diya highlight on top tab bar** — saffron flame + curved
+  gold-saffron bowl silhouette under the active label replaces
+  the gold underline.
+- **Vaaram-deity portrait** on `TodaySummaryCard` (squircle,
+  swaps per day-of-week: Surya → Shiva → Hanuman → Ganesha →
+  Vishnu → Lakshmi → Shani).
+- **Sankalpa Deepam** daily-practice pill replaces the older
+  passive streak counter. User-driven (tap to light today's
+  lamp), with a weekly-grace skip.
+
+### Changed
+
+- **PageHeader** simplified to a single row of chrome
+  (`← Back · ☰ Menu · 🏠 Home · Title`). Location pill + EN/తె
+  toggle removed from every header — they're now in the drawer
+  as one-time settings.
+- **BrandedHeader** drops the avatar + notification bell.
+  `showBack` variant moves the ☰ to the right side beside
+  Settings so the row is balanced 2-left / 2-right.
+- **FeatureTile** accepts `lottieSource` prop (replaces the MCI
+  glyph) + `animation` prop (`'spin'` = gold focus-ring,
+  `'page-turn'` = saffron focus-ring + rain particles).
+
+### Removed
+
+- **Stock Market section** — removed from `MAIN_SECTIONS`,
+  `TabNavigator`, and home grid. Surfacing live stock prices in
+  a dharmic-content app was nudging users toward gambling
+  rather than long-horizon investing. `MarketScreen.js` and
+  `marketService.js` deleted. The `nseQuote` Cloud Function is
+  left deployed but orphaned (delete when confident no other
+  surface needs it).
+
+### Fixed
+
+- **Phone OTP on Android** now works via
+  `@react-native-firebase/auth` (Play Integrity API). The v2.4.x
+  `auth/argument-error` bug was caused by passing a null
+  `RecaptchaVerifier` to the JS SDK on mobile — `RecaptchaVerifier`
+  only works in a DOM. Web continues to use `firebase/auth` +
+  `RecaptchaVerifier` unchanged. Both SDKs expose identical
+  `.confirm(otp)` API so `handleVerifyOtp` is single-codepath.
+- **Panchang tab 1-second open delay** fixed by gating
+  `observancesForYear` (5×365-day astronomy-engine scan) on the
+  Festivals sub-tab, not running it on every CalendarScreen
+  mount.
+- **Phone input** now opens with `+91 ` (trailing space) for
+  clearer separation from the typed digits.
+- **ClearableInput text-node warning** on web — cast `showClear`
+  to `Boolean()` so an empty string never renders as a child of
+  `<View>`.
+
+### Notes for testers
+
+- Mobile OTP requires both SHA-1 fingerprints (upload key AND
+  Play App Signing) registered in Firebase Console. After every
+  Play Console upload, copy the App Signing SHA-1 from
+  *Test and release → App integrity* into Firebase Console.
+- Web Phone Auth on `localhost` works only with test phone
+  numbers registered in Firebase Console. Real SMS on web
+  needs Blaze plan or `localhost` added to the reCAPTCHA
+  Enterprise key's allowed domains.
+
+---
+
 ## [2.4.5] — 2026-05-16
 
 Readability + label clarity release. Every home tile, nav bar pill,

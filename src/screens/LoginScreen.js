@@ -71,7 +71,7 @@ export function LoginScreen({ navigation }) {
   const tierFontSize = usePick({ default: 11, lg: 13, xl: 15 });
   const crownBadgeSize = usePick({ default: 24, lg: 28, xl: 32 });
 
-  const [phone, setPhone] = useState('+91');
+  const [phone, setPhone] = useState('+91 ');
   const [otp, setOtp] = useState('');
   const [name, setName] = useState(profile?.name || '');
   const [step, setStep] = useState('phone'); // 'phone' | 'otp' | 'profile'

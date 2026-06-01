@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors } from '../theme/colors';
 
 export function ClearableInput({ value, onChangeText, style, containerStyle, iconSize = 16, ...props }) {
-  const showClear = value && value.length > 0;
+  const showClear = Boolean(value && value.length > 0);
 
   return (
     <View style={[styles.container, containerStyle]}>
