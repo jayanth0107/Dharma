@@ -152,10 +152,28 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
   const gridCtx = useContext(FeatureGridContext);
   const cols = gridCtx?.columns || columns;
   const { lang } = useLanguage();
-  // Tile sizing — sublabel-less tiles are ~30 px shorter, icon takes
-  // more visual weight since label is now a single word.
+  // Tile sizing — Lottie + MCI tiles share a single unified iconBoxSize.
+  // Earlier, MCI tiles rendered at iconSize bare (~36 dp) while Lottie
+  // tiles rendered at iconSize × 1.65 (~60 dp). The 24 dp content-block
+  // height delta got centred by the tile's justifyContent, which pushed
+  // labels to different vertical positions (visible as "Wisdom on top,
+  // Astrology down" misalignment on Home). The icon area is now a fixed
+  // square sized to the Lottie viewport; MCI glyphs render inside the
+  // same container so label baselines align across a row regardless of
+  // tile variant.
   const iconSize = usePick({ default: 36, md: 40, lg: 44, xl: 50 });
-  const tileMinH = usePick({ default: 90, md: 100, lg: 116, xl: 128 });
+  // Lottie viewport scaled up to ~2× iconSize so the animation fills
+  // the icon area properly instead of sitting in the middle of a small
+  // box. Combined with overflow:hidden on the wrapper, this clips any
+  // transparent padding the Lottie has around its content and lets the
+  // motion read clearly at tile size on real-device phones.
+  const iconBoxSize = Math.round(iconSize * 2.0);
+  // MCI glyph rendered larger than bare iconSize so plain-icon tiles
+  // don't look anemic inside the bigger Lottie box. ~1.3× iconSize is
+  // visually close to the Lottie's visible content after viewport
+  // padding is clipped.
+  const mciIconSize = Math.round(iconSize * 1.3);
+  const tileMinH = usePick({ default: 104, md: 116, lg: 132, xl: 148 });
   // Telugu optical sizing audit (v10 — LOCKED IN, no further changes).
   // After several rounds of shrinking that made labels unreadable on
   // device, set to Material Body Medium (14) + 1 step = 15 px for
@@ -218,28 +236,36 @@ export function FeatureTile({ icon, label, sublabel, onPress, accentColor, disab
           compete with the spinning planet visually. */}
       {animation === 'page-turn' && <RainOverlay variant={animation} />}
 
-      {/* Icon — Lottie animation when a source is provided (richer
-          motion than glyph rotations could express), MCI glyph fallback
-          otherwise. The MCI fallback also fires if the Lottie module
-          failed to load at startup (graceful degradation). The text
-          labels below stay stable regardless.
-          The Lottie is wrapped in a View with explicit dimensions and
-          overflow:hidden — without this, the dotlottie-react web
-          element adds its own padding/margins that pushed tile height
-          ~6 dp taller than MCI-icon tiles in the same row. */}
-      {lottieSource && LottieView ? (
-        <View style={{ width: iconSize * 1.35, height: iconSize * 1.35, overflow: 'hidden' }}>
+      {/* Icon area — fixed iconBoxSize × iconBoxSize square so Lottie
+          tiles and MCI tiles consume identical vertical space. Without
+          this wrapper, MCI glyphs render at bare iconSize (~36 dp) while
+          Lotties render at iconSize × 1.65 (~60 dp), creating a 24 dp
+          content-height delta between tile variants that broke label
+          baseline alignment across a row.
+          overflow:hidden also clips the dotlottie-react web element's
+          internal padding so it doesn't push tile height ~6 dp taller
+          than its sibling MCI tile. */}
+      <View
+        style={{
+          width: iconBoxSize,
+          height: iconBoxSize,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {lottieSource && LottieView ? (
           <LottieView
             source={lottieSource}
             autoPlay
             loop
-            style={{ width: iconSize * 1.35, height: iconSize * 1.35 }}
+            style={{ width: iconBoxSize, height: iconBoxSize }}
             renderMode={Platform.OS === 'android' ? 'SOFTWARE' : 'AUTOMATIC'}
           />
-        </View>
-      ) : (
-        <MaterialCommunityIcons name={icon} size={iconSize} color={DarkColors.gold} />
-      )}
+        ) : (
+          <MaterialCommunityIcons name={icon} size={mciIconSize} color={DarkColors.gold} />
+        )}
+      </View>
 
       {/* Label — default single line + autoshrink (Home grid). Callers
           that need wrap (e.g. hub screens with longer Telugu names like
@@ -348,10 +374,17 @@ const s = StyleSheet.create({
   },
   tile: {
     backgroundColor: 'transparent',
-    paddingVertical: 12,
+    paddingTop: 14,
+    paddingBottom: 12,
     paddingHorizontal: 6,
     alignItems: 'center',
-    justifyContent: 'center',
+    // Top-aligned (not centered) so the icon sits at a constant Y from
+    // the tile top, and the label baseline below it is at a constant Y
+    // too — regardless of whether sibling tiles in the same flex row
+    // stretched the tile height beyond its minimum. Centering would
+    // push the icon+label block down by ((rowH − contentH) / 2) and
+    // create the "wisdom on top, astrology down" baseline drift on Home.
+    justifyContent: 'flex-start',
     // overflow: 'hidden' so falling rain particles clip at the tile
     // boundary instead of spilling into adjacent tiles.
     overflow: 'hidden',

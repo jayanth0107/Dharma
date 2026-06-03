@@ -28,6 +28,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { TR } from '../context/LanguageContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useDrawer } from '../context/DrawerContext';
+import { useAuth } from '../context/AuthContext';
 import { DarkColors } from '../theme';
 import { usePick } from '../theme/responsive';
 import { FlagWithPole } from './FlagWithPole';
@@ -39,7 +40,13 @@ try {
 } catch (e) {
   if (__DEV__) console.warn('BrandedHeader: lottie unavailable, falling back to flag:', e?.message);
 }
-const DHARMA_WHEEL_SOURCE = require('../../assets/animations/dharma-wheel.json');
+// Inverted Ashvattha (cosmic banyan) per Bhagavad Gita 15.1 — roots upward
+// (rooted in Brahman), trunk and canopy downward (manifesting in the
+// material world). Replaces the earlier "cosmos galaxy" mark which read
+// as generic sci-fi rather than Sanatana. Filename retained as
+// dharma-ashvattha for clarity; if you swap the asset again, the source
+// path is the only place to update.
+const DHARMA_WHEEL_SOURCE = require('../../assets/animations/dharma-ashvattha.json');
 
 // showBack — set true on sub-section main screens (e.g. JyotishyamHubScreen)
 // so the header carries ← Back + 🏠 Home instead of the ☰ drawer button.
@@ -50,6 +57,7 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
   const route = useRoute();
   const { lang, t } = useLanguage();
   const { openDrawer } = useDrawer();
+  const { isLoggedIn } = useAuth();
   // Drawer host is global (App.js); fall back to it if the caller
   // didn't supply its own handler. Keeps existing callers compatible.
   const handleDrawerOpen = onDrawerOpen || openDrawer;
@@ -100,14 +108,15 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
   // class so the header doesn't feel tight on small phones and doesn't
   // float lonely on tablets.
   const headerPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 20, xl: 24 });
-  // Wheel slot's negative margins scale across breakpoints: small
-  // phones get aggressive pull (logo→title gap is the constraint),
-  // tablets get gentler pull (they have ample title space already).
-  // marginLeft eats the home-icon→logo whitespace; marginRight pulls
-  // the title flush against the visible orbit edge (the Lottie has
-  // ~8% transparent padding inside its viewport that we collapse).
-  const wheelMarginLeft  = usePick({ default: -28, sm: -28, md: -22, lg: -16, xl: -10 });
-  const wheelMarginRight = usePick({ default: -36, sm: -36, md: -28, lg: -20, xl: -12 });
+  // Wheel slot's negative margins scale across breakpoints. marginLeft
+  // is conservative now — pulling the wheel into the hamburger's tap
+  // area was making the menu button unclickable on devices. The wheel
+  // View also carries pointerEvents="none" (see below) so even residual
+  // overlap can't intercept taps. marginRight stays aggressive: it
+  // collapses the Lottie's internal transparent viewport padding so
+  // the wordmark sits flush against the visible orbit edge.
+  const wheelMarginLeft  = usePick({ default: -8,  sm: -8,  md: -6,  lg: -4,  xl: -2 });
+  const wheelMarginRight = usePick({ default: -32, sm: -32, md: -26, lg: -18, xl: -10 });
   // Divider sits below the row. Small positive margin keeps a clean
   // hairline of space between title row and the gold divider — too
   // negative (-10) was pulling the divider INTO the title content,
@@ -176,7 +185,10 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
             Slot minWidth tracks the logo size so no extra whitespace
             sits between the wheel and the "ధర్మ" wordmark. Falls back
             to FlagWithPole if Lottie can't load. */}
-        <View style={[s.slot, { height: headerLogoSize, minWidth: headerLogoSize, marginLeft: wheelMarginLeft, marginRight: wheelMarginRight }]}>
+        <View
+          pointerEvents="none"
+          style={[s.slot, { height: headerLogoSize, minWidth: headerLogoSize, marginLeft: wheelMarginLeft, marginRight: wheelMarginRight }]}
+        >
           {LottieView ? (
             <LottieView
               source={DHARMA_WHEEL_SOURCE}
@@ -214,11 +226,13 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
             </Text>
           )}
         </View>
-        {/* On showBack screens, the drawer hamburger lives on the
-            RIGHT (between title block and settings) so the row reads
-            as a balanced 2-icon left / 2-icon right layout — gives
-            the "Dharma" wordmark in the middle more breathing room. */}
-        {showBack && (
+        {/* Right slot — differs by chrome variant:
+            • Home (showBack=false): cog (or avatar when logged in)
+            • Sub-page (showBack=true): hamburger ONLY. Settings and
+              Login/Profile are reachable from the drawer, so the right
+              side stays uncluttered. Two left icons (Back + Home) + one
+              right icon (Menu) is the intentional layout. */}
+        {showBack ? (
           <TouchableOpacity
             style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
             onPress={handleDrawerOpen}
@@ -226,14 +240,25 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
           >
             <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
+        ) : isLoggedIn ? (
+          // Home + logged in → gold avatar.
+          <TouchableOpacity
+            style={[s.slot, s.userAvatar, { height: headerSlotSize, minWidth: headerSlotSize, borderRadius: headerSlotSize / 2 }, s.userAvatarLoggedIn]}
+            onPress={() => navigation.navigate('Login')}
+            accessibilityLabel="Profile"
+          >
+            <MaterialCommunityIcons name="account-circle" size={headerIconSize} color={DarkColors.gold} />
+          </TouchableOpacity>
+        ) : (
+          // Home + logged out → settings cog.
+          <TouchableOpacity
+            style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            onPress={handleSettings}
+            accessibilityLabel="Settings"
+          >
+            <MaterialCommunityIcons name="cog-outline" size={headerIconSize} color={DarkColors.silver} />
+          </TouchableOpacity>
         )}
-        <TouchableOpacity
-          style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
-          onPress={handleSettings}
-          accessibilityLabel="Settings"
-        >
-          <MaterialCommunityIcons name="cog-outline" size={headerIconSize} color={DarkColors.silver} />
-        </TouchableOpacity>
       </View>
 
       <View style={[s.divider, { marginTop: dividerMarginTop }]} />
@@ -285,8 +310,8 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: DarkColors.borderCard,
   },
   userAvatarLoggedIn: {
-    borderColor: DarkColors.tulasiGreen,
-    backgroundColor: 'rgba(46,125,50,0.1)',
+    borderColor: DarkColors.gold,
+    backgroundColor: 'rgba(212,160,23,0.1)',
   },
   // marginTop set inline (rowGap).
   divider: {

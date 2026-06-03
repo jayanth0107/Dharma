@@ -131,8 +131,8 @@ export function HomeScreen({ navigation }) {
         <FeatureGrid>
           <FeatureTile icon="pot-mix"            label={t('పంచాంగం', 'Panchangam')}   lottieSource={require('../../assets/animations/panchangam-moon.json')} onPress={() => navigation.navigate('Panchang', { tab: 'panchang', _ts: Date.now() })} />
           <FeatureTile icon="orbit-variant"      label={t('జ్యోతిష్యం', 'Astrology')} animation="spin" lottieSource={require('../../assets/animations/astrology-planet.json')} onPress={() => navigation.navigate('Jyotishyam')} />
-          <FeatureTile icon="head-question-outline" label={t('విజ్ఞానం', 'Wisdom')}   onPress={() => navigation.navigate('WisdomHub')} />
-          <FeatureTile icon="party-popper"       label={t('పండుగలు', 'Festivals')}     onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
+          <FeatureTile icon="head-question-outline" label={t('విజ్ఞానం', 'Wisdom')}   lottieSource={require('../../assets/animations/wisdom-lotus.json')} onPress={() => navigation.navigate('WisdomHub')} />
+          <FeatureTile icon="party-popper"       label={t('పండుగలు', 'Festivals')}     lottieSource={require('../../assets/animations/festivals-crackers.json')} onPress={() => navigation.navigate('Festivals', { tab: 'festivals', _ts: Date.now() })} />
           <FeatureTile icon="gold"               label={t('బంగారం ధర', 'Gold Price')}  lottieSource={require('../../assets/animations/gold-bars.json')} onPress={() => navigation.navigate('Gold')} />
         </FeatureGrid>
 
@@ -163,11 +163,11 @@ export function HomeScreen({ navigation }) {
             like Chanakya Niti, Vidura Niti — fits this category better
             than "Youth" where it lived earlier) */}
         <FeatureGrid>
-          <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    onPress={() => navigation.navigate('Ramayana')} />
+          <FeatureTile icon="bow-arrow"              label={t('రామాయణం', 'Ramayana')}    lottieSource={require('../../assets/animations/ramayana-bow.json')} onPress={() => navigation.navigate('Ramayana')} />
           <FeatureTile icon="sword-cross"            label={t('మహాభారతం', 'Mahabharata')} lottieSource={require('../../assets/animations/gita-book.json')} onPress={() => navigation.navigate('Mahabharata')} />
           <FeatureTile icon="book-open-page-variant-outline" label={t('భగవద్గీత', 'Bhagavad Gita')}    animation="page-turn" lottieSource={require('../../assets/animations/mahabharata-krishna-arjuna.json')} onPress={() => navigation.navigate('Gita')} />
           <FeatureTile icon="script-text-outline"            label={t('నీతి సూక్తులు', 'Moral Quotes')}  onPress={() => navigation.navigate('NeethiSukta')} />
-          <FeatureTile icon="baby-face-outline"      label={t('పిల్లల కథలు', 'Kids Stories')} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
+          <FeatureTile icon="baby-face-outline"      label={t('పిల్లల కథలు', 'Kids Stories')} lottieSource={require('../../assets/animations/kids-storybook.json')} onPress={() => navigation.navigate('Kids', { tab: 'kids', _ts: Date.now() })} />
         </FeatureGrid>
 
         {/* Youth & Learning block (Debate, Quiz, Sanskrit, Vedic Wisdom)

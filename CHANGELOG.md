@@ -6,6 +6,93 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.5.1] — 2026-06-03
+
+Iteration on the v2.5.0 brand mark and home grid based on real-device
+feedback. Lottie animations refined, gold price card extended with a
+spot/retail toggle, sub-page header decluttered.
+
+### Added
+
+- **Inverted Ashvattha** brand logo redesigned per Bhagavad Gita 15.1
+  (roots up, trunk and canopy down). Wider rugged trunk with bark
+  cracks, 9 main roots spread across the trunk top with varied lengths
+  (long sweepers + short stubs), 3-level fractal sub-branching down to
+  fine tip fingers, 5 canopy branches with sub-branches + sub-sub
+  branches, 11 leaf clusters scattered along (not just at tips) the
+  canopy with phase-offset rustle. Replaces the v2.5.0 cosmos galaxy.
+- **Kids Stories** Lottie (`kids-storybook.json`) — open saffron-and-gold
+  storybook with 5 phase-offset star polygons rising and twinkling
+  above. Replaces the static MCI baby-face icon on the Home Ithihaasa
+  row.
+- **Ramayana bow** Lottie rebuilt so the arrow direction matches the
+  bow curve: bow bulges right, arrow head also points right, draw
+  motion pulls left, release flies right past the bow.
+- **Festivals → Diwali crackers** (`festivals-crackers.json`) — 3
+  firework star bursts at phase-offset times (gold, saffron,
+  gold-light) plus 4 small twinkling sparkles. Replaces the earlier
+  3-diya cluster.
+- **Wisdom → side-view Indian lotus** — stem rising from a lily pad,
+  green calyx, 5 saffron petals fanning upward with the central petal
+  in gold-light, gentle sway on the outer petals.
+- **Gold price spot/retail toggle** on `GoldPriceCard`. Defaults to
+  *Market Rate* (MCX bullion + GST — newspaper benchmark). Tap *Shop
+  Rate* to see the same prices with a +6 % dealer markup applied
+  (closer to what a buyer actually pays at a jewellery shop for 24K
+  bars/coins). Single-line explanation under the toggle changes with
+  selection.
+- **Silver "estimated" indicator** — asterisk on the Silver card title
+  + footer note when the silver figure was derived from the fixed
+  gold:silver ratio (alternate / Frankfurter APIs) rather than a real
+  silver feed. Primary Gold-API.com path returns real silver and
+  doesn't show the indicator.
+- **Ornaments caveat** in card footer: making charges (8–25 %) plus
+  wastage are not included in either tier — makes the gap between the
+  app's "shop rate" and an actual ornament receipt explicit.
+
+### Changed
+
+- **Sub-page header** (`showBack=true`) right slot simplified to the
+  hamburger ☰ ONLY. The settings cog and the logged-in profile avatar
+  are removed from sub-pages — both remain reachable from the side
+  drawer. Home (showBack=false) still carries the avatar / cog as
+  today.
+- **Gold price persistent cache** TTL shortened from 24 h → 6 h. Gold
+  can move several percent in a day; showing yesterday's price as if
+  current was a data-quality risk users won't notice unless they
+  cross-check. Cache key versioned to `@dharma_gold_prices_v2` so
+  pre-v2.5.1 caches are discarded cleanly.
+- **Gold price fallback** values updated to current-era approximations
+  (₹11 500 / g 24 K, ₹10 540 / g 22 K, ₹135 / g silver) and now carry
+  both tiers + the `silverEstimated: true` flag.
+- **`FeatureTile`** unified icon container — Lottie and MCI tiles now
+  render inside a fixed-size square so their content blocks have
+  identical height. Tile layout switched to top-aligned
+  (`justifyContent: 'flex-start'`) so label baselines stay constant
+  across a row regardless of Lottie / MCI mix. Lottie viewport bumped
+  to `iconSize × 2.0` so animations fill the icon area on real-device
+  phones.
+- **Home tile Lotties wired** for Ramayana, Wisdom, Festivals (in
+  addition to the v2.5.0 set) so the Home Daily + Ithihaasa rows are
+  fully animated and visually consistent.
+- **`BrandedHeader` user avatar** color → gold (was tulasi green) and
+  the cosmos-wheel slot got `pointerEvents="none"` + reduced negative
+  margin so the hamburger tap area is no longer covered.
+
+### Fixed
+
+- **Lottie tile labels** on Home no longer drift in baseline between
+  Lottie and MCI tiles in the same row — caused by mixed content
+  heights getting centered separately. Unified-container + top-align
+  fix makes baselines uniform.
+- **Bow shape** is now actually curved on the Ramayana tile (the v2.5.0
+  bezier had zero-magnitude tangents, drawing as a straight line).
+- **Brand logo overlap** with the hamburger on small phones (cosmos
+  wheel's negative-margin slot was capturing taps that should reach
+  the menu button).
+
+---
+
 ## [2.5.0] — 2026-06-01
 
 Major UX refresh. Visual identity now anchored on animation: every

@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Easing } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Image, Animated, Easing, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DarkColors, Type } from '../theme';
 import { usePick } from '../theme/responsive';
 import { useLanguage } from '../context/LanguageContext';
 import { TR } from '../data/translations';
-import { formatINR } from '../utils/goldPriceService';
+import { formatINR, PRICE_TIER_RETAIL_MARKUP_PCT } from '../utils/goldPriceService';
 
 // Full-width banner images — gold biscuits/bars, silver bullion
 const BANNERS = {
@@ -147,6 +147,10 @@ function MetalPriceCard({ banner, gradientColors, accentColor, lightAccent, titl
 
 export function GoldSilverPriceCard({ prices, loading }) {
   const { t } = useLanguage();
+  // Tier toggle: 'spot' = MCX bullion benchmark (default), 'retail' = shop
+  // rate for 24K bars/coins. Default to spot since that's what newspapers
+  // and most price-comparison sites show — switching to retail is opt-in.
+  const [tier, setTier] = useState('spot');
   // ALL usePick calls must run at top level on EVERY render — no
   // conditionals, no early returns between hooks. The inline
   // usePick() calls that used to live inside the JSX (lines 179/181)
@@ -199,56 +203,92 @@ export function GoldSilverPriceCard({ prices, loading }) {
         <MaterialCommunityIcons name="ring" size={subIconSize} color={DarkColors.gold} />
       </View>
 
-      {/* Gold 22K */}
-      <MetalPriceCard
-        banner={BANNERS.gold22k}
-        gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
-        accentColor={DarkColors.gold}
-        lightAccent={DarkColors.goldLight}
-        title={t(TR.gold22k.te, TR.gold22k.en)}
-        subtitle={t(TR.gold22kSub.te, TR.gold22kSub.en)}
-        icon="gold"
-        label1={t(TR.perGram.te, TR.perGram.en)}
-        value1={formatINR(prices.gold22k?.perGram || prices.gold?.perGram)}
-        label2={t(TR.per10g.te, TR.per10g.en)}
-        value2={formatINR(prices.gold22k?.per10g || prices.gold?.per10g)}
-        isLive={!prices.isFallback}
-        showSparkles={true}
-      />
+      {/* Tier toggle — spot vs retail. Read prices from the matching object;
+          fall back to legacy top-level fields if older cached/fallback data
+          doesn't carry the spot/retail split. */}
+      {(() => {
+        const activeTier = prices[tier] || { gold22k: prices.gold22k, gold24k: prices.gold24k, silver: prices.silver };
+        const isSpot = tier === 'spot';
+        return (
+          <>
+            <View style={gs.tierToggleRow}>
+              <TouchableOpacity
+                style={[gs.tierBtn, isSpot && gs.tierBtnActive]}
+                onPress={() => setTier('spot')}
+                accessibilityLabel={t(TR.spotRate.te, TR.spotRate.en)}
+              >
+                <Text style={[gs.tierBtnText, isSpot && gs.tierBtnTextActive]}>{t(TR.spotRate.te, TR.spotRate.en)}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[gs.tierBtn, !isSpot && gs.tierBtnActive]}
+                onPress={() => setTier('retail')}
+                accessibilityLabel={t(TR.shopRate.te, TR.shopRate.en)}
+              >
+                <Text style={[gs.tierBtnText, !isSpot && gs.tierBtnTextActive]}>{t(TR.shopRate.te, TR.shopRate.en)}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={gs.tierExplainRow}>
+              <MaterialCommunityIcons name="information-outline" size={12} color={DarkColors.textMuted} />
+              <Text style={gs.tierExplainText}>
+                {isSpot
+                  ? t(TR.spotRateDesc.te, TR.spotRateDesc.en)
+                  : `${t(TR.shopRateDesc.te, TR.shopRateDesc.en)} (+${prices.retailMarkupPct || PRICE_TIER_RETAIL_MARKUP_PCT}%)`}
+              </Text>
+            </View>
 
-      {/* Gold 24K */}
-      <MetalPriceCard
-        banner={BANNERS.gold24k}
-        gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
-        accentColor={DarkColors.goldShimmer}
-        lightAccent={DarkColors.goldLight}
-        title={t(TR.gold24k.te, TR.gold24k.en)}
-        subtitle={t(TR.gold24kSub.te, TR.gold24kSub.en)}
-        icon="star-circle"
-        label1={t(TR.perGram.te, TR.perGram.en)}
-        value1={formatINR(prices.gold24k?.perGram || prices.gold?.perGram)}
-        label2={t(TR.per10g.te, TR.per10g.en)}
-        value2={formatINR(prices.gold24k?.per10g || prices.gold?.per10g)}
-        isLive={!prices.isFallback}
-        showSparkles={true}
-      />
+            {/* Gold 22K */}
+            <MetalPriceCard
+              banner={BANNERS.gold22k}
+              gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
+              accentColor={DarkColors.gold}
+              lightAccent={DarkColors.goldLight}
+              title={t(TR.gold22k.te, TR.gold22k.en)}
+              subtitle={t(TR.gold22kSub.te, TR.gold22kSub.en)}
+              icon="gold"
+              label1={t(TR.perGram.te, TR.perGram.en)}
+              value1={formatINR(activeTier.gold22k?.perGram)}
+              label2={t(TR.per10g.te, TR.per10g.en)}
+              value2={formatINR(activeTier.gold22k?.per10g)}
+              isLive={!prices.isFallback}
+              showSparkles={true}
+            />
 
-      {/* Silver */}
-      <MetalPriceCard
-        banner={BANNERS.silver}
-        gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
-        accentColor={DarkColors.silver}
-        lightAccent={DarkColors.silverLight}
-        title={t(TR.silver.te, TR.silver.en)}
-        subtitle={t(TR.silverSub.te, TR.silverSub.en)}
-        icon="circle-slice-8"
-        label1={t(TR.perGram.te, TR.perGram.en)}
-        value1={formatINR(prices.silver?.perGram)}
-        label2={t(TR.perKg.te, TR.perKg.en)}
-        value2={formatINR(prices.silver?.perKg)}
-        isLive={!prices.isFallback}
-        showSparkles={false}
-      />
+            {/* Gold 24K */}
+            <MetalPriceCard
+              banner={BANNERS.gold24k}
+              gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
+              accentColor={DarkColors.goldShimmer}
+              lightAccent={DarkColors.goldLight}
+              title={t(TR.gold24k.te, TR.gold24k.en)}
+              subtitle={t(TR.gold24kSub.te, TR.gold24kSub.en)}
+              icon="star-circle"
+              label1={t(TR.perGram.te, TR.perGram.en)}
+              value1={formatINR(activeTier.gold24k?.perGram)}
+              label2={t(TR.per10g.te, TR.per10g.en)}
+              value2={formatINR(activeTier.gold24k?.per10g)}
+              isLive={!prices.isFallback}
+              showSparkles={true}
+            />
+
+            {/* Silver */}
+            <MetalPriceCard
+              banner={BANNERS.silver}
+              gradientColors={[DarkColors.bgCard, DarkColors.bgElevated]}
+              accentColor={DarkColors.silver}
+              lightAccent={DarkColors.silverLight}
+              title={t(TR.silver.te, TR.silver.en) + (prices.silverEstimated && !prices.isFallback ? ' *' : '')}
+              subtitle={t(TR.silverSub.te, TR.silverSub.en)}
+              icon="circle-slice-8"
+              label1={t(TR.perGram.te, TR.perGram.en)}
+              value1={formatINR(activeTier.silver?.perGram)}
+              label2={t(TR.perKg.te, TR.perKg.en)}
+              value2={formatINR(activeTier.silver?.perKg)}
+              isLive={!prices.isFallback}
+              showSparkles={false}
+            />
+          </>
+        );
+      })()}
 
       {/* Footer */}
       <View style={gs.footer}>
@@ -258,6 +298,14 @@ export function GoldSilverPriceCard({ prices, loading }) {
             prices.lastUpdated ? ` ${t(TR.updated.te, TR.updated.en)}: ${prices.lastUpdated} • ${prices.source || t(TR.indianMarket.te, TR.indianMarket.en)}` : ''}
         </Text>
       </View>
+      {!prices.isFallback && prices.silverEstimated && (
+        <Text style={gs.estimateNote}>
+          {t(TR.silverEstNote.te, TR.silverEstNote.en)}
+        </Text>
+      )}
+      <Text style={gs.ornamentsNote}>
+        {t(TR.ornamentsNote.te, TR.ornamentsNote.en)}
+      </Text>
       {!prices.isFallback && (
         <Text style={gs.disclaimer}>
           {t(TR.disclaimer.te, TR.disclaimer.en)}
@@ -352,5 +400,64 @@ const gs = StyleSheet.create({
   disclaimer: {
     ...Type.micro, color: DarkColors.textMuted, textAlign: 'center', marginTop: 6,
     paddingHorizontal: 10,
+  },
+  // Tier toggle (Spot vs Shop)
+  tierToggleRow: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    marginBottom: 6,
+    borderRadius: 22,
+    backgroundColor: DarkColors.bgCard,
+    borderWidth: 1,
+    borderColor: DarkColors.borderGold,
+    padding: 3,
+  },
+  tierBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 19,
+    minWidth: 110,
+    alignItems: 'center',
+  },
+  tierBtnActive: {
+    backgroundColor: DarkColors.gold,
+  },
+  tierBtnText: {
+    ...Type.label,
+    fontSize: 13,
+    fontWeight: '600',
+    color: DarkColors.textSecondary,
+  },
+  tierBtnTextActive: {
+    color: DarkColors.bg,
+  },
+  tierExplainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    gap: 4,
+  },
+  tierExplainText: {
+    ...Type.micro,
+    color: DarkColors.textMuted,
+    textAlign: 'center',
+    flexShrink: 1,
+  },
+  estimateNote: {
+    ...Type.micro,
+    color: DarkColors.textMuted,
+    textAlign: 'center',
+    marginTop: 4,
+    paddingHorizontal: 10,
+  },
+  ornamentsNote: {
+    ...Type.micro,
+    color: DarkColors.kumkumLight || DarkColors.textMuted,
+    textAlign: 'center',
+    marginTop: 4,
+    paddingHorizontal: 10,
+    fontStyle: 'italic',
   },
 });

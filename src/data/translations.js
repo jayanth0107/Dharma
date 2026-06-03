@@ -227,6 +227,13 @@ export const TR = {
   indianMarket: { te: 'భారతీయ మార్కెట్', en: 'Indian Market' },
   estimatedPrices: { te: 'అంచనా ధరలు (ఆన్‌లైన్ అందుబాటులో లేదు)', en: 'Estimated prices (online unavailable)' },
   disclaimer: { te: '* అంతర్జాతీయ మార్కెట్ + దిగుమతి సుంకం + GST. వాస్తవ ధరలు దుకాణం ప్రకారం మారవచ్చు.', en: '* International market + import duty + GST. Actual prices may vary by dealer.' },
+  // ── Gold price-tier toggle (v2.5.1) ──
+  spotRate: { te: 'మార్కెట్ ధర', en: 'Market Rate' },
+  shopRate: { te: 'షాపు ధర', en: 'Shop Rate' },
+  spotRateDesc: { te: 'MCX బులియన్ + GST (వార్తాపత్రికల్లో చూపేది)', en: 'MCX bullion + tax (newspaper benchmark)' },
+  shopRateDesc: { te: '24K కాయిన్/బార్ షాపులో — డీలర్ మార్జిన్ కలిసి', en: '24K coin/bar at shop — incl. dealer margin' },
+  ornamentsNote: { te: 'ఆభరణాలకు: మేకింగ్ ఛార్జీలు (8–25%) + వేస్టేజ్ అదనం', en: 'Ornaments: add making charges (8–25%) + wastage' },
+  silverEstNote: { te: '* వెండి ధర అంచనా (బ్యాకప్ API)', en: '* Silver price estimated (backup API)' },
 
   // ── Astro ──
   muhurtamFinder: { te: 'ముహూర్తం ఫైండర్', en: 'Muhurtam Finder' },
