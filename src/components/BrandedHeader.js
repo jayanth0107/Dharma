@@ -108,15 +108,11 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
   // class so the header doesn't feel tight on small phones and doesn't
   // float lonely on tablets.
   const headerPadH      = usePick({ default: 12, sm: 12, md: 16, lg: 20, xl: 24 });
-  // Wheel slot's negative margins scale across breakpoints. marginLeft
-  // is conservative now — pulling the wheel into the hamburger's tap
-  // area was making the menu button unclickable on devices. The wheel
-  // View also carries pointerEvents="none" (see below) so even residual
-  // overlap can't intercept taps. marginRight stays aggressive: it
-  // collapses the Lottie's internal transparent viewport padding so
-  // the wordmark sits flush against the visible orbit edge.
-  const wheelMarginLeft  = usePick({ default: -8,  sm: -8,  md: -6,  lg: -4,  xl: -2 });
-  const wheelMarginRight = usePick({ default: -32, sm: -32, md: -26, lg: -18, xl: -10 });
+  // Gap between the logo slot and the title text within the centred
+  // logo+title group. Kept small so the wordmark sits close to the
+  // brand mark — flexSpacer / absolute-overlay handles the global
+  // centring, this just controls the within-pair tightness.
+  const logoTitleGap = usePick({ default: 2, sm: 2, md: 3, lg: 4, xl: 6 });
   // Divider sits below the row. Small positive margin keeps a clean
   // hairline of space between title row and the gold divider — too
   // negative (-10) was pulling the divider INTO the title content,
@@ -147,14 +143,26 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
         },
       ]}
     >
-      {/* Row 1 — single line, sized so every phone class fits */}
-      <View style={[s.row1, { gap: headerSlotGap }]}>
+      {/* Row 1 — single line.
+          Layout strategy: chrome icons sit in normal flex flow
+          (justifyContent: space-between pushes them to the left and
+          right edges). The logo+title group is rendered as an
+          ABSOLUTELY POSITIONED overlay that spans the full row width
+          and centres its content. This guarantees the pair sits at
+          the geometric centre of the header regardless of asymmetric
+          chrome (e.g., showBack=true has 2 icons on the left, 1 on
+          the right — flex spacers would have shifted the centre).
+          The overlay uses pointerEvents="box-none" so taps on chrome
+          icons still register; the logo carries pointerEvents="none"
+          and the title is a non-interactive Text.
+          Row height is locked to headerLogoSize so the absolute
+          overlay (top:0 bottom:0) has space to vertically centre the
+          larger logo while the smaller chrome icons sit centred too. */}
+      <View style={[s.row1, { height: headerLogoSize }]}>
+        {/* LEFT chrome — natural flex flow, pushed to the left edge
+            by row1's justifyContent: space-between. */}
         {showBack ? (
-          // Sub-section variant — Back ← 🏠 on extreme LEFT.
-          // The drawer hamburger moves to the right group (next to
-          // settings) so the title block has 2 fewer icons crowding
-          // it on the left, preventing "Dharma" clip.
-          <>
+          <View style={[s.chromeGroup, { gap: headerSlotGap }]}>
             <TouchableOpacity
               style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
               onPress={handleBack}
@@ -169,96 +177,87 @@ export function BrandedHeader({ showBack = false, onDrawerOpen, onSettings }) {
             >
               <MaterialCommunityIcons name="home-outline" size={headerIconSize} color={DarkColors.silver} />
             </TouchableOpacity>
-          </>
+          </View>
         ) : (
           <TouchableOpacity
-            style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            style={[s.slot, s.chromeIcon, { height: headerSlotSize, minWidth: headerSlotSize }]}
             onPress={handleDrawerOpen}
             accessibilityLabel="Menu"
           >
             <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         )}
-        {/* Dharma Cosmos Wheel logo slot — rendered at headerLogoSize
-            (significantly larger than headerFlagSize) because the
-            elliptical orbits + central sun read as tiny at flag size.
-            Slot minWidth tracks the logo size so no extra whitespace
-            sits between the wheel and the "ధర్మ" wordmark. Falls back
-            to FlagWithPole if Lottie can't load. */}
-        <View
-          pointerEvents="none"
-          style={[s.slot, { height: headerLogoSize, minWidth: headerLogoSize, marginLeft: wheelMarginLeft, marginRight: wheelMarginRight }]}
-        >
-          {LottieView ? (
-            <LottieView
-              source={DHARMA_WHEEL_SOURCE}
-              autoPlay
-              loop
-              style={{ width: headerLogoSize, height: headerLogoSize }}
-            />
-          ) : (
-            <FlagWithPole size={headerLogoSize} />
-          )}
-        </View>
-        <View style={s.titleBlock}>
-          <Text
-            style={[s.title, { fontSize: headerTitleFont, flexShrink: 1 }]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-            allowFontScaling={false}
-          >
-            {t(TR.appName.te, TR.appName.en)}
-          </Text>
-          {/* "సనాతనం" suffix shown ONLY on Home (showBack=false).
-              On sub-screens the row carries an extra slot (← Back +
-              🏠 Home replace the single ☰ drawer) so the title block
-              loses ~36 dp; the suffix would clip on small phones. */}
-          {lang === 'te' && !showBack && (
-            <Text
-              style={[s.subtitle, { fontSize: headerSubtitleFont, flexShrink: 1, marginLeft: 6 }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.5}
-              allowFontScaling={false}
-            >
-              {TR.sanatana.te}
-            </Text>
-          )}
-        </View>
-        {/* Right slot — differs by chrome variant:
-            • Home (showBack=false): cog (or avatar when logged in)
-            • Sub-page (showBack=true): hamburger ONLY. Settings and
-              Login/Profile are reachable from the drawer, so the right
-              side stays uncluttered. Two left icons (Back + Home) + one
-              right icon (Menu) is the intentional layout. */}
+
+        {/* RIGHT chrome — natural flex flow, pushed to the right edge. */}
         {showBack ? (
           <TouchableOpacity
-            style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            style={[s.slot, s.chromeIcon, { height: headerSlotSize, minWidth: headerSlotSize }]}
             onPress={handleDrawerOpen}
             accessibilityLabel="Menu"
           >
             <MaterialCommunityIcons name="menu" size={headerMenuIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         ) : isLoggedIn ? (
-          // Home + logged in → gold avatar.
           <TouchableOpacity
-            style={[s.slot, s.userAvatar, { height: headerSlotSize, minWidth: headerSlotSize, borderRadius: headerSlotSize / 2 }, s.userAvatarLoggedIn]}
+            style={[s.slot, s.userAvatar, s.chromeIcon, { height: headerSlotSize, minWidth: headerSlotSize, borderRadius: headerSlotSize / 2 }, s.userAvatarLoggedIn]}
             onPress={() => navigation.navigate('Login')}
             accessibilityLabel="Profile"
           >
             <MaterialCommunityIcons name="account-circle" size={headerIconSize} color={DarkColors.gold} />
           </TouchableOpacity>
         ) : (
-          // Home + logged out → settings cog.
           <TouchableOpacity
-            style={[s.slot, { height: headerSlotSize, minWidth: headerSlotSize }]}
+            style={[s.slot, s.chromeIcon, { height: headerSlotSize, minWidth: headerSlotSize }]}
             onPress={handleSettings}
             accessibilityLabel="Settings"
           >
             <MaterialCommunityIcons name="cog-outline" size={headerIconSize} color={DarkColors.silver} />
           </TouchableOpacity>
         )}
+
+        {/* CENTRE overlay — logo + title pair, absolutely positioned
+            so the geometric centre is invariant to chrome width. */}
+        <View pointerEvents="box-none" style={s.centerOverlay}>
+          <View pointerEvents="box-none" style={s.logoTitleGroup}>
+            <View
+              pointerEvents="none"
+              style={[s.slot, { height: headerLogoSize, width: headerLogoSize }]}
+            >
+              {LottieView ? (
+                <LottieView
+                  source={DHARMA_WHEEL_SOURCE}
+                  autoPlay
+                  loop
+                  style={{ width: headerLogoSize, height: headerLogoSize }}
+                />
+              ) : (
+                <FlagWithPole size={headerLogoSize} />
+              )}
+            </View>
+            <View style={[s.titleBlock, { marginLeft: logoTitleGap }]}>
+              <Text
+                style={[s.title, { fontSize: headerTitleFont, flexShrink: 1 }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+                allowFontScaling={false}
+              >
+                {t(TR.appName.te, TR.appName.en)}
+              </Text>
+              {lang === 'te' && !showBack && (
+                <Text
+                  style={[s.subtitle, { fontSize: headerSubtitleFont, flexShrink: 1, marginLeft: 6 }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.5}
+                  allowFontScaling={false}
+                >
+                  {TR.sanatana.te}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
       </View>
 
       <View style={[s.divider, { marginTop: dividerMarginTop }]} />
@@ -270,23 +269,70 @@ const s = StyleSheet.create({
   // paddingHorizontal + paddingBottom set inline (usePick) so the
   // header scales across phone classes.
   header: {},
+  // Row1: chrome icons via flex flow at the edges; centre group is
+  // an absolute overlay (see centerOverlay below).
   row1: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     flexWrap: 'nowrap',
     paddingHorizontal: 2,
+  },
+  // Above the absolute overlay so chrome icons are tappable and the
+  // overlay's logo/title sit behind them.
+  chromeIcon: {
+    zIndex: 2,
+  },
+  // Wraps Back + Home in the showBack variant so they share a gap
+  // and travel together as a single flex unit.
+  chromeGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  // Absolute overlay spanning the full row width and height. Logo+title
+  // group inside is centred both horizontally and vertically — that
+  // centre is the geometric centre of the header, invariant to chrome
+  // asymmetry. pointerEvents box-none lets taps on empty regions fall
+  // through, while the logo (pointerEvents=none) and the Text-only
+  // title never absorb taps anyway.
+  centerOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    zIndex: 1,
   },
   slot: {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Title block — natural width (no flex:1) so the parent's flex
+  // spacers can centre the logo+title group as a unit. flexShrink:1
+  // lets the title contract via adjustsFontSizeToFit if the group
+  // exceeds the available middle space on the smallest phones.
   titleBlock: {
-    flex: 1,
+    flexShrink: 1,
     paddingLeft: 0,
     paddingRight: 0,
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'flex-start',
+  },
+  // Pairs the logo slot and the title block as a single horizontal
+  // unit inside the absolute centre overlay. flexShrink lets the
+  // pair contract via adjustsFontSizeToFit on the title text if the
+  // available width is small.
+  logoTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+    maxWidth: '70%',
   },
   title: {
     fontWeight: '700',

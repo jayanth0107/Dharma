@@ -6,6 +6,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [2.5.2] — 2026-06-06
+
+Brand mark refinement — added the Vedic anchor (ॐ) at the crown of
+the Ashvattha and a stream of gold "consciousness particles" flowing
+from the divine source down through the trunk into the manifest
+world (Bhagavad Gita 15.1). Logo + title centring rebuilt to use
+geometric absolute positioning instead of flex spacers. Other small
+polish.
+
+### Added
+
+- **ॐ (Om) symbol** at the convergence of the root crown on the
+  brand mark. Rendered as 4 bezier paths (3-shape body, tail
+  flourish, chandra-bindu crescent, top bindu) in bright gold
+  `#F5BC1F`. Slow scale pulse 100% → 110% → 100% over 4 s (sacred
+  breath). Represents the Vedic source from which the inverted
+  tree's roots emerge.
+- **Gold consciousness particles** — 4 bright gold dots flowing
+  continuously DOWN from the Om through the trunk into the canopy.
+  Phase-offset by 30 frames each so 2-3 particles are visible at
+  any given moment. Symbolises the Gita 15.1 metaphor of
+  consciousness flowing from Brahman (above) into the manifest
+  world (below).
+- **3-level fractal sub-branching** on every root and branch:
+  level-1 main paths, level-2 offshoots emerging at varied points
+  along the main, level-3 tip-fingers + secondary offshoots. Roots
+  now carry 39 visible paths (was ~14 in v2.5.1) with varied
+  lengths (long sweepers + short stubs) so the crown reads as a
+  real root system, not five antennae.
+
+### Changed
+
+- **BrandedHeader layout** restructured. Logo + title are now in an
+  absolute-positioned overlay that always sits at the geometric
+  centre of the header, invariant to chrome asymmetry. v2.5.1's
+  flex-spacer approach was shifting the centre to the right on
+  sub-page screens (where Back + Home occupy ~74 dp on the left vs
+  Menu's 36 dp on the right). Chrome icons stay in the natural
+  flex flow at the edges with zIndex above the centred group.
+- **Logo + title gap** reduced to 2-6 dp (was 6-12 dp in v2.5.1)
+  so the pair reads as tightly clustered around the brand mark.
+- **Center root (R5)** shortened from y=4 to y=54 to make room for
+  the larger Om symbol at the top of the canvas.
+
+### Fixed
+
+- **Brand logo overlapping "Dharma" title** in v2.5.1 on every
+  variant. Caused by negative right margin on the logo slot that
+  was tuned for the v2.5.0 cosmos-galaxy mark's transparent
+  viewport padding — the Ashvattha tree fills the viewport
+  edge-to-edge, so any negative margin collapsed the title into
+  the tree's right side.
+
+---
+
 ## [2.5.1] — 2026-06-03
 
 Iteration on the v2.5.0 brand mark and home grid based on real-device
